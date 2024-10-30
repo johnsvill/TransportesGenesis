@@ -1,7 +1,11 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
+<<<<<<< HEAD
 using TransportesGenesis.Data;
+=======
+using TransportesGenesis.Data.Context;
+>>>>>>> dev_jonathan
 
 public static class Startup
 {
@@ -19,13 +23,24 @@ public static class Startup
     private static void ConfigureServices(WebApplicationBuilder builder)
     {
         // Add services to the container.
+<<<<<<< HEAD
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(connectionString));
+=======
+        var connectionString = builder.Configuration.GetConnectionString("TransportesGenesisConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+        builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseSqlServer(connectionString));
+
+>>>>>>> dev_jonathan
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
         builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
             .AddEntityFrameworkStores<ApplicationDbContext>();
+<<<<<<< HEAD
+=======
+
+>>>>>>> dev_jonathan
         builder.Services.AddControllersWithViews();
     }
 
