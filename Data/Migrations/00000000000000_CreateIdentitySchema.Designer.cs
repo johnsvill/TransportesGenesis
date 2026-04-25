@@ -5,11 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System;
-<<<<<<< HEAD
-using TransportesGenesis.Data;
-=======
 using TransportesGenesis.Data.Context;
->>>>>>> dev_jonathan
 
 namespace TransportesGenesis.Data.Migrations
 {
