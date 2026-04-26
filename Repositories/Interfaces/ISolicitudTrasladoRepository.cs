@@ -9,5 +9,9 @@ namespace TransportesGenesis.Repositories.Interfaces
         Task<IEnumerable<SolicitudTraslado>> GetByEstadoAsync(string estado);
         Task<bool> AprobarAsync(int idSolicitud, string idAdmin, int idBusDestino, string? comentario);
         Task<bool> RechazarAsync(int idSolicitud, string idAdmin, string? comentario);
+
+        // Métodos adicionales para el servicio
+        Task<IEnumerable<SolicitudTraslado>> GetSolicitudesPorFechaAsync(DateTime fecha);
+        Task<SolicitudTraslado?> GetSolicitudActivaAsync(int idAlumno, DateTime fecha);
     }
 }

@@ -9,16 +9,29 @@ namespace TransportesGenesis.Models.DB.Negocio
         [Key]
         public int IdSolicitud { get; set; }
 
+        [Required]
+        public int IdAlumno { get; set; }
+
         [ForeignKey("IdAlumno")]
         public Alumnos Alumno { get; set; }
+
+        [Required]
+        public int IdBusOrigen { get; set; }
 
         [ForeignKey("IdBusOrigen")]
         public Bus BusOrigen { get; set; }
 
-        public int? IdBusDestino { get; set; } // Nullable, Admin puede asignar después
+        public int? IdBusDestino { get; set; }
+
+        [ForeignKey("IdBusDestino")]
+        public Bus? BusDestino { get; set; }
 
         [Required]
         public DateTime FechaTraslado { get; set; }
+
+        [Required]
+        [StringLength(10)]
+        public string Turno { get; set; } = "Ambos"; // "Mañana", "Tarde", "Ambos"
 
         [StringLength(250)]
         public string? Motivo { get; set; }

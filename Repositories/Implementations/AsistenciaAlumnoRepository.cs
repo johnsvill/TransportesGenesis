@@ -16,14 +16,14 @@ namespace TransportesGenesis.Repositories.Implementations
             return await _dbSet
                 .Include(a => a.Alumno)
                     .ThenInclude(al => al.Padres)
-                .FirstOrDefaultAsync(a => a.Alumno.IdAlumno == idAlumno && a.Fecha.Date == fecha.Date);
+                .FirstOrDefaultAsync(a => a.IdAlumno == idAlumno && a.Fecha.Date == fecha.Date);
         }
 
         public async Task<IEnumerable<AsistenciaAlumno>> GetByAlumnoYRangoAsync(int idAlumno, DateTime fechaInicio, DateTime fechaFin)
         {
             return await _dbSet
                 .Include(a => a.Alumno)
-                .Where(a => a.Alumno.IdAlumno == idAlumno 
+                .Where(a => a.IdAlumno == idAlumno 
                     && a.Fecha.Date >= fechaInicio.Date 
                     && a.Fecha.Date <= fechaFin.Date)
                 .OrderByDescending(a => a.Fecha)
