@@ -9,5 +9,6 @@ namespace TransportesGenesis.Repositories.Interfaces
         Task<IEnumerable<AsistenciaAlumno>> GetConfirmadasDelDiaAsync(DateTime fecha, bool asisteMañana, bool asisteTarde);
         Task<bool> ConfirmarAsistenciaAsync(int idAsistencia);
         Task<IEnumerable<AsistenciaAlumno>> GetPendientesDeConfirmarAsync(DateTime fecha);
+        Task<IEnumerable<AsistenciaAlumno>> GetConfirmacionesPorFechaAsync(DateTime fecha);
     }
 }

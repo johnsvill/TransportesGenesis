@@ -9,11 +9,17 @@ namespace TransportesGenesis.Models.DB.Negocio
         [Key]
         public int IdParada { get; set; }
 
+        [Required]
+        public int IdRuta { get; set; }
+
         [ForeignKey("IdRuta")]
         public Ruta Ruta { get; set; }
 
+        // IdAlumno nullable para permitir paradas del colegio (sin alumno asignado)
+        public int? IdAlumno { get; set; }
+
         [ForeignKey("IdAlumno")]
-        public Alumnos Alumno { get; set; }
+        public Alumnos? Alumno { get; set; }
 
         [Required]
         [Column(TypeName = "decimal(10, 7)")]
@@ -33,7 +39,7 @@ namespace TransportesGenesis.Models.DB.Negocio
         public bool Completada { get; set; } = false;
 
         // Navegación
-        public List<RegistroRecogida> RegistrosRecogidaLink { get; set; }
-        public List<NotificacionProximidad> NotificacionesLink { get; set; }
+        public List<RegistroRecogida> RegistrosRecogidaLink { get; set; } = new List<RegistroRecogida>();
+        public List<NotificacionProximidad> NotificacionesLink { get; set; } = new List<NotificacionProximidad>();
     }
 }

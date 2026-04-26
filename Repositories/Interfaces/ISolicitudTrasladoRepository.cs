@@ -13,5 +13,6 @@ namespace TransportesGenesis.Repositories.Interfaces
         // Métodos adicionales para el servicio
         Task<IEnumerable<SolicitudTraslado>> GetSolicitudesPorFechaAsync(DateTime fecha);
         Task<SolicitudTraslado?> GetSolicitudActivaAsync(int idAlumno, DateTime fecha);
+        Task<IEnumerable<SolicitudTraslado>> GetTrasladosActivosPorFechaAsync(DateTime fecha);
     }
 }

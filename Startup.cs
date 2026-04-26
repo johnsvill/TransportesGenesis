@@ -33,6 +33,9 @@ public static class Startup
         // AutoMapper (Geolocalización - NO AFECTA MÓDULOS EXISTENTES)
         builder.Services.AddAutoMapper(typeof(Startup).Assembly);
 
+        // HttpClient para llamadas internas a APIs
+        builder.Services.AddHttpClient();
+
         // Repositorios de Geolocalización (NUEVOS - NO AFECTAN MÓDULO DE PAGOS)
         builder.Services.AddScoped<TransportesGenesis.Repositories.Interfaces.IBusRepository, TransportesGenesis.Repositories.Implementations.BusRepository>();
         builder.Services.AddScoped<TransportesGenesis.Repositories.Interfaces.IRutaRepository, TransportesGenesis.Repositories.Implementations.RutaRepository>();
@@ -45,6 +48,8 @@ public static class Startup
         builder.Services.AddScoped<TransportesGenesis.Services.Interfaces.IUbicacionBusService, TransportesGenesis.Services.Implementations.UbicacionBusService>();
         builder.Services.AddScoped<TransportesGenesis.Services.Interfaces.IAsistenciaService, TransportesGenesis.Services.Implementations.AsistenciaService>();
         builder.Services.AddScoped<TransportesGenesis.Services.Interfaces.ITrasladoService, TransportesGenesis.Services.Implementations.TrasladoService>();
+        builder.Services.AddScoped<TransportesGenesis.Services.Interfaces.IRutaService, TransportesGenesis.Services.Implementations.RutaService>(); // FASE 5: Cálculo dinámico de rutas
+        builder.Services.AddScoped<TransportesGenesis.Services.Interfaces.IConfiguracionService, TransportesGenesis.Services.Implementations.ConfiguracionService>(); // FASE 5: Configuración del sistema
 
         builder.Services.AddControllersWithViews();
     }

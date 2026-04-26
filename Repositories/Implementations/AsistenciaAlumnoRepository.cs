@@ -74,5 +74,13 @@ namespace TransportesGenesis.Repositories.Implementations
 
             return await query.CountAsync();
         }
+
+        public async Task<IEnumerable<AsistenciaAlumno>> GetConfirmacionesPorFechaAsync(DateTime fecha)
+        {
+            return await _dbSet
+                .Include(a => a.Alumno)
+                .Where(a => a.Fecha.Date == fecha.Date && a.FechaConfirmacion != null)
+                .ToListAsync();
+        }
     }
 }

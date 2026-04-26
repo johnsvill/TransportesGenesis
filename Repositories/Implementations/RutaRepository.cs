@@ -55,5 +55,24 @@ namespace TransportesGenesis.Repositories.Implementations
                 .OrderBy(r => r.HoraInicio)
                 .ToListAsync();
         }
+
+        public async Task<Parada?> GetParadaByIdAsync(int idParada)
+        {
+            return await _context.Set<Parada>()
+                .Include(p => p.Alumno)
+                .Include(p => p.Ruta)
+                .FirstOrDefaultAsync(p => p.IdParada == idParada);
+        }
+
+        public async Task<bool> MarcarParadaCompletadaAsync(int idParada, bool completada)
+        {
+            var parada = await _context.Set<Parada>().FindAsync(idParada);
+            if (parada == null)
+                return false;
+
+            parada.Completada = completada;
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

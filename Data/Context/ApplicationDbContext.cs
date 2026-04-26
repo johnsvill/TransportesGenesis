@@ -38,6 +38,7 @@ namespace TransportesGenesis.Data.Context
         public virtual DbSet<NotificacionProximidad> NotificacionesProximidadDb { get; set; }
         public virtual DbSet<RegistroRecogida> RegistrosRecogidaDb { get; set; }
         public virtual DbSet<NotificacionRetraso> NotificacionesRetrasoDb { get; set; }
+        public virtual DbSet<ConfiguracionSistema> ConfiguracionSistemaDb { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

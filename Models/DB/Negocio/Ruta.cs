@@ -9,6 +9,9 @@ namespace TransportesGenesis.Models.DB.Negocio
         [Key]
         public int IdRuta { get; set; }
 
+        [Required]
+        public int IdBus { get; set; }
+
         [ForeignKey("IdBus")]
         public Bus Bus { get; set; }
 
@@ -21,13 +24,13 @@ namespace TransportesGenesis.Models.DB.Negocio
 
         [Required]
         [StringLength(10)]
-        public string TipoRuta { get; set; } // "Ida" o "Vuelta"
+        public string TipoRuta { get; set; } // "Ida" o "Vuelta" o "Mañana" o "Tarde"
 
         public TimeSpan HoraInicio { get; set; }
 
         public bool EsActiva { get; set; } = true;
 
         // Navegación
-        public List<Parada> ParadasLink { get; set; }
+        public List<Parada> ParadasLink { get; set; } = new List<Parada>();
     }
 }

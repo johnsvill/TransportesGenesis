@@ -110,5 +110,15 @@ namespace TransportesGenesis.Repositories.Implementations
                     && s.Estado == "Aprobado")
                 .FirstOrDefaultAsync();
         }
+
+        public async Task<IEnumerable<SolicitudTraslado>> GetTrasladosActivosPorFechaAsync(DateTime fecha)
+        {
+            return await _dbSet
+                .Include(s => s.Alumno)
+                .Include(s => s.BusOrigen)
+                .Include(s => s.BusDestino)
+                .Where(s => s.FechaTraslado.Date == fecha.Date && s.Estado == "Aprobado")
+                .ToListAsync();
+        }
     }
 }

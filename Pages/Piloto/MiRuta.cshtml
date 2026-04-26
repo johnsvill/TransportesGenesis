@@ -1,0 +1,461 @@
+@page
+@model TransportesGenesis.Pages.Piloto.MiRutaModel
+@{
+    ViewData["Title"] = "Mi Ruta del Día";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="bi bi-geo-alt-fill text-primary"></i> Mi Ruta del Día</h2>
+                    <p class="text-muted mb-0">
+                        <i class="bi bi-bus-front"></i> Bus @Model.IdBus (@Model.TipoRuta) • 
+                        <i class="bi bi-calendar3"></i> @DateTime.Now.ToString("dddd, dd MMMM yyyy")
+                    </p>
+                </div>
+                <div>
+                    @if (Model.RutaActiva != null)
+                    {
+                        <span class="badge bg-success fs-6">
+                            <i class="bi bi-check-circle"></i> Ruta Activa
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning text-dark fs-6">
+                            <i class="bi bi-exclamation-triangle"></i> Sin Ruta
+                        </span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.MensajeError))
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                @if (Model.EsFinDeSemana)
+                {
+                    <div class="alert alert-info border-info" role="alert">
+                        <h4 class="alert-heading">
+                            <i class="bi bi-calendar-x fs-3"></i> 
+                            Fin de Semana - Modo de Espera
+                        </h4>
+                        <p class="mb-3">
+                            <strong>Hoy es @DateTime.Now.ToString("dddd dd/MM/yyyy")</strong>
+                        </p>
+                        <hr>
+                        <div class="mb-3">
+                            <h5><i class="bi bi-info-circle"></i> Información Importante:</h5>
+                            <ul class="mb-0">
+                                <li>Las <strong>rutas escolares operan únicamente de lunes a viernes</strong></li>
+                                <li>Los <strong>sábados y domingos NO se calculan rutas</strong></li>
+                                <li>La próxima ruta estará disponible el <strong>@Model.FechaRuta.ToString("dddd dd/MM/yyyy")</strong> por la mañana</li>
+                                <li>El administrador calculará las rutas automáticamente el lunes antes de las 6:00 AM</li>
+                            </ul>
+                        </div>
+                        <div class="alert alert-light border-primary mb-0">
+                            <strong><i class="bi bi-clock"></i> ¿Cuándo se calculan las rutas?</strong><br>
+                            Las rutas se generan cada día hábil (lunes a viernes) en la madrugada, basándose en las confirmaciones de asistencia de los padres del día anterior.
+                        </div>
+                    </div>
+                    <div class="text-center mt-3">
+                        <p class="text-muted">
+                            <i class="bi bi-lightbulb"></i> 
+                            Si necesitas calcular una ruta de prueba, puedes usar la herramienta de administración:
+                        </p>
+                        <a href="/Test" class="btn btn-outline-primary">
+                            <i class="bi bi-calculator"></i> Ir a Herramientas de Test
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-warning" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <strong>Atención:</strong> @Model.MensajeError
+                    </div>
+                    <div class="text-center">
+                        <p>Para generar una ruta, contacta al administrador o usa la página de cálculo de rutas.</p>
+                        <a href="/Test" class="btn btn-primary">
+                            <i class="bi bi-calculator"></i> Ir a Test de Rutas
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else if (Model.RutaActiva != null)
+    {
+        <!-- Estadísticas -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card border-primary">
+                    <div class="card-body text-center">
+                        <i class="bi bi-geo-alt fs-1 text-primary"></i>
+                        <h3 class="mb-0" id="totalParadas">@Model.RutaActiva.Paradas.Count</h3>
+                        <small class="text-muted">Total Paradas</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-success">
+                    <div class="card-body text-center">
+                        <i class="bi bi-check-circle fs-1 text-success"></i>
+                        <h3 class="mb-0" id="paradasCompletadas">@Model.RutaActiva.Paradas.Count(p => p.Completada)</h3>
+                        <small class="text-muted">Completadas</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-warning">
+                    <div class="card-body text-center">
+                        <i class="bi bi-clock fs-1 text-warning"></i>
+                        <h3 class="mb-0" id="paradasPendientes">@Model.RutaActiva.Paradas.Count(p => !p.Completada)</h3>
+                        <small class="text-muted">Pendientes</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-info">
+                    <div class="card-body text-center">
+                        <i class="bi bi-percent fs-1 text-info"></i>
+                        <h3 class="mb-0" id="porcentaje">
+                            @(Model.RutaActiva.Paradas.Count > 0 ? 
+                              Math.Round((double)Model.RutaActiva.Paradas.Count(p => p.Completada) / Model.RutaActiva.Paradas.Count * 100) : 0)%
+                        </h3>
+                        <small class="text-muted">Progreso</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mapa y Lista de Paradas -->
+        <div class="row">
+            <div class="col-lg-7 mb-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <i class="bi bi-map"></i> Mapa de la Ruta
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="mapa" style="height: 500px; width: 100%;"></div>
+                    </div>
+                    <div class="card-footer">
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle"></i> 
+                            <span class="text-success">Verde</span> = Completada • 
+                            <span class="text-danger">Rojo</span> = Pendiente • 
+                            Click en marcador para ver detalles
+                        </small>
+                    </div>
+                </div>
+
+                <!-- TODO: Funcionalidad futura - Verificar tráfico y recalcular -->
+                <div class="card mt-3">
+                    <div class="card-header bg-secondary text-white">
+                        <i class="bi bi-lightning-charge"></i> Funciones Avanzadas (Próximamente)
+                    </div>
+                    <div class="card-body">
+                        <button class="btn btn-outline-secondary" disabled>
+                            <i class="bi bi-diagram-3"></i> Verificar Tráfico
+                        </button>
+                        <button class="btn btn-outline-secondary ms-2" disabled>
+                            <i class="bi bi-arrow-repeat"></i> Recalcular Ruta
+                        </button>
+                        <p class="text-muted mt-2 mb-0">
+                            <small>
+                                <i class="bi bi-info-circle"></i> 
+                                Funcionalidad de tráfico en tiempo real y recálculo automático 
+                                estará disponible en FASE 7 (integración con Google Maps Traffic API).
+                            </small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5 mb-4">
+                <div class="card">
+                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-list-ol"></i> Lista de Paradas</span>
+                        <button onclick="actualizarRuta()" class="btn btn-sm btn-light">
+                            <i class="bi bi-arrow-clockwise"></i> Actualizar
+                        </button>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush" id="listaParadas">
+                            @foreach (var parada in Model.RutaActiva.Paradas.OrderBy(p => p.Orden))
+                            {
+                                <div class="list-group-item parada-item @(parada.Completada ? "bg-light" : "")" 
+                                     data-id="@parada.IdParada"
+                                     data-completada="@parada.Completada.ToString().ToLower()">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <span class="badge bg-primary me-2">@parada.Orden</span>
+                                                <strong>@parada.NombreAlumno</strong>
+                                                @if (parada.Completada)
+                                                {
+                                                    <span class="badge bg-success ms-2">
+                                                        <i class="bi bi-check-circle"></i> Completada
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning text-dark ms-2">
+                                                        <i class="bi bi-clock"></i> Pendiente
+                                                    </span>
+                                                }
+                                            </div>
+                                            <div class="small text-muted">
+                                                <i class="bi bi-geo-alt"></i> @parada.Direccion
+                                            </div>
+                                            @if (parada.HoraEstimada.HasValue)
+                                            {
+                                                <div class="small text-muted">
+                                                    <i class="bi bi-clock"></i> Hora estimada: @parada.HoraEstimada.Value.ToString(@"hh\:mm")
+                                                </div>
+                                            }
+                                        </div>
+                                        <div class="ms-3">
+                                            @if (!parada.Completada)
+                                            {
+                                                <button class="btn btn-success btn-sm" 
+                                                        onclick="marcarCompletada(@parada.IdParada, true)">
+                                                    <i class="bi bi-check-lg"></i> Marcar
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button class="btn btn-outline-secondary btn-sm" 
+                                                        onclick="marcarCompletada(@parada.IdParada, false)">
+                                                    <i class="bi bi-x-lg"></i> Desmarcar
+                                                </button>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Toast para notificaciones -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="toast" class="toast" role="alert">
+        <div class="toast-header">
+            <i class="bi bi-check-circle-fill text-success me-2"></i>
+            <strong class="me-auto">Éxito</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body" id="toastMessage">
+            Parada marcada correctamente
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        const rutaData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RutaActiva));
+        let mapa;
+        let marcadores = [];
+        let polyline;
+
+        // Inicializar mapa
+        function inicializarMapa() {
+            if (!rutaData || !rutaData.paradas || rutaData.paradas.length === 0) {
+                console.error('No hay datos de ruta para mostrar');
+                return;
+            }
+
+            // Centrar mapa en la primera parada
+            const primeraParada = rutaData.paradas[0];
+            mapa = L.map('mapa').setView([primeraParada.latitud, primeraParada.longitud], 13);
+
+            // Capa de OpenStreetMap
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(mapa);
+
+            // Crear array de coordenadas para la polyline
+            const coordenadas = rutaData.paradas.map(p => [p.latitud, p.longitud]);
+
+            // Dibujar línea de ruta
+            polyline = L.polyline(coordenadas, {
+                color: '#0d6efd',
+                weight: 4,
+                opacity: 0.7
+            }).addTo(mapa);
+
+            // Ajustar vista para mostrar toda la ruta
+            mapa.fitBounds(polyline.getBounds(), { padding: [50, 50] });
+
+            // Agregar marcadores
+            rutaData.paradas.forEach(parada => {
+                let icono;
+
+                // Verificar si es el colegio (idAlumno === null)
+                if (parada.idAlumno === null) {
+                    // Icono especial para el colegio
+                    const colorColegio = parada.completada ? '#28a745' : '#007bff'; // Verde si completada, azul si pendiente
+                    icono = L.divIcon({
+                        html: `<div style="background-color: ${colorColegio}; width: 40px; height: 40px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; font-weight: bold; box-shadow: 0 3px 8px rgba(0,0,0,0.4);">🏫</div>`,
+                        className: '',
+                        iconSize: [40, 40]
+                    });
+                } else {
+                    // Marcador normal para alumnos
+                    const color = parada.completada ? 'green' : 'red';
+                    icono = L.divIcon({
+                        html: `<div style="background-color: ${color}; width: 30px; height: 30px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">${parada.orden}</div>`,
+                        className: '',
+                        iconSize: [30, 30]
+                    });
+                }
+
+                const marcador = L.marker([parada.latitud, parada.longitud], { icon: icono })
+                    .addTo(mapa)
+                    .bindPopup(`
+                        <div style="min-width: 200px;">
+                            <strong>${parada.idAlumno === null ? '🏫 ' : ''}${parada.nombreAlumno}</strong><br>
+                            <small class="text-muted">${parada.direccion}</small><br>
+                            ${parada.horaEstimada ? `<small><i class="bi bi-clock"></i> ${parada.horaEstimada}</small><br>` : ''}
+                            <span class="badge bg-${parada.completada ? 'success' : 'warning'}">
+                                ${parada.completada ? 'Completada ✓' : 'Pendiente ⏳'}
+                            </span>
+                        </div>
+                    `);
+
+                marcadores.push({ id: parada.idParada, marcador: marcador, parada: parada });
+            });
+
+            console.log('Mapa inicializado con', rutaData.paradas.length, 'paradas');
+        }
+
+        // Marcar parada como completada/pendiente
+        async function marcarCompletada(idParada, completada) {
+            try {
+                console.log('Marcando parada', idParada, 'como', completada ? 'completada' : 'pendiente');
+
+                const response = await fetch(`/api/rutas/${rutaData.idRuta}/parada/${idParada}/completar`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ idParada: idParada, completada: completada })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    mostrarToast(data.message, 'success');
+
+                    // Actualizar UI localmente
+                    actualizarParadaUI(idParada, completada);
+                    actualizarEstadisticas();
+                } else {
+                    mostrarToast('Error: ' + data.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error al marcar parada:', error);
+                mostrarToast('Error de conexión', 'error');
+            }
+        }
+
+        // Actualizar UI de una parada
+        function actualizarParadaUI(idParada, completada) {
+            // Actualizar en el array de datos
+            const parada = rutaData.paradas.find(p => p.idParada === idParada);
+            if (parada) {
+                parada.completada = completada;
+            }
+
+            // Actualizar lista
+            const elemento = document.querySelector(`.parada-item[data-id="${idParada}"]`);
+            if (elemento) {
+                elemento.setAttribute('data-completada', completada);
+                if (completada) {
+                    elemento.classList.add('bg-light');
+                } else {
+                    elemento.classList.remove('bg-light');
+                }
+            }
+
+            // Actualizar marcador en mapa
+            const marcadorData = marcadores.find(m => m.id === idParada);
+            if (marcadorData) {
+                const parada = marcadorData.parada;
+                let icono;
+
+                // Si es el colegio, usar icono especial
+                if (parada.idAlumno === null) {
+                    const colorColegio = completada ? '#28a745' : '#007bff';
+                    icono = L.divIcon({
+                        html: `<div style="background-color: ${colorColegio}; width: 40px; height: 40px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; font-weight: bold; box-shadow: 0 3px 8px rgba(0,0,0,0.4);">🏫</div>`,
+                        className: '',
+                        iconSize: [40, 40]
+                    });
+                } else {
+                    // Marcador normal para alumnos
+                    const color = completada ? 'green' : 'red';
+                    const orden = parada.orden;
+                    icono = L.divIcon({
+                        html: `<div style="background-color: ${color}; width: 30px; height: 30px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">${orden}</div>`,
+                        className: '',
+                        iconSize: [30, 30]
+                    });
+                }
+                marcadorData.marcador.setIcon(icono);
+            }
+
+            // Recargar página completa para reflejar cambios
+            setTimeout(() => location.reload(), 1000);
+        }
+
+        // Actualizar estadísticas
+        function actualizarEstadisticas() {
+            const completadas = rutaData.paradas.filter(p => p.completada).length;
+            const total = rutaData.paradas.length;
+            const pendientes = total - completadas;
+            const porcentaje = total > 0 ? Math.round((completadas / total) * 100) : 0;
+
+            document.getElementById('paradasCompletadas').textContent = completadas;
+            document.getElementById('paradasPendientes').textContent = pendientes;
+            document.getElementById('porcentaje').textContent = porcentaje + '%';
+        }
+
+        // Mostrar toast
+        function mostrarToast(mensaje, tipo) {
+            const toastElement = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            const toast = new bootstrap.Toast(toastElement);
+
+            toastMessage.textContent = mensaje;
+            toast.show();
+        }
+
+        // Actualizar toda la ruta (recargar página)
+        function actualizarRuta() {
+            location.reload();
+        }
+
+        // Inicializar cuando cargue la página
+        document.addEventListener('DOMContentLoaded', function() {
+            if (rutaData) {
+                inicializarMapa();
+            }
+        });
+    </script>
+}

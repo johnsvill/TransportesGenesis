@@ -9,5 +9,7 @@ namespace TransportesGenesis.Repositories.Interfaces
         Task<Ruta?> GetConParadasAsync(int idRuta);
         Task<IEnumerable<Ruta>> GetByTipoAsync(string tipoRuta);
         Task<IEnumerable<Ruta>> GetRutasDelDiaAsync(DateTime fecha, string tipoRuta);
+        Task<Parada?> GetParadaByIdAsync(int idParada);
+        Task<bool> MarcarParadaCompletadaAsync(int idParada, bool completada);
     }
 }
