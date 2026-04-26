@@ -16,6 +16,23 @@ namespace TransportesGenesis.Models.DB.Negocio
 
         public string Apellido { get; set; }
 
+        // Campos para geolocalización (nullable para no afectar registros existentes)
+        public int? IdBusAsignado { get; set; }
+
+        [Column(TypeName = "decimal(10, 7)")]
+        public decimal? Latitud { get; set; }
+
+        [Column(TypeName = "decimal(10, 7)")]
+        public decimal? Longitud { get; set; }
+
+        [StringLength(250)]
+        public string? Direccion { get; set; }
+
+        // Navegación
         public List<Pago> PagosLink { get; set; }
+        public List<AsistenciaAlumno> AsistenciasLink { get; set; }
+        public List<Parada> ParadasLink { get; set; }
+        public List<RegistroRecogida> RegistrosRecogidaLink { get; set; }
+        public List<SolicitudTraslado> SolicitudesTrasladoLink { get; set; }
     }
 }

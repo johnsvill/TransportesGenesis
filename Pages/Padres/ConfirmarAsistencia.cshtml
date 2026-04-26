@@ -1,0 +1,396 @@
+@page
+@model TransportesGenesis.Pages.Padres.ConfirmarAsistenciaModel
+@{
+    ViewData["Title"] = "Confirmar Asistencia";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2>
+                <i class="bi bi-calendar-check"></i> Confirmar Asistencia de Hoy
+            </h2>
+            <p class="text-muted">Confirme si su hijo(a) viajará en el bus escolar hoy</p>
+            <hr />
+        </div>
+    </div>
+
+    <!-- Alertas de horarios -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <div class="card border-info">
+                <div class="card-body">
+                    <h6 class="card-title"><i class="bi bi-sunrise"></i> Ruta Matutina</h6>
+                    <p class="card-text">
+                        <small>Confirmación hasta las <strong>4:00 AM</strong></small>
+                    </p>
+                    <div id="estadoMañana" class="alert alert-info mb-0" role="alert">
+                        <div class="spinner-border spinner-border-sm" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div> Verificando...
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-warning">
+                <div class="card-body">
+                    <h6 class="card-title"><i class="bi bi-sunset"></i> Ruta Vespertina</h6>
+                    <p class="card-text">
+                        <small>Confirmación hasta las <strong>11:00 AM</strong></small>
+                    </p>
+                    <div id="estadoTarde" class="alert alert-warning mb-0" role="alert">
+                        <div class="spinner-border spinner-border-sm" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div> Verificando...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Selector de alumno (simulado - cuando tengas roles será dinámico) -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="bi bi-person"></i> Seleccionar Alumno</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="selectAlumno" class="form-label">Hijo(a):</label>
+                        <select class="form-select" id="selectAlumno" onchange="cargarResumenAlumno()">
+                            <option value="">-- Seleccione un alumno --</option>
+                            <!-- Por ahora simulamos - cuando tengas roles cargará desde API -->
+                            <option value="1" selected>Alumno de Prueba 1</option>
+                        </select>
+                    </div>
+
+                    <!-- Resumen del alumno -->
+                    <div id="resumenAlumno" class="d-none">
+                        <div class="alert alert-light border">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>👤 Nombre:</strong> <span id="nombreAlumno"></span><br>
+                                    <strong>🚌 Bus Asignado:</strong> <span id="busAsignado"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>📅 Estado Hoy:</strong> <span id="estadoConfirmacion"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulario de confirmación -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5><i class="bi bi-check-circle"></i> Confirmación de Asistencia</h5>
+                </div>
+                <div class="card-body">
+                    <form id="formConfirmacion">
+                        <input type="hidden" id="idAlumno" value="1">
+                        <input type="hidden" id="fecha" value="">
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="asisteMañana" checked>
+                                    <label class="form-check-label" for="asisteMañana">
+                                        <strong>🌅 Asiste en la Mañana</strong>
+                                        <br><small class="text-muted">Ruta de ida al colegio</small>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="asisteTarde" checked>
+                                    <label class="form-check-label" for="asisteTarde">
+                                        <strong>🌆 Asiste en la Tarde</strong>
+                                        <br><small class="text-muted">Ruta de regreso a casa</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> 
+                            <strong>Importante:</strong> Si desmarca una opción, su hijo(a) NO será recogido en esa ruta.
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-success btn-lg" onclick="confirmarAsistencia()">
+                                <i class="bi bi-check-circle"></i> Confirmar Asistencia
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historial reciente -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5><i class="bi bi-clock-history"></i> Historial Reciente (Últimos 7 días)</h5>
+                </div>
+                <div class="card-body">
+                    <div id="historialContainer">
+                        <div class="text-center">
+                            <div class="spinner-border text-secondary" role="status">
+                                <span class="visually-hidden">Cargando...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmación exitosa -->
+<div class="modal fade" id="modalExito" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="bi bi-check-circle"></i> ¡Confirmación Exitosa!</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <i class="bi bi-check-circle text-success" style="font-size: 4rem;"></i>
+                <h4 class="mt-3">Asistencia Confirmada</h4>
+                <p id="mensajeExito" class="text-muted"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Entendido</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de error -->
+<div class="modal fade" id="modalError" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> Error</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="mensajeError"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let puedeConfirmarMañana = false;
+    let puedeConfirmarTarde = false;
+
+    // Cargar al iniciar la página
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+        verificarHorariosConfirmacion();
+        cargarResumenAlumno();
+        cargarHistorial();
+    });
+
+    // Verificar si está dentro del horario de confirmación
+    async function verificarHorariosConfirmacion() {
+        try {
+            // Verificar mañana
+            const respMañana = await fetch('/api/asistencia/puede-confirmar/manana');
+            const dataMañana = await respMañana.json();
+            puedeConfirmarMañana = dataMañana.puede;
+
+            document.getElementById('estadoMañana').className = dataMañana.puede 
+                ? 'alert alert-success mb-0' 
+                : 'alert alert-danger mb-0';
+            document.getElementById('estadoMañana').innerHTML = dataMañana.mensaje;
+            document.getElementById('asisteMañana').disabled = !dataMañana.puede;
+
+            // Verificar tarde
+            const respTarde = await fetch('/api/asistencia/puede-confirmar/tarde');
+            const dataTarde = await respTarde.json();
+            puedeConfirmarTarde = dataTarde.puede;
+
+            document.getElementById('estadoTarde').className = dataTarde.puede 
+                ? 'alert alert-success mb-0' 
+                : 'alert alert-danger mb-0';
+            document.getElementById('estadoTarde').innerHTML = dataTarde.mensaje;
+            document.getElementById('asisteTarde').disabled = !dataTarde.puede;
+
+        } catch (error) {
+            console.error('Error al verificar horarios:', error);
+        }
+    }
+
+    // Cargar resumen del alumno seleccionado
+    async function cargarResumenAlumno() {
+        const idAlumno = document.getElementById('selectAlumno').value;
+        if (!idAlumno) {
+            document.getElementById('resumenAlumno').classList.add('d-none');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/asistencia/alumno/${idAlumno}/hoy`);
+            const data = await response.json();
+
+            document.getElementById('nombreAlumno').textContent = data.nombreCompleto;
+            document.getElementById('busAsignado').textContent = data.placaBus;
+            document.getElementById('estadoConfirmacion').innerHTML = data.mensajeEstado;
+
+            // Marcar checkboxes según confirmación previa
+            document.getElementById('asisteMañana').checked = data.asisteMañanaHoy;
+            document.getElementById('asisteTarde').checked = data.asisteTardeHoy;
+
+            document.getElementById('resumenAlumno').classList.remove('d-none');
+
+        } catch (error) {
+            console.error('Error al cargar resumen:', error);
+            mostrarError('No se pudo cargar la información del alumno');
+        }
+    }
+
+    // Confirmar asistencia
+    async function confirmarAsistencia() {
+        const idAlumno = document.getElementById('idAlumno').value;
+        const fecha = new Date().toISOString();
+        const asisteMañana = document.getElementById('asisteMañana').checked;
+        const asisteTarde = document.getElementById('asisteTarde').checked;
+
+        // Validar que al menos uno esté marcado
+        if (!asisteMañana && !asisteTarde) {
+            mostrarError('Debe seleccionar al menos una ruta (mañana o tarde)');
+            return;
+        }
+
+        const dto = {
+            idAlumno: parseInt(idAlumno),
+            fecha: fecha,
+            asisteMañana: asisteMañana,
+            asisteTarde: asisteTarde
+        };
+
+        try {
+            const response = await fetch('/api/asistencia/confirmar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dto)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                const mensaje = `
+                    Confirmado para:<br>
+                    ${asisteMañana ? '✅ Ruta Matutina' : '❌ NO viajará en la mañana'}<br>
+                    ${asisteTarde ? '✅ Ruta Vespertina' : '❌ NO viajará en la tarde'}
+                `;
+                mostrarExito(mensaje);
+                cargarResumenAlumno();
+                cargarHistorial();
+            } else {
+                mostrarError(result.message);
+            }
+
+        } catch (error) {
+            console.error('Error al confirmar:', error);
+            mostrarError('Error de conexión. Intente nuevamente.');
+        }
+    }
+
+    // Cargar historial reciente
+    async function cargarHistorial() {
+        const idAlumno = document.getElementById('idAlumno').value;
+        const hoy = new Date();
+        const hace7Dias = new Date(hoy);
+        hace7Dias.setDate(hace7Dias.getDate() - 7);
+
+        try {
+            const response = await fetch(
+                `/api/asistencia/alumno/${idAlumno}/historial?fechaInicio=${hace7Dias.toISOString()}&fechaFin=${hoy.toISOString()}`
+            );
+            const historial = await response.json();
+
+            if (historial.length === 0) {
+                document.getElementById('historialContainer').innerHTML = 
+                    '<p class="text-muted text-center">No hay historial reciente</p>';
+                return;
+            }
+
+            const html = `
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Mañana</th>
+                                <th>Tarde</th>
+                                <th>Confirmado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${historial.map(h => `
+                                <tr>
+                                    <td>${new Date(h.fecha).toLocaleDateString()}</td>
+                                    <td>${h.asisteMañana ? '✅ Sí' : '❌ No'}</td>
+                                    <td>${h.asisteTarde ? '✅ Sí' : '❌ No'}</td>
+                                    <td>${h.fechaConfirmacion ? '✓' : '⏳ Pendiente'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            document.getElementById('historialContainer').innerHTML = html;
+
+        } catch (error) {
+            console.error('Error al cargar historial:', error);
+        }
+    }
+
+    // Mostrar modal de éxito
+    function mostrarExito(mensaje) {
+        document.getElementById('mensajeExito').innerHTML = mensaje;
+        const modal = new bootstrap.Modal(document.getElementById('modalExito'));
+        modal.show();
+    }
+
+    // Mostrar modal de error
+    function mostrarError(mensaje) {
+        document.getElementById('mensajeError').textContent = mensaje;
+        const modal = new bootstrap.Modal(document.getElementById('modalError'));
+        modal.show();
+    }
+</script>
+
+<style>
+    .form-check-input:checked {
+        background-color: #198754;
+        border-color: #198754;
+    }
+
+    .form-check-input:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .card {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+</style>

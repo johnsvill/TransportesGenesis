@@ -1,0 +1,376 @@
+@page
+@model TransportesGenesis.Pages.Geolocalizacion.MapaEnTiempoRealModel
+@{
+    ViewData["Title"] = "Mapa en Tiempo Real";
+}
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""/>
+
+<div class="container-fluid mt-3">
+    <div class="row">
+        <div class="col-12">
+            <h2>
+                <i class="bi bi-geo-alt-fill"></i> Mapa en Tiempo Real
+            </h2>
+            <p class="text-muted">Ubicación actual de la flota de buses</p>
+            <hr />
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Panel de información -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="bi bi-info-circle"></i> Buses Activos</h5>
+                </div>
+                <div class="card-body" id="busesInfo">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header bg-info text-white">
+                    <h6><i class="bi bi-palette"></i> Leyenda de Estados</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-2">
+                        <span class="badge bg-success">🚌 En Movimiento</span>
+                        <br><small class="text-muted">Velocidad > 5 km/h</small>
+                    </div>
+                    <div class="mb-2">
+                        <span class="badge bg-warning">⏸️ Detenido</span>
+                        <br><small class="text-muted">Velocidad ≤ 5 km/h</small>
+                    </div>
+                    <div class="mb-3">
+                        <span class="badge bg-danger">📡 Sin Señal</span>
+                        <br><small class="text-muted">Sin actualizar > 10 min</small>
+                    </div>
+                    <hr>
+                    <div class="text-center">
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle"></i> Haz clic en un bus de la tabla para verlo en el mapa
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mapa -->
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-body p-0">
+                    <div id="map" style="height: 600px; width: 100%;"></div>
+                </div>
+                <div class="card-footer text-muted">
+                    <small>
+                        <i class="bi bi-clock"></i> Última actualización: <span id="lastUpdate">--:--:--</span>
+                        <button class="btn btn-sm btn-primary float-end" onclick="actualizarMapa()">
+                            <i class="bi bi-arrow-clockwise"></i> Actualizar
+                        </button>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
+
+<script>
+    let map;
+    let marcadores = {};
+
+    // Inicializar mapa centrado en Ciudad de Guatemala
+    function inicializarMapa() {
+        map = L.map('map').setView([14.6349, -90.5069], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(map);
+
+        console.log('Mapa inicializado');
+    }
+
+    // Obtener color según estado
+    function getColorByEstado(estado) {
+        switch (estado) {
+            case 'Movimiento': return 'green';
+            case 'Detenido': return 'orange';
+            case 'SinSeñal': return 'red';
+            default: return 'gray';
+        }
+    }
+
+    // Crear icono personalizado
+    function createBusIcon(estado) {
+        const color = getColorByEstado(estado);
+        return L.divIcon({
+            html: `<div class="bus-icon" style="background-color: ${color};">🚌</div>`,
+            className: 'custom-bus-marker',
+            iconSize: [40, 40],
+            iconAnchor: [20, 20],
+            popupAnchor: [0, -20]
+        });
+    }
+
+    // Cargar ubicaciones de buses
+    async function cargarUbicaciones() {
+        try {
+            const response = await fetch('/api/ubicaciones/buses-activos');
+
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('Respuesta completa de la API:', data);
+
+            // Validar que sea un array
+            let buses = Array.isArray(data) ? data : (data.value || []);
+
+            if (!Array.isArray(buses)) {
+                console.error('La respuesta no es un array:', buses);
+                buses = [];
+            }
+
+            console.log('Buses a procesar:', buses);
+
+            // Si no hay buses, mostrar mensaje
+            if (buses.length === 0) {
+                document.getElementById('busesInfo').innerHTML = `
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i> No hay buses activos en este momento
+                    </div>
+                `;
+                document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+                return;
+            }
+
+            // Actualizar panel de información
+            actualizarPanelInfo(buses);
+
+            // Actualizar marcadores en el mapa
+            const bounds = [];
+            buses.forEach(bus => {
+                const key = `bus_${bus.idBus}`;
+                const icon = createBusIcon(bus.estado);
+                bounds.push([bus.latitud, bus.longitud]);
+
+                if (marcadores[key]) {
+                    // Actualizar posición del marcador existente
+                    marcadores[key].setLatLng([bus.latitud, bus.longitud]);
+                    marcadores[key].setIcon(icon);
+                    marcadores[key].setPopupContent(`
+                        <div style="min-width: 200px;">
+                            <h6 class="mb-2"><strong>🚌 ${bus.placaBus}</strong></h6>
+                            <div class="mb-1"><strong>Estado:</strong> <span class="badge bg-${getColorByEstado(bus.estado) === 'green' ? 'success' : getColorByEstado(bus.estado) === 'orange' ? 'warning' : 'danger'}">${bus.estado}</span></div>
+                            <div class="mb-1"><strong>Velocidad:</strong> ${bus.velocidad ? bus.velocidad.toFixed(1) + ' km/h' : 'Detenido'}</div>
+                            <div class="mb-1"><strong>Ubicación:</strong> ${bus.latitud.toFixed(4)}, ${bus.longitud.toFixed(4)}</div>
+                            <div class="text-muted"><small>🕒 ${new Date(bus.ultimaActualizacion).toLocaleString()}</small></div>
+                        </div>
+                    `);
+                } else {
+                    // Crear nuevo marcador
+                    const marker = L.marker([bus.latitud, bus.longitud], { icon: icon })
+                        .addTo(map)
+                        .bindPopup(`
+                            <div style="min-width: 200px;">
+                                <h6 class="mb-2"><strong>🚌 ${bus.placaBus}</strong></h6>
+                                <div class="mb-1"><strong>Estado:</strong> <span class="badge bg-${getColorByEstado(bus.estado) === 'green' ? 'success' : getColorByEstado(bus.estado) === 'orange' ? 'warning' : 'danger'}">${bus.estado}</span></div>
+                                <div class="mb-1"><strong>Velocidad:</strong> ${bus.velocidad ? bus.velocidad.toFixed(1) + ' km/h' : 'Detenido'}</div>
+                                <div class="mb-1"><strong>Ubicación:</strong> ${bus.latitud.toFixed(4)}, ${bus.longitud.toFixed(4)}</div>
+                                <div class="text-muted"><small>🕒 ${new Date(bus.ultimaActualizacion).toLocaleString()}</small></div>
+                            </div>
+                        `);
+                    marcadores[key] = marker;
+                }
+            });
+
+            // Ajustar el mapa para mostrar todos los buses
+            if (bounds.length > 0) {
+                map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+            }
+
+            // Actualizar timestamp
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+
+        } catch (error) {
+            console.error('Error al cargar ubicaciones:', error);
+            document.getElementById('busesInfo').innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-circle"></i> 
+                    <strong>Error:</strong> ${error.message}
+                    <br><small>Revisa la consola del navegador para más detalles</small>
+                </div>
+            `;
+        }
+    }
+
+    // Actualizar panel de información con tabla
+    function actualizarPanelInfo(buses) {
+        if (buses.length === 0) {
+            document.getElementById('busesInfo').innerHTML = '<p class="text-muted">No hay buses activos</p>';
+            return;
+        }
+
+        const totalBuses = buses.length;
+        const enMovimiento = buses.filter(b => b.estado === 'Movimiento').length;
+        const detenidos = buses.filter(b => b.estado === 'Detenido').length;
+        const sinSenal = buses.filter(b => b.estado === 'SinSeñal').length;
+
+        const html = `
+            <!-- Resumen -->
+            <div class="alert alert-info mb-3">
+                <strong>📊 Resumen:</strong><br>
+                <small>
+                    Total: <strong>${totalBuses}</strong> buses<br>
+                    🟢 En ruta: ${enMovimiento} | 🟠 Detenidos: ${detenidos} | 🔴 Sin señal: ${sinSenal}
+                </small>
+            </div>
+
+            <!-- Tabla de buses -->
+            <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Bus</th>
+                            <th>Estado</th>
+                            <th>Velocidad</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${buses.map(bus => {
+                            const colorClass = getColorByEstado(bus.estado) === 'green' ? 'success' : 
+                                             getColorByEstado(bus.estado) === 'orange' ? 'warning' : 'danger';
+                            const icon = bus.estado === 'Movimiento' ? '🚌' : 
+                                       bus.estado === 'Detenido' ? '⏸️' : '📡';
+
+                            return `
+                                <tr onclick="centrarEnBus(${bus.idBus}, ${bus.latitud}, ${bus.longitud})" style="cursor: pointer;" title="Clic para ver en el mapa">
+                                    <td>
+                                        <strong>${bus.placaBus}</strong>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-${colorClass}">
+                                            ${icon} ${bus.estado}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        ${bus.velocidad ? 
+                                            `<span class="text-primary"><strong>${bus.velocidad.toFixed(1)}</strong> km/h</span>` : 
+                                            '<span class="text-muted">0.0 km/h</span>'}
+                                    </td>
+                                    <td class="text-end">
+                                        <i class="bi bi-geo-alt-fill text-muted"></i>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        document.getElementById('busesInfo').innerHTML = html;
+    }
+
+    // Centrar mapa en un bus específico
+    function centrarEnBus(idBus, lat, lng) {
+        map.setView([lat, lng], 16);
+        const marker = marcadores[`bus_${idBus}`];
+        if (marker) {
+            marker.openPopup();
+        }
+    }
+
+    // Actualizar mapa manualmente
+    function actualizarMapa() {
+        cargarUbicaciones();
+    }
+
+    // Inicializar al cargar la página
+    document.addEventListener('DOMContentLoaded', function() {
+        inicializarMapa();
+        cargarUbicaciones();
+
+        // Auto-actualizar cada 30 segundos
+        setInterval(cargarUbicaciones, 30000);
+    });
+</script>
+
+<style>
+    .custom-bus-marker {
+        background: transparent;
+        border: none;
+    }
+
+    .bus-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        border: 3px solid white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    .bus-icon:hover {
+        transform: scale(1.2);
+    }
+
+    /* Estilos para el popup */
+    .leaflet-popup-content {
+        margin: 10px;
+    }
+
+    .leaflet-popup-content h6 {
+        margin-bottom: 8px;
+        color: #333;
+    }
+
+    /* Estilos para la tabla de buses */
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+        cursor: pointer;
+    }
+
+    .table-responsive {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    /* Scrollbar personalizado */
+    .table-responsive::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .table-responsive::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 4px;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+</style>

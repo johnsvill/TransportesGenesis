@@ -30,6 +30,20 @@ public static class Startup
         builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
             .AddEntityFrameworkStores<ApplicationDbContext>();
 
+        // AutoMapper (Geolocalización - NO AFECTA MÓDULOS EXISTENTES)
+        builder.Services.AddAutoMapper(typeof(Startup).Assembly);
+
+        // Repositorios de Geolocalización (NUEVOS - NO AFECTAN MÓDULO DE PAGOS)
+        builder.Services.AddScoped<TransportesGenesis.Repositories.Interfaces.IBusRepository, TransportesGenesis.Repositories.Implementations.BusRepository>();
+        builder.Services.AddScoped<TransportesGenesis.Repositories.Interfaces.IRutaRepository, TransportesGenesis.Repositories.Implementations.RutaRepository>();
+        builder.Services.AddScoped<TransportesGenesis.Repositories.Interfaces.IUbicacionBusRepository, TransportesGenesis.Repositories.Implementations.UbicacionBusRepository>();
+        builder.Services.AddScoped<TransportesGenesis.Repositories.Interfaces.IAsistenciaAlumnoRepository, TransportesGenesis.Repositories.Implementations.AsistenciaAlumnoRepository>();
+
+        // Services de Geolocalización (NUEVOS - NO AFECTAN MÓDULO DE PAGOS)
+        builder.Services.AddScoped<TransportesGenesis.Services.Interfaces.IBusService, TransportesGenesis.Services.Implementations.BusService>();
+        builder.Services.AddScoped<TransportesGenesis.Services.Interfaces.IUbicacionBusService, TransportesGenesis.Services.Implementations.UbicacionBusService>();
+        builder.Services.AddScoped<TransportesGenesis.Services.Interfaces.IAsistenciaService, TransportesGenesis.Services.Implementations.AsistenciaService>();
+
         builder.Services.AddControllersWithViews();
     }
 

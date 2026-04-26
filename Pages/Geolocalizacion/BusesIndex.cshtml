@@ -1,0 +1,87 @@
+@page
+@model TransportesGenesis.Pages.Geolocalizacion.BusesIndexModel
+@{
+    ViewData["Title"] = "Gestión de Buses";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2>
+                <i class="bi bi-bus-front"></i> Gestión de Buses
+            </h2>
+            <p class="text-muted">Administra la flota de buses escolares</p>
+            <hr />
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-12">
+            <a asp-page="./BusCreate" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Nuevo Bus
+            </a>
+        </div>
+    </div>
+
+    @if (Model.Buses != null && Model.Buses.Any())
+    {
+        <div class="row">
+            <div class="col-12">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Placa</th>
+                                <th>Modelo</th>
+                                <th>Capacidad</th>
+                                <th>Rutas Activas</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var bus in Model.Buses)
+                            {
+                                <tr>
+                                    <td>@bus.IdBus</td>
+                                    <td><strong>@bus.Placa</strong></td>
+                                    <td>@(bus.Modelo ?? "N/A")</td>
+                                    <td>
+                                        <span class="badge bg-info">@bus.Capacidad personas</span>
+                                    </td>
+                                    <td>@bus.RutasActivas</td>
+                                    <td>
+                                        @if (bus.Estado)
+                                        {
+                                            <span class="badge bg-success">Activo</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Inactivo</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a asp-page="./BusEdit" asp-route-id="@bus.IdBus" class="btn btn-sm btn-warning">
+                                            <i class="bi bi-pencil"></i> Editar
+                                        </a>
+                                        <a asp-page="./BusDetails" asp-route-id="@bus.IdBus" class="btn btn-sm btn-info">
+                                            <i class="bi bi-eye"></i> Ver
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> No hay buses registrados. 
+            <a asp-page="./BusCreate">Crear el primer bus</a>
+        </div>
+    }
+</div>
