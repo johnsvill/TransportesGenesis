@@ -50,6 +50,15 @@ public static class Startup
         builder.Services.AddScoped<TransportesGenesis.Services.Interfaces.ITrasladoService, TransportesGenesis.Services.Implementations.TrasladoService>();
         builder.Services.AddScoped<TransportesGenesis.Services.Interfaces.IRutaService, TransportesGenesis.Services.Implementations.RutaService>(); // FASE 5: Cálculo dinámico de rutas
         builder.Services.AddScoped<TransportesGenesis.Services.Interfaces.IConfiguracionService, TransportesGenesis.Services.Implementations.ConfiguracionService>(); // FASE 5: Configuración del sistema
+        builder.Services.AddScoped<TransportesGenesis.Services.Interfaces.INotificacionService, TransportesGenesis.Services.Implementations.NotificacionService>(); // FASE 7: Notificaciones SignalR
+
+        // FASE 7: SignalR para notificaciones en tiempo real
+        builder.Services.AddSignalR(options =>
+        {
+            options.EnableDetailedErrors = true; // Solo en desarrollo
+            options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+            options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
+        });
 
         builder.Services.AddControllersWithViews();
     }
@@ -73,6 +82,9 @@ public static class Startup
         app.UseRouting();
 
         app.UseAuthorization();
+
+        // FASE 7: Endpoint de SignalR para notificaciones
+        app.MapHub<TransportesGenesis.Hubs.NotificacionesHub>("/notificacionesHub");
 
         app.MapControllerRoute(
             name: "default",
