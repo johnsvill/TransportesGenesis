@@ -5,10 +5,9 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using TransportesGenesis.Data; // tu DbContext
 using TransportesGenesis.Data.Context;
 using TransportesGenesis.Models.DB.Negocio;
-using TransportesGenesis.Models.DTO; // aquí está PagoPadre
+using TransportesGenesis.Models.DTO;
 
 namespace TransportesGenesis.Controllers
 {

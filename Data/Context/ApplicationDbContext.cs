@@ -6,7 +6,7 @@ using TransportesGenesis.Models.DB.Usuarios;
 
 namespace TransportesGenesis.Data.Context
 {
-    public class ApplicationDbContext : IdentityDbContext
+    public class ApplicationDbContext : IdentityDbContext<AppUser>
     {
         public ApplicationDbContext()
         {

@@ -22,21 +22,17 @@ public static class Startup
 
     private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
+        // Connection string
         var connectionString = configuration.GetConnectionString("TransportesGenesisConnection")
-        var connectionString = builder.Configuration.GetConnectionString("TransportesGenesisConnection")
-            ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-
             ?? throw new InvalidOperationException("Connection string 'TransportesGenesisConnection' not found.");
 
+        // Database context
         services.AddDbContext<ApplicationDbContext>(options =>
-        builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(connectionString));
 
-        builder.Services.AddDatabaseDeveloperPageExceptionFilter();
         services.AddDatabaseDeveloperPageExceptionFilter();
 
-        builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-            .AddEntityFrameworkStores<ApplicationDbContext>();
+        // Identity configuration (de tu compañero)
         services.AddIdentity<AppUser, IdentityRole>(options =>
         {
             options.Password.RequireDigit = true;
@@ -46,50 +42,61 @@ public static class Startup
             options.Password.RequireNonAlphanumeric = false;
         })
         .AddEntityFrameworkStores<ApplicationDbContext>()
-        .AddDefaultTokenProviders();     
+        .AddDefaultTokenProviders();
 
-        // AutoMapper (Geolocalización - NO AFECTA MÓDULOS EXISTENTES)
-        builder.Services.AddAutoMapper(typeof(Startup).Assembly);
+        // Configurar rutas de autenticación personalizadas (de tu compañero)
+        services.ConfigureApplicationCookie(options =>
+        {
+            options.LoginPath = "/Auth/Login";
+            options.LogoutPath = "/Auth/Logout";
+            options.AccessDeniedPath = "/Auth/AccessDenied";
+        });
+
+        // Email sender (de tu compañero)
+        services.AddTransient<IEmailSender, EmailSender>();
+
+        // Stripe configuration (de tu compañero)
+        services.Configure<StripeSettings>(configuration.GetSection("Stripe"));
+
+        // AutoMapper (Geolocalización)
+        services.AddAutoMapper(typeof(Startup).Assembly);
 
         // HttpClient para llamadas internas a APIs
-        services.AddTransient<IEmailSender, EmailSender>();
-        services.AddControllersWithViews();
-        services.AddRazorPages().AddRazorRuntimeCompilation();
-        services.Configure<StripeSettings>(configuration.GetSection("Stripe"));
-        builder.Services.AddHttpClient();
+        services.AddHttpClient();
 
-        // Repositorios de Geolocalización (NUEVOS - NO AFECTAN MÓDULO DE PAGOS)
-        builder.Services.AddScoped<TransportesGenesis.Repositories.Interfaces.IBusRepository, TransportesGenesis.Repositories.Implementations.BusRepository>();
-        builder.Services.AddScoped<TransportesGenesis.Repositories.Interfaces.IRutaRepository, TransportesGenesis.Repositories.Implementations.RutaRepository>();
-        builder.Services.AddScoped<TransportesGenesis.Repositories.Interfaces.IUbicacionBusRepository, TransportesGenesis.Repositories.Implementations.UbicacionBusRepository>();
-        builder.Services.AddScoped<TransportesGenesis.Repositories.Interfaces.IAsistenciaAlumnoRepository, TransportesGenesis.Repositories.Implementations.AsistenciaAlumnoRepository>();
-        builder.Services.AddScoped<TransportesGenesis.Repositories.Interfaces.ISolicitudTrasladoRepository, TransportesGenesis.Repositories.Implementations.SolicitudTrasladoRepository>();
+        // Repositorios de Geolocalización
+        services.AddScoped<TransportesGenesis.Repositories.Interfaces.IBusRepository, TransportesGenesis.Repositories.Implementations.BusRepository>();
+        services.AddScoped<TransportesGenesis.Repositories.Interfaces.IRutaRepository, TransportesGenesis.Repositories.Implementations.RutaRepository>();
+        services.AddScoped<TransportesGenesis.Repositories.Interfaces.IUbicacionBusRepository, TransportesGenesis.Repositories.Implementations.UbicacionBusRepository>();
+        services.AddScoped<TransportesGenesis.Repositories.Interfaces.IAsistenciaAlumnoRepository, TransportesGenesis.Repositories.Implementations.AsistenciaAlumnoRepository>();
+        services.AddScoped<TransportesGenesis.Repositories.Interfaces.ISolicitudTrasladoRepository, TransportesGenesis.Repositories.Implementations.SolicitudTrasladoRepository>();
 
-        // Services de Geolocalización (NUEVOS - NO AFECTAN MÓDULO DE PAGOS)
-        builder.Services.AddScoped<TransportesGenesis.Services.Interfaces.IBusService, TransportesGenesis.Services.Implementations.BusService>();
-        builder.Services.AddScoped<TransportesGenesis.Services.Interfaces.IUbicacionBusService, TransportesGenesis.Services.Implementations.UbicacionBusService>();
-        builder.Services.AddScoped<TransportesGenesis.Services.Interfaces.IAsistenciaService, TransportesGenesis.Services.Implementations.AsistenciaService>();
-        builder.Services.AddScoped<TransportesGenesis.Services.Interfaces.ITrasladoService, TransportesGenesis.Services.Implementations.TrasladoService>();
-        builder.Services.AddScoped<TransportesGenesis.Services.Interfaces.IRutaService, TransportesGenesis.Services.Implementations.RutaService>(); // FASE 5: Cálculo dinámico de rutas
-        builder.Services.AddScoped<TransportesGenesis.Services.Interfaces.IConfiguracionService, TransportesGenesis.Services.Implementations.ConfiguracionService>(); // FASE 5: Configuración del sistema
-        builder.Services.AddScoped<TransportesGenesis.Services.Interfaces.INotificacionService, TransportesGenesis.Services.Implementations.NotificacionService>(); // FASE 7: Notificaciones SignalR
+        // Services de Geolocalización
+        services.AddScoped<TransportesGenesis.Services.Interfaces.IBusService, TransportesGenesis.Services.Implementations.BusService>();
+        services.AddScoped<TransportesGenesis.Services.Interfaces.IUbicacionBusService, TransportesGenesis.Services.Implementations.UbicacionBusService>();
+        services.AddScoped<TransportesGenesis.Services.Interfaces.IAsistenciaService, TransportesGenesis.Services.Implementations.AsistenciaService>();
+        services.AddScoped<TransportesGenesis.Services.Interfaces.ITrasladoService, TransportesGenesis.Services.Implementations.TrasladoService>();
+        services.AddScoped<TransportesGenesis.Services.Interfaces.IRutaService, TransportesGenesis.Services.Implementations.RutaService>();
+        services.AddScoped<TransportesGenesis.Services.Interfaces.IConfiguracionService, TransportesGenesis.Services.Implementations.ConfiguracionService>();
+        services.AddScoped<TransportesGenesis.Services.Interfaces.INotificacionService, TransportesGenesis.Services.Implementations.NotificacionService>();
 
-        // FASE 7: SignalR para notificaciones en tiempo real
-        builder.Services.AddSignalR(options =>
+        // SignalR para notificaciones en tiempo real
+        services.AddSignalR(options =>
         {
-            options.EnableDetailedErrors = true; // Solo en desarrollo
+            options.EnableDetailedErrors = true;
             options.KeepAliveInterval = TimeSpan.FromSeconds(15);
             options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
         });
 
-        builder.Services.AddControllersWithViews();
+        // MVC y Razor Pages
+        services.AddControllersWithViews();
+        services.AddRazorPages().AddRazorRuntimeCompilation();
     }
 
     private static void Configure(WebApplication app, IWebHostEnvironment env)
     {
+        // Configure the HTTP request pipeline
         if (env.IsDevelopment())
-        // Configure the HTTP request pipeline.
-        if (app.Environment.IsDevelopment())
         {
             app.UseMigrationsEndPoint();
         }
@@ -107,11 +114,11 @@ public static class Startup
         app.UseAuthentication();
         app.UseAuthorization();
 
-        // FASE 7: Endpoint de SignalR para notificaciones
-        app.MapHub<TransportesGenesis.Hubs.NotificacionesHub>("/notificacionesHub");
+        // Configuración de Stripe (de tu compañero)
         var stripeSettings = app.Services.GetRequiredService<IOptions<StripeSettings>>().Value;
         Stripe.StripeConfiguration.ApiKey = stripeSettings.SecretKey;
 
+        // Seed de roles y usuario admin (de tu compañero)
         using (var scope = app.Services.CreateScope())
         {
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
@@ -119,10 +126,16 @@ public static class Startup
             SeedRolesAndAdmin(roleManager, userManager).GetAwaiter().GetResult();
         }
 
+        // SignalR endpoint para notificaciones
+        app.MapHub<TransportesGenesis.Hubs.NotificacionesHub>("/notificacionesHub");
+
+        // Mapear rutas de controladores MVC ANTES que Razor Pages para que AuthController tenga prioridad
         app.MapControllerRoute(
             name: "default",
             pattern: "{controller=Home}/{action=Index}/{id?}");
-        app.MapRazorPages();
+
+        // Deshabilitar Razor Pages de Identity ya que se usa AuthController personalizado
+        // app.MapRazorPages();
     }
 
     private static async Task SeedRolesAndAdmin(RoleManager<IdentityRole> roleManager, UserManager<AppUser> userManager)
