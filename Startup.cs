@@ -134,8 +134,8 @@ public static class Startup
             name: "default",
             pattern: "{controller=Home}/{action=Index}/{id?}");
 
-        // Deshabilitar Razor Pages de Identity ya que se usa AuthController personalizado
-        // app.MapRazorPages();
+        // Habilitar Razor Pages (necesarias para Admin, Padres, Geolocalizacion, etc.)
+        app.MapRazorPages();
     }
 
     private static async Task SeedRolesAndAdmin(RoleManager<IdentityRole> roleManager, UserManager<AppUser> userManager)

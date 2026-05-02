@@ -1,6 +1,62 @@
 ﻿@{
-    ViewData["Title"] = "Admin Dashboard";
+    ViewData["Title"] = "Panel de Administrador";
 }
 
-<h2>Bienvenido Administrador</h2>
-<p>Esta es la vista de administración.</p>
+<div class="container mt-4">
+    <h2 class="text-primary">Panel de Administrador</h2>
+    <p class="lead">Bienvenido, @User.Identity.Name</p>
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Gestión de Rutas</h5>
+                    <p class="card-text">Calcular y administrar rutas de transporte</p>
+                    <a href="/Admin/CalcularRutas" class="btn btn-primary">Ir a Rutas</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Gestión de Traslados</h5>
+                    <p class="card-text">Administrar solicitudes de traslado</p>
+                    <a href="/Admin/GestionarTraslados" class="btn btn-primary">Ir a Traslados</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Geolocalización</h5>
+                    <p class="card-text">Ver buses y ubicaciones en tiempo real</p>
+                    <a href="/Geolocalizacion/BusesIndex" class="btn btn-primary">Ir a Buses</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Mapa en Tiempo Real</h5>
+                    <p class="card-text">Ver ubicación de buses en el mapa</p>
+                    <a href="/Geolocalizacion/MapaEnTiempoReal" class="btn btn-primary">Ver Mapa</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Gestión de Usuarios</h5>
+                    <p class="card-text">Administrar usuarios del sistema</p>
+                    <a href="#" class="btn btn-secondary disabled">Próximamente</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

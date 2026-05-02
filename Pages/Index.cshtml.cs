@@ -1,7 +1,9 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace TransportesGenesis.Pages
 {
+    [Authorize] // Requiere autenticación para acceder a esta página
     public class IndexModel : PageModel
     {
         public void OnGet()
