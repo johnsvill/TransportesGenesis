@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <title>@ViewData["Title"] - Transportes Genesis</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Animate.css para animaciones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+
+    <!-- Estilos personalizados mejorados -->
+    <style>
+        :root {
+            --primary-color: #FFA500;
+            --secondary-color: #FF6B35;
+            --success-color: #228B22;
+            --warning-color: #FFD700;
+            --danger-color: #DC143C;
+            --info-color: #1E90FF;
+            --gradient-primary: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%);
+            --gradient-secondary: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF6B35 100%);
+            --shadow-sm: 0 2px 4px rgba(255,165,0,0.2);
+            --shadow-md: 0 4px 8px rgba(255,165,0,0.25);
+            --shadow-lg: 0 8px 16px rgba(255,165,0,0.3);
+            --border-radius: 12px;
+            --border-radius-sm: 8px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #FFF8DC 0%, #FFEBCD 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Navbar mejorada */
+        .navbar {
+            background: var(--gradient-primary) !important;
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-md);
+            padding: 12px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1050;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.3rem;
+            padding: 8px 0;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand:hover {
+            transform: scale(1.05);
+        }
+
+        .navbar-nav .nav-link {
+            font-weight: 500;
+            padding: 8px 15px;
+            border-radius: var(--border-radius-sm);
+            margin: 0 2px;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-nav .nav-link:hover {
+            background-color: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Contenido principal */
+        main {
+            min-height: calc(100vh - 160px);
+            padding: 20px 0;
+        }
+
+        /* Cards mejoradas */
+        .card {
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-4px);
+        }
+
+        .card-header {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            font-weight: 600;
+            padding: 15px 20px;
+        }
+
+        /* Botones mejorados */
+        .btn {
+            border-radius: var(--border-radius-sm);
+            font-weight: 500;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+        }
+
+        /* Footer mejorado */
+        footer {
+            background: var(--gradient-primary);
+            color: white !important;
+            margin-top: 40px;
+            box-shadow: 0 -4px 8px rgba(0,0,0,0.1);
+        }
+
+        footer small {
+            color: rgba(255,255,255,0.8) !important;
+        }
+
+        /* Responsive utilities */
+        @@media (max-width: 768px) {
+            .container-fluid {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+
+            main {
+                padding: 10px 0;
+            }
+
+            .navbar-brand {
+                font-size: 1.1rem;
+            }
+
+            .card {
+                margin-bottom: 15px;
+            }
+
+            .btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            .btn:last-child {
+                margin-bottom: 0;
+            }
+        }
+
+        @@media (max-width: 576px) {
+            .navbar-nav .nav-link {
+                text-align: center;
+                padding: 10px;
+            }
+
+            .card-header {
+                padding: 12px 15px;
+                font-size: 0.95rem;
+            }
+
+            .card-body {
+                padding: 15px;
+            }
+        }
+
+        /* Animaciones suaves */
+        .fade-in {
+            animation: fadeIn 0.6s ease-in;
+        }
+
+        .slide-up {
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @@keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @@keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Loading spinner mejorado */
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        /* Toast notifications */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1055;
+        }
+
+        /* Utility classes */
+        .text-gradient {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .bg-glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+
+    <!-- Estilos personalizados adicionales -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand animate__animated animate__fadeInLeft" href="/">
+                    <i class="bi bi-bus-front-fill me-2"></i>
+                    <span class="d-none d-sm-inline">Transportes Genesis</span>
+                    <span class="d-inline d-sm-none">TG</span>
+                </a>
+
+                <!-- Botón móvil mejorado -->
+                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/">
+                                <i class="bi bi-house-fill me-1"></i>
+                                <span>Inicio</span>
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown d-none d-lg-block">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-speedometer2 me-1"></i>
+                                <span>Panel</span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="/Piloto/MiRuta">
+                                    <i class="bi bi-geo-alt text-primary me-2"></i>Mi Ruta
+                                </a></li>
+                                <li><a class="dropdown-item" href="/Admin/CalcularRutas">
+                                    <i class="bi bi-calculator text-info me-2"></i>Calcular Rutas
+                                </a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Geolocalizacion/MapaEnTiempoReal">
+                                <i class="bi bi-geo-alt-fill me-1"></i>
+                                <span>Mapa</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Padres/ConfirmarAsistencia">
+                                <i class="bi bi-calendar-check-fill me-1"></i>
+                                <span>Asistencia</span>
+                            </a>
+                        </li>
+                        <!-- Enlaces móviles -->
+                        <li class="nav-item d-lg-none">
+                            <a class="nav-link" href="/Piloto/MiRuta">
+                                <i class="bi bi-geo-alt me-1"></i>Mi Ruta
+                            </a>
+                        </li>
+                        <li class="nav-item d-lg-none">
+                            <a class="nav-link" href="/Admin/CalcularRutas">
+                                <i class="bi bi-calculator me-1"></i>Calcular Rutas
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main role="main" class="pb-4 fade-in">
+        <!-- Toast container para notificaciones -->
+        <div class="toast-container"></div>
+
+        @RenderBody()
+    </main>
+
+    <footer class="text-center py-4">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6 text-md-start mb-2 mb-md-0">
+                    <small>
+                        <i class="bi bi-bus-front me-1"></i>
+                        &copy; 2026 - Transportes Genesis
+                    </small>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <small>
+                        <i class="bi bi-shield-check me-1"></i>
+                        Sistema de Gestión de Transporte Escolar
+                    </small>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
+    <!-- Script para mejorar la experiencia móvil -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animaciones de entrada
+            const cards = document.querySelectorAll('.card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = (index * 0.1) + 's';
+                card.classList.add('animate__animated', 'animate__fadeInUp');
+            });
+
+            // Cerrar navbar móvil al hacer clic en un enlace
+            const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+            const navbarToggler = document.querySelector('.navbar-toggler');
+            const navbarCollapse = document.querySelector('.navbar-collapse');
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    if (navbarCollapse.classList.contains('show')) {
+                        navbarToggler.click();
+                    }
+                });
+            });
+
+            // Función para mostrar toasts
+            window.showToast = function(message, type = 'success') {
+                const toastContainer = document.querySelector('.toast-container');
+                const toastId = 'toast-' + Date.now();
+
+                const toastHTML = `
+                    <div id="${toastId}" class="toast align-items-center text-white bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                ${message}
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                    </div>
+                `;
+
+                toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+                const toast = new bootstrap.Toast(document.getElementById(toastId));
+                toast.show();
+
+                // Remover el toast después de que se oculte
+                document.getElementById(toastId).addEventListener('hidden.bs.toast', function() {
+                    this.remove();
+                });
+            };
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

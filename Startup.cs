@@ -23,13 +23,20 @@ public static class Startup
     private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("TransportesGenesisConnection")
+        var connectionString = builder.Configuration.GetConnectionString("TransportesGenesisConnection")
+            ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
             ?? throw new InvalidOperationException("Connection string 'TransportesGenesisConnection' not found.");
 
         services.AddDbContext<ApplicationDbContext>(options =>
+        builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(connectionString));
 
+        builder.Services.AddDatabaseDeveloperPageExceptionFilter();
         services.AddDatabaseDeveloperPageExceptionFilter();
 
+        builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            .AddEntityFrameworkStores<ApplicationDbContext>();
         services.AddIdentity<AppUser, IdentityRole>(options =>
         {
             options.Password.RequireDigit = true;
@@ -41,15 +48,48 @@ public static class Startup
         .AddEntityFrameworkStores<ApplicationDbContext>()
         .AddDefaultTokenProviders();     
 
+        // AutoMapper (Geolocalización - NO AFECTA MÓDULOS EXISTENTES)
+        builder.Services.AddAutoMapper(typeof(Startup).Assembly);
+
+        // HttpClient para llamadas internas a APIs
         services.AddTransient<IEmailSender, EmailSender>();
         services.AddControllersWithViews();
         services.AddRazorPages().AddRazorRuntimeCompilation();
         services.Configure<StripeSettings>(configuration.GetSection("Stripe"));
+        builder.Services.AddHttpClient();
+
+        // Repositorios de Geolocalización (NUEVOS - NO AFECTAN MÓDULO DE PAGOS)
+        builder.Services.AddScoped<TransportesGenesis.Repositories.Interfaces.IBusRepository, TransportesGenesis.Repositories.Implementations.BusRepository>();
+        builder.Services.AddScoped<TransportesGenesis.Repositories.Interfaces.IRutaRepository, TransportesGenesis.Repositories.Implementations.RutaRepository>();
+        builder.Services.AddScoped<TransportesGenesis.Repositories.Interfaces.IUbicacionBusRepository, TransportesGenesis.Repositories.Implementations.UbicacionBusRepository>();
+        builder.Services.AddScoped<TransportesGenesis.Repositories.Interfaces.IAsistenciaAlumnoRepository, TransportesGenesis.Repositories.Implementations.AsistenciaAlumnoRepository>();
+        builder.Services.AddScoped<TransportesGenesis.Repositories.Interfaces.ISolicitudTrasladoRepository, TransportesGenesis.Repositories.Implementations.SolicitudTrasladoRepository>();
+
+        // Services de Geolocalización (NUEVOS - NO AFECTAN MÓDULO DE PAGOS)
+        builder.Services.AddScoped<TransportesGenesis.Services.Interfaces.IBusService, TransportesGenesis.Services.Implementations.BusService>();
+        builder.Services.AddScoped<TransportesGenesis.Services.Interfaces.IUbicacionBusService, TransportesGenesis.Services.Implementations.UbicacionBusService>();
+        builder.Services.AddScoped<TransportesGenesis.Services.Interfaces.IAsistenciaService, TransportesGenesis.Services.Implementations.AsistenciaService>();
+        builder.Services.AddScoped<TransportesGenesis.Services.Interfaces.ITrasladoService, TransportesGenesis.Services.Implementations.TrasladoService>();
+        builder.Services.AddScoped<TransportesGenesis.Services.Interfaces.IRutaService, TransportesGenesis.Services.Implementations.RutaService>(); // FASE 5: Cálculo dinámico de rutas
+        builder.Services.AddScoped<TransportesGenesis.Services.Interfaces.IConfiguracionService, TransportesGenesis.Services.Implementations.ConfiguracionService>(); // FASE 5: Configuración del sistema
+        builder.Services.AddScoped<TransportesGenesis.Services.Interfaces.INotificacionService, TransportesGenesis.Services.Implementations.NotificacionService>(); // FASE 7: Notificaciones SignalR
+
+        // FASE 7: SignalR para notificaciones en tiempo real
+        builder.Services.AddSignalR(options =>
+        {
+            options.EnableDetailedErrors = true; // Solo en desarrollo
+            options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+            options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
+        });
+
+        builder.Services.AddControllersWithViews();
     }
 
     private static void Configure(WebApplication app, IWebHostEnvironment env)
     {
         if (env.IsDevelopment())
+        // Configure the HTTP request pipeline.
+        if (app.Environment.IsDevelopment())
         {
             app.UseMigrationsEndPoint();
         }
@@ -67,6 +107,8 @@ public static class Startup
         app.UseAuthentication();
         app.UseAuthorization();
 
+        // FASE 7: Endpoint de SignalR para notificaciones
+        app.MapHub<TransportesGenesis.Hubs.NotificacionesHub>("/notificacionesHub");
         var stripeSettings = app.Services.GetRequiredService<IOptions<StripeSettings>>().Value;
         Stripe.StripeConfiguration.ApiKey = stripeSettings.SecretKey;
 

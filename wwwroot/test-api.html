@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test API Geolocalización - Transportes Genesis</title>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .test-section { margin-bottom: 30px; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; color: #0c5460; }
+        pre { background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0; }
+        .stat-card { background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; }
+        .stat-number { font-size: 2rem; font-weight: bold; color: #007bff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚌 Test API Geolocalización - Transportes Genesis</h1>
+
+        <div class="test-section info">
+            <h2>📍 Ubicaciones de Buses en Guatemala</h2>
+            <p><strong>Rutas configuradas:</strong></p>
+            <ul>
+                <li><strong>Bus P-001CX:</strong> Zona 1 (Centro Histórico) → Colegio La Asunción (Zona 14)</li>
+                <li><strong>Bus P-002CX:</strong> Zona 5 → Liceo Javier (Zona 10)</li>
+                <li><strong>Bus P-003CX:</strong> Cayalá (Zona 16) → Colegio Yulimai PC (Zona 13)</li>
+                <li><strong>Bus P-004CX:</strong> Zona 4 → Colegio Americano de Guatemala</li>
+                <li><strong>Bus P-005CX:</strong> Mixco → Liceo Guatemala (Zona 2)</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h2>🔗 Pruebas de API</h2>
+            <button onclick="probarAPI()">🔄 Probar API de Buses</button>
+            <button onclick="probarEstadisticas()">📊 Probar Estadísticas</button>
+            <button onclick="abrirMapa()">🗺️ Abrir Mapa en Tiempo Real</button>
+        </div>
+
+        <div class="stats" id="estadisticas" style="display: none;">
+            <div class="stat-card">
+                <div class="stat-number" id="totalBuses">-</div>
+                <div>Total Buses</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="busesActivos">-</div>
+                <div>En Movimiento</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="busesDetenidos">-</div>
+                <div>Detenidos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="velocidadPromedio">-</div>
+                <div>Velocidad Promedio</div>
+            </div>
+        </div>
+
+        <div class="test-section" id="resultado" style="display: none;">
+            <h3>📋 Resultado de la Prueba</h3>
+            <div id="contenidoResultado"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>🌐 Enlaces Rápidos</h2>
+            <p>Una vez que la aplicación esté ejecutándose en el puerto 7240:</p>
+            <ul>
+                <li><a href="http://localhost:7240" target="_blank">🏠 Dashboard Principal</a></li>
+                <li><a href="http://localhost:7240/Geolocalizacion/MapaEnTiempoReal" target="_blank">🗺️ Mapa en Tiempo Real</a></li>
+                <li><a href="http://localhost:7240/api/geolocalizacion/buses" target="_blank">🔗 API Buses (JSON)</a></li>
+                <li><a href="http://localhost:7240/api/geolocalizacion/estadisticas" target="_blank">📊 API Estadísticas (JSON)</a></li>
+                <li><a href="http://localhost:7240/Piloto/MiRuta" target="_blank">🧭 Mi Ruta (Piloto)</a></li>
+                <li><a href="http://localhost:7240/Padres/ConfirmarAsistencia" target="_blank">👨‍👩‍👧‍👦 Confirmar Asistencia</a></li>
+                <li><a href="http://localhost:7240/Geolocalizacion/BusesIndex" target="_blank">🚌 Gestión de Buses</a></li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h2>🚀 Instrucciones para Ejecutar</h2>
+            <pre><code>1. Abrir terminal en: C:\Proyectos\TransportesGenesis\
+2. Ejecutar: dotnet run
+3. Abrir navegador en: http://localhost:7240
+4. Navegar a: Mapa en Tiempo Real para ver los buses</code></pre>
+        </div>
+    </div>
+
+    <script>
+        async function probarAPI() {
+            const resultado = document.getElementById('resultado');
+            const contenido = document.getElementById('contenidoResultado');
+
+            try {
+                const response = await fetch('/api/geolocalizacion/buses');
+                const buses = await response.json();
+
+                resultado.style.display = 'block';
+                resultado.className = 'test-section success';
+
+                contenido.innerHTML = `
+                    <h4>✅ API de Buses Funcionando Correctamente</h4>
+                    <p><strong>Buses encontrados:</strong> ${buses.length}</p>
+                    <pre>${JSON.stringify(buses, null, 2)}</pre>
+                `;
+
+            } catch (error) {
+                resultado.style.display = 'block';
+                resultado.className = 'test-section error';
+                contenido.innerHTML = `
+                    <h4>❌ Error al conectar con la API</h4>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    <p><strong>Solución:</strong> Asegúrate de que la aplicación esté ejecutándose en http://localhost:5280</p>
+                `;
+            }
+        }
+
+        async function probarEstadisticas() {
+            const estadisticas = document.getElementById('estadisticas');
+
+            try {
+                const response = await fetch('/api/geolocalizacion/estadisticas');
+                const stats = await response.json();
+
+                document.getElementById('totalBuses').textContent = stats.totalBuses;
+                document.getElementById('busesActivos').textContent = stats.busesActivos;
+                document.getElementById('busesDetenidos').textContent = stats.busesDetenidos;
+                document.getElementById('velocidadPromedio').textContent = Math.round(stats.velocidadPromedio) + ' km/h';
+
+                estadisticas.style.display = 'grid';
+
+            } catch (error) {
+                console.error('Error al cargar estadísticas:', error);
+            }
+        }
+
+        function abrirMapa() {
+            window.open('/Geolocalizacion/MapaEnTiempoReal', '_blank');
+        }
+
+        // Auto-probar cuando la página carga
+        setTimeout(() => {
+            probarAPI();
+            probarEstadisticas();
+        }, 1000);
+    </script>
+</body>
+</html>

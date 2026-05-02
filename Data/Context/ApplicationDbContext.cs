@@ -28,6 +28,20 @@ namespace TransportesGenesis.Data.Context
         public virtual DbSet<PagoPadre> PagosPadres { get; set; }
 
 
+        // Entidades de Geolocalización
+        public virtual DbSet<Bus> BusesDb { get; set; }
+        public virtual DbSet<Ruta> RutasDb { get; set; }
+        public virtual DbSet<Parada> ParadasDb { get; set; }
+        public virtual DbSet<AsistenciaAlumno> AsistenciasAlumnoDb { get; set; }
+        public virtual DbSet<UbicacionBusEnTiempoReal> UbicacionesBusDb { get; set; }
+        public virtual DbSet<Alerta> AlertasDb { get; set; }
+        public virtual DbSet<SolicitudTraslado> SolicitudesTrasladoDb { get; set; }
+        public virtual DbSet<AsignacionPilotoBus> AsignacionesPilotoBusDb { get; set; }
+        public virtual DbSet<NotificacionProximidad> NotificacionesProximidadDb { get; set; }
+        public virtual DbSet<RegistroRecogida> RegistrosRecogidaDb { get; set; }
+        public virtual DbSet<NotificacionRetraso> NotificacionesRetrasoDb { get; set; }
+        public virtual DbSet<ConfiguracionSistema> ConfiguracionSistemaDb { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
