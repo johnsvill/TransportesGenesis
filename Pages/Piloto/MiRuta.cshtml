@@ -1,195 +1,164 @@
 @page
 @model TransportesGenesis.Pages.Piloto.MiRutaModel
 @{
-    ViewData["Title"] = "Mi Ruta del Día";
+    ViewData["Title"] = "Mi Ruta";
     Layout = "~/Pages/Shared/_Layout.cshtml";
 }
 
 <!-- Leaflet CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-<div class="container-fluid mt-4">
+<!-- Estilos personalizados -->
+<style>
+    #mapa {
+        height: 400px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .parada-item {
+        transition: all 0.3s ease;
+        border-left: 4px solid transparent;
+    }
+
+    .parada-item:hover {
+        background-color: #f8f9fa !important;
+        border-left-color: #007bff;
+    }
+
+    .parada-item[data-completada="true"] {
+        border-left-color: #28a745;
+        background-color: #f8fff9 !important;
+    }
+
+    .ruta-header {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        color: white;
+        border-radius: 10px 10px 0 0;
+        padding: 15px;
+        margin-bottom: 0;
+    }
+
+    .badge-gps {
+        animation: pulse 2s infinite;
+    }
+
+    @@keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+</style>
+
+<div class="container-fluid">
+    @if (!string.IsNullOrEmpty(Model.MensajeError))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle"></i>
+            <strong>Error:</strong> @Model.MensajeError
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.MensajeExito))
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle"></i>
+            <strong>Éxito:</strong> @Model.MensajeExito
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Header Principal -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h2><i class="bi bi-geo-alt-fill text-primary"></i> Mi Ruta del Día</h2>
-                    <p class="text-muted mb-0">
-                        <i class="bi bi-bus-front"></i> Bus @Model.IdBus (@Model.TipoRuta) • 
-                        <i class="bi bi-calendar3"></i> @DateTime.Now.ToString("dddd, dd MMMM yyyy")
-                    </p>
-                </div>
-                <div>
-                    @if (Model.RutaActiva != null)
-                    {
-                        <span class="badge bg-success fs-6">
-                            <i class="bi bi-check-circle"></i> Ruta Activa
-                        </span>
-                    }
-                    else
-                    {
-                        <span class="badge bg-warning text-dark fs-6">
-                            <i class="bi bi-exclamation-triangle"></i> Sin Ruta
-                        </span>
-                    }
+            <div class="card">
+                <div class="ruta-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="mb-1">
+                                <i class="bi bi-geo-alt-fill"></i> Mi Ruta del Día
+                            </h4>
+                            <p class="mb-0 text-white-50">
+                                @DateTime.Now.ToString("dddd, d 'de' MMMM 'de' yyyy", new System.Globalization.CultureInfo("es-ES"))
+                            </p>
+                        </div>
+                        <div class="text-end">
+                            <span id="estadoGPS" class="badge bg-secondary badge-gps">
+                                <i class="bi bi-geo-alt"></i> Detectando GPS...
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    @if (!string.IsNullOrEmpty(Model.MensajeError))
+    <!-- Información del Piloto y Estado GPS -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <i class="bi bi-person-badge"></i> Información del Piloto
+                </div>
+                <div class="card-body">
+                    <h6 class="card-title">@Model.NombrePiloto</h6>
+                    <p class="card-text">
+                        <strong>ID:</strong> @Model.IdPiloto<br>
+                        <strong>Estado:</strong> <span class="badge bg-success">Activo</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <i class="bi bi-geo-alt-fill"></i> Ubicación GPS
+                </div>
+                <div class="card-body">
+                    <div id="ubicacionInfo">
+                        <p class="text-muted mb-0">
+                            <i class="bi bi-hourglass-split"></i> Obteniendo ubicación...
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mapa -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="bi bi-map"></i> Mapa de Ruta
+                    </div>
+                    <div>
+                        <button onclick="centrarEnUsuario()" class="btn btn-sm btn-light">
+                            <i class="bi bi-crosshair"></i> Mi Ubicación
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div id="mapa"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.RutaActiva != null && Model.RutaActiva.Paradas.Any())
     {
+        <!-- Lista de Paradas -->
         <div class="row mb-4">
             <div class="col-12">
-                @if (Model.EsFinDeSemana)
-                {
-                    <div class="alert alert-info border-info" role="alert">
-                        <h4 class="alert-heading">
-                            <i class="bi bi-calendar-x fs-3"></i> 
-                            Fin de Semana - Modo de Espera
-                        </h4>
-                        <p class="mb-3">
-                            <strong>Hoy es @DateTime.Now.ToString("dddd dd/MM/yyyy")</strong>
-                        </p>
-                        <hr>
-                        <div class="mb-3">
-                            <h5><i class="bi bi-info-circle"></i> Información Importante:</h5>
-                            <ul class="mb-0">
-                                <li>Las <strong>rutas escolares operan únicamente de lunes a viernes</strong></li>
-                                <li>Los <strong>sábados y domingos NO se calculan rutas</strong></li>
-                                <li>La próxima ruta estará disponible el <strong>@Model.FechaRuta.ToString("dddd dd/MM/yyyy")</strong> por la mañana</li>
-                                <li>El administrador calculará las rutas automáticamente el lunes antes de las 6:00 AM</li>
-                            </ul>
-                        </div>
-                        <div class="alert alert-light border-primary mb-0">
-                            <strong><i class="bi bi-clock"></i> ¿Cuándo se calculan las rutas?</strong><br>
-                            Las rutas se generan cada día hábil (lunes a viernes) en la madrugada, basándose en las confirmaciones de asistencia de los padres del día anterior.
-                        </div>
-                    </div>
-                    <div class="text-center mt-3">
-                        <p class="text-muted">
-                            <i class="bi bi-lightbulb"></i> 
-                            Si necesitas calcular una ruta de prueba, puedes usar la herramienta de administración:
-                        </p>
-                        <a href="/Test" class="btn btn-outline-primary">
-                            <i class="bi bi-calculator"></i> Ir a Herramientas de Test
-                        </a>
-                    </div>
-                }
-                else
-                {
-                    <div class="alert alert-warning" role="alert">
-                        <i class="bi bi-exclamation-triangle-fill"></i>
-                        <strong>Atención:</strong> @Model.MensajeError
-                    </div>
-                    <div class="text-center">
-                        <p>Para generar una ruta, contacta al administrador o usa la página de cálculo de rutas.</p>
-                        <a href="/Test" class="btn btn-primary">
-                            <i class="bi bi-calculator"></i> Ir a Test de Rutas
-                        </a>
-                    </div>
-                }
-            </div>
-        </div>
-    }
-    else if (Model.RutaActiva != null)
-    {
-        <!-- Estadísticas -->
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <div class="card border-primary">
-                    <div class="card-body text-center">
-                        <i class="bi bi-geo-alt fs-1 text-primary"></i>
-                        <h3 class="mb-0" id="totalParadas">@Model.RutaActiva.Paradas.Count</h3>
-                        <small class="text-muted">Total Paradas</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card border-success">
-                    <div class="card-body text-center">
-                        <i class="bi bi-check-circle fs-1 text-success"></i>
-                        <h3 class="mb-0" id="paradasCompletadas">@Model.RutaActiva.Paradas.Count(p => p.Completada)</h3>
-                        <small class="text-muted">Completadas</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card border-warning">
-                    <div class="card-body text-center">
-                        <i class="bi bi-clock fs-1 text-warning"></i>
-                        <h3 class="mb-0" id="paradasPendientes">@Model.RutaActiva.Paradas.Count(p => !p.Completada)</h3>
-                        <small class="text-muted">Pendientes</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card border-info">
-                    <div class="card-body text-center">
-                        <i class="bi bi-percent fs-1 text-info"></i>
-                        <h3 class="mb-0" id="porcentaje">
-                            @(Model.RutaActiva.Paradas.Count > 0 ? 
-                              Math.Round((double)Model.RutaActiva.Paradas.Count(p => p.Completada) / Model.RutaActiva.Paradas.Count * 100) : 0)%
-                        </h3>
-                        <small class="text-muted">Progreso</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Mapa y Lista de Paradas -->
-        <div class="row">
-            <div class="col-lg-7 mb-4">
                 <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        <i class="bi bi-map"></i> Mapa de la Ruta
-                    </div>
-                    <div class="card-body p-0">
-                        <div id="mapa" style="height: 500px; width: 100%;"></div>
-                    </div>
-                    <div class="card-footer">
-                        <small class="text-muted">
-                            <i class="bi bi-info-circle"></i> 
-                            <span class="text-success">Verde</span> = Completada • 
-                            <span class="text-danger">Rojo</span> = Pendiente • 
-                            Click en marcador para ver detalles
-                        </small>
-                    </div>
-                </div>
-
-                <!-- TODO: Funcionalidad futura - Verificar tráfico y recalcular -->
-                <div class="card mt-3">
-                    <div class="card-header bg-secondary text-white">
-                        <i class="bi bi-lightning-charge"></i> Funciones Avanzadas (Próximamente)
+                    <div class="card-header bg-warning text-dark">
+                        <i class="bi bi-list-check"></i> Paradas del Día 
+                        <span class="badge bg-dark ms-2">@Model.RutaActiva.Paradas.Count paradas</span>
                     </div>
                     <div class="card-body">
-                        <button class="btn btn-outline-secondary" disabled>
-                            <i class="bi bi-diagram-3"></i> Verificar Tráfico
-                        </button>
-                        <button class="btn btn-outline-secondary ms-2" disabled>
-                            <i class="bi bi-arrow-repeat"></i> Recalcular Ruta
-                        </button>
-                        <p class="text-muted mt-2 mb-0">
-                            <small>
-                                <i class="bi bi-info-circle"></i> 
-                                Funcionalidad de tráfico en tiempo real y recálculo automático 
-                                estará disponible en FASE 7 (integración con Google Maps Traffic API).
-                            </small>
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-5 mb-4">
-                <div class="card">
-                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-                        <span><i class="bi bi-list-ol"></i> Lista de Paradas</span>
-                        <button onclick="actualizarRuta()" class="btn btn-sm btn-light">
-                            <i class="bi bi-arrow-clockwise"></i> Actualizar
-                        </button>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="list-group list-group-flush" id="listaParadas">
+                        <div class="list-group">
                             @foreach (var parada in Model.RutaActiva.Paradas.OrderBy(p => p.Orden))
                             {
                                 <div class="list-group-item parada-item @(parada.Completada ? "bg-light" : "")" 
@@ -203,39 +172,37 @@
                                                 @if (parada.Completada)
                                                 {
                                                     <span class="badge bg-success ms-2">
-                                                        <i class="bi bi-check-circle"></i> Completada
+                                                        <i class="bi bi-check-circle-fill"></i> Completada
                                                     </span>
                                                 }
                                                 else
                                                 {
-                                                    <span class="badge bg-warning text-dark ms-2">
+                                                    <span class="badge bg-warning ms-2">
                                                         <i class="bi bi-clock"></i> Pendiente
                                                     </span>
                                                 }
                                             </div>
-                                            <div class="small text-muted">
+                                            <small class="text-muted">
                                                 <i class="bi bi-geo-alt"></i> @parada.Direccion
-                                            </div>
-                                            @if (parada.HoraEstimada.HasValue)
-                                            {
-                                                <div class="small text-muted">
-                                                    <i class="bi bi-clock"></i> Hora estimada: @parada.HoraEstimada.Value.ToString(@"hh\:mm")
-                                                </div>
-                                            }
+                                                @if (parada.HoraEstimada.HasValue)
+                                                {
+                                                    <br><i class="bi bi-clock"></i> @parada.HoraEstimada.Value.ToString(@"hh\:mm")
+                                                }
+                                            </small>
                                         </div>
-                                        <div class="ms-3">
+                                        <div class="text-end">
                                             @if (!parada.Completada)
                                             {
-                                                <button class="btn btn-success btn-sm" 
-                                                        onclick="marcarCompletada(@parada.IdParada, true)">
-                                                    <i class="bi bi-check-lg"></i> Marcar
+                                                <button onclick="marcarCompletada(@parada.IdParada, true)" 
+                                                        class="btn btn-sm btn-success">
+                                                    <i class="bi bi-check"></i> Completar
                                                 </button>
                                             }
                                             else
                                             {
-                                                <button class="btn btn-outline-secondary btn-sm" 
-                                                        onclick="marcarCompletada(@parada.IdParada, false)">
-                                                    <i class="bi bi-x-lg"></i> Desmarcar
+                                                <button onclick="marcarCompletada(@parada.IdParada, false)" 
+                                                        class="btn btn-sm btn-outline-secondary">
+                                                    <i class="bi bi-arrow-counterclockwise"></i> Desmarcar
                                                 </button>
                                             }
                                         </div>
@@ -247,215 +214,383 @@
                 </div>
             </div>
         </div>
+
+        <!-- Estadísticas -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">
+                            <i class="bi bi-check-circle"></i>
+                        </h5>
+                        <h3 class="text-primary">@Model.RutaActiva.Paradas.Count(p => p.Completada)</h3>
+                        <p class="card-text">Completadas</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <h5 class="card-title text-warning">
+                            <i class="bi bi-clock"></i>
+                        </h5>
+                        <h3 class="text-warning">@Model.RutaActiva.Paradas.Count(p => !p.Completada)</h3>
+                        <p class="card-text">Pendientes</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <h5 class="card-title text-info">
+                            <i class="bi bi-list-ul"></i>
+                        </h5>
+                        <h3 class="text-info">@Model.RutaActiva.Paradas.Count</h3>
+                        <p class="card-text">Total</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Mensaje cuando NO hay ruta -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        @if (Model.EsFinDeSemana)
+                        {
+                            <i class="bi bi-calendar-x text-info" style="font-size: 4rem;"></i>
+                            <h4 class="mt-3 text-info">Es fin de semana</h4>
+                            <p class="text-muted mb-4">
+                                No hay rutas programadas para hoy. Puedes consultar la ruta del próximo lunes.
+                            </p>
+                            <button onclick="mostrarRutaLunes()" class="btn btn-primary">
+                                <i class="bi bi-calendar-week"></i> Ver Ruta del Lunes
+                            </button>
+                        }
+                        else
+                        {
+                            <i class="bi bi-geo-alt text-warning" style="font-size: 4rem;"></i>
+                            <h4 class="mt-3 text-warning">No hay ruta asignada</h4>
+                            <p class="text-muted mb-4">
+                                No tienes una ruta asignada para hoy. Contacta con el administrador.
+                            </p>
+                            <button onclick="buscarRutaAlternativa()" class="btn btn-outline-primary">
+                                <i class="bi bi-search"></i> Buscar Mi Ruta
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Funciones avanzadas (cuando NO hay ruta) -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-secondary text-white">
+                        <i class="bi bi-lightning-charge"></i> Funciones Avanzadas
+                    </div>
+                    <div class="card-body">
+                        @if (Model.EsFinDeSemana)
+                        {
+                            <button onclick="mostrarRutaLunes()" class="btn btn-primary me-2">
+                                <i class="bi bi-calendar-week"></i> Ver Ruta del Lunes
+                            </button>
+                        }
+                        <button onclick="buscarRutaAlternativa()" class="btn btn-outline-primary me-2">
+                            <i class="bi bi-search"></i> Buscar Mi Ruta
+                        </button>
+                        <button class="btn btn-outline-secondary" disabled>
+                            <i class="bi bi-diagram-3"></i> Verificar Tráfico
+                        </button>
+                        <button class="btn btn-outline-secondary ms-2" disabled>
+                            <i class="bi bi-arrow-repeat"></i> Recalcular Ruta
+                        </button>
+                        <p class="text-muted mt-2 mb-0">
+                            <small>
+                                <i class="bi bi-info-circle"></i> 
+                                Funcionalidad de tráfico en tiempo real estará disponible en FASE 7.
+                            </small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
     }
 </div>
 
-<!-- Toast para notificaciones -->
-<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-    <div id="toast" class="toast" role="alert">
-        <div class="toast-header">
-            <i class="bi bi-check-circle-fill text-success me-2"></i>
-            <strong class="me-auto">Éxito</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
-        </div>
-        <div class="toast-body" id="toastMessage">
-            Parada marcada correctamente
-        </div>
-    </div>
-</div>
-
 @section Scripts {
-    <!-- Leaflet JS -->
+    <!-- Leaflet JavaScript -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        const rutaData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RutaActiva));
+        // Variables globales
         let mapa;
         let marcadores = [];
-        let polyline;
+        let marcadorUsuario = null;
+        let rutaData = @Html.Raw(Model.RutaActiva != null ? System.Text.Json.JsonSerializer.Serialize(Model.RutaActiva) : "null");
 
-        // Inicializar mapa
+        // Inicializar mapa SIEMPRE
         function inicializarMapa() {
-            if (!rutaData || !rutaData.paradas || rutaData.paradas.length === 0) {
-                console.error('No hay datos de ruta para mostrar');
-                return;
-            }
+            console.log('Inicializando mapa...');
 
-            // Centrar mapa en la primera parada
-            const primeraParada = rutaData.paradas[0];
-            mapa = L.map('mapa').setView([primeraParada.latitud, primeraParada.longitud], 13);
+            // Guatemala City como centro por defecto
+            const centroDefecto = [14.6349, -90.5069];
 
-            // Capa de OpenStreetMap
+            // Crear mapa centrado en Guatemala City
+            mapa = L.map('mapa').setView(centroDefecto, 12);
+
+            // Agregar capa de OpenStreetMap
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors',
-                maxZoom: 19
+                attribution: '© OpenStreetMap contributors'
             }).addTo(mapa);
 
-            // Crear array de coordenadas para la polyline
-            const coordenadas = rutaData.paradas.map(p => [p.latitud, p.longitud]);
+            // SIEMPRE intentar obtener ubicación del usuario
+            obtenerUbicacionUsuario();
 
-            // Dibujar línea de ruta
-            polyline = L.polyline(coordenadas, {
-                color: '#0d6efd',
-                weight: 4,
-                opacity: 0.7
-            }).addTo(mapa);
+            // Solo si hay ruta activa, mostrar paradas y ruta
+            if (rutaData && rutaData.paradas) {
+                mostrarRutaEnMapa();
+            } else {
+                console.log('No hay ruta activa, mostrando solo ubicación del usuario');
+            }
+        }
 
-            // Ajustar vista para mostrar toda la ruta
-            mapa.fitBounds(polyline.getBounds(), { padding: [50, 50] });
+        // Obtener ubicación actual del usuario
+        function obtenerUbicacionUsuario() {
+            const estadoGPS = document.getElementById('estadoGPS');
+            const ubicacionInfo = document.getElementById('ubicacionInfo');
 
-            // Agregar marcadores
-            rutaData.paradas.forEach(parada => {
-                let icono;
+            if (navigator.geolocation) {
+                estadoGPS.innerHTML = '<i class="bi bi-geo-alt"></i> Obteniendo GPS...';
+                estadoGPS.className = 'badge bg-warning badge-gps';
 
-                // Verificar si es el colegio (idAlumno === null)
-                if (parada.idAlumno === null) {
-                    // Icono especial para el colegio
-                    const colorColegio = parada.completada ? '#28a745' : '#007bff'; // Verde si completada, azul si pendiente
-                    icono = L.divIcon({
-                        html: `<div style="background-color: ${colorColegio}; width: 40px; height: 40px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; font-weight: bold; box-shadow: 0 3px 8px rgba(0,0,0,0.4);">🏫</div>`,
-                        className: '',
-                        iconSize: [40, 40]
-                    });
-                } else {
-                    // Marcador normal para alumnos
-                    const color = parada.completada ? 'green' : 'red';
-                    icono = L.divIcon({
-                        html: `<div style="background-color: ${color}; width: 30px; height: 30px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">${parada.orden}</div>`,
-                        className: '',
-                        iconSize: [30, 30]
-                    });
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        const accuracy = position.coords.accuracy;
+
+                        console.log('Ubicación del usuario:', lat, lon);
+
+                        // Actualizar estado GPS
+                        estadoGPS.innerHTML = '<i class="bi bi-geo-alt-fill"></i> GPS Activo';
+                        estadoGPS.className = 'badge bg-success badge-gps';
+
+                        // Actualizar info de ubicación
+                        if (ubicacionInfo) {
+                            ubicacionInfo.innerHTML = `
+                                <p class="mb-1">
+                                    <strong>Lat:</strong> ${lat.toFixed(6)}<br>
+                                    <strong>Lon:</strong> ${lon.toFixed(6)}<br>
+                                    <small class="text-muted">Precisión: ${Math.round(accuracy)}m</small>
+                                </p>
+                                <span class="badge bg-success">
+                                    <i class="bi bi-geo-alt-fill"></i> Ubicación obtenida
+                                </span>
+                            `;
+                        }
+
+                        // Agregar marcador del usuario al mapa
+                        if (marcadorUsuario) {
+                            mapa.removeLayer(marcadorUsuario);
+                        }
+
+                        // Crear marcador azul para el usuario
+                        marcadorUsuario = L.marker([lat, lon], {
+                            icon: L.divIcon({
+                                className: 'custom-div-icon',
+                                html: `
+                                    <div style="background-color: #007bff; color: white; border-radius: 50%; 
+                                                width: 20px; height: 20px; text-align: center; line-height: 20px; 
+                                                border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                                        <i class="bi bi-person-fill" style="font-size: 10px;"></i>
+                                    </div>
+                                `,
+                                iconSize: [20, 20],
+                                iconAnchor: [10, 10]
+                            })
+                        }).addTo(mapa);
+
+                        // Popup con información
+                        marcadorUsuario.bindPopup(`
+                            <div class="text-center">
+                                <strong><i class="bi bi-geo-alt-fill text-primary"></i> Mi Ubicación</strong><br>
+                                <small>
+                                    <strong>Lat:</strong> ${lat.toFixed(6)}<br>
+                                    <strong>Lon:</strong> ${lon.toFixed(6)}<br>
+                                    <span class="badge bg-info">Precisión: ${Math.round(accuracy)}m</span>
+                                </small>
+                            </div>
+                        `);
+
+                        // Centrar el mapa en la ubicación del usuario si no hay ruta
+                        if (!rutaData || !rutaData.paradas) {
+                            mapa.setView([lat, lon], 15);
+                        }
+                    },
+                    function(error) {
+                        console.error('Error obteniendo ubicación:', error);
+
+                        // Actualizar estado GPS a error
+                        estadoGPS.innerHTML = '<i class="bi bi-geo-alt-slash"></i> GPS No Disponible';
+                        estadoGPS.className = 'badge bg-danger';
+
+                        if (ubicacionInfo) {
+                            ubicacionInfo.innerHTML = `
+                                <p class="text-danger mb-0">
+                                    <i class="bi bi-exclamation-triangle"></i> No se pudo obtener la ubicación
+                                    <br><small>Verifica que el GPS esté habilitado</small>
+                                </p>
+                            `;
+                        }
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 60000
+                    }
+                );
+            } else {
+                estadoGPS.innerHTML = '<i class="bi bi-geo-alt-slash"></i> GPS No Soportado';
+                estadoGPS.className = 'badge bg-secondary';
+
+                if (ubicacionInfo) {
+                    ubicacionInfo.innerHTML = `
+                        <p class="text-warning mb-0">
+                            <i class="bi bi-exclamation-triangle"></i> 
+                            El navegador no soporta geolocalización
+                        </p>
+                    `;
                 }
+            }
+        }
 
-                const marcador = L.marker([parada.latitud, parada.longitud], { icon: icono })
-                    .addTo(mapa)
-                    .bindPopup(`
-                        <div style="min-width: 200px;">
-                            <strong>${parada.idAlumno === null ? '🏫 ' : ''}${parada.nombreAlumno}</strong><br>
-                            <small class="text-muted">${parada.direccion}</small><br>
+        // Centrar mapa en la ubicación del usuario
+        function centrarEnUsuario() {
+            if (marcadorUsuario) {
+                const latlng = marcadorUsuario.getLatLng();
+                mapa.setView(latlng, 16);
+                marcadorUsuario.openPopup();
+            } else {
+                alert('Ubicación del usuario no disponible');
+            }
+        }
+
+        // Mostrar ruta en el mapa
+        function mostrarRutaEnMapa() {
+            if (!rutaData || !rutaData.paradas) return;
+
+            console.log('Mostrando ruta en mapa:', rutaData);
+
+            // Limpiar marcadores existentes
+            marcadores.forEach(marker => mapa.removeLayer(marker));
+            marcadores = [];
+
+            // Array para ajustar la vista del mapa
+            let coordenadas = [];
+
+            // Agregar marcadores para cada parada
+            rutaData.paradas.forEach(function(parada, index) {
+                if (parada.latitud && parada.longitud) {
+                    coordenadas.push([parada.latitud, parada.longitud]);
+
+                    // Color del marcador según estado
+                    const color = parada.completada ? '#28a745' : '#ffc107';
+                    const iconClass = parada.completada ? 'bi-check-circle-fill' : 'bi-clock';
+
+                    // Crear marcador
+                    const marcador = L.marker([parada.latitud, parada.longitud], {
+                        icon: L.divIcon({
+                            className: 'custom-div-icon',
+                            html: `
+                                <div style="background-color: ${color}; color: white; border-radius: 50%; 
+                                            width: 30px; height: 30px; text-align: center; line-height: 30px; 
+                                            border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); 
+                                            font-weight: bold; font-size: 12px;">
+                                    ${parada.orden}
+                                </div>
+                            `,
+                            iconSize: [30, 30],
+                            iconAnchor: [15, 15]
+                        })
+                    }).addTo(mapa);
+
+                    // Popup con información de la parada
+                    marcador.bindPopup(`
+                        <div>
+                            <strong>Parada ${parada.orden}</strong><br>
+                            <strong>${parada.nombreAlumno}</strong><br>
+                            <small>${parada.direccion}</small><br>
                             ${parada.horaEstimada ? `<small><i class="bi bi-clock"></i> ${parada.horaEstimada}</small><br>` : ''}
-                            <span class="badge bg-${parada.completada ? 'success' : 'warning'}">
-                                ${parada.completada ? 'Completada ✓' : 'Pendiente ⏳'}
+                            <span class="badge ${parada.completada ? 'bg-success' : 'bg-warning'}">
+                                <i class="${iconClass}"></i> ${parada.completada ? 'Completada' : 'Pendiente'}
                             </span>
                         </div>
                     `);
 
-                marcadores.push({ id: parada.idParada, marcador: marcador, parada: parada });
+                    marcadores.push(marcador);
+                }
             });
 
-            console.log('Mapa inicializado con', rutaData.paradas.length, 'paradas');
+            // Ajustar vista del mapa para mostrar todas las coordenadas
+            if (coordenadas.length > 0) {
+                if (marcadorUsuario) {
+                    coordenadas.push(marcadorUsuario.getLatLng());
+                }
+
+                const grupo = new L.featureGroup(marcadores);
+                if (marcadorUsuario) {
+                    grupo.addLayer(marcadorUsuario);
+                }
+
+                mapa.fitBounds(grupo.getBounds().pad(0.1));
+            }
         }
 
-        // Marcar parada como completada/pendiente
-        async function marcarCompletada(idParada, completada) {
-            try {
-                console.log('Marcando parada', idParada, 'como', completada ? 'completada' : 'pendiente');
-
-                const response = await fetch(`/api/rutas/${rutaData.idRuta}/parada/${idParada}/completar`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ idParada: idParada, completada: completada })
-                });
-
-                const data = await response.json();
-
+        // Marcar parada como completada/no completada
+        function marcarCompletada(idParada, completada) {
+            fetch('/Piloto/MiRuta?handler=MarcarCompletada', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                body: JSON.stringify({
+                    idParada: idParada,
+                    completada: completada
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
                 if (data.success) {
-                    mostrarToast(data.message, 'success');
-
-                    // Actualizar UI localmente
-                    actualizarParadaUI(idParada, completada);
-                    actualizarEstadisticas();
+                    location.reload();
                 } else {
-                    mostrarToast('Error: ' + data.message, 'error');
+                    alert('Error: ' + data.message);
                 }
-            } catch (error) {
-                console.error('Error al marcar parada:', error);
-                mostrarToast('Error de conexión', 'error');
-            }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al actualizar el estado de la parada');
+            });
         }
 
-        // Actualizar UI de una parada
-        function actualizarParadaUI(idParada, completada) {
-            // Actualizar en el array de datos
-            const parada = rutaData.paradas.find(p => p.idParada === idParada);
-            if (parada) {
-                parada.completada = completada;
-            }
-
-            // Actualizar lista
-            const elemento = document.querySelector(`.parada-item[data-id="${idParada}"]`);
-            if (elemento) {
-                elemento.setAttribute('data-completada', completada);
-                if (completada) {
-                    elemento.classList.add('bg-light');
-                } else {
-                    elemento.classList.remove('bg-light');
-                }
-            }
-
-            // Actualizar marcador en mapa
-            const marcadorData = marcadores.find(m => m.id === idParada);
-            if (marcadorData) {
-                const parada = marcadorData.parada;
-                let icono;
-
-                // Si es el colegio, usar icono especial
-                if (parada.idAlumno === null) {
-                    const colorColegio = completada ? '#28a745' : '#007bff';
-                    icono = L.divIcon({
-                        html: `<div style="background-color: ${colorColegio}; width: 40px; height: 40px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; font-weight: bold; box-shadow: 0 3px 8px rgba(0,0,0,0.4);">🏫</div>`,
-                        className: '',
-                        iconSize: [40, 40]
-                    });
-                } else {
-                    // Marcador normal para alumnos
-                    const color = completada ? 'green' : 'red';
-                    const orden = parada.orden;
-                    icono = L.divIcon({
-                        html: `<div style="background-color: ${color}; width: 30px; height: 30px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">${orden}</div>`,
-                        className: '',
-                        iconSize: [30, 30]
-                    });
-                }
-                marcadorData.marcador.setIcon(icono);
-            }
-
-            // Recargar página completa para reflejar cambios
-            setTimeout(() => location.reload(), 1000);
+        // Buscar ruta alternativa
+        function buscarRutaAlternativa() {
+            alert('Función de búsqueda de ruta alternativa estará disponible en FASE 6');
         }
 
-        // Actualizar estadísticas
-        function actualizarEstadisticas() {
-            const completadas = rutaData.paradas.filter(p => p.completada).length;
-            const total = rutaData.paradas.length;
-            const pendientes = total - completadas;
-            const porcentaje = total > 0 ? Math.round((completadas / total) * 100) : 0;
-
-            document.getElementById('paradasCompletadas').textContent = completadas;
-            document.getElementById('paradasPendientes').textContent = pendientes;
-            document.getElementById('porcentaje').textContent = porcentaje + '%';
+        // Mostrar ruta del lunes (para fines de semana)
+        function mostrarRutaLunes() {
+            alert('Función para mostrar ruta del lunes estará disponible en FASE 6');
         }
 
-        // Mostrar toast
-        function mostrarToast(mensaje, tipo) {
-            const toastElement = document.getElementById('toast');
-            const toastMessage = document.getElementById('toastMessage');
-            const toast = new bootstrap.Toast(toastElement);
-
-            toastMessage.textContent = mensaje;
-            toast.show();
-        }
-
-        // Actualizar toda la ruta (recargar página)
-        function actualizarRuta() {
-            location.reload();
-        }
-
-        // Inicializar cuando cargue la página
+        // Inicializar mapa cuando la página carga
         document.addEventListener('DOMContentLoaded', function() {
-            if (rutaData) {
-                inicializarMapa();
-            }
+            inicializarMapa();
         });
     </script>
 }

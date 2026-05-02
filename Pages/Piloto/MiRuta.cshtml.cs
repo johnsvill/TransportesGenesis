@@ -18,6 +18,9 @@ namespace TransportesGenesis.Pages.Piloto
         public int IdBus { get; set; } = 4; // TODO: Obtener del usuario autenticado (Claims)
         public string TipoRuta { get; set; } = "Mañana";
         public string MensajeError { get; set; } = string.Empty;
+        public string MensajeExito { get; set; } = string.Empty;
+        public string NombrePiloto { get; set; } = "Juan Pérez"; // TODO: Obtener del usuario autenticado
+        public int IdPiloto { get; set; } = 1; // TODO: Obtener del usuario autenticado
         public DateTime FechaRuta { get; set; }
         public bool EsFinDeSemana { get; set; }
 
