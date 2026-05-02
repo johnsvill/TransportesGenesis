@@ -25,7 +25,11 @@ namespace TransportesGenesis.Models.DB.Negocio
         public DateTime? FechaConfirmacion { get; set; }
 
         public int? IdBusTemporalMañana { get; set; } // Para traslados temporales
+        [ForeignKey("IdBusTemporalMañana")]
+        public Bus? BusTemporalMañana { get; set; }
 
         public int? IdBusTemporalTarde { get; set; } // Para traslados temporales
+        [ForeignKey("IdBusTemporalTarde")]
+        public Bus? BusTemporalTarde { get; set; }
     }
 }

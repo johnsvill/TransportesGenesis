@@ -11,6 +11,17 @@ namespace TransportesGenesis.Data.Configuraciones
             builder.Property(x => x.Nombre).HasMaxLength(50);
             builder.Property(x => x.Apellido).HasMaxLength(50);
             builder.HasIndex(x => x.FechaRegistro);
+
+            // Configuraciones para geolocalización
+            builder.Property(x => x.Latitud).HasColumnType("decimal(10,7)");
+            builder.Property(x => x.Longitud).HasColumnType("decimal(10,7)");
+            builder.Property(x => x.Direccion).HasMaxLength(250);
+
+            // Relación con Bus (opcional)
+            builder.HasOne(x => x.BusAsignado)
+                .WithMany()
+                .HasForeignKey(x => x.IdBusAsignado)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

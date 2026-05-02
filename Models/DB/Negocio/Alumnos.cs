@@ -19,6 +19,9 @@ namespace TransportesGenesis.Models.DB.Negocio
         // Campos para geolocalización (nullable para no afectar registros existentes)
         public int? IdBusAsignado { get; set; }
 
+        [ForeignKey("IdBusAsignado")]
+        public Bus? BusAsignado { get; set; }
+
         [Column(TypeName = "decimal(10, 7)")]
         public decimal? Latitud { get; set; }
 

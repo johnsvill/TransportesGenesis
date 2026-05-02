@@ -11,13 +11,14 @@
 
 <style>
     .realtime-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%);
         color: white;
         border-radius: 20px;
         padding: 25px;
         margin-bottom: 25px;
         position: relative;
         overflow: hidden;
+        box-shadow: 0 8px 25px rgba(255,165,0,0.3);
     }
 
     .realtime-header::before {
@@ -61,19 +62,19 @@
     }
 
     .buses-panel .card-header {
-        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
         border: none;
         padding: 15px;
     }
 
     .legend-panel .card-header {
-        background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%);
+        background: linear-gradient(135deg, #228B22 0%, #32CD32 100%);
         border: none;
         padding: 15px;
     }
 
     .stats-panel .card-header {
-        background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+        background: linear-gradient(135deg, #FF6B35 0%, #FF4500 100%);
         border: none;
         padding: 15px;
     }
@@ -108,9 +109,9 @@
         animation: pulse 2s infinite;
     }
 
-    .status-moving { background-color: #28a745; }
-    .status-stopped { background-color: #ffc107; }
-    .status-offline { background-color: #dc3545; }
+    .status-moving { background-color: #FFD700; }
+    .status-stopped { background-color: #FF6B35; }
+    .status-offline { background-color: #DC143C; }
 
     .legend-item {
         background: white;
@@ -127,7 +128,7 @@
     }
 
     .update-btn {
-        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        background: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%);
         border: none;
         border-radius: 10px;
         color: white;
@@ -138,7 +139,7 @@
 
     .update-btn:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+        box-shadow: 0 4px 12px rgba(255,165,0,0.4);
         color: white;
     }
 
@@ -468,54 +469,19 @@
     <script>
         let map;
         let marcadores = {};
+        let polylines = {};
         let seguimientoActivo = false;
         let vistaSatelite = false;
         let busSeleccionado = null;
-
-        // Datos simulados de buses
-        let busesData = [
-            {
-                id: 1,
-                placa: "P-001CX",
-                ruta: "Centro - Norte",
-                lat: 14.6349,
-                lng: -90.5069,
-                velocidad: 25,
-                estado: "moviendo",
-                conductor: "Juan Pérez",
-                ultimaActualizacion: new Date()
-            },
-            {
-                id: 2,
-                placa: "P-002CX", 
-                ruta: "Sur - Este",
-                lat: 14.6249,
-                lng: -90.4969,
-                velocidad: 0,
-                estado: "detenido",
-                conductor: "María González",
-                ultimaActualizacion: new Date()
-            },
-            {
-                id: 3,
-                placa: "P-003CX",
-                ruta: "Oeste - Centro",
-                lat: 14.6449,
-                lng: -90.5169,
-                velocidad: 15,
-                estado: "moviendo",
-                conductor: "Carlos Rodríguez",
-                ultimaActualizacion: new Date()
-            }
-        ];
+        let busesData = [];
+        let actualizacionInterval;
 
         document.addEventListener('DOMContentLoaded', function() {
             inicializarMapa();
-            cargarDatosBuses();
-            actualizarEstadisticas();
+            cargarDatosBusesDesdeAPI();
 
-            // Actualización automática cada 30 segundos
-            setInterval(simularActualizacion, 30000);
+            // Actualización automática cada 10 segundos
+            actualizacionInterval = setInterval(cargarDatosBusesDesdeAPI, 10000);
 
             // Animaciones de entrada
             setTimeout(() => {
@@ -530,7 +496,7 @@
 
         // Inicializar mapa centrado en Ciudad de Guatemala
         function inicializarMapa() {
-            map = L.map('map').setView([14.6349, -90.5069], 13);
+            map = L.map('map').setView([14.6349, -90.5069], 12);
 
             // Capa base de OpenStreetMap
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -538,32 +504,88 @@
                 maxZoom: 19
             }).addTo(map);
 
-            // Agregar marcadores iniciales
-            actualizarMarcadores();
+            console.log('Mapa inicializado correctamente');
         }
 
-        function cargarDatosBuses() {
+        async function cargarDatosBusesDesdeAPI() {
+            try {
+                console.log('Cargando datos de buses desde API...');
+                const response = await fetch('/api/geolocalizacion/buses');
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                busesData = await response.json();
+                console.log('Datos cargados:', busesData);
+
+                actualizarMarcadores();
+                cargarListaBuses();
+                cargarEstadisticasDesdeAPI();
+
+                // Actualizar timestamp
+                const now = new Date();
+                document.getElementById('lastUpdate').textContent = 
+                    now.toLocaleTimeString('es-ES', { hour12: false });
+
+            } catch (error) {
+                console.error('Error al cargar datos de buses:', error);
+                mostrarErrorConexion();
+            }
+        }
+
+        async function cargarEstadisticasDesdeAPI() {
+            try {
+                const response = await fetch('/api/geolocalizacion/estadisticas');
+                if (!response.ok) throw new Error('Error al cargar estadísticas');
+
+                const stats = await response.json();
+
+                document.getElementById('busesActivos').textContent = stats.totalBuses;
+                document.getElementById('busesEnRuta').textContent = stats.busesActivos;
+                document.getElementById('velocidadPromedio').textContent = Math.round(stats.velocidadPromedio || 0);
+                document.getElementById('distanciaTotal').textContent = Math.round(stats.estudiantesTotales || 0);
+
+            } catch (error) {
+                console.error('Error al cargar estadísticas:', error);
+            }
+        }
+
+        function cargarListaBuses() {
             const busesContainer = document.getElementById('busesInfo');
+
+            if (!busesData || busesData.length === 0) {
+                busesContainer.innerHTML = `
+                    <div class="p-3 text-center">
+                        <i class="bi bi-exclamation-circle text-warning fs-1 mb-3"></i>
+                        <p class="text-muted">No hay buses disponibles</p>
+                    </div>
+                `;
+                return;
+            }
+
             let html = '';
 
             busesData.forEach(bus => {
                 const estadoClass = getEstadoClass(bus.estado);
-                const tiempoActualizacion = calcularTiempoTranscurrido(bus.ultimaActualizacion);
+                const tiempoActualizacion = calcularTiempoTranscurrido(new Date(bus.ultimaActualizacion));
+                const porcentajeOcupacion = Math.round((bus.estudiantesAbordo / bus.capacidadTotal) * 100);
 
                 html += `
-                    <div class="bus-item ${busSeleccionado === bus.id ? 'active' : ''}" 
-                         onclick="seleccionarBus(${bus.id})"
-                         data-bus-id="${bus.id}">
+                    <div class="bus-item ${busSeleccionado === bus.idBus ? 'active' : ''}" 
+                         onclick="seleccionarBus(${bus.idBus})"
+                         data-bus-id="${bus.idBus}">
                         <div class="d-flex justify-content-between align-items-start">
                             <div class="flex-grow-1">
                                 <div class="d-flex align-items-center mb-2">
                                     <span class="bus-status ${estadoClass} me-2"></span>
                                     <strong class="text-primary">${bus.placa}</strong>
+                                    <small class="ms-2 badge bg-secondary">${bus.velocidad} km/h</small>
                                 </div>
                                 <div class="mb-1">
                                     <small class="text-muted">
                                         <i class="bi bi-geo-alt me-1"></i>
-                                        ${bus.ruta}
+                                        ${bus.rutaNombre}
                                     </small>
                                 </div>
                                 <div class="mb-1">
@@ -572,15 +594,22 @@
                                         ${bus.conductor}
                                     </small>
                                 </div>
-                                <div>
+                                <div class="mb-2">
                                     <small class="text-muted">
-                                        <i class="bi bi-speedometer2 me-1"></i>
-                                        ${bus.velocidad} km/h
+                                        <i class="bi bi-people me-1"></i>
+                                        ${bus.estudiantesAbordo}/${bus.capacidadTotal} 
+                                        <span class="badge ${porcentajeOcupacion > 80 ? 'bg-warning' : 'bg-success'}">${porcentajeOcupacion}%</span>
                                     </small>
+                                </div>
+                                <div class="progress" style="height: 4px;">
+                                    <div class="progress-bar ${porcentajeOcupacion > 80 ? 'bg-warning' : 'bg-success'}" 
+                                         style="width: ${porcentajeOcupacion}%"></div>
                                 </div>
                             </div>
                             <div class="text-end">
                                 <small class="text-muted">${tiempoActualizacion}</small>
+                                <br>
+                                <small class="badge ${getEstadoBadgeClass(bus.estado)}">${bus.estado}</small>
                             </div>
                         </div>
                     </div>
@@ -591,77 +620,152 @@
         }
 
         function actualizarMarcadores() {
-            // Limpiar marcadores existentes
+            // Limpiar marcadores y rutas existentes
             Object.values(marcadores).forEach(marker => map.removeLayer(marker));
+            Object.values(polylines).forEach(polyline => map.removeLayer(polyline));
             marcadores = {};
+            polylines = {};
+
+            if (!busesData || busesData.length === 0) return;
 
             // Agregar nuevos marcadores
             busesData.forEach(bus => {
-                const estadoClass = getEstadoClass(bus.estado);
                 const color = getEstadoColor(bus.estado);
+                const rotation = bus.direccion || 0;
 
-                // Crear ícono personalizado
+                // Crear ícono personalizado con dirección
                 const customIcon = L.divIcon({
                     className: 'custom-bus-marker',
                     html: `
-                        <div class="bus-marker" style="background-color: ${color}; border: 3px solid white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
-                            <i class="bi bi-bus-front-fill text-white" style="font-size: 12px;"></i>
+                        <div class="bus-marker" 
+                             style="background-color: ${color}; 
+                                    border: 3px solid white; 
+                                    border-radius: 50%; 
+                                    width: 35px; 
+                                    height: 35px; 
+                                    display: flex; 
+                                    align-items: center; 
+                                    justify-content: center; 
+                                    box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+                                    transform: rotate(${rotation}deg);
+                                    transition: all 0.3s ease;">
+                            <i class="bi bi-bus-front-fill text-white" style="font-size: 14px; transform: rotate(-${rotation}deg);"></i>
+                        </div>
+                        <div style="position: absolute; top: -8px; right: -8px; background: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: ${color}; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+                            ${bus.velocidad}
                         </div>
                     `,
-                    iconSize: [30, 30],
-                    iconAnchor: [15, 15],
-                    popupAnchor: [0, -15]
+                    iconSize: [35, 35],
+                    iconAnchor: [17, 17],
+                    popupAnchor: [0, -20]
                 });
 
                 // Crear marcador
-                const marker = L.marker([bus.lat, bus.lng], { icon: customIcon })
+                const marker = L.marker([bus.latitud, bus.longitud], { icon: customIcon })
+                    .bindPopup(crearPopupBus(bus))
+                    .addTo(map);
+
+                marcadores[bus.idBus] = marker;
+
+                // Dibujar ruta si tiene paradas
+                if (bus.paradas && bus.paradas.length > 0) {
+                    dibujarRutaBus(bus);
+                }
+
+                // Evento click en marcador
+                marker.on('click', () => seleccionarBus(bus.idBus));
+            });
+
+            // Auto-fit si es la primera carga
+            if (busesData.length > 0 && !busSeleccionado) {
+                setTimeout(() => {
+                    const group = new L.featureGroup(Object.values(marcadores));
+                    map.fitBounds(group.getBounds().pad(0.1));
+                }, 100);
+            }
+        }
+
+        function dibujarRutaBus(bus) {
+            if (!bus.paradas || bus.paradas.length < 2) return;
+
+            // Crear línea de ruta
+            const rutaCoords = bus.paradas.map(parada => [parada.latitud, parada.longitud]);
+
+            const polyline = L.polyline(rutaCoords, {
+                color: getEstadoColor(bus.estado),
+                weight: 4,
+                opacity: 0.7,
+                dashArray: bus.estado === 'Sin Señal' ? '10, 10' : null
+            }).addTo(map);
+
+            polylines[bus.idBus] = polyline;
+
+            // Agregar marcadores de paradas
+            bus.paradas.forEach((parada, index) => {
+                const paradaIcon = L.divIcon({
+                    className: 'custom-parada-marker',
+                    html: `
+                        <div style="background-color: ${parada.completada ? '#28a745' : '#ffc107'}; 
+                                    border: 2px solid white; 
+                                    border-radius: 50%; 
+                                    width: 20px; 
+                                    height: 20px; 
+                                    display: flex; 
+                                    align-items: center; 
+                                    justify-content: center; 
+                                    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+                                    color: white;
+                                    font-size: 10px;
+                                    font-weight: bold;">
+                            ${index + 1}
+                        </div>
+                    `,
+                    iconSize: [20, 20],
+                    iconAnchor: [10, 10]
+                });
+
+                L.marker([parada.latitud, parada.longitud], { icon: paradaIcon })
                     .bindPopup(`
                         <div class="text-center">
-                            <h6 class="mb-2 text-primary">${bus.placa}</h6>
-                            <div class="mb-2">
-                                <span class="badge ${estadoClass}">${getEstadoTexto(bus.estado)}</span>
-                            </div>
-                            <p class="mb-1"><strong>Ruta:</strong> ${bus.ruta}</p>
-                            <p class="mb-1"><strong>Conductor:</strong> ${bus.conductor}</p>
-                            <p class="mb-1"><strong>Velocidad:</strong> ${bus.velocidad} km/h</p>
-                            <p class="mb-0"><strong>Actualizado:</strong> ${calcularTiempoTranscurrido(bus.ultimaActualizacion)}</p>
+                            <strong>${parada.nombre}</strong><br>
+                            <span class="badge ${parada.completada ? 'bg-success' : 'bg-warning'}">
+                                ${parada.completada ? 'Completada' : 'Pendiente'}
+                            </span>
                         </div>
                     `)
                     .addTo(map);
-
-                marcadores[bus.id] = marker;
-
-                // Evento click en marcador
-                marker.on('click', () => seleccionarBus(bus.id));
             });
         }
 
-        function actualizarEstadisticas() {
-            const busesActivos = busesData.length;
-            const busesEnRuta = busesData.filter(b => b.estado === 'moviendo').length;
-            const velocidadPromedio = Math.round(
-                busesData.reduce((sum, b) => sum + b.velocidad, 0) / busesActivos
-            );
-            const distanciaTotal = Math.round(Math.random() * 500 + 100); // Simulado
+        function crearPopupBus(bus) {
+            const proximaParada = bus.paradas?.find(p => !p.completada);
+            const porcentajeOcupacion = Math.round((bus.estudiantesAbordo / bus.capacidadTotal) * 100);
 
-            document.getElementById('busesActivos').textContent = busesActivos;
-            document.getElementById('busesEnRuta').textContent = busesEnRuta;
-            document.getElementById('velocidadPromedio').textContent = velocidadPromedio;
-            document.getElementById('distanciaTotal').textContent = distanciaTotal;
-
-            // Actualizar timestamp
-            const now = new Date();
-            document.getElementById('lastUpdate').textContent = 
-                now.toLocaleTimeString('es-ES', { hour12: false });
+            return `
+                <div class="text-center" style="min-width: 200px;">
+                    <h6 class="mb-2 text-primary fw-bold">${bus.placa}</h6>
+                    <div class="mb-2">
+                        <span class="badge ${getEstadoBadgeClass(bus.estado)}">${bus.estado}</span>
+                    </div>
+                    <div class="text-start">
+                        <p class="mb-1"><strong>Ruta:</strong> ${bus.rutaNombre}</p>
+                        <p class="mb-1"><strong>Conductor:</strong> ${bus.conductor}</p>
+                        <p class="mb-1"><strong>Velocidad:</strong> ${bus.velocidad} km/h</p>
+                        <p class="mb-1"><strong>Estudiantes:</strong> ${bus.estudiantesAbordo}/${bus.capacidadTotal} (${porcentajeOcupacion}%)</p>
+                        ${proximaParada ? `<p class="mb-1"><strong>Próxima parada:</strong> ${proximaParada.nombre}</p>` : ''}
+                        <p class="mb-0"><strong>Actualizado:</strong> ${calcularTiempoTranscurrido(new Date(bus.ultimaActualizacion))}</p>
+                    </div>
+                </div>
+            `;
         }
 
         function seleccionarBus(busId) {
             busSeleccionado = busId;
-            const bus = busesData.find(b => b.id === busId);
+            const bus = busesData.find(b => b.idBus === busId);
 
             if (bus) {
                 // Centrar mapa en el bus
-                map.setView([bus.lat, bus.lng], 16);
+                map.setView([bus.latitud, bus.longitud], 16);
 
                 // Abrir popup
                 if (marcadores[busId]) {
@@ -669,26 +773,26 @@
                 }
 
                 // Actualizar lista visual
-                cargarDatosBuses();
+                cargarListaBuses();
 
                 // Mostrar notificación
                 if (typeof showToast === 'function') {
-                    showToast(`Bus ${bus.placa} seleccionado`, 'info');
+                    showToast(`Bus ${bus.placa} seleccionado - ${bus.rutaNombre}`, 'info');
                 }
             }
         }
 
         function centrarMapa() {
             if (busSeleccionado) {
-                const bus = busesData.find(b => b.id === busSeleccionado);
+                const bus = busesData.find(b => b.idBus === busSeleccionado);
                 if (bus) {
-                    map.setView([bus.lat, bus.lng], 16);
+                    map.setView([bus.latitud, bus.longitud], 16);
                     return;
                 }
             }
 
             // Centrar en Guatemala City
-            map.setView([14.6349, -90.5069], 13);
+            map.setView([14.6349, -90.5069], 12);
         }
 
         function verTodosBuses() {
@@ -699,7 +803,11 @@
             map.fitBounds(group.getBounds().pad(0.1));
 
             busSeleccionado = null;
-            cargarDatosBuses();
+            cargarListaBuses();
+
+            if (typeof showToast === 'function') {
+                showToast('Mostrando todos los buses', 'info');
+            }
         }
 
         function seguirBuses() {
@@ -724,8 +832,6 @@
         }
 
         function cambiarVistaSatelite() {
-            // Esta función requeriría una API key para mapas satelitales
-            // Por ahora solo mostramos una notificación
             if (typeof showToast === 'function') {
                 showToast('Vista satelital estará disponible próximamente', 'info');
             }
@@ -746,67 +852,57 @@
         }
 
         function actualizarMapa() {
-            simularActualizacion();
+            cargarDatosBusesDesdeAPI();
 
             if (typeof showToast === 'function') {
-                showToast('Datos actualizados', 'success');
+                showToast('Datos actualizados desde el servidor', 'success');
             }
         }
 
-        function simularActualizacion() {
-            // Simular movimiento de buses
-            busesData.forEach(bus => {
-                if (bus.estado === 'moviendo') {
-                    // Pequeño movimiento aleatorio
-                    bus.lat += (Math.random() - 0.5) * 0.002;
-                    bus.lng += (Math.random() - 0.5) * 0.002;
+        function mostrarErrorConexion() {
+            const busesContainer = document.getElementById('busesInfo');
+            busesContainer.innerHTML = `
+                <div class="p-3 text-center">
+                    <i class="bi bi-wifi-off text-danger fs-1 mb-3"></i>
+                    <p class="text-danger fw-bold">Error de conexión</p>
+                    <p class="text-muted mb-3">No se pudieron cargar los datos</p>
+                    <button class="btn btn-sm btn-primary" onclick="cargarDatosBusesDesdeAPI()">
+                        <i class="bi bi-arrow-clockwise me-1"></i>
+                        Reintentar
+                    </button>
+                </div>
+            `;
 
-                    // Cambiar velocidad ocasionalmente
-                    if (Math.random() > 0.7) {
-                        bus.velocidad = Math.round(Math.random() * 30 + 5);
-                    }
-                }
-
-                // Cambiar estado ocasionalmente
-                if (Math.random() > 0.9) {
-                    bus.estado = bus.estado === 'moviendo' ? 'detenido' : 'moviendo';
-                    bus.velocidad = bus.estado === 'detenido' ? 0 : Math.round(Math.random() * 30 + 5);
-                }
-
-                bus.ultimaActualizacion = new Date();
-            });
-
-            // Actualizar interfaz
-            actualizarMarcadores();
-            cargarDatosBuses();
-            actualizarEstadisticas();
+            if (typeof showToast === 'function') {
+                showToast('Error al cargar datos de buses', 'danger');
+            }
         }
 
         // Funciones auxiliares
         function getEstadoClass(estado) {
-            switch(estado) {
-                case 'moviendo': return 'status-moving bg-success';
-                case 'detenido': return 'status-stopped bg-warning';
-                case 'offline': return 'status-offline bg-danger';
-                default: return 'status-offline bg-secondary';
+            switch(estado?.toLowerCase()) {
+                case 'en movimiento': return 'status-moving';
+                case 'detenido': return 'status-stopped';
+                case 'sin señal': return 'status-offline';
+                default: return 'status-offline';
             }
         }
 
         function getEstadoColor(estado) {
-            switch(estado) {
-                case 'moviendo': return '#28a745';
-                case 'detenido': return '#ffc107';
-                case 'offline': return '#dc3545';
+            switch(estado?.toLowerCase()) {
+                case 'en movimiento': return '#FFD700'; // Amarillo autobús escolar
+                case 'detenido': return '#FF6B35'; // Naranja
+                case 'sin señal': return '#DC143C'; // Rojo
                 default: return '#6c757d';
             }
         }
 
-        function getEstadoTexto(estado) {
-            switch(estado) {
-                case 'moviendo': return 'En Movimiento';
-                case 'detenido': return 'Detenido';
-                case 'offline': return 'Sin Señal';
-                default: return 'Desconocido';
+        function getEstadoBadgeClass(estado) {
+            switch(estado?.toLowerCase()) {
+                case 'en movimiento': return 'bg-warning text-dark';
+                case 'detenido': return 'bg-danger';
+                case 'sin señal': return 'bg-dark';
+                default: return 'bg-secondary';
             }
         }
 
@@ -831,12 +927,19 @@
         // Seguimiento automático
         setInterval(() => {
             if (seguimientoActivo && busSeleccionado) {
-                const bus = busesData.find(b => b.id === busSeleccionado);
+                const bus = busesData.find(b => b.idBus === busSeleccionado);
                 if (bus) {
-                    map.panTo([bus.lat, bus.lng]);
+                    map.panTo([bus.latitud, bus.longitud]);
                 }
             }
-        }, 5000);
+        }, 2000);
+
+        // Limpiar intervalos al salir
+        window.addEventListener('beforeunload', function() {
+            if (actualizacionInterval) {
+                clearInterval(actualizacionInterval);
+            }
+        });
     </script>
 }
 

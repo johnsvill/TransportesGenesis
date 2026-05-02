@@ -19,6 +19,17 @@ namespace TransportesGenesis.Data.Configuraciones
             builder.HasOne(x => x.Alumno)
                 .WithMany(x => x.AsistenciasLink)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Relaciones opcionales con buses temporales
+            builder.HasOne(x => x.BusTemporalMañana)
+                .WithMany()
+                .HasForeignKey(x => x.IdBusTemporalMañana)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            builder.HasOne(x => x.BusTemporalTarde)
+                .WithMany()
+                .HasForeignKey(x => x.IdBusTemporalTarde)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }
