@@ -1,32 +1,37 @@
-using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
-using TransportesGenesis.Models;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace TransportesGenesis.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
-        {
-            _logger = logger;
-        }
-
         public IActionResult Index()
         {
-            return View();
-        }
+            if (User.Identity.IsAuthenticated)
+            {
+                if (User.IsInRole("PadreDeFamilia"))
+                {
+                    // Redirige al panel de pagos del padre de familia
+                    return RedirectToAction("Index", "PagosPadresFamilia");
+                }
+                else if (User.IsInRole("Administrador"))
+                {
+                    // Placeholder para administrador
+                    return RedirectToAction("Index", "Admin");
+                }
+                else if (User.IsInRole("Piloto"))
+                {
+                    // Placeholder para piloto
+                    return View("PilotoDashboard");
+                }
+                else if (User.IsInRole("Monitor"))
+                {
+                    // Placeholder para monitor
+                    return View("MonitorDashboard");
+                }
+            }
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            // Si no está logueado → Index público
+            return View(); // aquí se carga Views/Home/Index.cshtml
         }
     }
 }

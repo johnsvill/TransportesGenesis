@@ -1,0 +1,37 @@
+﻿@model IEnumerable<TransportesGenesis.Models.DB.Negocio.PagoPadre>
+
+<div class="container mt-5">
+    <h2>Historial de Pagos</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Mes</th>
+                <th>Año</th>
+                <th>Monto</th>
+                <th>Tipo</th>
+                <th>Comprobante</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var pago in Model)
+            {
+                <tr>
+                    <td>@pago.Mes</td>
+                    <td>@pago.Anio</td>
+                    <td>Q @pago.Monto</td>
+                    <td>@pago.TipoPago</td>
+                    <td>
+                        @if (pago.TipoPago == "Boleta")
+                        {
+                            <a href="@pago.ComprobanteUrl" target="_blank">Ver boleta</a>
+                        }
+                        else
+                        {
+                            <span>ID Stripe: @pago.ComprobanteUrl</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

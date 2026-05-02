@@ -1,0 +1,161 @@
+﻿@{
+    ViewData["Title"] = "Opciones de Pago";
+}
+
+<div class="container mt-5">
+    <h2>Opciones de Pago</h2>
+
+    <!-- Badge azul -->
+    <span class="badge bg-primary mb-3 fs-6">
+        Se tiene hasta el 5 de cada mes para hacer el pago
+    </span>
+
+    <!-- Toaster rojo si hay meses pendientes -->
+    @if (ViewBag.MesesPendientes != null && (ViewBag.MesesPendientes as List<string>).Any())
+    {
+        <div class="alert alert-danger">
+            <strong>Atención:</strong> Tiene pendiente el pago de
+            @string.Join(", ", ViewBag.MesesPendientes as List<string>).
+        </div>
+    }
+
+    <!-- Si el mes actual ya está pagado -->
+    @if (ViewBag.MesActualPagado == true)
+    {
+        <div class="alert alert-success text-center p-4 fs-4">
+            ✅ El pago del mes actual está al día
+        </div>
+    }
+    else
+    {
+        <!-- Subida de boleta -->
+        <form asp-action="SubirBoleta" method="post" enctype="multipart/form-data" class="mb-4">
+            <div class="mb-3">
+                <label for="mes" class="form-label">Mes a pagar</label>
+                <select name="mes" class="form-select" required>
+                    @foreach (var mes in ViewBag.MesesDisponibles as List<string>)
+                    {
+                        if ((ViewBag.MesesPendientes as List<string>).Contains(mes))
+                        {
+                            <option value="@mes">@mes (Vencido)</option>
+                        }
+                        else
+                        {
+                            <option value="@mes">@mes</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="boleta" class="form-label">Subir boleta de pago</label>
+                <input type="file" name="boleta" id="boleta" class="form-control" required />
+                <img id="preview" src="#" alt="Preview" class="mt-3 img-thumbnail" style="max-height:200px; display:none;" />
+            </div>
+
+            <div class="mb-3">
+                <label for="monto" class="form-label">Monto</label>
+                <input type="number" name="monto" class="form-control" step="0.01" required />
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Guardar Boleta</button>
+        </form>
+
+        <!-- Pago en línea con Stripe -->
+        <h3>Pagar en línea</h3>
+        <div class="card shadow-lg p-4 mb-4">
+            <form id="payment-form">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Datos de la tarjeta</label>
+                    <div id="card-element" class="form-control p-2"><!-- Stripe Elements --></div>
+                </div>
+                <button id="submit" class="btn btn-success w-100 fs-5">💳 Pagar</button>
+            </form>
+            <div id="payment-message" class="mt-3 text-center fw-bold"></div>
+        </div>
+    }
+</div>
+
+<!-- Scripts al final para evitar errores de carga -->
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Preview de imagen
+        const boletaInput = document.getElementById("boleta");
+        if (boletaInput) {
+            boletaInput.addEventListener("change", function (event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function () {
+                        const preview = document.getElementById("preview");
+                        preview.src = reader.result;
+                        preview.style.display = "block";
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // Stripe Elements
+        if (document.getElementById("card-element")) {
+            const stripe = Stripe("@ViewData["StripeKey"]");
+            const elements = stripe.elements();
+            const cardElement = elements.create("card", {
+                style: {
+                    base: {
+                        fontSize: "16px",
+                        color: "#32325d",
+                        "::placeholder": { color: "#a0aec0" }
+                    }
+                }
+            });
+            cardElement.mount("#card-element");
+
+            // Manejo del formulario de Stripe
+            const form = document.getElementById("payment-form");
+            if (form) {
+                form.addEventListener("submit", async (e) => {
+                    e.preventDefault();
+
+                    const mesSelect = document.querySelector("select[name='mes']");
+                    const mesSeleccionado = mesSelect ? mesSelect.value : "";
+
+                    const montoInput = document.querySelector("input[name='monto']");
+                    const montoSeleccionado = montoInput ? parseFloat(montoInput.value) : 0;
+
+                    try {
+                        const response = await fetch("/PagosPadresFamilia/PagarEnLinea", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ monto: montoSeleccionado, mes: mesSeleccionado })
+                        });
+
+                        const { clientSecret } = await response.json();
+
+                        const result = await stripe.confirmCardPayment(clientSecret, {
+                            payment_method: { card: cardElement }
+                        });
+
+                        const messageDiv = document.getElementById("payment-message");
+
+                        if (result.error) {
+                            messageDiv.textContent = result.error.message;
+                            messageDiv.classList.add("text-danger");
+                        } else {
+                            if (result.paymentIntent.status === "succeeded") {
+                                messageDiv.textContent = "✅ Pago realizado con éxito.";
+                                messageDiv.classList.add("text-success");
+                                window.location.href = "/PagosPadresFamilia/Historial";
+                            }
+                        }
+                    } catch (err) {
+                        const messageDiv = document.getElementById("payment-message");
+                        messageDiv.textContent = "❌ Error al procesar el pago.";
+                        messageDiv.classList.add("text-danger");
+                    }
+                });
+            }
+        }
+    });
+</script>

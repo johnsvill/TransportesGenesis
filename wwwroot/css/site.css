@@ -1,22 +1,78 @@
 html {
-  font-size: 14px;
+    font-size: 14px;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 html {
-  position: relative;
-  min-height: 100%;
+    position: relative;
+    min-height: 100%;
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
 }
+
+/* ============================
+   NAVBAR ESTILOS
+   ============================ */
+
+/* Opciones normales del navbar */
+.navbar .nav-link {
+    color: #ffffff; /* blanco por defecto */
+    transition: all 0.3s ease;
+}
+
+    /* Hover simple (color amarillo, negrita, subrayado) */
+    .navbar .nav-link:hover {
+        color: #ffc107;
+        font-weight: bold;
+        text-decoration: underline;
+    }
+
+    /* Estilo especial para el correo del usuario logueado */
+    .navbar .nav-link.user-email {
+        color: #000000; /* negro */
+        background-color: #f8f9fa; /* fondo claro */
+        border-radius: 4px;
+        font-weight: bold;
+        padding: 4px 8px;
+    }
+
+    /* ============================
+   NAVBAR CON ICONOS EN HOVER
+   ============================ */
+
+    /* Base para links con íconos */
+    .navbar .nav-link.nav-hover-icon {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+    }
+
+        /* Ícono oculto por defecto */
+        .navbar .nav-link.nav-hover-icon i {
+            margin-right: 6px;
+            opacity: 0;
+            transform: translateX(-5px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        /* Mostrar ícono al hover */
+        .navbar .nav-link.nav-hover-icon:hover i {
+            opacity: 1;
+            transform: translateX(0);
+        }

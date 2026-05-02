@@ -1,0 +1,22 @@
+﻿@* Views/PagosPadresFamilia/Index.cshtml *@
+@{
+    ViewData["Title"] = "Panel de Pagos";
+}
+
+<div class="container text-center mt-5">
+    <h2 class="mb-4">Bienvenido, @User.Identity.Name</h2>
+    <div class="row justify-content-center">
+        <div class="col-md-4 mb-3">
+            <a asp-action="Pagos" class="btn btn-primary btn-lg w-100 p-4 shadow">
+                <i class="fa-solid fa-credit-card fa-2x mb-2"></i><br />
+                Pagos
+            </a>
+        </div>
+        <div class="col-md-4 mb-3">
+            <a asp-action="Historial" class="btn btn-secondary btn-lg w-100 p-4 shadow">
+                <i class="fa-solid fa-list fa-2x mb-2"></i><br />
+                Historial de Pagos
+            </a>
+        </div>
+    </div>
+</div>

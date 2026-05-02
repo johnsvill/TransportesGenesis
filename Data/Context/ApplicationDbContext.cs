@@ -24,7 +24,9 @@ namespace TransportesGenesis.Data.Context
         public virtual DbSet<Banco> BancosDb { get; set; }
         public virtual DbSet<TipoCuenta> TipoCuentasDb { get; set; }
         public virtual DbSet<TipoRecorridoPago> TipoRecorridoPagosDb { get; set; }
-        public virtual DbSet<Pago> PagosDb { get; set; }    
+        public virtual DbSet<Pago> PagosDb { get; set; }
+        public virtual DbSet<PagoPadre> PagosPadres { get; set; }
+
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

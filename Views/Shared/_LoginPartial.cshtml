@@ -1,26 +1,65 @@
 ﻿@using Microsoft.AspNetCore.Identity
-@inject SignInManager<IdentityUser> SignInManager
-@inject UserManager<IdentityUser> UserManager
+@using TransportesGenesis.Models.DB.Usuarios
+@inject SignInManager<AppUser> SignInManager
+@inject UserManager<AppUser> UserManager
 
-<ul class="navbar-nav">
 @if (SignInManager.IsSignedIn(User))
 {
-    <li class="nav-item">
-        <a  class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @User.Identity?.Name!</a>
-    </li>
-    <li class="nav-item">
-        <form  class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-            <button  type="submit" class="nav-link btn btn-link text-dark">Logout</button>
-        </form>
-    </li>
+    var currentUser = await UserManager.GetUserAsync(User);
+    var roles = await UserManager.GetRolesAsync(currentUser);
+
+    <ul class="navbar-nav">
+        @if (roles.Contains("Administrador"))
+        {
+            <li class="nav-item">
+                <a class="nav-link text-dark" asp-area="Identity" asp-page="/Admin/Index">Gestión de Usuarios</a>
+            </li>
+        }
+        else if (roles.Contains("Piloto"))
+        {
+            <li class="nav-item">
+                <a class="nav-link text-dark" asp-controller="Rutas" asp-action="Index">Mis Rutas</a>
+            </li>
+        }
+        else if (roles.Contains("Monitor"))
+        {
+            <li class="nav-item">
+                <a class="nav-link text-dark" asp-controller="Monitoreo" asp-action="Index">Monitoreo</a>
+            </li>
+        }
+        else if (roles.Contains("PadreDeFamilia"))
+        {
+            <li class="nav-item">
+                <a class="nav-link text-dark" asp-controller="Pagos" asp-action="Index">Pagos</a>
+            </li>
+        }
+        @if (SignInManager.IsSignedIn(User))
+        {
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <span class="nav-link fw-bold text-dark bg-light rounded px-2">
+                        Bienvenido, @User.Identity.Name
+                    </span>
+                </li>
+                <li class="nav-item">
+                    <form asp-area="Identity" asp-page="/Account/Logout" method="post" id="logoutForm">
+                        <button type="submit" class="btn btn-link nav-link text-light">Cerrar sesión</button>
+                    </form>
+                </li>
+            </ul>
+        }
+
+
+    </ul>
 }
 else
 {
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Register</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
-    </li>
+    <ul class="navbar-nav">
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Iniciar sesión</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Registrarse</a>
+        </li>
+    </ul>
 }
-</ul>
