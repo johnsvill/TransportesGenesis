@@ -40,23 +40,63 @@ namespace TransportesGenesis.Controllers
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
             {
+                // También intenta encontrar por nombre de usuario
+                user = await _userManager.FindByNameAsync(model.Email);
+            }
+
+            if (user == null)
+            {
                 ModelState.AddModelError("", "Usuario no encontrado.");
                 return View(model);
             }
 
-            var result = await _signInManager.PasswordSignInAsync(user, model.Password, false, false);
+            var result = await _signInManager.PasswordSignInAsync(user.UserName, model.Password, false, false);
 
             if (result.Succeeded)
             {
+                // Actualizar último login
+                user.LastLoginDate = DateTime.Now;
+                await _userManager.UpdateAsync(user);
+
                 if (user.IsFirstLogin && !await _userManager.IsInRoleAsync(user, "Administrador"))
                 {
                     return RedirectToAction("ForceChangePassword");
                 }
 
-                return RedirectToAction("Index", "Home");
+                // Redirigir según el rol del usuario
+                var roles = await _userManager.GetRolesAsync(user);
+
+                if (roles.Contains("Administrador"))
+                {
+                    return RedirectToAction("Index", "Admin");
+                }
+                else if (roles.Contains("PadreDeFamilia"))
+                {
+                    return RedirectToAction("Index", "PagosPadresFamilia");
+                }
+                else if (roles.Contains("Piloto"))
+                {
+                    return RedirectToPage("/Piloto/MiRuta");
+                }
+                else
+                {
+                    return RedirectToAction("Index", "Home");
+                }
             }
 
-            ModelState.AddModelError("", "Credenciales inválidas.");
+            if (result.IsLockedOut)
+            {
+                ModelState.AddModelError("", "Cuenta bloqueada temporalmente.");
+            }
+            else if (result.IsNotAllowed)
+            {
+                ModelState.AddModelError("", "Inicio de sesión no permitido.");
+            }
+            else
+            {
+                ModelState.AddModelError("", "Credenciales inválidas.");
+            }
+
             return View(model);
         }
 
@@ -95,11 +135,28 @@ namespace TransportesGenesis.Controllers
         }
 
         // GET: /Auth/Logout
+        [HttpGet]
         [Authorize]
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
-            return RedirectToAction("Login");
+            return RedirectToAction("Login", "Auth");
+        }
+
+        // POST: /Auth/Logout - Para formularios que usen POST
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> LogoutPost()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Login", "Auth");
+        }
+
+        // GET: /Auth/AccessDenied
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
     }
 }

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Text.Json;
@@ -5,6 +6,7 @@ using TransportesGenesis.DTOs.Ruta;
 
 namespace TransportesGenesis.Pages.Admin
 {
+    [Authorize(Roles = "Administrador")]
     public class CalcularRutasModel : PageModel
     {
         private readonly IHttpClientFactory _httpClientFactory;

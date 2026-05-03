@@ -150,24 +150,40 @@ public static class Startup
             }
         }
 
+        // Crear usuario admin por defecto con credenciales conocidas
         var adminEmail = "admin@transportesgenesis.com";
+        var adminUserName = "admin";
         var adminPassword = "Admin123!";
 
         var adminUser = await userManager.FindByEmailAsync(adminEmail);
         if (adminUser == null)
         {
+            adminUser = await userManager.FindByNameAsync(adminUserName);
+        }
+
+        if (adminUser == null)
+        {
             var newAdmin = new AppUser
             {
-                UserName = adminEmail,
+                UserName = adminUserName,
                 Email = adminEmail,
                 EmailConfirmed = true,
-                IsFirstLogin = false
+                IsFirstLogin = false,
+                LastLoginDate = DateTime.Now
             };
 
             var result = await userManager.CreateAsync(newAdmin, adminPassword);
             if (result.Succeeded)
             {
                 await userManager.AddToRoleAsync(newAdmin, "Administrador");
+            }
+        }
+        else
+        {
+            // Asegurar que el admin existente tenga el rol correcto
+            if (!await userManager.IsInRoleAsync(adminUser, "Administrador"))
+            {
+                await userManager.AddToRoleAsync(adminUser, "Administrador");
             }
         }
     }

@@ -10,7 +10,17 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Gestión de Rutas</h5>
+                    <h5 class="card-title">📍 Mapa en Tiempo Real</h5>
+                    <p class="card-text">Monitoreo en vivo de ubicaciones de buses</p>
+                    <a href="/Geolocalizacion/MapaEnTiempoReal" class="btn btn-primary">Ver Mapa en Vivo</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">🚌 Gestión de Rutas</h5>
                     <p class="card-text">Calcular y administrar rutas de transporte</p>
                     <a href="/Admin/CalcularRutas" class="btn btn-primary">Ir a Rutas</a>
                 </div>
@@ -20,19 +30,9 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Gestión de Traslados</h5>
+                    <h5 class="card-title">🔄 Gestión de Traslados</h5>
                     <p class="card-text">Administrar solicitudes de traslado</p>
                     <a href="/Admin/GestionarTraslados" class="btn btn-primary">Ir a Traslados</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Geolocalización</h5>
-                    <p class="card-text">Ver buses y ubicaciones en tiempo real</p>
-                    <a href="/Geolocalizacion/BusesIndex" class="btn btn-primary">Ir a Buses</a>
                 </div>
             </div>
         </div>
@@ -42,9 +42,9 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Mapa en Tiempo Real</h5>
-                    <p class="card-text">Ver ubicación de buses en el mapa</p>
-                    <a href="/Geolocalizacion/MapaEnTiempoReal" class="btn btn-primary">Ver Mapa</a>
+                    <h5 class="card-title">📊 Geolocalización</h5>
+                    <p class="card-text">Ver buses y ubicaciones en tiempo real</p>
+                    <a href="/Geolocalizacion/BusesIndex" class="btn btn-primary">Ir a Buses</a>
                 </div>
             </div>
         </div>
@@ -52,9 +52,31 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Gestión de Usuarios</h5>
+                    <h5 class="card-title">👨‍💼 Gestión de Usuarios</h5>
                     <p class="card-text">Administrar usuarios del sistema</p>
-                    <a href="#" class="btn btn-secondary disabled">Próximamente</a>
+                    <a href="/Admin/Usuarios" class="btn btn-success">Gestionar Usuarios</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">📈 Dashboard Principal</h5>
+                    <p class="card-text">Vista general del sistema con estadísticas</p>
+                    <a href="/Dashboard" class="btn btn-info">Ver Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">🚪 Cerrar Sesión</h5>
+                    <p class="card-text">Salir del sistema de administración</p>
+                    <a href="/Auth/Logout" class="btn btn-outline-danger">Cerrar Sesión</a>
                 </div>
             </div>
         </div>

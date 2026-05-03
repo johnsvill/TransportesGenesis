@@ -1,0 +1,536 @@
+@page "/Mapa/Simulacion"
+@model TransportesGenesis.Pages.Geolocalizacion.SimulacionMapaModel
+@{
+    ViewData["Title"] = "Simulación de Mapa - Transportes Genesis";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<!-- CSS personalizado para la simulación -->
+<style>
+    #simulationMap {
+        height: 80vh;
+        min-height: 600px;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .simulation-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .control-panel {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        margin-bottom: 1rem;
+    }
+
+    .bus-info-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        border-left: 4px solid #007bff;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+
+    .bus-info-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    }
+
+    .bus-status-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 8px;
+        animation: pulse 2s infinite;
+    }
+
+    .status-moving { background-color: #28a745; }
+    .status-loading { background-color: #ffc107; }
+    .status-stopped { background-color: #dc3545; }
+
+    .route-legend {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .route-color {
+        width: 20px;
+        height: 4px;
+        margin-right: 10px;
+        border-radius: 2px;
+    }
+
+    @@keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+    }
+
+    .speed-control {
+        margin: 1rem 0;
+    }
+
+    .btn-simulation {
+        border-radius: 8px;
+        font-weight: 600;
+        padding: 0.5rem 1.5rem;
+        margin: 0.25rem;
+    }
+</style>
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="simulation-header">
+        <h1 class="mb-3">🚌 Simulación de Buses en Tiempo Real</h1>
+        <p class="mb-0">Visualización de buses moviéndose desde diferentes zonas hacia Yulimay PC</p>
+    </div>
+
+    <div class="row">
+        <!-- Panel de control -->
+        <div class="col-md-4 col-lg-3">
+            <div class="control-panel">
+                <h5 class="mb-3">🎮 Controles de Simulación</h5>
+
+                <div class="d-grid gap-2 mb-3">
+                    <button class="btn btn-success btn-simulation" onclick="iniciarSimulacion()">
+                        ▶️ Iniciar Simulación
+                    </button>
+                    <button class="btn btn-warning btn-simulation" onclick="pausarSimulacion()">
+                        ⏸️ Pausar
+                    </button>
+                    <button class="btn btn-danger btn-simulation" onclick="detenerSimulacion()">
+                        ⏹️ Detener
+                    </button>
+                    <button class="btn btn-info btn-simulation" onclick="reiniciarSimulacion()">
+                        🔄 Reiniciar
+                    </button>
+                </div>
+
+                <div class="speed-control">
+                    <label for="speedRange" class="form-label">⚡ Velocidad de Simulación</label>
+                    <input type="range" class="form-range" min="0.5" max="5" step="0.5" value="1" id="speedRange" onchange="cambiarVelocidad(this.value)">
+                    <div class="d-flex justify-content-between">
+                        <small>Lento</small>
+                        <small id="speedLabel">1x</small>
+                        <small>Rápido</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-panel">
+                <h5 class="mb-3">🚍 Buses Activos</h5>
+                <div id="busesInfo">
+                    <!-- Se llenará dinámicamente -->
+                </div>
+            </div>
+
+            <div class="control-panel">
+                <h5 class="mb-3">🗺️ Leyenda de Rutas</h5>
+                <div id="routeLegend">
+                    <!-- Se llenará dinámicamente -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Mapa -->
+        <div class="col-md-8 col-lg-9">
+            <div id="simulationMap"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Leaflet CSS y JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+@section Scripts {
+<script>
+let map;
+let buses = {};
+let rutas = {};
+let simulacionActiva = false;
+let velocidadSimulacion = 1;
+let intervalos = [];
+
+// Coordenadas de Guatemala
+const DESTINO = { lat: 14.6349, lng: -90.5069, nombre: "Yulimay PC" }; // Ciudad de Guatemala centro
+
+// Definición de rutas con puntos intermedios
+const RUTAS_DEFINIDAS = {
+    'zona1': {
+        nombre: 'Ruta Zona 1',
+        color: '#FF6B6B',
+        origen: { lat: 14.6505, lng: -90.5200, nombre: "Zona 1" },
+        puntos: [
+            { lat: 14.6480, lng: -90.5150 },
+            { lat: 14.6450, lng: -90.5100 },
+            { lat: 14.6400, lng: -90.5080 },
+            { lat: 14.6370, lng: -90.5070 }
+        ]
+    },
+    'cayala': {
+        nombre: 'Ruta Cayalá',
+        color: '#4ECDC4',
+        origen: { lat: 14.6100, lng: -90.4800, nombre: "Cayalá" },
+        puntos: [
+            { lat: 14.6120, lng: -90.4850 },
+            { lat: 14.6150, lng: -90.4900 },
+            { lat: 14.6200, lng: -90.4950 },
+            { lat: 14.6280, lng: -90.5000 }
+        ]
+    },
+    'sanCristobal': {
+        nombre: 'Ruta San Cristóbal',
+        color: '#45B7D1',
+        origen: { lat: 14.7000, lng: -90.5500, nombre: "San Cristóbal" },
+        puntos: [
+            { lat: 14.6900, lng: -90.5450 },
+            { lat: 14.6800, lng: -90.5400 },
+            { lat: 14.6700, lng: -90.5350 },
+            { lat: 14.6500, lng: -90.5200 }
+        ]
+    },
+    'petapa': {
+        nombre: 'Ruta Petapa',
+        color: '#96CEB4',
+        origen: { lat: 14.5500, lng: -90.5500, nombre: "Petapa" },
+        puntos: [
+            { lat: 14.5600, lng: -90.5450 },
+            { lat: 14.5700, lng: -90.5400 },
+            { lat: 14.5850, lng: -90.5300 },
+            { lat: 14.6100, lng: -90.5150 }
+        ]
+    }
+};
+
+// Inicializar cuando cargue la página
+document.addEventListener('DOMContentLoaded', function() {
+    inicializarMapa();
+    crearBuses();
+    crearLeyendaRutas();
+    actualizarInfoBuses();
+});
+
+function inicializarMapa() {
+    // Crear mapa centrado en Ciudad de Guatemala
+    map = L.map('simulationMap').setView([DESTINO.lat, DESTINO.lng], 12);
+
+    // Agregar capa de mapa
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Agregar marcador del destino
+    const destinoIcon = L.divIcon({
+        className: 'destino-marker',
+        html: `
+            <div style="background: #dc3545; border: 3px solid white; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(220,53,69,0.4);">
+                <span style="color: white; font-size: 18px;">🏫</span>
+            </div>
+        `,
+        iconSize: [40, 40],
+        iconAnchor: [20, 20]
+    });
+
+    L.marker([DESTINO.lat, DESTINO.lng], { icon: destinoIcon })
+        .bindPopup(`<div class="text-center"><strong>${DESTINO.nombre}</strong><br>Destino Final</div>`)
+        .addTo(map);
+
+    console.log('Mapa inicializado');
+}
+
+function crearBuses() {
+    let busId = 1;
+
+    Object.keys(RUTAS_DEFINIDAS).forEach(rutaKey => {
+        const ruta = RUTAS_DEFINIDAS[rutaKey];
+        const rutaCompleta = [ruta.origen, ...ruta.puntos, DESTINO];
+
+        // Crear polilinea de la ruta
+        const polyline = L.polyline(
+            rutaCompleta.map(punto => [punto.lat, punto.lng]), 
+            { color: ruta.color, weight: 4, opacity: 0.7 }
+        ).addTo(map);
+
+        rutas[rutaKey] = {
+            ...ruta,
+            rutaCompleta: rutaCompleta,
+            polyline: polyline
+        };
+
+        // Crear bus para esta ruta
+        const bus = {
+            id: `BUS-${busId.toString().padStart(3, '0')}`,
+            rutaKey: rutaKey,
+            ruta: ruta,
+            rutaCompleta: rutaCompleta,
+            posicionActual: 0, // Índice en la ruta
+            progreso: 0, // Progreso entre puntos (0-1)
+            velocidad: Math.random() * 20 + 30, // 30-50 km/h
+            estado: 'detenido',
+            marker: null,
+            ultimaActualizacion: new Date()
+        };
+
+        // Crear marcador del bus
+        const busIcon = crearIconoBus(ruta.color, bus.id);
+        bus.marker = L.marker([ruta.origen.lat, ruta.origen.lng], { icon: busIcon })
+            .bindPopup(crearPopupBus(bus))
+            .addTo(map);
+
+        buses[bus.id] = bus;
+        busId++;
+
+        // Agregar marcadores de paradas intermedias
+        ruta.puntos.forEach((punto, index) => {
+            const paradaIcon = L.divIcon({
+                className: 'parada-marker',
+                html: `
+                    <div style="background: ${ruta.color}; border: 2px solid white; border-radius: 50%; width: 15px; height: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.3);"></div>
+                `,
+                iconSize: [15, 15],
+                iconAnchor: [7, 7]
+            });
+
+            L.marker([punto.lat, punto.lng], { icon: paradaIcon })
+                .bindPopup(`<div class="text-center">Parada ${index + 1}<br><strong>${ruta.nombre}</strong></div>`)
+                .addTo(map);
+        });
+
+        // Marcador de origen
+        const origenIcon = L.divIcon({
+            className: 'origen-marker',
+            html: `
+                <div style="background: ${ruta.color}; border: 3px solid white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 10px rgba(0,0,0,0.4);">
+                    <span style="color: white; font-size: 12px; font-weight: bold;">🚌</span>
+                </div>
+            `,
+            iconSize: [30, 30],
+            iconAnchor: [15, 15]
+        });
+
+        L.marker([ruta.origen.lat, ruta.origen.lng], { icon: origenIcon })
+            .bindPopup(`<div class="text-center"><strong>${ruta.origen.nombre}</strong><br>Punto de Salida</div>`)
+            .addTo(map);
+    });
+
+    console.log('Buses creados:', Object.keys(buses).length);
+}
+
+function crearIconoBus(color, busId) {
+    return L.divIcon({
+        className: 'custom-bus-icon',
+        html: `
+            <div style="background: ${color}; border: 3px solid white; border-radius: 8px; width: 35px; height: 25px; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 8px rgba(0,0,0,0.4); position: relative;">
+                <span style="color: white; font-size: 10px; font-weight: bold;">${busId.slice(-3)}</span>
+                <div style="position: absolute; top: -8px; right: -8px; background: white; border-radius: 50%; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center;">
+                    <div class="bus-status-indicator status-moving"></div>
+                </div>
+            </div>
+        `,
+        iconSize: [35, 25],
+        iconAnchor: [17, 12]
+    });
+}
+
+function crearPopupBus(bus) {
+    return `
+        <div class="text-center" style="min-width: 180px;">
+            <h6 class="mb-2" style="color: ${bus.ruta.color};">${bus.id}</h6>
+            <div class="text-start">
+                <p class="mb-1"><strong>Ruta:</strong> ${bus.ruta.nombre}</p>
+                <p class="mb-1"><strong>Velocidad:</strong> ${Math.round(bus.velocidad)} km/h</p>
+                <p class="mb-1"><strong>Estado:</strong> ${bus.estado}</p>
+                <p class="mb-0"><strong>Progreso:</strong> ${Math.round(((bus.posicionActual + bus.progreso) / (bus.rutaCompleta.length - 1)) * 100)}%</p>
+            </div>
+        </div>
+    `;
+}
+
+function crearLeyendaRutas() {
+    const legendContainer = document.getElementById('routeLegend');
+    let html = '';
+
+    Object.values(RUTAS_DEFINIDAS).forEach(ruta => {
+        html += `
+            <div class="route-legend">
+                <div class="route-color" style="background-color: ${ruta.color};"></div>
+                <small><strong>${ruta.nombre}</strong><br>
+                <span class="text-muted">${ruta.origen.nombre} → Yulimay PC</span></small>
+            </div>
+        `;
+    });
+
+    legendContainer.innerHTML = html;
+}
+
+function actualizarInfoBuses() {
+    const busesContainer = document.getElementById('busesInfo');
+    let html = '';
+
+    Object.values(buses).forEach(bus => {
+        const progresoPorcentaje = Math.round(((bus.posicionActual + bus.progreso) / (bus.rutaCompleta.length - 1)) * 100);
+
+        html += `
+            <div class="bus-info-card" onclick="centrarEnBus('${bus.id}')" style="border-left-color: ${bus.ruta.color};">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <strong>${bus.id}</strong>
+                        <div class="small text-muted">${bus.ruta.nombre}</div>
+                        <div class="small">
+                            <span class="bus-status-indicator status-${bus.estado}"></span>
+                            ${bus.estado} - ${Math.round(bus.velocidad)} km/h
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <div class="badge bg-primary">${progresoPorcentaje}%</div>
+                    </div>
+                </div>
+                <div class="progress mt-2" style="height: 4px;">
+                    <div class="progress-bar" style="width: ${progresoPorcentaje}%; background-color: ${bus.ruta.color};"></div>
+                </div>
+            </div>
+        `;
+    });
+
+    busesContainer.innerHTML = html;
+}
+
+function iniciarSimulacion() {
+    if (simulacionActiva) return;
+
+    simulacionActiva = true;
+
+    Object.values(buses).forEach(bus => {
+        bus.estado = 'movimiento';
+
+        const intervalo = setInterval(() => {
+            if (!simulacionActiva) {
+                clearInterval(intervalo);
+                return;
+            }
+
+            moverBus(bus);
+        }, 100 / velocidadSimulacion);
+
+        intervalos.push(intervalo);
+    });
+
+    console.log('Simulación iniciada');
+}
+
+function pausarSimulacion() {
+    simulacionActiva = false;
+    intervalos.forEach(intervalo => clearInterval(intervalo));
+    intervalos = [];
+
+    Object.values(buses).forEach(bus => {
+        bus.estado = 'detenido';
+    });
+
+    actualizarInfoBuses();
+    console.log('Simulación pausada');
+}
+
+function detenerSimulacion() {
+    pausarSimulacion();
+    console.log('Simulación detenida');
+}
+
+function reiniciarSimulacion() {
+    pausarSimulacion();
+
+    // Resetear posiciones
+    Object.values(buses).forEach(bus => {
+        bus.posicionActual = 0;
+        bus.progreso = 0;
+        bus.estado = 'detenido';
+
+        // Volver al origen
+        const origen = bus.rutaCompleta[0];
+        bus.marker.setLatLng([origen.lat, origen.lng]);
+        bus.marker.setPopupContent(crearPopupBus(bus));
+    });
+
+    actualizarInfoBuses();
+    console.log('Simulación reiniciada');
+}
+
+function moverBus(bus) {
+    if (bus.posicionActual >= bus.rutaCompleta.length - 1) {
+        // Bus llegó al destino
+        bus.estado = 'llegado';
+        return;
+    }
+
+    const puntoActual = bus.rutaCompleta[bus.posicionActual];
+    const siguientePunto = bus.rutaCompleta[bus.posicionActual + 1];
+
+    if (!siguientePunto) return;
+
+    // Incrementar progreso
+    bus.progreso += 0.01 * velocidadSimulacion;
+
+    if (bus.progreso >= 1) {
+        bus.progreso = 0;
+        bus.posicionActual++;
+
+        if (bus.posicionActual >= bus.rutaCompleta.length - 1) {
+            bus.estado = 'llegado';
+            return;
+        }
+    }
+
+    // Calcular posición interpolada
+    const lat = puntoActual.lat + (siguientePunto.lat - puntoActual.lat) * bus.progreso;
+    const lng = puntoActual.lng + (siguientePunto.lng - puntoActual.lng) * bus.progreso;
+
+    // Actualizar posición del marcador
+    bus.marker.setLatLng([lat, lng]);
+    bus.marker.setPopupContent(crearPopupBus(bus));
+    bus.ultimaActualizacion = new Date();
+
+    // Actualizar info cada 10 movimientos
+    if (Math.random() < 0.1) {
+        actualizarInfoBuses();
+    }
+}
+
+function cambiarVelocidad(nuevaVelocidad) {
+    velocidadSimulacion = parseFloat(nuevaVelocidad);
+    document.getElementById('speedLabel').textContent = `${velocidadSimulacion}x`;
+
+    if (simulacionActiva) {
+        pausarSimulacion();
+        setTimeout(iniciarSimulacion, 100);
+    }
+}
+
+function centrarEnBus(busId) {
+    const bus = buses[busId];
+    if (bus && bus.marker) {
+        const pos = bus.marker.getLatLng();
+        map.setView([pos.lat, pos.lng], 15);
+        bus.marker.openPopup();
+    }
+}
+
+// Auto-iniciar simulación después de 2 segundos
+setTimeout(() => {
+    if (confirm('¿Deseas iniciar la simulación automáticamente?')) {
+        iniciarSimulacion();
+    }
+}, 2000);
+</script>
+}

@@ -1,0 +1,313 @@
+@page
+@model TransportesGenesis.Pages.Admin.Usuarios.IndexModel
+@{
+    ViewData["Title"] = "Gestión de Usuarios";
+}
+
+<style>
+    .user-management-header {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+
+    .create-user-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin-bottom: 25px;
+    }
+
+    .create-user-card .card-header {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        border: none;
+        border-radius: 15px 15px 0 0 !important;
+    }
+
+    .users-list-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .users-list-card .card-header {
+        background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
+        color: white;
+        border: none;
+        border-radius: 15px 15px 0 0 !important;
+    }
+
+    .user-item {
+        border: 1px solid #e9ecef;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+    }
+
+    .user-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .role-badge {
+        font-size: 0.8rem;
+        padding: 0.3rem 0.6rem;
+    }
+
+    .btn-delete {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        border: none;
+        color: white;
+        border-radius: 20px;
+        padding: 5px 15px;
+        font-size: 0.8rem;
+    }
+
+    .btn-delete:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
+        color: white;
+    }
+
+    .form-control {
+        border-radius: 10px;
+        border: 1px solid #dee2e6;
+        padding: 10px 15px;
+    }
+
+    .form-control:focus {
+        border-color: #28a745;
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    }
+
+    .btn-create {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        color: white;
+        border-radius: 25px;
+        padding: 10px 25px;
+        font-weight: 600;
+    }
+
+    .btn-create:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.3);
+        color: white;
+    }
+
+    .alert {
+        border: none;
+        border-radius: 10px;
+        padding: 15px 20px;
+    }
+</style>
+
+<div class="container-fluid px-4">
+    <!-- Header -->
+    <div class="user-management-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="mb-2 fw-bold">
+                    <i class="bi bi-people-fill me-3"></i>
+                    Gestión de Usuarios
+                </h1>
+                <p class="mb-0 opacity-75">
+                    <i class="bi bi-shield-check me-2"></i>
+                    Administra todos los usuarios del sistema de transporte
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <a href="/Admin" class="btn btn-light btn-lg">
+                    <i class="bi bi-arrow-left me-2"></i>
+                    Volver al Panel
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mensaje de resultado -->
+    @if (!string.IsNullOrEmpty(Model.Mensaje))
+    {
+        <div class="alert alert-@(Model.TipoMensaje == "success" ? "success" : "danger") alert-dismissible fade show">
+            <i class="bi bi-@(Model.TipoMensaje == "success" ? "check-circle-fill" : "exclamation-triangle-fill") me-2"></i>
+            <strong>@Model.Mensaje</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row">
+        <!-- Formulario para crear usuario -->
+        <div class="col-md-5">
+            <div class="create-user-card">
+                <div class="card-header">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-person-plus-fill me-2"></i>
+                        Crear Nuevo Usuario
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" asp-page-handler="CrearUsuario" asp-antiforgery="true">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label asp-for="Input.UserName" class="form-label fw-semibold">
+                                <i class="bi bi-person me-2"></i>Nombre de Usuario
+                            </label>
+                            <input asp-for="Input.UserName" class="form-control" placeholder="Ej: padre.juan" required />
+                            <span asp-validation-for="Input.UserName" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.Email" class="form-label fw-semibold">
+                                <i class="bi bi-envelope me-2"></i>Correo Electrónico
+                            </label>
+                            <input asp-for="Input.Email" type="email" class="form-control" placeholder="ejemplo@correo.com" required />
+                            <span asp-validation-for="Input.Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.Password" class="form-label fw-semibold">
+                                <i class="bi bi-lock me-2"></i>Contraseña
+                            </label>
+                            <input asp-for="Input.Password" type="password" class="form-control" placeholder="Mínimo 6 caracteres" required />
+                            <span asp-validation-for="Input.Password" class="text-danger"></span>
+                            <small class="form-text text-muted">La contraseña debe tener al menos 6 caracteres</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.Rol" class="form-label fw-semibold">
+                                <i class="bi bi-shield me-2"></i>Rol del Usuario
+                            </label>
+                            <select asp-for="Input.Rol" class="form-select">
+                                <option value="PadreDeFamilia">Padre de Familia</option>
+                                <option value="Piloto">Piloto</option>
+                                <option value="Monitor">Monitor</option>
+                                <option value="Administrador">Administrador</option>
+                            </select>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-create">
+                                <i class="bi bi-plus-circle me-2"></i>
+                                Crear Usuario
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Información útil -->
+            <div class="alert alert-info">
+                <h6 class="alert-heading">
+                    <i class="bi bi-info-circle me-2"></i>Información
+                </h6>
+                <ul class="mb-0">
+                    <li><strong>Padre de Familia:</strong> Accede a pagos, calendario, ruta del bus</li>
+                    <li><strong>Piloto:</strong> Ve rutas asignadas y gestiona buses</li>
+                    <li><strong>Monitor:</strong> Supervisa estudiantes en rutas</li>
+                    <li><strong>Administrador:</strong> Control total del sistema</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Lista de usuarios existentes -->
+        <div class="col-md-7">
+            <div class="users-list-card">
+                <div class="card-header">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-people me-2"></i>
+                        Usuarios Existentes
+                        <span class="badge bg-light text-dark ms-2">@Model.Usuarios.Count</span>
+                    </h5>
+                </div>
+                <div class="card-body p-4" style="max-height: 600px; overflow-y: auto;">
+                    @if (Model.Usuarios.Any())
+                    {
+                        @foreach (var usuario in Model.Usuarios)
+                        {
+                            <div class="user-item">
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <i class="bi bi-person-circle text-primary me-3 fs-3"></i>
+                                            <div>
+                                                <div class="fw-bold">@usuario.UserName</div>
+                                                <div class="text-muted small">@usuario.Email</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-2">
+                                            @if (Model.UsuarioRoles.ContainsKey(usuario.Id))
+                                            {
+                                                @foreach (var rol in Model.UsuarioRoles[usuario.Id])
+                                                {
+                                                    var badgeClass = rol switch
+                                                    {
+                                                        "Administrador" => "bg-danger",
+                                                        "PadreDeFamilia" => "bg-success",
+                                                        "Piloto" => "bg-primary",
+                                                        "Monitor" => "bg-warning",
+                                                        _ => "bg-secondary"
+                                                    };
+                                                    <span class="badge @badgeClass role-badge me-1">@rol</span>
+                                                }
+                                            }
+                                        </div>
+
+                                        <div class="row text-muted small">
+                                            <div class="col-6">
+                                                <i class="bi bi-calendar me-1"></i>
+                                                Creado: @(usuario.LastLoginDate?.ToString("dd/MM/yyyy") ?? "N/A")
+                                            </div>
+                                            <div class="col-6">
+                                                <i class="bi bi-clock me-1"></i>
+                                                Email confirmado: @(usuario.EmailConfirmed ? "Sí" : "No")
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4 text-end">
+                                        @if (usuario.UserName != "admin")
+                                        {
+                                            <form method="post" asp-page-handler="EliminarUsuario" style="display: inline;" 
+                                                  onsubmit="return confirm('¿Estás seguro de eliminar este usuario?')">
+                                                <input type="hidden" name="userId" value="@usuario.Id" />
+                                                <button type="submit" class="btn btn-delete">
+                                                    <i class="bi bi-trash me-1"></i>
+                                                    Eliminar
+                                                </button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning">
+                                                <i class="bi bi-shield-lock me-1"></i>
+                                                Protegido
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-people text-muted" style="font-size: 4rem;"></i>
+                            <h5 class="text-muted mt-3">No hay usuarios registrados</h5>
+                            <p class="text-muted">Crea el primer usuario usando el formulario de la izquierda</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

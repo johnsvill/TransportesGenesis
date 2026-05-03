@@ -198,79 +198,55 @@
     }
 
     .nav-btn {
-        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
         color: white;
         border: none;
-        border-radius: 10px;
+        border-radius: 25px;
         padding: 10px 20px;
-        font-weight: 500;
+        font-weight: 600;
         transition: all 0.3s ease;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
     }
 
     .nav-btn:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
         color: white;
     }
 
     .confirmation-panel {
-        background: white;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
         border-radius: 20px;
-        box-shadow: 0 6px 25px rgba(0,0,0,0.1);
+        box-shadow: 0 10px 30px rgba(40, 167, 69, 0.3);
         overflow: hidden;
-        border: none;
     }
 
-    .confirmation-panel .card-header {
-        background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
-        border: none;
-        padding: 20px;
+    .confirmation-panel .card-body {
+        background: white;
+        color: #333;
     }
 
+    .pulse-animation {
+        animation: pulse 2s infinite;
+    }
+
+    @@keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-10px) rotate(5deg); }
+    }
+
+    @@keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+
+    /* Mejoras responsivas */
     @@media (max-width: 768px) {
-        .attendance-header {
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .info-card {
-            margin-bottom: 15px;
-        }
-
         .calendar-table td {
             height: 60px;
-        }
-
-        .day-number {
-            font-size: 0.9rem;
-        }
-
-        .day-status {
-            font-size: 1.2rem;
-            width: 20px;
-            height: 20px;
-            font-size: 10px;
-        }
-
-        .legend-item {
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        .nav-btn {
-            width: 100%;
-            margin-bottom: 10px;
-        }
-
-        .calendar-table th {
-            padding: 10px 4px;
-            font-size: 0.7rem;
-        }
-    }
-
-    @@media (max-width: 576px) {
-        .calendar-table td {
-            height: 50px;
         }
 
         .calendar-day {
@@ -278,29 +254,19 @@
         }
 
         .day-number {
-            font-size: 0.8rem;
+            font-size: 0.9rem;
         }
 
         .status-confirmed, .status-partial, .status-pending, .status-absent {
-            width: 18px;
-            height: 18px;
-            font-size: 8px;
+            width: 25px;
+            height: 25px;
+            font-size: 12px;
         }
-    }
 
-    @@keyframes float {
-        0%, 100% { transform: translateY(0px) rotate(0deg); }
-        50% { transform: translateY(-20px) rotate(180deg); }
-    }
-
-    .pulse-animation {
-        animation: pulse 2s infinite;
-    }
-
-    @@keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-        100% { transform: scale(1); }
+        .nav-btn {
+            padding: 8px 15px;
+            font-size: 0.9rem;
+        }
     }
 </style>
 
@@ -348,7 +314,7 @@
                             <i class="bi bi-person-badge text-success me-3 fs-4"></i>
                             <div>
                                 <div class="fw-semibold">Nombre</div>
-                                <div class="text-muted" id="nombreAlumno">Cargando...</div>
+                                <div class="text-muted" id="nombreAlumno">Juan Pérez Rodríguez</div>
                             </div>
                         </div>
 
@@ -356,7 +322,7 @@
                             <i class="bi bi-bus-front-fill text-primary me-3 fs-4"></i>
                             <div>
                                 <div class="fw-semibold">Bus Asignado</div>
-                                <div class="text-muted" id="busAsignado">Cargando...</div>
+                                <div class="text-muted" id="busAsignado">Bus #001 - Ruta Centro</div>
                             </div>
                         </div>
 
@@ -414,16 +380,16 @@
                     <div class="mb-3">
                         <div class="d-flex align-items-center mb-2">
                             <i class="bi bi-clock-fill text-info me-2"></i>
-                            <small class="fw-semibold text-white">Horario de confirmación</small>
+                            <small class="fw-semibold">Horario de confirmación</small>
                         </div>
-                        <div class="bg-white bg-opacity-20 rounded-3 p-3">
-                            <div class="fw-bold text-center text-white">
+                        <div class="bg-light rounded-3 p-3">
+                            <div class="fw-bold text-center">
                                 5:00 PM - 11:00 AM
                             </div>
                         </div>
                     </div>
 
-                    <div id="estadoTarde" class="alert alert-warning mb-0 border-0">
+                    <div id="estadoTarde" class="alert alert-info mb-0 border-0">
                         <div class="d-flex align-items-center">
                             <div class="spinner-border spinner-border-sm me-2"></div>
                             <span>Verificando estado...</span>
@@ -434,68 +400,19 @@
         </div>
     </div>
 
-    <!-- Calendario Principal -->
+    <!-- Calendario -->
     <div class="row">
-        <div class="col-12">
+        <div class="col-12 col-lg-9">
             <div class="calendar-card animate__animated animate__fadeInUp" style="animation-delay: 0.4s">
                 <div class="card-header text-white">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="mb-0 fw-bold">
                             <i class="bi bi-calendar3 me-2"></i>
-                            Calendario del Mes
+                            <span id="mesActual">Noviembre 2024</span>
                         </h5>
-                        <div class="d-flex align-items-center">
-                            <span id="mesActual" class="badge bg-white text-primary px-3 py-2 fs-6"></span>
-                        </div>
                     </div>
                 </div>
-
-                <div class="card-body p-4">
-                    <!-- Leyenda mejorada -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <div class="row g-3">
-                                <div class="col-6 col-md-3">
-                                    <div class="legend-item text-center">
-                                        <div class="status-confirmed mx-auto mb-2">
-                                            <i class="bi bi-check"></i>
-                                        </div>
-                                        <small class="fw-semibold">Confirmado</small>
-                                        <div class="text-muted" style="font-size: 0.75rem;">Ambas rutas</div>
-                                    </div>
-                                </div>
-                                <div class="col-6 col-md-3">
-                                    <div class="legend-item text-center">
-                                        <div class="status-partial mx-auto mb-2">
-                                            <i class="bi bi-dash"></i>
-                                        </div>
-                                        <small class="fw-semibold">Parcial</small>
-                                        <div class="text-muted" style="font-size: 0.75rem;">Solo una ruta</div>
-                                    </div>
-                                </div>
-                                <div class="col-6 col-md-3">
-                                    <div class="legend-item text-center">
-                                        <div class="status-pending mx-auto mb-2">
-                                            <i class="bi bi-clock"></i>
-                                        </div>
-                                        <small class="fw-semibold">Pendiente</small>
-                                        <div class="text-muted" style="font-size: 0.75rem;">Por confirmar</div>
-                                    </div>
-                                </div>
-                                <div class="col-6 col-md-3">
-                                    <div class="legend-item text-center">
-                                        <div class="status-absent mx-auto mb-2">
-                                            <i class="bi bi-x"></i>
-                                        </div>
-                                        <small class="fw-semibold">No asistirá</small>
-                                        <div class="text-muted" style="font-size: 0.75rem;">Confirmado</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Tabla del calendario mejorada -->
+                <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table calendar-table" id="calendarioTabla">
                             <thead>
@@ -516,7 +433,7 @@
                     </div>
 
                     <!-- Navegación mejorada -->
-                    <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap">
+                    <div class="d-flex justify-content-between align-items-center p-4 bg-light flex-wrap">
                         <button class="nav-btn" onclick="mesAnterior()">
                             <i class="bi bi-chevron-left me-2"></i>
                             <span class="d-none d-sm-inline">Mes </span>Anterior
@@ -534,6 +451,87 @@
                             <i class="bi bi-chevron-right ms-2"></i>
                         </button>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leyenda -->
+        <div class="col-12 col-lg-3">
+            <div class="sticky-top" style="top: 20px;">
+                <div class="legend-item animate__animated animate__fadeInRight" style="animation-delay: 0.5s">
+                    <h6 class="fw-bold mb-3">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Leyenda de Estados
+                    </h6>
+
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="status-confirmed me-3">
+                                <i class="bi bi-check"></i>
+                            </div>
+                            <div>
+                                <div class="fw-semibold">Ambas rutas confirmadas</div>
+                                <small class="text-muted">Mañana y tarde</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="status-partial me-3">
+                                <i class="bi bi-dash"></i>
+                            </div>
+                            <div>
+                                <div class="fw-semibold">Parcialmente confirmado</div>
+                                <small class="text-muted">Solo una ruta</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="status-pending me-3">
+                                <i class="bi bi-clock"></i>
+                            </div>
+                            <div>
+                                <div class="fw-semibold">Pendiente</div>
+                                <small class="text-muted">Falta confirmar</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="status-absent me-3">
+                                <i class="bi bi-x"></i>
+                            </div>
+                            <div>
+                                <div class="fw-semibold">No asistirá</div>
+                                <small class="text-muted">Ambas rutas canceladas</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="legend-item animate__animated animate__fadeInRight" style="animation-delay: 0.7s">
+                    <h6 class="fw-bold mb-3">
+                        <i class="bi bi-lightbulb me-2"></i>
+                        Instrucciones
+                    </h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="bi bi-1-circle text-primary me-2"></i>
+                            Haz clic en cualquier día del calendario
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-2-circle text-primary me-2"></i>
+                            Selecciona las rutas deseadas
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-3-circle text-primary me-2"></i>
+                            Confirma la asistencia
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -602,8 +600,77 @@
                             <i class="bi bi-x-lg me-2"></i>
                             Cerrar
                         </button>
+                        <button class="btn btn-info ms-2" onclick="console.log('Botón traslado clickeado'); abrirModalTraslado()">
+                            <i class="bi bi-arrow-left-right me-2"></i>
+                            Solicitar Traslado
+                        </button>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Traslado -->
+<div class="modal fade" id="modalTraslado" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-arrow-left-right"></i> Solicitar Traslado Temporal de Bus
+                </h5>
+                <button type="button" class="btn-close btn-close-white" onclick="cerrarModalTraslado()"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    <strong>¿Qué es un traslado?</strong> Permite que su hijo(a) viaje en otro bus temporalmente 
+                    (por ejemplo, si se quedará en casa de un familiar).
+                </div>
+
+                <form id="formTraslado">
+                    <input type="hidden" id="trasladoIdAlumno" value="1">
+                    <input type="hidden" id="trasladoFecha" value="">
+
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Fecha del traslado:</strong></label>
+                        <p id="trasladoFechaTexto" class="text-muted"></p>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="trasladoTurno" class="form-label"><strong>Turno:</strong></label>
+                        <select class="form-select" id="trasladoTurno" required onchange="cargarBusesDisponibles()">
+                            <option value="Ambos">Ambos (Mañana y Tarde)</option>
+                            <option value="Mañana">Solo Mañana (Ida)</option>
+                            <option value="Tarde">Solo Tarde (Regreso)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="trasladoBusDestino" class="form-label"><strong>Seleccionar bus destino:</strong></label>
+                        <select class="form-select" id="trasladoBusDestino" required>
+                            <option value="">-- Seleccione un bus --</option>
+                            <option value="2">Bus #002 - Ruta Norte (15 espacios)</option>
+                            <option value="3">Bus #003 - Ruta Sur (8 espacios)</option>
+                            <option value="4">Bus #004 - Ruta Este (22 espacios)</option>
+                        </select>
+                        <small class="text-muted">Buses disponibles con espacio</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="trasladoMotivo" class="form-label"><strong>Motivo del traslado:</strong></label>
+                        <textarea class="form-control" id="trasladoMotivo" rows="3" 
+                                  placeholder="Ejemplo: Se quedará en casa de su abuela esa semana"
+                                  maxlength="250"></textarea>
+                        <small class="text-muted">Opcional - máximo 250 caracteres</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cerrarModalTraslado()">Cancelar</button>
+                <button type="button" class="btn btn-info" onclick="enviarSolicitudTraslado()">
+                    <i class="bi bi-send"></i> Enviar Solicitud
+                </button>
             </div>
         </div>
     </div>
@@ -776,6 +843,11 @@
                 behavior: 'smooth',
                 block: 'nearest'
             });
+
+            // Actualizar modal de traslado
+            document.getElementById('trasladoFecha').value = fechaKey;
+            document.getElementById('trasladoFechaTexto').textContent = 
+                `${dia} de ${obtenerNombreMes(mes - 1)} de ${año}`;
         }
 
         function actualizarEstadoPanel(elementId, estado) {
@@ -819,9 +891,8 @@
             const rutaTexto = ruta === 'mañana' ? 'Matutina' : 'Vespertina';
             const estadoTexto = asistira ? 'asistirá' : 'no asistirá';
 
-            if (typeof showToast === 'function') {
-                showToast(`Ruta ${rutaTexto}: ${estadoTexto} confirmado`, 'success');
-            }
+            // Crear notificación simple
+            mostrarNotificacion(`Ruta ${rutaTexto}: ${estadoTexto} confirmado`, 'success');
         }
 
         function cerrarPanelConfirmacion() {
@@ -903,23 +974,173 @@
                     `;
                     estadoTarde.className = 'alert alert-warning border-0';
                 }
-            }, 1000);
-
-            // Actualizar información del alumno
-            setTimeout(() => {
-                document.getElementById('nombreAlumno').textContent = 'Juan Pérez Rodríguez';
-                document.getElementById('busAsignado').textContent = 'Bus #001 - Ruta Centro';
 
                 // Verificar si es fin de semana
-                const ahora = new Date();
                 const diaSemana = ahora.getDay();
-
                 if (diaSemana === 0 || diaSemana === 6) {
                     document.getElementById('mensajeFinSemana').style.display = 'block';
                     document.getElementById('textoFinSemana').textContent = 
                         'Es fin de semana. Las confirmaciones están habilitadas para días laborables.';
                 }
-            }, 500);
+            }, 1000);
+        }
+
+        function abrirModalTraslado() {
+            if (!fechaSeleccionada) {
+                mostrarNotificacion('Por favor, selecciona un día del calendario primero', 'warning');
+                return;
+            }
+
+            console.log('Intentando abrir modal de traslado...');
+
+            // Verificar que el elemento del modal existe
+            const modalElement = document.getElementById('modalTraslado');
+            if (!modalElement) {
+                console.error('Elemento modal no encontrado');
+                mostrarNotificacion('Error: Modal no encontrado', 'error');
+                return;
+            }
+
+            // Intentar abrir el modal con diferentes métodos
+            try {
+                if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                    // Bootstrap 5
+                    const modal = new bootstrap.Modal(modalElement);
+                    modal.show();
+                    console.log('Modal abierto con Bootstrap 5');
+                } else if (typeof $ !== 'undefined' && $.fn.modal) {
+                    // jQuery/Bootstrap 4 fallback
+                    $('#modalTraslado').modal('show');
+                    console.log('Modal abierto con jQuery');
+                } else {
+                    // Fallback manual
+                    modalElement.style.display = 'block';
+                    modalElement.classList.add('show');
+                    modalElement.setAttribute('aria-hidden', 'false');
+
+                    // Añadir backdrop
+                    const backdrop = document.createElement('div');
+                    backdrop.className = 'modal-backdrop fade show';
+                    backdrop.id = 'modal-backdrop-traslado';
+                    document.body.appendChild(backdrop);
+
+                    console.log('Modal abierto manualmente');
+                }
+            } catch (error) {
+                console.error('Error al abrir modal:', error);
+                mostrarNotificacion('Error al abrir formulario de traslado', 'error');
+            }
+        }
+
+        function enviarSolicitudTraslado() {
+            const turno = document.getElementById('trasladoTurno').value;
+            const busDestino = document.getElementById('trasladoBusDestino').value;
+            const motivo = document.getElementById('trasladoMotivo').value;
+
+            if (!busDestino) {
+                mostrarNotificacion('Por favor, selecciona un bus destino', 'warning');
+                return;
+            }
+
+            // Simular envío
+            console.log('Enviando solicitud de traslado...', {
+                fecha: document.getElementById('trasladoFecha').value,
+                turno: turno,
+                busDestino: busDestino,
+                motivo: motivo
+            });
+
+            // Cerrar modal con diferentes métodos
+            try {
+                const modalElement = document.getElementById('modalTraslado');
+
+                if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                    // Bootstrap 5
+                    const modal = bootstrap.Modal.getInstance(modalElement);
+                    if (modal) {
+                        modal.hide();
+                    } else {
+                        const newModal = new bootstrap.Modal(modalElement);
+                        newModal.hide();
+                    }
+                } else if (typeof $ !== 'undefined' && $.fn.modal) {
+                    // jQuery fallback
+                    $('#modalTraslado').modal('hide');
+                } else {
+                    // Manual close
+                    modalElement.style.display = 'none';
+                    modalElement.classList.remove('show');
+                    modalElement.setAttribute('aria-hidden', 'true');
+
+                    // Remover backdrop
+                    const backdrop = document.getElementById('modal-backdrop-traslado');
+                    if (backdrop) {
+                        backdrop.remove();
+                    }
+                }
+
+                console.log('Modal cerrado correctamente');
+            } catch (error) {
+                console.error('Error al cerrar modal:', error);
+            }
+
+            // Mostrar confirmación
+            mostrarNotificacion('Solicitud de traslado enviada correctamente', 'success');
+        }
+
+        function cerrarModalTraslado() {
+            try {
+                const modalElement = document.getElementById('modalTraslado');
+
+                if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                    // Bootstrap 5
+                    const modal = bootstrap.Modal.getInstance(modalElement);
+                    if (modal) {
+                        modal.hide();
+                    } else {
+                        const newModal = new bootstrap.Modal(modalElement);
+                        newModal.hide();
+                    }
+                } else if (typeof $ !== 'undefined' && $.fn.modal) {
+                    // jQuery fallback
+                    $('#modalTraslado').modal('hide');
+                } else {
+                    // Manual close
+                    modalElement.style.display = 'none';
+                    modalElement.classList.remove('show');
+                    modalElement.setAttribute('aria-hidden', 'true');
+
+                    // Remover backdrop
+                    const backdrop = document.getElementById('modal-backdrop-traslado');
+                    if (backdrop) {
+                        backdrop.remove();
+                    }
+                }
+
+                console.log('Modal cerrado por el usuario');
+            } catch (error) {
+                console.error('Error al cerrar modal:', error);
+            }
+        }
+
+        function mostrarNotificacion(mensaje, tipo) {
+            // Crear elemento de notificación
+            const notificacion = document.createElement('div');
+            notificacion.className = `alert alert-${tipo} alert-dismissible fade show position-fixed`;
+            notificacion.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            notificacion.innerHTML = `
+                <strong>${tipo === 'success' ? '✓' : tipo === 'warning' ? '⚠' : 'ℹ'}</strong> ${mensaje}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            document.body.appendChild(notificacion);
+
+            // Auto-remover después de 5 segundos
+            setTimeout(() => {
+                if (notificacion.parentNode) {
+                    notificacion.remove();
+                }
+            }, 5000);
         }
 
         // Cerrar panel al hacer clic fuera
@@ -939,869 +1160,3 @@
         });
     </script>
 }
-                            <i class="bi bi-x-lg me-2"></i>
-                            Cerrar
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-                    <h5 class="mb-0">
-                        <i class="bi bi-calendar-check"></i> Confirmar Asistencia - 
-                        <span id="fechaSeleccionada"></span>
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-check form-switch mb-4" style="padding-left: 4rem;">
-                                <input class="form-check-input form-check-input-xl" 
-                                       type="checkbox" 
-                                       role="switch"
-                                       id="switchMañana" 
-                                       checked>
-                                <label class="form-check-label ms-3" for="switchMañana" style="cursor: pointer;">
-                                    <i class="bi bi-sunrise-fill text-warning fs-4"></i>
-                                    <strong class="d-block">Ruta Matutina</strong>
-                                    <small class="text-muted">Ida al colegio</small>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-check form-switch mb-4" style="padding-left: 4rem;">
-                                <input class="form-check-input form-check-input-xl" 
-                                       type="checkbox" 
-                                       role="switch"
-                                       id="switchTarde" 
-                                       checked>
-                                <label class="form-check-label ms-3" for="switchTarde" style="cursor: pointer;">
-                                    <i class="bi bi-sunset-fill text-info fs-4"></i>
-                                    <strong class="d-block">Ruta Vespertina</strong>
-                                    <small class="text-muted">Regreso a casa</small>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="alert alert-warning">
-                        <i class="bi bi-exclamation-triangle"></i>
-                        <strong>Importante:</strong> Si desmarca una opción, su hijo(a) NO será recogido en esa ruta.
-                    </div>
-
-                    <!-- ✅ NUEVO: Indicador de traslado -->
-                    <div id="alertaTraslado" class="alert alert-info" style="display: none;">
-                        <h6 class="alert-heading">
-                            <i class="bi bi-bus-front"></i> Traslado Temporal Activo
-                        </h6>
-                        <p id="textoTraslado" class="mb-0"></p>
-                    </div>
-
-                    <div class="d-grid gap-2">
-                        <button type="button" class="btn btn-success btn-lg" onclick="confirmarDia()">
-                            <i class="bi bi-check-circle-fill"></i> Confirmar Asistencia para este Día
-                        </button>
-                        <button type="button" class="btn btn-outline-info" onclick="abrirModalTraslado()">
-                            <i class="bi bi-arrow-left-right"></i> Solicitar Traslado de Bus
-                        </button>
-                        <button type="button" class="btn btn-outline-secondary" onclick="cerrarPanelConfirmacion()">
-                            Cancelar
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal de Traslado -->
-<div class="modal fade" id="modalTraslado" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-info text-white">
-                <h5 class="modal-title">
-                    <i class="bi bi-arrow-left-right"></i> Solicitar Traslado Temporal de Bus
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="alert alert-info">
-                    <i class="bi bi-info-circle"></i>
-                    <strong>¿Qué es un traslado?</strong> Permite que su hijo(a) viaje en otro bus temporalmente 
-                    (por ejemplo, si se quedará en casa de un familiar).
-                </div>
-
-                <form id="formTraslado">
-                    <input type="hidden" id="trasladoIdAlumno" value="1">
-                    <input type="hidden" id="trasladoFecha" value="">
-
-                    <div class="mb-3">
-                        <label class="form-label"><strong>Fecha del traslado:</strong></label>
-                        <p id="trasladoFechaTexto" class="text-muted"></p>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="trasladoTurno" class="form-label"><strong>Turno:</strong></label>
-                        <select class="form-select" id="trasladoTurno" required onchange="cargarBusesDisponibles()">
-                            <option value="Ambos">Ambos (Mañana y Tarde)</option>
-                            <option value="Mañana">Solo Mañana (Ida)</option>
-                            <option value="Tarde">Solo Tarde (Regreso)</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="trasladoBusDestino" class="form-label"><strong>Seleccionar bus destino:</strong></label>
-                        <select class="form-select" id="trasladoBusDestino" required>
-                            <option value="">-- Cargando buses disponibles --</option>
-                        </select>
-                        <small class="text-muted">Buses disponibles con espacio</small>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="trasladoMotivo" class="form-label"><strong>Motivo del traslado:</strong></label>
-                        <textarea class="form-control" id="trasladoMotivo" rows="3" 
-                                  placeholder="Ejemplo: Se quedará en casa de su abuela esa semana"
-                                  maxlength="250"></textarea>
-                        <small class="text-muted">Opcional - máximo 250 caracteres</small>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-info" onclick="enviarSolicitudTraslado()">
-                    <i class="bi bi-send"></i> Enviar Solicitud
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal de éxito -->
-<div class="modal fade" id="modalExito" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title"><i class="bi bi-check-circle-fill"></i> <span id="tituloExito">¡Confirmado!</span></h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body text-center py-4">
-                <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
-                <h4 class="mt-3" id="subtituloExito">Asistencia Confirmada</h4>
-                <div id="mensajeExito" class="text-start mt-3"></div>
-            </div>
-            <div class="modal-footer" id="botonesExito">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Entendido</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal de error -->
-<div class="modal fade" id="modalError" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title"><i class="bi bi-exclamation-triangle-fill"></i> Error</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p id="mensajeError" class="mb-0"></p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    let mesActual = new Date().getMonth();
-    let anioActual = new Date().getFullYear();
-    let diaSeleccionado = null;
-    let puedeConfirmarMañanaGlobal = false;
-    let puedeConfirmarTardeGlobal = false;
-    let asistenciasDelMes = [];
-    let trasladosDelMes = []; // ✅ NUEVO: Almacenar traslados aprobados del mes
-    let confirmacionesLocales = {}; // Guardar confirmaciones en memoria
-
-    // Cargar confirmaciones guardadas del localStorage
-    function cargarConfirmacionesLocales() {
-        try {
-            const guardadas = localStorage.getItem('asistenciasConfirmadas');
-            if (guardadas) {
-                confirmacionesLocales = JSON.parse(guardadas);
-            }
-        } catch (error) {
-            console.log('No hay confirmaciones previas guardadas');
-        }
-    }
-
-    // Guardar confirmaciones en localStorage
-    function guardarConfirmacionLocal(fecha, asisteMañana, asisteTarde) {
-        const fechaKey = fecha.toISOString().split('T')[0];
-        confirmacionesLocales[fechaKey] = {
-            asisteMañana: asisteMañana,
-            asisteTarde: asisteTarde,
-            fechaConfirmacion: new Date().toISOString()
-        };
-        localStorage.setItem('asistenciasConfirmadas', JSON.stringify(confirmacionesLocales));
-    }
-
-    // Cargar al iniciar
-    document.addEventListener('DOMContentLoaded', function() {
-        cargarConfirmacionesLocales();
-        verificarHorarios();
-        cargarInfoAlumno();
-        cargarCalendario();
-    });
-
-    // Verificar horarios de confirmación
-    async function verificarHorarios() {
-        try {
-            // Mañana: 2:00 PM a 4:00 AM
-            const respMañana = await fetch('/api/asistencia/puede-confirmar/manana');
-            const dataMañana = await respMañana.json();
-            puedeConfirmarMañanaGlobal = dataMañana.puede;
-
-            const estadoMañanaEl = document.getElementById('estadoMañana');
-            estadoMañanaEl.className = puedeConfirmarMañanaGlobal 
-                ? 'alert alert-success mb-0' 
-                : 'alert alert-danger mb-0';
-            estadoMañanaEl.innerHTML = `<strong>${puedeConfirmarMañanaGlobal ? '✓ Disponible' : '✗ No disponible'}</strong><br>
-                <small>${dataMañana.mensaje}</small>`;
-
-            // Tarde: 5:00 PM a 11:00 AM
-            const respTarde = await fetch('/api/asistencia/puede-confirmar/tarde');
-            const dataTarde = await respTarde.json();
-            puedeConfirmarTardeGlobal = dataTarde.puede;
-
-            const estadoTardeEl = document.getElementById('estadoTarde');
-            estadoTardeEl.className = puedeConfirmarTardeGlobal 
-                ? 'alert alert-success mb-0' 
-                : 'alert alert-danger mb-0';
-            estadoTardeEl.innerHTML = `<strong>${puedeConfirmarTardeGlobal ? '✓ Disponible' : '✗ No disponible'}</strong><br>
-                <small>${dataTarde.mensaje}</small>`;
-
-        } catch (error) {
-            console.error('Error al verificar horarios:', error);
-        }
-    }
-
-    // Cargar información del alumno
-    async function cargarInfoAlumno() {
-        const idAlumno = document.getElementById('selectAlumno').value;
-        try {
-            const response = await fetch(`/api/asistencia/alumno/${idAlumno}/hoy`);
-            const data = await response.json();
-
-            document.getElementById('nombreAlumno').textContent = data.nombreCompleto || 'Alumno de Prueba';
-            document.getElementById('busAsignado').textContent = data.placaBus || 'Sin asignar';
-
-            // Mostrar mensaje si es fin de semana
-            const hoy = new Date();
-            const diaSemana = hoy.getDay();
-            if (diaSemana === 0 || diaSemana === 6) { // Domingo o Sábado
-                const mensajeDiv = document.getElementById('mensajeFinSemana');
-                const textoSpan = document.getElementById('textoFinSemana');
-
-                if (diaSemana === 6) {
-                    textoSpan.textContent = 'Hoy es sábado. El calendario muestra solo días escolares (L-V).';
-                } else {
-                    textoSpan.textContent = 'Hoy es domingo. El calendario muestra solo días escolares (L-V).';
-                }
-
-                mensajeDiv.style.display = 'block';
-            }
-        } catch (error) {
-            console.error('Error al cargar alumno:', error);
-            document.getElementById('nombreAlumno').textContent = 'Alumno de Prueba';
-            document.getElementById('busAsignado').textContent = 'BUS-001';
-        }
-    }
-
-    // Cargar calendario del mes
-    async function cargarCalendario() {
-        const idAlumno = document.getElementById('selectAlumno').value;
-
-        // Actualizar título del mes
-        const nombresMeses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-                              'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-        document.getElementById('mesActual').textContent = `${nombresMeses[mesActual]} ${anioActual}`;
-
-        // Cargar asistencias del mes desde API
-        const primerDia = new Date(anioActual, mesActual, 1);
-        const ultimoDia = new Date(anioActual, mesActual + 1, 0);
-
-        try {
-            const response = await fetch(
-                `/api/asistencia/alumno/${idAlumno}/historial?fechaInicio=${primerDia.toISOString()}&fechaFin=${ultimoDia.toISOString()}`
-            );
-            asistenciasDelMes = await response.json();
-        } catch (error) {
-            console.error('Error al cargar asistencias:', error);
-            asistenciasDelMes = [];
-        }
-
-        // ✅ NUEVO: Cargar traslados aprobados del mes
-        try {
-            const responseTras = await fetch(`/api/traslados/alumno/${idAlumno}`);
-            const todosTras = await responseTras.json();
-
-            console.log(`[CALENDARIO] Total traslados recibidos: ${todosTras.length}`);
-            console.log('[CALENDARIO] Mes actual:', mesActual, 'Año actual:', anioActual);
-
-            // Filtrar solo los aprobados del mes actual
-            trasladosDelMes = todosTras.filter(t => {
-                console.log(`[TRASLADO] ID: ${t.idSolicitud}, Estado: "${t.estado}", Fecha: ${t.fechaTraslado}`);
-
-                if (t.estado.toLowerCase() !== 'aprobado') return false; // Case insensitive
-
-                const fechaTras = new Date(t.fechaTraslado);
-                const esDelMes = fechaTras.getFullYear() === anioActual && fechaTras.getMonth() === mesActual;
-
-                console.log(`  -> Año: ${fechaTras.getFullYear()}, Mes: ${fechaTras.getMonth()}, Coincide: ${esDelMes}`);
-
-                return esDelMes;
-            });
-
-            console.log(`[CALENDARIO] ✅ Traslados aprobados del mes: ${trasladosDelMes.length}`);
-            if (trasladosDelMes.length > 0) {
-                console.log('[CALENDARIO] Traslados filtrados:', trasladosDelMes);
-            }
-        } catch (error) {
-            console.error('Error al cargar traslados:', error);
-            trasladosDelMes = [];
-        }
-
-        // Generar calendario
-        generarCalendario();
-    }
-
-    // Generar la tabla del calendario
-    function generarCalendario() {
-        const tbody = document.getElementById('calendarioBody');
-        tbody.innerHTML = '';
-
-        const primerDia = new Date(anioActual, mesActual, 1);
-        const ultimoDia = new Date(anioActual, mesActual + 1, 0);
-        const primerDiaSemana = primerDia.getDay();
-
-        let fecha = 1;
-        let filas = Math.ceil((primerDiaSemana + ultimoDia.getDate()) / 7);
-
-        for (let i = 0; i < filas; i++) {
-            const fila = document.createElement('tr');
-
-            for (let j = 0; j < 7; j++) {
-                const celda = document.createElement('td');
-                celda.style.padding = '15px';
-                celda.style.cursor = 'pointer';
-                celda.style.minWidth = '80px';
-                celda.style.height = '80px';
-                celda.style.verticalAlign = 'top';
-
-                if (i === 0 && j < primerDiaSemana) {
-                    celda.innerHTML = '';
-                } else if (fecha > ultimoDia.getDate()) {
-                    celda.innerHTML = '';
-                } else {
-                    const fechaActual = new Date(anioActual, mesActual, fecha);
-                    const diaSemana = fechaActual.getDay();
-
-                    // Solo días de lunes a viernes (1-5)
-                    if (diaSemana >= 1 && diaSemana <= 5) {
-                        const asistencia = buscarAsistencia(fechaActual);
-                        const traslado = buscarTraslado(fechaActual); // ✅ NUEVO
-                        const color = obtenerColor(asistencia, fechaActual);
-                        const icono = obtenerIcono(asistencia);
-
-                        celda.style.backgroundColor = color;
-                        celda.style.color = (color === '#28a745' || color === '#dc3545' || color === '#17a2b8') ? 'white' : 'black';
-
-                        // ✅ NUEVO: Agregar borde si hay traslado aprobado
-                        if (traslado) {
-                            celda.style.border = '3px solid #ff9800'; // Borde naranja
-                            celda.style.boxShadow = '0 0 8px rgba(255, 152, 0, 0.5)';
-                            celda.title = `Traslado aprobado a ${traslado.placaBusDestino || 'bus temporal'}`; // Tooltip
-                        }
-
-                        // ✅ NUEVO: Agregar icono de bus si hay traslado
-                        const iconoTraslado = traslado ? '<div style="font-size: 0.9em;">🚌</div>' : '';
-
-                        celda.innerHTML = `
-                            <div class="fw-bold">${fecha}</div>
-                            <div class="mt-1">${icono}</div>
-                            ${iconoTraslado}
-                        `;
-
-                        const fechaClick = new Date(fechaActual);
-                        celda.onclick = () => seleccionarDia(fechaClick);
-                    } else {
-                        // Fines de semana en gris
-                        celda.style.backgroundColor = '#e9ecef';
-                        celda.innerHTML = `<div class="text-muted">${fecha}</div>`;
-                    }
-
-                    fecha++;
-                }
-
-                fila.appendChild(celda);
-            }
-
-            tbody.appendChild(fila);
-        }
-    }
-
-    // ✅ NUEVO: Buscar traslado aprobado para una fecha
-    function buscarTraslado(fecha) {
-        return trasladosDelMes.find(t => {
-            const fechaTras = new Date(t.fechaTraslado);
-            return fechaTras.toDateString() === fecha.toDateString();
-        });
-    }
-
-    // Buscar asistencia para una fecha (incluir confirmaciones locales)
-    function buscarAsistencia(fecha) {
-        // Primero buscar en confirmaciones locales
-        const fechaKey = fecha.toISOString().split('T')[0];
-        if (confirmacionesLocales[fechaKey]) {
-            return {
-                fecha: fecha,
-                asisteMañana: confirmacionesLocales[fechaKey].asisteMañana,
-                asisteTarde: confirmacionesLocales[fechaKey].asisteTarde,
-                fechaConfirmacion: confirmacionesLocales[fechaKey].fechaConfirmacion
-            };
-        }
-
-        // Si no, buscar en datos del servidor
-        return asistenciasDelMes.find(a => {
-            const fechaAsist = new Date(a.fecha);
-            return fechaAsist.toDateString() === fecha.toDateString();
-        });
-    }
-
-    // Obtener color según estado
-    function obtenerColor(asistencia, fecha) {
-        const hoy = new Date();
-        hoy.setHours(0, 0, 0, 0);
-        fecha.setHours(0, 0, 0, 0);
-
-        if (!asistencia) {
-            // Sin asistencia registrada
-            if (fecha < hoy) return '#e9ecef'; // Pasado sin confirmar
-            if (fecha.toDateString() === hoy.toDateString()) return '#ffc107'; // Hoy pendiente
-            return '#28a745'; // Futuro (por default confirmado)
-        }
-
-        // Con asistencia registrada
-        if (asistencia.asisteMañana && asistencia.asisteTarde) return '#28a745'; // Verde - ambas rutas
-        if (asistencia.asisteMañana || asistencia.asisteTarde) return '#17a2b8'; // Azul - una ruta
-        return '#dc3545'; // Rojo - no asiste
-    }
-
-    // Obtener icono según estado
-    function obtenerIcono(asistencia) {
-        // Si no hay asistencia registrada
-        if (!asistencia) {
-            return '✓'; // Check simple por defecto
-        }
-
-        // Si hay asistencia registrada
-        if (asistencia.asisteMañana && asistencia.asisteTarde) {
-            return '✓'; // Ambas rutas confirmadas
-        }
-        if (asistencia.asisteMañana && !asistencia.asisteTarde) {
-            return '🌅'; // Solo mañana
-        }
-        if (!asistencia.asisteMañana && asistencia.asisteTarde) {
-            return '🌆'; // Solo tarde
-        }
-
-        // No asiste a ninguna
-        return '✗';
-    }
-
-    // Seleccionar un día del calendario
-    function seleccionarDia(fecha) {
-        diaSeleccionado = fecha;
-        const asistencia = buscarAsistencia(fecha);
-        const traslado = buscarTraslado(fecha); // ✅ NUEVO
-
-        // Formatear fecha
-        const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        document.getElementById('fechaSeleccionada').textContent = fecha.toLocaleDateString('es-ES', opciones);
-
-        // Cargar valores actuales
-        document.getElementById('switchMañana').checked = asistencia ? asistencia.asisteMañana : true;
-        document.getElementById('switchTarde').checked = asistencia ? asistencia.asisteTarde : true;
-
-        // Habilitar/deshabilitar según horarios
-        const hoy = new Date();
-        const esFuturo = fecha > hoy;
-
-        document.getElementById('switchMañana').disabled = !puedeConfirmarMañanaGlobal && !esFuturo;
-        document.getElementById('switchTarde').disabled = !puedeConfirmarTardeGlobal && !esFuturo;
-
-        // ✅ NUEVO: Mostrar alerta si hay traslado aprobado
-        const alertaTraslado = document.getElementById('alertaTraslado');
-        const textoTraslado = document.getElementById('textoTraslado');
-
-        if (traslado) {
-            alertaTraslado.style.display = 'block';
-            const turnoTexto = traslado.turno === 'Ambos' ? 'ambas rutas' : 
-                              traslado.turno === 'Mañana' ? 'ruta matutina' : 'ruta vespertina';
-            textoTraslado.innerHTML = `
-                <strong>Este día tiene un traslado aprobado:</strong><br>
-                🚌 Bus temporal: <strong>${traslado.placaBusDestino || 'N/A'}</strong><br>
-                ⏰ Turno: <strong>${turnoTexto}</strong><br>
-                ${traslado.motivo ? `📝 Motivo: ${traslado.motivo}` : ''}
-            `;
-        } else {
-            alertaTraslado.style.display = 'none';
-        }
-
-        // Mostrar panel
-        document.getElementById('panelConfirmacion').style.display = 'block';
-        document.getElementById('panelConfirmacion').scrollIntoView({ behavior: 'smooth' });
-    }
-
-    // Confirmar asistencia para el día seleccionado
-    async function confirmarDia() {
-        if (!diaSeleccionado) return;
-
-        const idAlumno = document.getElementById('selectAlumno').value;
-        const asisteMañana = document.getElementById('switchMañana').checked;
-        const asisteTarde = document.getElementById('switchTarde').checked;
-
-        // El padre PUEDE cancelar ambas rutas (no asiste ese día)
-        // Ya no validamos que al menos una esté marcada
-
-        const dto = {
-            idAlumno: parseInt(idAlumno),
-            fecha: diaSeleccionado.toISOString(),
-            asisteMañana: asisteMañana,
-            asisteTarde: asisteTarde
-        };
-
-        try {
-            const response = await fetch('/api/asistencia/confirmar', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(dto)
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                // Guardar confirmación localmente
-                guardarConfirmacionLocal(diaSeleccionado, asisteMañana, asisteTarde);
-
-                const mensaje = `
-                    Confirmado para ${diaSeleccionado.toLocaleDateString('es-ES')}:<br>
-                    ${asisteMañana ? '✅ Ruta Matutina' : '❌ NO viajará en la mañana'}<br>
-                    ${asisteTarde ? '✅ Ruta Vespertina' : '❌ NO viajará en la tarde'}
-                `;
-                mostrarExito(mensaje);
-                cerrarPanelConfirmacion();
-                cargarCalendario();
-            } else {
-                mostrarError(result.message);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            mostrarError('Error de conexión. Intente nuevamente.');
-        }
-    }
-
-    // Cerrar panel de confirmación
-    function cerrarPanelConfirmacion() {
-        document.getElementById('panelConfirmacion').style.display = 'none';
-        diaSeleccionado = null;
-    }
-
-    // Navegar al mes anterior
-    function mesAnterior() {
-        mesActual--;
-        if (mesActual < 0) {
-            mesActual = 11;
-            anioActual--;
-        }
-        cargarCalendario();
-    }
-
-    // Navegar al mes siguiente
-    function mesSiguiente() {
-        mesActual++;
-        if (mesActual > 11) {
-            mesActual = 0;
-            anioActual++;
-        }
-        cargarCalendario();
-    }
-
-    // Mostrar modal de éxito
-    function mostrarExito(mensaje, esTraslado = false) {
-        document.getElementById('mensajeExito').innerHTML = mensaje;
-
-        if (esTraslado) {
-            // Cambiar título para traslados
-            document.getElementById('tituloExito').textContent = 'Solicitud Enviada';
-            document.getElementById('subtituloExito').textContent = 'Traslado Temporal';
-
-            // Agregar botón para ver historial
-            document.getElementById('botonesExito').innerHTML = `
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <a href="/Padres/Traslados" class="btn btn-primary">
-                    <i class="bi bi-list-check"></i> Ver Historial de Traslados
-                </a>
-            `;
-        } else {
-            // Restaurar valores por defecto para confirmaciones
-            document.getElementById('tituloExito').textContent = '¡Confirmado!';
-            document.getElementById('subtituloExito').textContent = 'Asistencia Confirmada';
-            document.getElementById('botonesExito').innerHTML = `
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Entendido</button>
-            `;
-        }
-
-        new bootstrap.Modal(document.getElementById('modalExito')).show();
-    }
-
-    // Mostrar modal de error
-    function mostrarError(mensaje) {
-        document.getElementById('mensajeError').textContent = mensaje;
-        new bootstrap.Modal(document.getElementById('modalError')).show();
-    }
-
-    // ========================================
-    // FUNCIONES PARA TRASLADOS
-    // ========================================
-
-    // Abrir modal de traslado
-    function abrirModalTraslado() {
-        if (!diaSeleccionado) {
-            mostrarError('Debe seleccionar un día del calendario primero');
-            return;
-        }
-
-        // Configurar fecha en el modal
-        document.getElementById('trasladoFecha').value = diaSeleccionado.toISOString();
-        document.getElementById('trasladoFechaTexto').textContent = diaSeleccionado.toLocaleDateString('es-ES', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-
-        // Cargar buses disponibles
-        cargarBusesDisponibles();
-
-        // Abrir modal
-        new bootstrap.Modal(document.getElementById('modalTraslado')).show();
-    }
-
-    // Cargar buses disponibles
-    async function cargarBusesDisponibles() {
-        const turno = document.getElementById('trasladoTurno').value;
-        const fecha = diaSeleccionado.toISOString();
-
-        try {
-            const response = await fetch(`/api/traslados/buses-disponibles?fecha=${fecha}&turno=${turno}`);
-            const buses = await response.json();
-
-            const select = document.getElementById('trasladoBusDestino');
-            select.innerHTML = '<option value="">-- Seleccione un bus --</option>';
-
-            buses.forEach(bus => {
-                const option = document.createElement('option');
-                option.value = bus.idBus;
-                option.textContent = `${bus.placa} - ${bus.modelo} (${bus.asientosDisponibles}/${bus.capacidad} disponibles)`;
-                select.appendChild(option);
-            });
-        } catch (error) {
-            console.error('Error al cargar buses:', error);
-            mostrarError('No se pudieron cargar los buses disponibles');
-        }
-    }
-
-    // Enviar solicitud de traslado
-    async function enviarSolicitudTraslado() {
-        const idAlumno = document.getElementById('trasladoIdAlumno').value;
-        const fecha = document.getElementById('trasladoFecha').value;
-        const turno = document.getElementById('trasladoTurno').value;
-        const idBusDestino = document.getElementById('trasladoBusDestino').value;
-        const motivo = document.getElementById('trasladoMotivo').value;
-
-        // Validaciones
-        if (!idBusDestino) {
-            mostrarError('Debe seleccionar un bus destino');
-            return;
-        }
-
-        const dto = {
-            idAlumno: parseInt(idAlumno),
-            fechaTraslado: fecha,
-            turno: turno,
-            idBusDestino: parseInt(idBusDestino),
-            motivo: motivo || null
-        };
-
-        try {
-            const response = await fetch('/api/traslados', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(dto)
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                // Cerrar modal de traslado
-                bootstrap.Modal.getInstance(document.getElementById('modalTraslado')).hide();
-
-                // Obtener información para mostrar
-                const busTexto = document.getElementById('trasladoBusDestino').selectedOptions[0].text;
-                const fechaTexto = diaSeleccionado.toLocaleDateString('es-ES', { 
-                    weekday: 'long', 
-                    day: 'numeric', 
-                    month: 'long', 
-                    year: 'numeric' 
-                });
-
-                // Mostrar éxito con detalles completos
-                mostrarExito(`
-                    <div class="alert alert-success mb-3">
-                        <i class="bi bi-check-circle-fill"></i>
-                        <strong> Solicitud creada exitosamente</strong>
-                    </div>
-
-                    <div class="mb-3">
-                        <h6 class="text-primary mb-3"><i class="bi bi-info-circle"></i> Detalles de la Solicitud:</h6>
-
-                        <table class="table table-sm table-borderless">
-                            <tr>
-                                <td class="text-muted" style="width: 40%;"><strong>Fecha del traslado:</strong></td>
-                                <td>${fechaTexto}</td>
-                            </tr>
-                            <tr>
-                                <td class="text-muted"><strong>Turno:</strong></td>
-                                <td><span class="badge bg-info">${turno}</span></td>
-                            </tr>
-                            <tr>
-                                <td class="text-muted"><strong>Bus solicitado:</strong></td>
-                                <td><span class="badge bg-secondary">${busTexto}</span></td>
-                            </tr>
-                            <tr>
-                                <td class="text-muted"><strong>Estado:</strong></td>
-                                <td><span class="badge bg-warning text-dark"><i class="bi bi-clock"></i> Pendiente</span></td>
-                            </tr>
-                        </table>
-                    </div>
-
-                    <div class="alert alert-info mb-0">
-                        <i class="bi bi-bell"></i> 
-                        <small>Recibirá una notificación cuando el administrador revise su solicitud.</small>
-                    </div>
-                `, true); // true = es un traslado
-
-                // Recargar calendario
-                cargarCalendario();
-            } else {
-                mostrarError(result.message);
-            }
-        } catch (error) {
-            console.error('Error al enviar solicitud:', error);
-            mostrarError('Error al enviar la solicitud. Intente nuevamente.');
-        }
-    }
-
-</script>
-
-<style>
-    .calendario-table td {
-        transition: all 0.3s ease;
-    }
-
-    .calendario-table td:hover:not(:empty) {
-        transform: scale(1.05);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        z-index: 10;
-    }
-
-    .form-check-input-lg {
-        width: 3rem;
-        height: 1.5rem;
-    }
-
-    .form-check-input-lg:checked {
-        background-color: #28a745;
-        border-color: #28a745;
-    }
-
-    /* Switches EXTRA GRANDES para mejor visibilidad */
-    .form-check-input-xl {
-        width: 4rem !important;
-        height: 2rem !important;
-        border-radius: 2rem !important;
-        cursor: pointer !important;
-        background-color: #e9ecef !important;
-        border: 2px solid #ced4da !important;
-        position: relative;
-        transition: all 0.3s ease;
-    }
-
-    .form-check-input-xl:checked {
-        background-color: #28a745 !important;
-        border-color: #28a745 !important;
-        box-shadow: 0 0 0 0.25rem rgba(40, 167, 69, 0.25) !important;
-    }
-
-    .form-check-input-xl:focus {
-        border-color: #28a745 !important;
-        box-shadow: 0 0 0 0.25rem rgba(40, 167, 69, 0.25) !important;
-    }
-
-    .form-check-input-xl::before {
-        content: '';
-        position: absolute;
-        width: 1.5rem;
-        height: 1.5rem;
-        border-radius: 50%;
-        background: white;
-        top: 50%;
-        left: 0.2rem;
-        transform: translateY(-50%);
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-
-    .form-check-input-xl:checked::before {
-        left: calc(100% - 1.7rem);
-    }
-
-    .form-check-label {
-        font-size: 1rem;
-        user-select: none;
-    }
-
-    .form-check {
-        min-height: 3rem;
-        display: flex;
-        align-items: center;
-    }
-
-    .form-check-input:disabled {
-        opacity: 0.4;
-        cursor: not-allowed;
-    }
-
-    .badge-lg {
-        padding: 8px 12px;
-        font-size: 1rem;
-    }
-
-    .card {
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-</style>
