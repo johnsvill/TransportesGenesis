@@ -8,7 +8,7 @@ using TransportesGenesis.Data.Context;
 
 #nullable disable
 
-namespace TransportesGenesis.Data.Migrations
+namespace TransportesGenesis.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
@@ -285,6 +285,62 @@ namespace TransportesGenesis.Data.Migrations
                     b.ToTable("Bancos", "genesis");
                 });
 
+            modelBuilder.Entity("TransportesGenesis.Models.DB.Negocio.CuentaUsuario", b =>
+                {
+                    b.Property<int>("IdCuentaUsuario")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdCuentaUsuario"));
+
+                    b.Property<int>("Activo")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Alias")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("FechaRegistro")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("IdBanco")
+                        .HasColumnType("int");
+
+                    b.Property<string>("NumeroCuenta")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UsuarioId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("IdCuentaUsuario");
+
+                    b.ToTable("CuentasUsuarios", "genesis");
+                });
+
+            modelBuilder.Entity("TransportesGenesis.Models.DB.Negocio.MontoPadre", b =>
+                {
+                    b.Property<int>("IdMontoPadre")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdMontoPadre"));
+
+                    b.Property<int>("Activo")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("FechaRegistro")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("MontoAsignado")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("UsuarioId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("IdMontoPadre");
+
+                    b.ToTable("MontosPadres", "genesis");
+                });
+
             modelBuilder.Entity("TransportesGenesis.Models.DB.Negocio.Padres", b =>
                 {
                     b.Property<int>("IdPadre")
@@ -393,14 +449,32 @@ namespace TransportesGenesis.Data.Migrations
                     b.Property<string>("ComprobanteUrl")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("EstadoAdmin")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EstadoStripe")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("Fecha")
                         .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("FechaPago")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("IdBanco")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("IdCuentaUsuario")
+                        .HasColumnType("int");
 
                     b.Property<string>("Mes")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Monto")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("NumeroComprobante")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TipoPago")
                         .HasColumnType("nvarchar(max)");
@@ -410,7 +484,7 @@ namespace TransportesGenesis.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PagosPadres");
+                    b.ToTable("PagosPadresDb");
                 });
 
             modelBuilder.Entity("TransportesGenesis.Models.DB.Negocio.TipoCuenta", b =>

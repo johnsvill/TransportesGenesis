@@ -1,0 +1,28 @@
+﻿@model TransportesGenesis.Models.DB.Negocio.MontoPadre
+
+@{
+    ViewData["Title"] = "Asignar Monto";
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">Asignar Monto</h2>
+
+    <form asp-action="Create" method="post" class="card shadow-lg p-4">
+        <div class="mb-3">
+            <label for="UsuarioId" class="form-label">Padre de familia</label>
+            <select asp-for="UsuarioId" class="form-select" asp-items="@(new SelectList(ViewBag.Padres, "UserName", "Email"))" required>
+                <option value="">-- Seleccione un padre --</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="MontoAsignado" class="form-label">Monto asignado</label>
+            <input asp-for="MontoAsignado" class="form-control" step="0.01" required />
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <button type="submit" class="btn btn-success">Guardar</button>
+            <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>

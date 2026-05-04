@@ -12,13 +12,15 @@
         @if (roles.Contains("Administrador"))
         {
             <li class="nav-item">
-                <a class="nav-link text-dark" asp-area="Identity" asp-page="/Admin/Index">Gestión de Usuarios</a>
+                <a class="nav-link text-dark" asp-controller="Admin" asp-action="GestionUsuarios">Gestión de Usuarios</a>
             </li>
         }
         else if (roles.Contains("Piloto"))
         {
             <li class="nav-item">
-                <a class="nav-link text-dark" asp-controller="Rutas" asp-action="Index">Mis Rutas</a>
+                <a class="nav-link text-dark" asp-controller="Admin" asp-action="Index">
+                    Gestión de Usuarios
+                </a>
             </li>
         }
         else if (roles.Contains("Monitor"))

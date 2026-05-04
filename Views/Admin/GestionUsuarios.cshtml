@@ -1,0 +1,73 @@
+﻿@model IEnumerable<TransportesGenesis.ViewModels.UsuarioViewModel>
+
+@{
+    ViewData["Title"] = "Gestión de Usuarios";
+}
+
+<div class="container mt-4">
+    <h2>Gestión de Usuarios</h2>
+
+    <!-- Botón para abrir el modal -->
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#crearUsuarioModal">
+        Crear Usuario
+    </button>
+
+    <!-- Tabla de usuarios -->
+    <table class="table table-striped mt-3">
+        <thead class="table-dark">
+            <tr>
+                <th>Usuario</th>
+                <th>Rol</th>
+                <th>Último Login</th>
+                <th>Estatus</th>
+                <th>Primer Login</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var usuario in Model)
+            {
+                <tr>
+                    <td>@usuario.Email</td>
+                    <td>@string.Join(", ", usuario.Roles)</td>
+                    <td>@(usuario.UltimoLogin?.ToString("dd/MM/yyyy HH:mm") ?? "Nunca")</td>
+                    <td>@(usuario.Activo ? "Activo" : "Bloqueado")</td>
+                    <td>@(usuario.PrimerLoginPendiente ? "Pendiente" : "Completado")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal Crear Usuario -->
+<div class="modal fade" id="crearUsuarioModal" tabindex="-1" aria-labelledby="crearUsuarioModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="crearUsuarioModalLabel">Crear Usuario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="CrearUsuario" asp-controller="Admin" method="post">
+                    <div class="mb-3">
+                        <label for="Email" class="form-label">Correo electrónico</label>
+                        <input type="email" class="form-control" id="Email" name="Email" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Rol" class="form-label">Rol</label>
+                        <select class="form-select" id="Rol" name="Rol" required>
+                            <option value="" selected disabled>--Elegir rol del usuario--</option>
+                            <option value="PadreDeFamilia">Padre de Familia</option>
+                            <option value="Administrador">Administrador</option>
+                            <option value="Piloto">Piloto</option>
+                            <option value="Monitor">Monitor</option>
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Crear</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
