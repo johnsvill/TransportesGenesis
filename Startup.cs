@@ -70,6 +70,7 @@ public static class Startup
         services.AddScoped<TransportesGenesis.Repositories.Interfaces.IUbicacionBusRepository, TransportesGenesis.Repositories.Implementations.UbicacionBusRepository>();
         services.AddScoped<TransportesGenesis.Repositories.Interfaces.IAsistenciaAlumnoRepository, TransportesGenesis.Repositories.Implementations.AsistenciaAlumnoRepository>();
         services.AddScoped<TransportesGenesis.Repositories.Interfaces.ISolicitudTrasladoRepository, TransportesGenesis.Repositories.Implementations.SolicitudTrasladoRepository>();
+        services.AddScoped<TransportesGenesis.Repositories.Interfaces.IAlertaProximidadRepository, TransportesGenesis.Repositories.Implementations.AlertaProximidadRepository>();
 
         // Services de Geolocalización
         services.AddScoped<TransportesGenesis.Services.Interfaces.IBusService, TransportesGenesis.Services.Implementations.BusService>();
@@ -78,6 +79,7 @@ public static class Startup
         services.AddScoped<TransportesGenesis.Services.Interfaces.ITrasladoService, TransportesGenesis.Services.Implementations.TrasladoService>();
         services.AddScoped<TransportesGenesis.Services.Interfaces.IRutaService, TransportesGenesis.Services.Implementations.RutaService>();
         services.AddScoped<TransportesGenesis.Services.Interfaces.IConfiguracionService, TransportesGenesis.Services.Implementations.ConfiguracionService>();
+        services.AddScoped<TransportesGenesis.Services.Interfaces.IAlertaService, TransportesGenesis.Services.Implementations.AlertaService>();
         services.AddScoped<TransportesGenesis.Services.Interfaces.INotificacionService, TransportesGenesis.Services.Implementations.NotificacionService>();
 
         // SignalR para notificaciones en tiempo real

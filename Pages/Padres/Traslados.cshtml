@@ -4,100 +4,229 @@
     ViewData["Title"] = "Historial de Traslados";
 }
 
-<div class="container my-4">
-    <div class="row mb-4">
-        <div class="col">
-            <h2>
-                <i class="bi bi-arrow-left-right"></i> Historial de Traslados Temporales
-            </h2>
-            <p class="text-muted">Consulte todas las solicitudes de traslado de bus que ha realizado</p>
-        </div>
-    </div>
+<!-- Estilos personalizados para responsive -->
+<style>
+    .traslado-card {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
 
-    <!-- Filtros -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="row g-3">
-                <div class="col-md-4">
-                    <label class="form-label">Filtrar por estado:</label>
-                    <select class="form-select" id="filtroEstado" onchange="filtrarSolicitudes()">
-                        <option value="Todos">Todos</option>
-                        <option value="Pendiente">Pendiente</option>
-                        <option value="Aprobado">Aprobado</option>
-                        <option value="Rechazado">Rechazado</option>
-                    </select>
+    .traslado-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .estado-pendiente { border-left: 4px solid #ffc107; }
+    .estado-aprobado { border-left: 4px solid #198754; }
+    .estado-rechazado { border-left: 4px solid #dc3545; }
+
+    .stats-card {
+        text-align: center;
+        padding: 1rem;
+    }
+
+    .mobile-info {
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+
+    @@media (max-width: 768px) {
+        .container {
+            padding: 0 10px;
+        }
+
+        .row.mb-4 {
+            margin-bottom: 1rem !important;
+        }
+
+        .stats-card h3 {
+            font-size: 1.8rem;
+        }
+
+        .btn {
+            font-size: 0.9rem;
+        }
+
+        .card-body {
+            padding: 1rem 0.75rem;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .stats-card h3 {
+            font-size: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1rem;
+        }
+
+        .mobile-info {
+            font-size: 0.85rem;
+        }
+    }
+
+    .quick-actions {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+    }
+
+    @@media (max-width: 768px) {
+        .quick-actions {
+            bottom: 15px;
+            right: 15px;
+        }
+    }
+</style>
+
+<div class="container my-4">
+    <!-- Header Principal -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+                <div class="mb-2 mb-md-0">
+                    <h2 class="mb-1">
+                        <i class="bi bi-arrow-left-right text-primary"></i> 
+                        <span class="d-none d-md-inline">Historial de</span> Traslados
+                    </h2>
+                    <p class="text-muted mb-0 d-none d-md-block">Consulte todas las solicitudes de traslado que ha realizado</p>
                 </div>
-                <div class="col-md-4">
-                    <label class="form-label">Filtrar por mes:</label>
-                    <select class="form-select" id="filtroMes" onchange="filtrarSolicitudes()">
-                        <option value="Todos">Todos</option>
-                    </select>
-                </div>
-                <div class="col-md-4 d-flex align-items-end">
-                    <button class="btn btn-outline-secondary w-100" onclick="limpiarFiltros()">
-                        <i class="bi bi-x-circle"></i> Limpiar Filtros
+                <div>
+                    <button class="btn btn-primary btn-sm" onclick="mostrarAyuda()">
+                        <i class="bi bi-question-circle"></i>
+                        <span class="d-none d-md-inline">Ayuda</span>
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Resumen de estadísticas -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card border-warning">
-                <div class="card-body text-center">
-                    <h3 class="text-warning" id="totalPendientes">0</h3>
-                    <p class="text-muted mb-0"><small>Pendientes</small></p>
+    <!-- Resumen de estadísticas responsive -->
+    <div class="row mb-4 g-2">
+        <div class="col-6 col-md-3">
+            <div class="card border-warning h-100">
+                <div class="card-body stats-card">
+                    <h3 class="text-warning mb-1" id="totalPendientes">0</h3>
+                    <p class="text-muted mb-0">
+                        <small><i class="bi bi-clock"></i> Pendientes</small>
+                    </p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-success">
-                <div class="card-body text-center">
-                    <h3 class="text-success" id="totalAprobados">0</h3>
-                    <p class="text-muted mb-0"><small>Aprobados</small></p>
+        <div class="col-6 col-md-3">
+            <div class="card border-success h-100">
+                <div class="card-body stats-card">
+                    <h3 class="text-success mb-1" id="totalAprobados">0</h3>
+                    <p class="text-muted mb-0">
+                        <small><i class="bi bi-check-circle"></i> Aprobados</small>
+                    </p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-danger">
-                <div class="card-body text-center">
-                    <h3 class="text-danger" id="totalRechazados">0</h3>
-                    <p class="text-muted mb-0"><small>Rechazados</small></p>
+        <div class="col-6 col-md-3">
+            <div class="card border-danger h-100">
+                <div class="card-body stats-card">
+                    <h3 class="text-danger mb-1" id="totalRechazados">0</h3>
+                    <p class="text-muted mb-0">
+                        <small><i class="bi bi-x-circle"></i> Rechazados</small>
+                    </p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-info">
-                <div class="card-body text-center">
-                    <h3 class="text-info" id="totalSolicitudes">0</h3>
-                    <p class="text-muted mb-0"><small>Total</small></p>
+        <div class="col-6 col-md-3">
+            <div class="card border-info h-100">
+                <div class="card-body stats-card">
+                    <h3 class="text-info mb-1" id="totalSolicitudes">0</h3>
+                    <p class="text-muted mb-0">
+                        <small><i class="bi bi-list-ul"></i> Total</small>
+                    </p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Tabla de solicitudes -->
-    <div class="card">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">
-                <i class="bi bi-list-ul"></i> Solicitudes de Traslado
-            </h5>
+    <!-- Filtros colapsables -->
+    <div class="card mb-3">
+        <div class="card-header bg-light">
+            <div class="d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">
+                    <i class="bi bi-funnel"></i> Filtros
+                </h6>
+                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" 
+                        data-bs-target="#filtrosCollapse" aria-expanded="false">
+                    <i class="bi bi-chevron-down" id="filtrosIcon"></i>
+                </button>
+            </div>
         </div>
-        <div class="card-body">
-            <div id="contenedorSolicitudes">
-                <div class="text-center py-5">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Cargando...</span>
+        <div class="collapse" id="filtrosCollapse">
+            <div class="card-body">
+                <div class="row g-2">
+                    <div class="col-12 col-md-4">
+                        <label class="form-label">
+                            <i class="bi bi-funnel-fill"></i> Estado:
+                        </label>
+                        <select class="form-select form-select-sm" id="filtroEstado" onchange="filtrarSolicitudes()">
+                            <option value="Todos">Todos los estados</option>
+                            <option value="Pendiente">⏰ Pendiente</option>
+                            <option value="Aprobado">✅ Aprobado</option>
+                            <option value="Rechazado">❌ Rechazado</option>
+                        </select>
                     </div>
-                    <p class="text-muted mt-3">Cargando solicitudes...</p>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label">
+                            <i class="bi bi-calendar-month"></i> Mes:
+                        </label>
+                        <select class="form-select form-select-sm" id="filtroMes" onchange="filtrarSolicitudes()">
+                            <option value="Todos">Todos los meses</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-4 d-flex align-items-end">
+                        <button class="btn btn-outline-secondary btn-sm w-100" onclick="limpiarFiltros()">
+                            <i class="bi bi-x-circle"></i> Limpiar
+                        </button>
+                    </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Contenedor principal de solicitudes -->
+    <div id="contenedorSolicitudes">
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="text-muted mt-3">Cargando solicitudes...</p>
         </div>
     </div>
 
     <!-- Mensaje sin solicitudes -->
+    <div id="mensajeSinSolicitudes" class="text-center py-5" style="display: none;">
+        <div class="mb-3">
+            <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+        </div>
+        <h5 class="text-muted">No hay solicitudes de traslado</h5>
+        <p class="text-muted mb-3">Aún no ha realizado ninguna solicitud de traslado.</p>
+        <a href="/Padres/ConfirmarAsistencia" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Nueva Solicitud
+        </a>
+    </div>
+</div>
+
+<!-- Botones de acciones rápidas flotantes -->
+<div class="quick-actions d-block d-md-none">
+    <div class="btn-group-vertical" role="group">
+        <button type="button" class="btn btn-primary btn-sm" onclick="scrollToTop()">
+            <i class="bi bi-arrow-up"></i>
+        </button>
+        <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="collapse" 
+                data-bs-target="#filtrosCollapse">
+            <i class="bi bi-funnel"></i>
+        </button>
+    </div>
+</div>
     <div id="mensajeSinSolicitudes" class="alert alert-info mt-4" style="display: none;">
         <i class="bi bi-info-circle"></i>
         <strong>No hay solicitudes de traslado</strong><br>
@@ -105,9 +234,9 @@
     </div>
 </div>
 
-<!-- Modal de detalles -->
+<!-- Modal de detalles responsive -->
 <div class="modal fade" id="modalDetalles" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header" id="modalDetallesHeader">
                 <h5 class="modal-title">
@@ -118,8 +247,16 @@
             <div class="modal-body" id="modalDetallesBody">
                 <!-- Contenido dinámico -->
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-arrow-left"></i> Cerrar
+                </button>
+                <div>
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="compartirSolicitud()">
+                        <i class="bi bi-share"></i>
+                        <span class="d-none d-md-inline">Compartir</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -134,7 +271,86 @@
     document.addEventListener('DOMContentLoaded', async () => {
         await cargarSolicitudes();
         poblarFiltroMeses();
+
+        // Manejar el ícono de filtros colapsables
+        const filtrosCollapse = document.getElementById('filtrosCollapse');
+        const filtrosIcon = document.getElementById('filtrosIcon');
+
+        filtrosCollapse.addEventListener('show.bs.collapse', () => {
+            filtrosIcon.className = 'bi bi-chevron-up';
+        });
+
+        filtrosCollapse.addEventListener('hide.bs.collapse', () => {
+            filtrosIcon.className = 'bi bi-chevron-down';
+        });
     });
+
+    // Función para scroll to top
+    function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Función para mostrar ayuda
+    function mostrarAyuda() {
+        const ayudaModal = new bootstrap.Modal(document.createElement('div'));
+
+        const modalHtml = `
+        <div class="modal fade" id="ayudaModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title">
+                            <i class="bi bi-question-circle"></i> Ayuda - Traslados
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <h6><i class="bi bi-info-circle text-info"></i> ¿Qué son los traslados?</h6>
+                                <p class="small text-muted">
+                                    Los traslados temporales permiten que su hijo/a sea transportado en un bus 
+                                    diferente por un día específico.
+                                </p>
+                            </div>
+                            <div class="col-12">
+                                <h6><i class="bi bi-clock text-warning"></i> Estados de solicitud</h6>
+                                <ul class="small text-muted">
+                                    <li><strong>Pendiente:</strong> Su solicitud está en revisión</li>
+                                    <li><strong>Aprobado:</strong> Su solicitud fue aceptada</li>
+                                    <li><strong>Rechazado:</strong> Su solicitud fue denegada</li>
+                                </ul>
+                            </div>
+                            <div class="col-12">
+                                <h6><i class="bi bi-calendar text-primary"></i> ¿Cómo solicitar?</h6>
+                                <p class="small text-muted">
+                                    Puede solicitar traslados desde el 
+                                    <a href="/Padres/ConfirmarAsistencia" class="text-decoration-none">
+                                        calendario de asistencia
+                                    </a> con al menos 24 horas de anticipación.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        <a href="/Padres/ConfirmarAsistencia" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Nueva Solicitud
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        const modal = new bootstrap.Modal(document.getElementById('ayudaModal'));
+        modal.show();
+
+        // Limpiar modal después de cerrarlo
+        document.getElementById('ayudaModal').addEventListener('hidden.bs.modal', function () {
+            this.remove();
+        });
+    }
 
     // Cargar solicitudes desde API
     async function cargarSolicitudes() {
@@ -200,7 +416,7 @@
         ];
     }
 
-    // Mostrar solicitudes en tabla
+    // Mostrar solicitudes en formato de cards responsive
     function mostrarSolicitudes() {
         const contenedor = document.getElementById('contenedorSolicitudes');
         const mensajeSin = document.getElementById('mensajeSinSolicitudes');
@@ -216,38 +432,121 @@
         // Ordenar por fecha descendente (más recientes primero)
         solicitudesFiltradas.sort((a, b) => new Date(b.fechaRegistro) - new Date(a.fechaRegistro));
 
-        let html = '<div class="table-responsive"><table class="table table-hover">';
-        html += '<thead class="table-light">';
-        html += '<tr>';
-        html += '<th>Fecha Traslado</th>';
-        html += '<th>Turno</th>';
-        html += '<th>Bus Destino</th>';
-        html += '<th>Estado</th>';
-        html += '<th>Fecha Solicitud</th>';
-        html += '<th>Acciones</th>';
-        html += '</tr>';
-        html += '</thead>';
-        html += '<tbody>';
+        let html = '<div class="row g-3">';
 
         solicitudesFiltradas.forEach(s => {
             const fecha = new Date(s.fechaTraslado);
             const fechaRegistro = new Date(s.fechaRegistro);
-            const estadoBadge = obtenerBadgeEstado(s.estado);
+            const estadoClass = `estado-${s.estado.toLowerCase()}`;
             const iconoTurno = obtenerIconoTurno(s.turno);
+            const estadoBadge = obtenerBadgeEstado(s.estado);
 
-            html += '<tr>';
-            html += `<td><strong>${fecha.toLocaleDateString('es-ES', { weekday: 'short', day: '2-digit', month: 'short' })}</strong></td>`;
-            html += `<td>${iconoTurno} ${s.turno}</td>`;
-            html += `<td><span class="badge bg-secondary">${s.placaBusDestino || 'Sin asignar'}</span></td>`;
-            html += `<td>${estadoBadge}</td>`;
-            html += `<td><small class="text-muted">${fechaRegistro.toLocaleDateString('es-ES')}</small></td>`;
-            html += `<td><button class="btn btn-sm btn-outline-info" onclick="verDetalles(${s.idSolicitud})">
-                         <i class="bi bi-eye"></i> Ver
-                     </button></td>`;
-            html += '</tr>';
+            // Determinar si es próximo, pasado o hoy
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0);
+            const fechaTraslado = new Date(s.fechaTraslado);
+            fechaTraslado.setHours(0, 0, 0, 0);
+
+            let tiempoStatus = '';
+            if (fechaTraslado.getTime() === hoy.getTime()) {
+                tiempoStatus = '<span class="badge bg-info">Hoy</span>';
+            } else if (fechaTraslado > hoy) {
+                const diffTime = Math.abs(fechaTraslado - hoy);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                tiempoStatus = `<span class="badge bg-primary">En ${diffDays} día${diffDays > 1 ? 's' : ''}</span>`;
+            } else {
+                tiempoStatus = '<span class="badge bg-secondary">Pasado</span>';
+            }
+
+            html += `
+            <div class="col-12">
+                <div class="card traslado-card ${estadoClass}" onclick="verDetalles(${s.idSolicitud})">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <!-- Información principal -->
+                            <div class="col-12 col-md-8">
+                                <div class="d-flex flex-column flex-md-row justify-content-between align-items-start">
+                                    <div class="mb-2 mb-md-0">
+                                        <h6 class="card-title mb-1">
+                                            <i class="bi bi-calendar-date text-primary"></i>
+                                            ${fecha.toLocaleDateString('es-ES', { 
+                                                weekday: 'long', 
+                                                day: '2-digit', 
+                                                month: 'short',
+                                                year: 'numeric'
+                                            })}
+                                            ${tiempoStatus}
+                                        </h6>
+                                        <div class="mobile-info">
+                                            <div class="mb-1">
+                                                <strong>${iconoTurno} ${s.turno}</strong> 
+                                                ${s.placaBusDestino ? 
+                                                    `<span class="badge bg-secondary ms-2">${s.placaBusDestino}</span>` : 
+                                                    '<span class="badge bg-light text-dark ms-2">Sin asignar</span>'
+                                                }
+                                            </div>
+                                            ${s.motivo ? 
+                                                `<div class="text-muted small">
+                                                    <i class="bi bi-chat-text"></i> ${s.motivo.length > 50 ? 
+                                                        s.motivo.substring(0, 50) + '...' : 
+                                                        s.motivo
+                                                    }
+                                                </div>` : 
+                                                ''
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Estado y acciones -->
+                            <div class="col-12 col-md-4">
+                                <div class="d-flex flex-column align-items-md-end">
+                                    <div class="mb-2">
+                                        ${estadoBadge}
+                                    </div>
+                                    <div class="d-flex justify-content-between w-100 w-md-auto">
+                                        <small class="text-muted me-3">
+                                            <i class="bi bi-clock-history"></i> 
+                                            ${fechaRegistro.toLocaleDateString('es-ES')}
+                                        </small>
+                                        <button class="btn btn-outline-primary btn-sm" onclick="event.stopPropagation(); verDetalles(${s.idSolicitud})">
+                                            <i class="bi bi-eye"></i>
+                                            <span class="d-none d-md-inline">Ver detalles</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
         });
 
-        html += '</tbody></table></div>';
+        html += '</div>';
+
+        // Agregar información adicional al final
+        html += `
+        <div class="mt-4">
+            <div class="alert alert-info">
+                <div class="row align-items-center">
+                    <div class="col-12 col-md-8">
+                        <h6 class="alert-heading mb-1">
+                            <i class="bi bi-info-circle"></i> Información importante
+                        </h6>
+                        <p class="mb-0 small">
+                            Las solicitudes de traslado deben realizarse con al menos 24 horas de anticipación.
+                        </p>
+                    </div>
+                    <div class="col-12 col-md-4 text-md-end mt-2 mt-md-0">
+                        <a href="/Padres/ConfirmarAsistencia" class="btn btn-primary btn-sm">
+                            <i class="bi bi-plus-circle"></i> Nueva Solicitud
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+
         contenedor.innerHTML = html;
     }
 
@@ -271,7 +570,7 @@
         return iconos[turno] || '⏰';
     }
 
-    // Ver detalles de una solicitud
+    // Ver detalles de una solicitud con diseño responsive
     function verDetalles(idSolicitud) {
         const solicitud = solicitudesOriginal.find(s => s.idSolicitud === idSolicitud);
         if (!solicitud) return;
@@ -286,41 +585,207 @@
         else if (solicitud.estado === 'Rechazado') header.classList.add('bg-danger', 'text-white');
         else header.classList.add('bg-warning');
 
-        let html = '<div class="row g-3">';
+        // Determinar si es próximo, pasado o hoy
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+        const fechaTraslado = new Date(solicitud.fechaTraslado);
+        fechaTraslado.setHours(0, 0, 0, 0);
 
-        // Información básica
-        html += '<div class="col-12"><h6 class="border-bottom pb-2">Información del Traslado</h6></div>';
-        html += `<div class="col-md-6"><strong>Fecha del Traslado:</strong><br>${fecha.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>`;
-        html += `<div class="col-md-6"><strong>Turno:</strong><br>${obtenerIconoTurno(solicitud.turno)} ${solicitud.turno}</div>`;
-        html += `<div class="col-md-6"><strong>Bus Origen:</strong><br><span class="badge bg-secondary">${solicitud.placaBusOrigen}</span></div>`;
-        html += `<div class="col-md-6"><strong>Bus Destino:</strong><br><span class="badge bg-secondary">${solicitud.placaBusDestino || 'Sin asignar'}</span></div>`;
+        let tiempoStatus = '';
+        if (fechaTraslado.getTime() === hoy.getTime()) {
+            tiempoStatus = '<span class="badge bg-info fs-6">Es hoy</span>';
+        } else if (fechaTraslado > hoy) {
+            const diffTime = Math.abs(fechaTraslado - hoy);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            tiempoStatus = `<span class="badge bg-primary fs-6">En ${diffDays} día${diffDays > 1 ? 's' : ''}</span>`;
+        } else {
+            tiempoStatus = '<span class="badge bg-secondary fs-6">Ya pasó</span>';
+        }
+
+        let html = `
+        <div class="card border-0">
+            <div class="card-body p-0">
+                <!-- Header de la solicitud -->
+                <div class="text-center mb-4 p-3 bg-light rounded">
+                    <h4 class="mb-2">
+                        ${obtenerIconoTurno(solicitud.turno)} Traslado ${solicitud.turno}
+                    </h4>
+                    <h5 class="text-primary mb-1">
+                        ${fecha.toLocaleDateString('es-ES', { 
+                            weekday: 'long', 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric' 
+                        })}
+                    </h5>
+                    ${tiempoStatus}
+                </div>
+
+                <!-- Información del traslado -->
+                <div class="row g-3 mb-4">
+                    <div class="col-12">
+                        <h6 class="border-bottom pb-2 mb-3">
+                            <i class="bi bi-bus-front text-primary"></i> Información del Traslado
+                        </h6>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-arrow-right-circle text-muted me-2"></i>
+                            <strong class="me-2">Bus Origen:</strong>
+                        </div>
+                        <span class="badge bg-secondary fs-6">${solicitud.placaBusOrigen}</span>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-arrow-left-circle text-muted me-2"></i>
+                            <strong class="me-2">Bus Destino:</strong>
+                        </div>
+                        <span class="badge bg-secondary fs-6">${solicitud.placaBusDestino || 'Sin asignar'}</span>
+                    </div>`;
 
         // Motivo
         if (solicitud.motivo) {
-            html += `<div class="col-12"><strong>Motivo:</strong><br><p class="text-muted mb-0">${solicitud.motivo}</p></div>`;
+            html += `
+                    <div class="col-12">
+                        <div class="d-flex align-items-start mb-2">
+                            <i class="bi bi-chat-text text-muted me-2 mt-1"></i>
+                            <strong>Motivo:</strong>
+                        </div>
+                        <div class="alert alert-light border p-3">
+                            <p class="mb-0">${solicitud.motivo}</p>
+                        </div>
+                    </div>`;
         }
 
-        // Estado y fechas
-        html += '<div class="col-12"><h6 class="border-bottom pb-2 mt-3">Estado de la Solicitud</h6></div>';
-        html += `<div class="col-md-6"><strong>Estado:</strong><br>${obtenerBadgeEstado(solicitud.estado)}</div>`;
-        html += `<div class="col-md-6"><strong>Fecha de Solicitud:</strong><br>${fechaRegistro.toLocaleDateString('es-ES')}</div>`;
+        html += `
+                </div>
+
+                <!-- Estado de la solicitud -->
+                <div class="row g-3">
+                    <div class="col-12">
+                        <h6 class="border-bottom pb-2 mb-3">
+                            <i class="bi bi-clipboard-check text-primary"></i> Estado de la Solicitud
+                        </h6>
+                    </div>
+
+                    <div class="col-12 text-center mb-3">
+                        <div class="p-3 rounded" style="background-color: ${
+                            solicitud.estado === 'Aprobado' ? '#d4edda' : 
+                            solicitud.estado === 'Rechazado' ? '#f8d7da' : 
+                            '#fff3cd'
+                        };">
+                            ${obtenerBadgeEstado(solicitud.estado)}
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-calendar-plus text-muted me-2"></i>
+                            <strong>Solicitado:</strong>
+                        </div>
+                        <p class="text-muted">${fechaRegistro.toLocaleDateString('es-ES', { 
+                            weekday: 'long', 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric' 
+                        })}</p>
+                    </div>`;
 
         // Información de respuesta (si existe)
         if (solicitud.fechaRespuesta) {
             const fechaRespuesta = new Date(solicitud.fechaRespuesta);
-            html += `<div class="col-md-6"><strong>Fecha de Respuesta:</strong><br>${fechaRespuesta.toLocaleDateString('es-ES')}</div>`;
-            html += `<div class="col-md-6"><strong>Respondido por:</strong><br>${solicitud.aprobadoPor || 'N/A'}</div>`;
+            html += `
+                    <div class="col-12 col-md-6">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-calendar-check text-muted me-2"></i>
+                            <strong>Respondido:</strong>
+                        </div>
+                        <p class="text-muted">${fechaRespuesta.toLocaleDateString('es-ES', { 
+                            weekday: 'long', 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric' 
+                        })}</p>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-person-check text-muted me-2"></i>
+                            <strong>Procesado por:</strong>
+                        </div>
+                        <span class="badge bg-info">${solicitud.aprobadoPor || 'Sistema'}</span>
+                    </div>`;
         }
 
         // Comentario del admin (si existe)
         if (solicitud.comentarioAdmin) {
-            html += `<div class="col-12"><div class="alert alert-info mb-0"><strong>Comentario del Administrador:</strong><br>${solicitud.comentarioAdmin}</div></div>`;
+            html += `
+                    <div class="col-12 mt-3">
+                        <div class="alert ${
+                            solicitud.estado === 'Aprobado' ? 'alert-success' : 
+                            solicitud.estado === 'Rechazado' ? 'alert-danger' : 
+                            'alert-warning'
+                        }">
+                            <h6 class="alert-heading mb-2">
+                                <i class="bi bi-chat-square-text"></i> Comentario del Administrador
+                            </h6>
+                            <p class="mb-0">${solicitud.comentarioAdmin}</p>
+                        </div>
+                    </div>`;
         }
 
-        html += '</div>';
+        html += `
+                </div>
+            </div>
+        </div>`;
 
         document.getElementById('modalDetallesBody').innerHTML = html;
+
+        // Guardar ID de solicitud actual para compartir
+        window.currentSolicitudId = idSolicitud;
+
         new bootstrap.Modal(document.getElementById('modalDetalles')).show();
+    }
+
+    // Función para compartir solicitud
+    function compartirSolicitud() {
+        if (!window.currentSolicitudId) return;
+
+        const solicitud = solicitudesOriginal.find(s => s.idSolicitud === window.currentSolicitudId);
+        if (!solicitud) return;
+
+        const fecha = new Date(solicitud.fechaTraslado);
+        const texto = `Solicitud de Traslado #${solicitud.idSolicitud}\n` +
+                     `Fecha: ${fecha.toLocaleDateString('es-ES')}\n` +
+                     `Turno: ${solicitud.turno}\n` +
+                     `Estado: ${solicitud.estado}\n` +
+                     `Bus destino: ${solicitud.placaBusDestino || 'Sin asignar'}`;
+
+        if (navigator.share) {
+            navigator.share({
+                title: 'Solicitud de Traslado',
+                text: texto
+            }).catch(err => console.log('Error compartiendo:', err));
+        } else {
+            // Fallback: copiar al portapapeles
+            navigator.clipboard.writeText(texto).then(() => {
+                // Mostrar notificación temporal
+                const toast = document.createElement('div');
+                toast.className = 'toast show position-fixed bottom-0 end-0 m-3';
+                toast.innerHTML = `
+                    <div class="toast-body bg-success text-white">
+                        <i class="bi bi-check-circle me-2"></i>
+                        Información copiada al portapapeles
+                    </div>`;
+                document.body.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.remove();
+                }, 3000);
+            });
+        }
     }
 
     // Filtrar solicitudes

@@ -183,5 +183,105 @@ namespace TransportesGenesis.Services.Implementations
                 // No throw - actualización de ubicación no debe romper flujo
             }
         }
+
+        #region Métodos para Alertas de Proximidad (Módulo 3)
+
+        public async Task EnviarAlertaProximidadAsync(int idAlerta, int idBus, int? idAlumno, string mensaje, string tipoAlerta, int? paradasRestantes = null)
+        {
+            try
+            {
+                _logger.LogInformation($"[NOTIFICACION-ALERTA] Enviando alerta {tipoAlerta} - ID: {idAlerta}, Bus: {idBus}");
+
+                var alertaData = new
+                {
+                    IdAlerta = idAlerta,
+                    IdBus = idBus,
+                    IdAlumno = idAlumno,
+                    TipoAlerta = tipoAlerta,
+                    Mensaje = mensaje,
+                    ParadasRestantes = paradasRestantes,
+                    FechaHora = DateTime.Now,
+                    RequiereConfirmacion = tipoAlerta == "proximidad"
+                };
+
+                // Enviar a grupo del bus (todos los padres de ese bus)
+                await _hubContext.Clients.Group($"Bus_{idBus}")
+                    .SendAsync("AlertaRecibida", alertaData);
+
+                // Si hay alumno específico, también enviar a su grupo personal
+                if (idAlumno.HasValue)
+                {
+                    await _hubContext.Clients.Group($"Alumno_{idAlumno.Value}")
+                        .SendAsync("AlertaPersonal", alertaData);
+                }
+
+                _logger.LogInformation($"[NOTIFICACION-ALERTA] Alerta {idAlerta} enviada exitosamente");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"[NOTIFICACION-ALERTA] Error al enviar alerta {idAlerta}");
+                throw;
+            }
+        }
+
+        public async Task NotificarAlertaResueltaAsync(int idAlerta, int idBus, string motivo)
+        {
+            try
+            {
+                _logger.LogInformation($"[NOTIFICACION-ALERTA] Notificando resolución alerta {idAlerta} - Bus: {idBus}");
+
+                var resolucionData = new
+                {
+                    IdAlerta = idAlerta,
+                    IdBus = idBus,
+                    Motivo = motivo,
+                    FechaResolucion = DateTime.Now,
+                    Mensaje = $"✅ Alerta #{idAlerta} ha sido resuelta: {motivo}"
+                };
+
+                // Notificar a grupo del bus
+                await _hubContext.Clients.Group($"Bus_{idBus}")
+                    .SendAsync("AlertaResuelta", resolucionData);
+
+                _logger.LogInformation($"[NOTIFICACION-ALERTA] Resolución alerta {idAlerta} notificada");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"[NOTIFICACION-ALERTA] Error al notificar resolución alerta {idAlerta}");
+                throw;
+            }
+        }
+
+        public async Task NotificarConfirmacionAlertaAsync(int idAlerta, string idPadre)
+        {
+            try
+            {
+                _logger.LogInformation($"[NOTIFICACION-ALERTA] Notificando confirmación alerta {idAlerta} por padre {idPadre}");
+
+                var confirmacionData = new
+                {
+                    IdAlerta = idAlerta,
+                    IdPadre = idPadre,
+                    FechaConfirmacion = DateTime.Now,
+                    Mensaje = $"✅ Alerta #{idAlerta} confirmada por padre"
+                };
+
+                // Notificar a administradores y pilotos
+                await _hubContext.Clients.Group("Administradores")
+                    .SendAsync("AlertaConfirmada", confirmacionData);
+
+                await _hubContext.Clients.Group("Pilotos")
+                    .SendAsync("AlertaConfirmada", confirmacionData);
+
+                _logger.LogInformation($"[NOTIFICACION-ALERTA] Confirmación alerta {idAlerta} notificada");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"[NOTIFICACION-ALERTA] Error al notificar confirmación alerta {idAlerta}");
+                throw;
+            }
+        }
+
+        #endregion
     }
 }

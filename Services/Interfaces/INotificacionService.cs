@@ -36,5 +36,20 @@ namespace TransportesGenesis.Services.Interfaces
         /// Actualizar ubicación del bus en tiempo real
         /// </summary>
         Task ActualizarUbicacionBusAsync(int idBus, decimal latitud, decimal longitud);
+
+        /// <summary>
+        /// Enviar alerta de proximidad en tiempo real via SignalR
+        /// </summary>
+        Task EnviarAlertaProximidadAsync(int idAlerta, int idBus, int? idAlumno, string mensaje, string tipoAlerta, int? paradasRestantes = null);
+
+        /// <summary>
+        /// Notificar que una alerta ha sido resuelta
+        /// </summary>
+        Task NotificarAlertaResueltaAsync(int idAlerta, int idBus, string motivo);
+
+        /// <summary>
+        /// Enviar confirmación de alerta recibida por padre
+        /// </summary>
+        Task NotificarConfirmacionAlertaAsync(int idAlerta, string idPadre);
     }
 }

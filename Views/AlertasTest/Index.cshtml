@@ -1,0 +1,589 @@
+@{
+    ViewData["Title"] = "Pruebas - Sistema de Alertas";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- CDN de SignalR -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.0/signalr.min.js"></script>
+
+<!-- REEMPLAZAR TOASTR CON NOTIFICACIONES BOOTSTRAP NATIVAS -->
+<style>
+    .notification-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+    }
+
+    .custom-toast {
+        min-width: 300px;
+        margin-bottom: 10px;
+        animation: slideIn 0.3s ease-in;
+    }
+
+    @@keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+</style>
+
+<!-- Contenedor para notificaciones personalizadas -->
+<div id="notificationContainer" class="notification-container"></div>
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">🧪 Sistema de Pruebas - Alertas con SignalR</h3>
+                    <small>Módulo 3: Integración con Hub de Notificaciones</small>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <strong>ℹ️ Instrucciones:</strong>
+                        <ul class="mb-0">
+                            <li>Las alertas se envían automáticamente via SignalR cuando uses los botones</li>
+                            <li>Las notificaciones aparecerán en tiempo real sin refrescar la página</li>
+                            <li>Abre esta página en múltiples pestañas para ver el efecto broadcast</li>
+                            <li>Revisa la consola del navegador (F12) para logs detallados</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel de Control -->
+            <div class="row g-4">
+                <!-- Simular Alertas -->
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0">🚨 Simular Alertas</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <button id="btnAlertaProximidad" class="btn btn-info">
+                                    📍 Simular Alerta de Proximidad
+                                </button>
+                                <button id="btnAlertaRetraso" class="btn btn-warning">
+                                    ⏰ Simular Alerta de Retraso
+                                </button>
+                                <button id="btnBroadcast" class="btn btn-secondary">
+                                    📢 Enviar Broadcast General
+                                </button>
+                            </div>
+
+                            <hr>
+
+                            <div class="mb-3">
+                                <label for="idBusNotificar" class="form-label">Notificar Bus Específico:</label>
+                                <div class="input-group">
+                                    <input type="number" id="idBusNotificar" class="form-control" placeholder="ID del Bus" value="1">
+                                    <input type="text" id="mensajeBus" class="form-control" placeholder="Mensaje...">
+                                    <button id="btnNotificarBus" class="btn btn-outline-primary">Enviar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gestionar Alertas -->
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">✅ Gestionar Alertas</h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- ✨ MÓDULO 6: Botón para generar datos de ejemplo -->
+                            <button id="btnGenerarDatos" class="btn btn-primary mb-3 w-100">
+                                🎯 Generar Datos de Ejemplo (Módulo 6)
+                            </button>
+
+                            <!-- 🔍 DIAGNÓSTICO: Nuevo botón para verificar estado del sistema -->
+                            <button id="btnDiagnostico" class="btn btn-info mb-3 w-100">
+                                🔍 Diagnóstico del Sistema
+                            </button>
+
+                            <button id="btnCargarAlertas" class="btn btn-outline-info mb-3 w-100">
+                                🔄 Cargar Alertas Activas
+                            </button>
+
+                            <div id="listaAlertasActivas">
+                                <p class="text-muted">Haz clic en "Cargar Alertas Activas" para ver las alertas...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estado de Conexión -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header bg-dark text-white">
+                            <h5 class="mb-0">🔌 Estado de Conexión SignalR</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="d-flex align-items-center">
+                                        <div id="connectionStatus" class="badge bg-secondary me-2">🔴 Desconectado</div>
+                                        <span>Estado de Conexión</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="d-flex align-items-center">
+                                        <div id="alertasRecibidas" class="badge bg-info me-2">0</div>
+                                        <span>Alertas Recibidas</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="d-flex align-items-center">
+                                        <button id="btnReconectar" class="btn btn-sm btn-outline-primary">
+                                            🔄 Reconectar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Log de Actividad -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">📋 Log de Actividad</h5>
+                            <button id="btnLimpiarLog" class="btn btn-sm btn-outline-light">Limpiar</button>
+                        </div>
+                        <div class="card-body">
+                            <div id="activityLog" style="height: 300px; overflow-y: auto; background: #f8f9fa; padding: 10px; border-radius: 4px;">
+                                <div class="text-muted">Log de actividad aparecerá aquí...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/alertas-signalr.js"></script>
+    <script>
+        let alertasRecibidas = 0;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Ya no necesitamos configurar Toastr - usamos notificaciones Bootstrap
+            log('🔄 Inicializando página de pruebas de alertas...');
+
+            // Configurar callbacks de AlertasSignalR
+            alertasSignalR.on('onAlertaRecibida', function(data) {
+                alertasRecibidas++;
+                document.getElementById('alertasRecibidas').textContent = alertasRecibidas;
+                log(`🚨 Alerta recibida: ${data.TipoAlerta} - ${data.Mensaje}`);
+            });
+
+            alertasSignalR.on('onAlertaPersonal', function(data) {
+                alertasRecibidas++;
+                document.getElementById('alertasRecibidas').textContent = alertasRecibidas;
+                log(`🎯 Alerta PERSONAL: ${data.TipoAlerta} - ${data.Mensaje}`);
+            });
+
+            alertasSignalR.on('onAlertaResuelta', function(data) {
+                log(`✅ Alerta resuelta: ${data.IdAlerta} - ${data.Motivo}`);
+            });
+
+            alertasSignalR.on('onAlertaConfirmada', function(data) {
+                log(`🔔 Alerta confirmada: ${data.IdAlerta} por padre ${data.IdPadre}`);
+            });
+
+            // Verificar estado de conexión cada 2 segundos
+            setInterval(function() {
+                const conectado = alertasSignalR.estaConectado();
+                const badge = document.getElementById('connectionStatus');
+                if (conectado) {
+                    badge.textContent = '🟢 Conectado';
+                    badge.className = 'badge bg-success me-2';
+                } else {
+                    badge.textContent = '🔴 Desconectado';
+                    badge.className = 'badge bg-danger me-2';
+                }
+            }, 2000);
+
+            // Configurar botones
+            configurarBotones();
+        });
+
+        function configurarBotones() {
+            // Simular alerta de proximidad
+            document.getElementById('btnAlertaProximidad').addEventListener('click', async function() {
+                this.disabled = true;
+                this.innerHTML = '⏳ Enviando...';
+
+                try {
+                    const response = await fetch('/AlertasTest/SimularAlertaProximidad', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        log(`✅ ${result.message} - ID: ${result.alertaId}`);
+                        showToastr('success', result.message, 'Éxito');
+                    } else {
+                        log(`❌ Error: ${result.message}`);
+                        showToastr('error', result.message, 'Error');
+                    }
+                } catch (error) {
+                    log(`❌ Error de red: ${error.message}`);
+                    showToastr('error', 'Error de conexión', 'Error');
+                }
+
+                this.disabled = false;
+                this.innerHTML = '📍 Simular Alerta de Proximidad';
+            });
+
+            // Simular alerta de retraso
+            document.getElementById('btnAlertaRetraso').addEventListener('click', async function() {
+                this.disabled = true;
+                this.innerHTML = '⏳ Enviando...';
+
+                try {
+                    const response = await fetch('/AlertasTest/SimularAlertaRetraso', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        log(`✅ ${result.message} - ID: ${result.alertaId}`);
+                        showToastr('warning', result.message, 'Alerta Enviada');
+                    } else {
+                        log(`❌ Error: ${result.message}`);
+                        showToastr('error', result.message, 'Error');
+                    }
+                } catch (error) {
+                    log(`❌ Error de red: ${error.message}`);
+                    showToastr('error', 'Error de conexión', 'Error');
+                }
+
+                this.disabled = false;
+                this.innerHTML = '⏰ Simular Alerta de Retraso';
+            });
+
+            // Broadcast
+            document.getElementById('btnBroadcast').addEventListener('click', async function() {
+                try {
+                    const response = await fetch('/AlertasTest/PruebaBroadcast', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    const result = await response.json();
+                    log(`📢 Broadcast: ${result.message}`);
+                    showToastr('info', result.message, 'Broadcast');
+                } catch (error) {
+                    showToastr('error', 'Error enviando broadcast', 'Error');
+                }
+            });
+
+            // Notificar bus específico
+            document.getElementById('btnNotificarBus').addEventListener('click', async function() {
+                const idBus = document.getElementById('idBusNotificar').value;
+                const mensaje = document.getElementById('mensajeBus').value;
+
+                if (!idBus || !mensaje) {
+                    showToastr('warning', 'Completa ID del bus y mensaje', 'Campos requeridos');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/AlertasTest/NotificarBus', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: `idBus=${idBus}&mensaje=${encodeURIComponent(mensaje)}`
+                    });
+
+                    const result = await response.json();
+                    log(`🚌 Notificación a bus: ${result.message}`);
+                    showToastr('success', result.message, 'Bus Notificado');
+
+                    document.getElementById('mensajeBus').value = '';
+                } catch (error) {
+                    showToastr('error', 'Error notificando bus', 'Error');
+                }
+            });
+
+            // ✨ MÓDULO 6: Generar datos de ejemplo
+            document.getElementById('btnGenerarDatos').addEventListener('click', async function() {
+                this.disabled = true;
+                this.innerHTML = '⏳ Generando datos...';
+
+                try {
+                    const response = await fetch('/api/alertas/generar-datos-ejemplo', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        log(`🎯 ${result.message}`);
+                        log(`📊 ${result.descripcion}`);
+                        showToastr('success', result.message, 'Datos Generados');
+                        showToastr('info', result.instrucciones, 'Instrucciones', { timeOut: 10000 });
+                    } else {
+                        log(`❌ Error: ${result.error}`);
+                        if (result.razon) {
+                            log(`📋 Razón: ${result.razon}`);
+                        }
+                        showToastr('error', result.error, 'Error');
+                    }
+                } catch (error) {
+                    log(`❌ Error de red: ${error.message}`);
+                    showToastr('error', 'Error de conexión', 'Error');
+                }
+
+                this.disabled = false;
+                this.innerHTML = '🎯 Generar Datos de Ejemplo (Módulo 6)';
+            });
+
+            // 🔍 DIAGNÓSTICO: Verificar estado del sistema
+            document.getElementById('btnDiagnostico').addEventListener('click', async function() {
+                this.disabled = true;
+                this.innerHTML = '⏳ Verificando sistema...';
+
+                try {
+                    const response = await fetch('/api/alertas/diagnostico');
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        log('🔍 === DIAGNÓSTICO DEL SISTEMA ===');
+                        log(`📊 Estado: ${result.estado}`);
+                        log(`💾 Base de datos: ${result.baseDatos}`);
+                        log(`🚌 Buses registrados: ${result.busesRegistrados}`);
+                        log(`⚠️ Alertas activas: ${result.alertasActivas}`);
+                        log(`📧 SignalR Hub: ${result.signalRStatus}`);
+
+                        if (result.errores && result.errores.length > 0) {
+                            log('❌ ERRORES ENCONTRADOS:');
+                            result.errores.forEach(error => log(`   - ${error}`));
+                        }
+
+                        if (result.recomendaciones && result.recomendaciones.length > 0) {
+                            log('💡 RECOMENDACIONES:');
+                            result.recomendaciones.forEach(rec => log(`   - ${rec}`));
+                        }
+
+                        showToastr('success', `Sistema: ${result.estado}`, 'Diagnóstico Completado');
+                    } else {
+                        log(`❌ Error en diagnóstico: ${result.error || 'Error desconocido'}`);
+                        showToastr('error', result.error || 'Error en diagnóstico', 'Error');
+                    }
+                } catch (error) {
+                    log(`❌ Error de red en diagnóstico: ${error.message}`);
+                    showToastr('error', 'Error de conexión con diagnóstico', 'Error');
+                }
+
+                this.disabled = false;
+                this.innerHTML = '🔍 Diagnóstico del Sistema';
+            });
+
+            // Cargar alertas activas
+            document.getElementById('btnCargarAlertas').addEventListener('click', async function() {
+                try {
+                    const response = await fetch('/AlertasTest/GetAlertasActivas');
+                    const alertas = await response.json();
+
+                    mostrarAlertasActivas(alertas);
+                    log(`📊 Cargadas ${alertas.proximidad.length + alertas.retraso.length} alertas activas`);
+                } catch (error) {
+                    showToastr('error', 'Error cargando alertas', 'Error');
+                }
+            });
+
+            // Reconectar
+            document.getElementById('btnReconectar').addEventListener('click', async function() {
+                try {
+                    await alertasSignalR.desconectar();
+                    await alertasSignalR.inicializar();
+                    log('🔄 SignalR reconectado manualmente');
+                    showToastr('info', 'Reconectado exitosamente', 'SignalR');
+                } catch (error) {
+                    log(`❌ Error reconectando: ${error.message}`);
+                    showToastr('error', 'Error en reconexión', 'SignalR');
+                }
+            });
+
+            // Limpiar log
+            document.getElementById('btnLimpiarLog').addEventListener('click', function() {
+                document.getElementById('activityLog').innerHTML = '';
+            });
+        }
+
+        function mostrarAlertasActivas(alertas) {
+            const container = document.getElementById('listaAlertasActivas');
+
+            let html = '';
+
+            if (alertas.proximidad.length === 0 && alertas.retraso.length === 0) {
+                html = '<div class="alert alert-info">No hay alertas activas</div>';
+            } else {
+                html += '<h6>Alertas de Proximidad:</h6>';
+                alertas.proximidad.forEach(alerta => {
+                    html += `
+                        <div class="alert alert-info alert-sm mb-2">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <strong>ID ${alerta.id}</strong> - Bus ${alerta.idBus}<br>
+                                    <small>${alerta.mensaje}</small>
+                                </div>
+                                <div>
+                                    <button class="btn btn-success btn-sm" onclick="confirmarAlerta(${alerta.id})">Confirmar</button>
+                                    <button class="btn btn-secondary btn-sm" onclick="resolverAlerta(${alerta.id})">Resolver</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += '<h6 class="mt-3">Alertas de Retraso:</h6>';
+                alertas.retraso.forEach(alerta => {
+                    html += `
+                        <div class="alert alert-warning alert-sm mb-2">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <strong>ID ${alerta.id}</strong> - Bus ${alerta.idBus}<br>
+                                    <small>${alerta.mensaje}</small>
+                                </div>
+                                <div>
+                                    <button class="btn btn-secondary btn-sm" onclick="resolverAlerta(${alerta.id})">Resolver</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            container.innerHTML = html;
+        }
+
+        async function confirmarAlerta(id) {
+            try {
+                const response = await fetch('/AlertasTest/ConfirmarAlerta', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `idAlerta=${id}`
+                });
+
+                const result = await response.json();
+                log(`✅ Confirmación: ${result.message}`);
+                showToastr('success', result.message, 'Confirmado');
+
+                // Recargar alertas
+                document.getElementById('btnCargarAlertas').click();
+            } catch (error) {
+                showToastr('error', 'Error confirmando alerta', 'Error');
+            }
+        }
+
+        async function resolverAlerta(id) {
+            try {
+                const response = await fetch('/AlertasTest/ResolverAlerta', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `idAlerta=${id}`
+                });
+
+                const result = await response.json();
+                log(`✅ Resolución: ${result.message}`);
+                showToastr('success', result.message, 'Resuelto');
+
+                // Recargar alertas
+                document.getElementById('btnCargarAlertas').click();
+            } catch (error) {
+                showToastr('error', 'Error resolviendo alerta', 'Error');
+            }
+        }
+
+        // 🔧 Sistema de notificaciones Bootstrap (reemplazo de Toastr)
+        function showNotification(type, message, title, duration = 8000) {
+            const container = document.getElementById('notificationContainer');
+
+            // Mapear tipos a clases Bootstrap
+            const typeMapping = {
+                'success': 'success',
+                'error': 'danger',
+                'warning': 'warning',
+                'info': 'info'
+            };
+
+            const alertClass = typeMapping[type] || 'info';
+
+            // Crear el elemento de notificación
+            const toastId = 'toast_' + Date.now();
+            const toastHTML = `
+                <div class="toast custom-toast" id="${toastId}" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header bg-${alertClass} text-white">
+                        <strong class="me-auto">
+                            ${type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️'} 
+                            ${title}
+                        </strong>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                    </div>
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                </div>
+            `;
+
+            // Agregar al contenedor
+            container.insertAdjacentHTML('beforeend', toastHTML);
+
+            // Activar el toast
+            const toastElement = document.getElementById(toastId);
+            const toast = new bootstrap.Toast(toastElement, {
+                autohide: true,
+                delay: duration
+            });
+
+            toast.show();
+
+            // Limpiar después de que se oculte
+            toastElement.addEventListener('hidden.bs.toast', function() {
+                toastElement.remove();
+            });
+        }
+
+        // Alias para mantener compatibilidad
+        function showToastr(type, message, title, options = {}) {
+            const duration = options.timeOut || 8000;
+            showNotification(type, message, title, duration);
+        }
+
+        function log(mensaje) {
+            const logContainer = document.getElementById('activityLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.innerHTML = `<small class="text-muted">[${timestamp}]</small> ${mensaje}`;
+            entry.style.borderBottom = '1px solid #dee2e6';
+            entry.style.paddingBottom = '4px';
+            entry.style.marginBottom = '4px';
+
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+    </script>
+}
+
+<style>
+    .alert-sm {
+        padding: 0.5rem;
+        font-size: 0.875rem;
+    }
+</style>

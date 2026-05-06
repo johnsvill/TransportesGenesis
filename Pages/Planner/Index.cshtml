@@ -112,8 +112,8 @@
                 <p class="mb-0">Gestión de Buses, Rutas y Geolocalización en Tiempo Real</p>
             </div>
             <div class="col-md-4 text-end">
-                <h3><i class="bi bi-calendar-check"></i> Sprint Actual: 2</h3>
-                <p class="mb-0">Semana del 20 al 26 de Abril, 2026</p>
+                <h3><i class="bi bi-calendar-check"></i> Sprint Actual: 6</h3>
+                <p class="mb-0">Semana del 18 al 24 de Mayo, 2026</p>
             </div>
         </div>
     </div>
@@ -129,27 +129,27 @@
                         <p class="text-muted">Sprints Completados</p>
                     </div>
                     <div class="col-md-3 text-center">
-                        <h2 class="text-warning">1</h2>
-                        <p class="text-muted">Sprint En Progreso</p>
+                        <h2 class="text-warning">2</h2>
+                        <p class="text-muted">Sprints En Progreso</p>
                     </div>
                     <div class="col-md-3 text-center">
-                        <h2 class="text-secondary">2</h2>
+                        <h2 class="text-secondary">1</h2>
                         <p class="text-muted">Sprints Pendientes</p>
                     </div>
                     <div class="col-md-3 text-center">
-                        <h2 class="text-primary">74%</h2>
+                        <h2 class="text-primary">82%</h2>
                         <p class="text-muted">Avance Total</p>
                     </div>
                 </div>
                 <div class="progress" style="height: 25px;">
-                    <div class="progress-bar bg-success" role="progressbar" style="width: 74%" aria-valuenow="74" aria-valuemin="0" aria-valuemax="100">
-                        74% Completado
+                    <div class="progress-bar bg-success" role="progressbar" style="width: 82%" aria-valuenow="82" aria-valuemin="0" aria-valuemax="100">
+                        82% Completado
                     </div>
                 </div>
                 <div class="mt-3">
                     <small class="text-muted">
                         <i class="bi bi-info-circle"></i> 
-                        <strong>Próxima prioridad:</strong> Resolver validaciones en sistema de pagos y completar integración final
+                        <strong>BLOQUEADOR ACTUAL:</strong> Migraciones de tabla Pagos pendientes (Jonathan) - Sprint 5 en pausa. Sprint 6 (Alertas) completado como prioridad alternativa.
                     </small>
                 </div>
             </div>
@@ -495,6 +495,7 @@
                         </div>
                         <div class="col-md-4 text-end">
                             <span class="developer-badge badge-david">David</span>
+                            <span class="developer-badge badge-jonathan">Jonathan</span>
                         </div>
                     </div>
                 </div>
@@ -527,72 +528,168 @@
                                 <strong>Gestión de Usuarios Completa</strong>
                                 <br><small class="text-muted">✅ CRUD, roles, validaciones, autorización</small>
                             </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-check-circle"></i> Completado:</h6>
                             <div class="task-item task-completada">
                                 <i class="bi bi-check-circle-fill text-success"></i> 
                                 <strong>Dashboard de Ruta del Bus</strong>
                                 <br><small class="text-muted">✅ Horarios dinámicos, mapas adaptativos</small>
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            <h6><i class="bi bi-arrow-repeat"></i> Pendiente:</h6>
+
+                            <h6 class="mt-3"><i class="bi bi-exclamation-triangle text-warning"></i> Pendiente (Jonathan):</h6>
                             <div class="task-item task-en-progreso">
                                 <i class="bi bi-arrow-repeat text-warning"></i> 
-                                <strong>Resolver Validaciones de Pagos</strong>
-                                <br><small class="text-muted">Corregir bloqueo por validación de fecha</small>
+                                <strong>Migraciones de Tabla Pagos</strong>
+                                <br><small class="text-muted">⚠️ REQUERIDO: Crear/aplicar migraciones faltantes</small>
                             </div>
                             <div class="task-item task-en-progreso">
                                 <i class="bi bi-arrow-repeat text-warning"></i> 
-                                <strong>Integrar Login con Pagos</strong>
-                                <br><small class="text-muted">Unificar sistema de autenticación</small>
+                                <strong>Validaciones de Pagos</strong>
+                                <br><small class="text-muted">⚠️ BLOQUEADO: Resolver validación de fecha (requiere migraciones)</small>
+                            </div>
+                            <div class="task-item task-en-progreso">
+                                <i class="bi bi-arrow-repeat text-warning"></i> 
+                                <strong>Integración Login con Pagos</strong>
+                                <br><small class="text-muted">⚠️ BLOQUEADO: Unificar sistema (requiere migraciones)</small>
                             </div>
                         </div>
                     </div>
                     <div class="mt-3">
                         <h6>Progreso del Sprint:</h6>
                         <div class="progress" style="height: 20px;">
-                            <div class="progress-bar bg-success" style="width: 85%">85% Completado</div>
-                            <div class="progress-bar bg-warning" style="width: 15%">15% Pendiente</div>
+                            <div class="progress-bar bg-success" style="width: 65%">65% Completado</div>
+                            <div class="progress-bar bg-warning" style="width: 20%">20% En Progreso</div>
+                            <div class="progress-bar bg-danger" style="width: 15%">15% Bloqueado</div>
                         </div>
+                        <small class="text-muted mt-2 d-block">
+                            <i class="bi bi-exclamation-triangle text-warning"></i> ⚠️ <strong>BLOQUEADOR:</strong> Migraciones de pagos pendientes (Jonathan) - Sistema de alertas completado mientras tanto
+                        </small>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Sprint 6: PENDIENTE -->
+    <!-- Sprint 6: COMPLETADO -->
     <div class="row">
         <div class="col-12">
-            <div class="card sprint-card sprint-pendiente">
+            <div class="card sprint-card sprint-completado">
                 <div class="card-header">
-                    <h4>
-                        <i class="bi bi-circle text-secondary"></i> 
-                        Sprint 6: Alertas, Notificaciones & Dashboards de Piloto/Monitor
-                    </h4>
-                    <p class="mb-0 text-muted">Semana 6 (18-24 Mayo) - <strong>PENDIENTE</strong></p>
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h4>
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                Sprint 6: Sistema de Alertas y Notificaciones
+                            </h4>
+                            <p class="mb-0 text-muted">Semana 6 (18-24 Mayo) - <strong>COMPLETADO (100%)</strong></p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <span class="developer-badge badge-david">David</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <!-- Sistema de Alertas y Notificaciones -->
+                        <!-- Sistema de Alertas Completado -->
                         <div class="col-md-6">
-                            <h6><i class="bi bi-bell"></i> Sistema de Alertas y Notificaciones:</h6>
-                            <div class="task-item task-pendiente">
-                                <strong>Alertas de Proximidad</strong>
-                                <br><small class="text-muted">Notificar a padres cuando bus está cerca (500m, 200m)</small>
+                            <h6><i class="bi bi-check-circle-fill text-success"></i> Sistema de Alertas Completado:</h6>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Módulo 1: Base de Datos</strong>
+                                <br><small class="text-muted">✅ Entidad AlertaProximidad, DTOs, Migración EF Core</small>
                             </div>
-                            <div class="task-item task-pendiente">
-                                <strong>Alertas de Retraso</strong>
-                                <br><small class="text-muted">Notificar retrasos significativos en rutas (+15 min)</small>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Módulo 2: Servicios y API</strong>
+                                <br><small class="text-muted">✅ AlertaService, Repository, AutoMapper, REST API</small>
                             </div>
-                            <div class="task-item task-pendiente">
-                                <strong>Panel de Notificaciones</strong>
-                                <br><small class="text-muted">Historial de alertas por usuario con estado (leído/no leído)</small>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Módulo 3: SignalR Real-time</strong>
+                                <br><small class="text-muted">✅ Integración con NotificacionesHub, JavaScript client</small>
                             </div>
-                            <div class="task-item task-pendiente">
-                                <strong>Notificaciones Push</strong>
-                                <br><small class="text-muted">Integración con SignalR para notificaciones en tiempo real</small>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Módulo 4: Dashboard Admin</strong>
+                                <br><small class="text-muted">✅ Historial completo con filtros y gestión</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Módulo 5: Botones Dashboard</strong>
+                                <br><small class="text-muted">✅ Accesos rápidos a alertas desde panel admin</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Módulo 6: Datos de Ejemplo</strong>
+                                <br><small class="text-muted">✅ Generación automática para testing</small>
                             </div>
                         </div>
 
+                        <!-- Funcionalidades Específicas Completadas -->
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-check-circle-fill text-success"></i> Funcionalidades Específicas:</h6>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Alertas de Proximidad</strong>
+                                <br><small class="text-muted">✅ Notificar a padres cuando bus está cerca</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Alertas de Retraso</strong>
+                                <br><small class="text-muted">✅ Notificaciones automáticas de retrasos</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Panel de Notificaciones</strong>
+                                <br><small class="text-muted">✅ Historial completo con estado y filtros</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Notificaciones en Tiempo Real</strong>
+                                <br><small class="text-muted">✅ SignalR integrado para alertas instantáneas</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Gestión de Alertas</strong>
+                                <br><small class="text-muted">✅ Marcar como resueltas, estadísticas, limpieza</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <h6>Progreso del Sprint:</h6>
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar bg-success" style="width: 100%">100% Completado - Sistema de Alertas Completo</div>
+                        </div>
+                        <small class="text-muted mt-2 d-block">
+                            <i class="bi bi-check-circle-fill text-success"></i> ✅ Sistema de alertas de proximidad y retrasos completamente funcional
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sprint 7: EN PROGRESO -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card sprint-card sprint-en-progreso">
+                <div class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h4>
+                                <i class="bi bi-hourglass-split text-warning"></i> 
+                                Sprint 7: Dashboards de Piloto/Monitor & Testing Final
+                            </h4>
+                            <p class="mb-0 text-muted">Semana 7 (25-31 Mayo) - <strong>EN PROGRESO</strong></p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <span class="developer-badge badge-david">David</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
                         <!-- Dashboards de Piloto y Monitor -->
                         <div class="col-md-6">
                             <h6><i class="bi bi-people-fill"></i> Dashboards de Piloto y Monitor:</h6>
@@ -609,35 +706,30 @@
                                 <br><small class="text-muted">Supervisión de múltiples rutas, alertas de seguridad</small>
                             </div>
                             <div class="task-item task-pendiente">
+                                <strong>Integración Monitor con Alertas</strong>
+                                <br><small class="text-muted">⚠️ FALTABA: Dashboard monitor reciba alertas en tiempo real</small>
+                            </div>
+                            <div class="task-item task-pendiente">
+                                <strong>Panel de Control Monitor</strong>
+                                <br><small class="text-muted">⚠️ FALTABA: Vista consolidada de todas las rutas activas</small>
+                            </div>
+                            <div class="task-item task-pendiente">
                                 <strong>Reportes de Incidentes</strong>
                                 <br><small class="text-muted">Sistema para reportar problemas durante el trayecto</small>
                             </div>
-                            <div class="task-item task-pendiente">
-                                <strong>Control de Asistencia en Tiempo Real</strong>
-                                <br><small class="text-muted">Ver confirmaciones del día y estudiantes ausentes</small>
-                            </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Sprint 7: PENDIENTE -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card sprint-card sprint-pendiente">
-                <div class="card-header">
-                    <h4>
-                        <i class="bi bi-circle text-secondary"></i> 
-                        Sprint 7: Testing, Optimización & Entrega Final
-                    </h4>
-                    <p class="mb-0 text-muted">Semana 7 (25-31 Mayo) - <strong>PENDIENTE</strong></p>
-                </div>
-                <div class="card-body">
-                    <div class="row">
+                        <!-- Testing y Calidad -->
                         <div class="col-md-6">
-                            <h6><i class="bi bi-bug"></i> Testing y Calidad:</h6>
+                            <h6><i class="bi bi-bug"></i> Testing y Optimización:</h6>
+                            <div class="task-item task-pendiente">
+                                <strong>Testing de Integración Monitor</strong>
+                                <br><small class="text-muted">⚠️ FALTABA: Probar flujos completos de monitoreo</small>
+                            </div>
+                            <div class="task-item task-pendiente">
+                                <strong>Testing del Sistema de Alertas</strong>
+                                <br><small class="text-muted">Validar funcionamiento completo de notificaciones</small>
+                            </div>
                             <div class="task-item task-pendiente">
                                 <strong>Testing de Integración</strong>
                                 <br><small class="text-muted">Probar flujos completos end-to-end por rol</small>
@@ -655,26 +747,49 @@
                                 <br><small class="text-muted">Validar autorización y protección de datos</small>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="col-md-6">
-                            <h6><i class="bi bi-file-earmark-text"></i> Documentación y Entrega:</h6>
-                            <div class="task-item task-pendiente">
-                                <strong>Documentación Final</strong>
-                                <br><small class="text-muted">Manual de usuario y documentación técnica</small>
-                            </div>
-                            <div class="task-item task-pendiente">
-                                <strong>Guía de Instalación</strong>
-                                <br><small class="text-muted">Setup completo para producción</small>
-                            </div>
-                            <div class="task-item task-pendiente">
-                                <strong>Video Demostrativo</strong>
-                                <br><small class="text-muted">Grabación del sistema funcionando</small>
-                            </div>
-                            <div class="task-item task-pendiente">
-                                <strong>Presentación del Proyecto</strong>
-                                <br><small class="text-muted">Demo final ante instructores</small>
+                    <!-- Documentación y Entrega -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h6><i class="bi bi-file-earmark-text"></i> Documentación y Entrega Final:</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="task-item task-pendiente">
+                                        <strong>Documentación Final</strong>
+                                        <br><small class="text-muted">Manual de usuario y documentación técnica</small>
+                                    </div>
+                                    <div class="task-item task-pendiente">
+                                        <strong>Guía de Instalación</strong>
+                                        <br><small class="text-muted">Setup completo para producción</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="task-item task-pendiente">
+                                        <strong>Video Demostrativo</strong>
+                                        <br><small class="text-muted">Grabación del sistema funcionando</small>
+                                    </div>
+                                    <div class="task-item task-pendiente">
+                                        <strong>Presentación del Proyecto</strong>
+                                        <br><small class="text-muted">Demo final ante instructores</small>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
+
+                    <div class="mt-3">
+                        <h6>Progreso del Sprint:</h6>
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar bg-warning" style="width: 25%">25% En Progreso</div>
+                            <div class="progress-bar bg-secondary" style="width: 75%">75% Pendiente</div>
+                        </div>
+                        <small class="text-muted mt-2 d-block">
+                            <i class="bi bi-exclamation-triangle text-warning"></i> ⚠️ Prioridad: Completar integración del Monitor con sistema de alertas
+                        </small>
+                    </div>
                 </div>
+            </div>
+        </div>
+    </div>
 

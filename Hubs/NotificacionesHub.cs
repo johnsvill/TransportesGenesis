@@ -150,6 +150,79 @@ namespace TransportesGenesis.Hubs
 
         #endregion
 
+        #region Métodos para Alertas de Proximidad (Módulo 3)
+
+        /// <summary>
+        /// Sistema envía alerta de proximidad a padres específicos
+        /// </summary>
+        public async Task EnviarAlertaProximidad(int idAlerta, int idBus, int? idAlumno, string mensaje, string tipoAlerta, int? paradasRestantes)
+        {
+            _logger.LogInformation($"[SIGNALR-ALERTA] Enviando alerta {tipoAlerta} - ID: {idAlerta}, Bus: {idBus}");
+
+            var alertaData = new
+            {
+                IdAlerta = idAlerta,
+                IdBus = idBus,
+                IdAlumno = idAlumno,
+                TipoAlerta = tipoAlerta,
+                Mensaje = mensaje,
+                ParadasRestantes = paradasRestantes,
+                FechaHora = DateTime.Now,
+                RequiereConfirmacion = tipoAlerta == "proximidad"
+            };
+
+            // Enviar a grupo del bus (todos los padres de ese bus)
+            await Clients.Group($"Bus_{idBus}").SendAsync("AlertaRecibida", alertaData);
+
+            // Si hay alumno específico, también enviar a su grupo
+            if (idAlumno.HasValue)
+            {
+                await Clients.Group($"Alumno_{idAlumno.Value}").SendAsync("AlertaPersonal", alertaData);
+            }
+        }
+
+        /// <summary>
+        /// Padre confirma que recibió la alerta (Cliente → Servidor)
+        /// </summary>
+        public async Task ConfirmarAlerta(int idAlerta, string idPadre)
+        {
+            _logger.LogInformation($"[SIGNALR-ALERTA] Padre {idPadre} confirma alerta {idAlerta}");
+
+            // Aquí podrías llamar al AlertaService para actualizar la BD
+            // Pero para no romper nada, solo enviaremos confirmación
+
+            // Notificar a admins que la alerta fue confirmada
+            await Clients.Group("Administradores").SendAsync("AlertaConfirmada", new
+            {
+                IdAlerta = idAlerta,
+                IdPadre = idPadre,
+                FechaConfirmacion = DateTime.Now,
+                Mensaje = $"✅ Alerta #{idAlerta} confirmada por padre"
+            });
+        }
+
+        /// <summary>
+        /// Sistema notifica resolución de alerta
+        /// </summary>
+        public async Task NotificarAlertaResuelta(int idAlerta, int idBus, string motivo)
+        {
+            _logger.LogInformation($"[SIGNALR-ALERTA] Alerta {idAlerta} resuelta - Bus: {idBus}");
+
+            var resolucionData = new
+            {
+                IdAlerta = idAlerta,
+                IdBus = idBus,
+                Motivo = motivo,
+                FechaResolucion = DateTime.Now,
+                Mensaje = $"✅ Alerta #{idAlerta} ha sido resuelta: {motivo}"
+            };
+
+            // Notificar a grupo del bus
+            await Clients.Group($"Bus_{idBus}").SendAsync("AlertaResuelta", resolucionData);
+        }
+
+        #endregion
+
         #region Métodos de Prueba (Testing)
 
         /// <summary>
