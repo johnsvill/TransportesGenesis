@@ -76,13 +76,7 @@ namespace TransportesGenesis.Controllers
                 }
                 else if (roles.Contains("Piloto"))
                 {
-                    // Usar vista intermedia que redirige a Razor Page
-                    return View("PilotoDashboard");
-                }
-                else if (roles.Contains("Monitor"))
-                {
-                    // Usar vista intermedia que redirige a Razor Page
-                    return View("MonitorDashboard");
+                    return RedirectToPage("/Piloto/MiRuta");
                 }
                 else
                 {
@@ -131,32 +125,7 @@ namespace TransportesGenesis.Controllers
             {
                 user.IsFirstLogin = false;
                 await _userManager.UpdateAsync(user);
-
-                // Redirigir según el rol del usuario
-                var roles = await _userManager.GetRolesAsync(user);
-
-                if (roles.Contains("Administrador"))
-                {
-                    return RedirectToAction("Index", "Admin");
-                }
-                else if (roles.Contains("PadreDeFamilia"))
-                {
-                    return RedirectToAction("Index", "PagosPadresFamilia");
-                }
-                else if (roles.Contains("Piloto"))
-                {
-                    // Usar vista intermedia que redirige a Razor Page
-                    return View("PilotoDashboard");
-                }
-                else if (roles.Contains("Monitor"))
-                {
-                    // Usar vista intermedia que redirige a Razor Page
-                    return View("MonitorDashboard");
-                }
-                else
-                {
-                    return RedirectToAction("Index", "Home");
-                }
+                return RedirectToAction("Index", "Home");
             }
 
             foreach (var error in result.Errors)

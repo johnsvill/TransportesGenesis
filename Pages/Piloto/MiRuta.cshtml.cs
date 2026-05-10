@@ -1,33 +1,26 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using TransportesGenesis.Data.Context;
 using TransportesGenesis.DTOs.Ruta;
 using System.Net.Http;
-using System.Security.Claims;
 using System.Text.Json;
 
 namespace TransportesGenesis.Pages.Piloto
 {
-    [Authorize(Roles = "Piloto")]
     public class MiRutaModel : PageModel
     {
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly ApplicationDbContext _context;
 
-        public MiRutaModel(IHttpClientFactory httpClientFactory, ApplicationDbContext context)
+        public MiRutaModel(IHttpClientFactory httpClientFactory)
         {
             _httpClientFactory = httpClientFactory;
-            _context = context;
         }
 
         public RutaDto? RutaActiva { get; set; }
-        public int IdBus { get; set; }
+        public int IdBus { get; set; } = 4; // TODO: Obtener del usuario autenticado (Claims)
         public string TipoRuta { get; set; } = "Mañana";
         public string MensajeError { get; set; } = string.Empty;
         public string MensajeExito { get; set; } = string.Empty;
-        public string NombrePiloto { get; set; } = string.Empty;
-        public string IdPiloto { get; set; } = string.Empty;
+        public string NombrePiloto { get; set; } = "Juan Pérez"; // TODO: Obtener del usuario autenticado
+        public int IdPiloto { get; set; } = 1; // TODO: Obtener del usuario autenticado
         public DateTime FechaRuta { get; set; }
         public bool EsFinDeSemana { get; set; }
 
@@ -35,33 +28,9 @@ namespace TransportesGenesis.Pages.Piloto
         {
             try
             {
-                // ========================================
-                // LOOKUP DINÁMICO DEL BUS ASIGNADO
-                // ========================================
-                IdPiloto = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
-                NombrePiloto = User.Identity?.Name ?? "Piloto";
-
-                if (string.IsNullOrEmpty(IdPiloto))
-                {
-                    MensajeError = "No se pudo identificar al usuario. Por favor, cierra sesión e intenta de nuevo.";
-                    return;
-                }
-
-                // Buscar asignación activa del piloto
-                var asignacion = await _context.AsignacionesPilotoBusDb
-                    .Include(a => a.Bus)
-                    .Where(a => a.IdUsuarioPiloto == IdPiloto && a.EsActual)
-                    .OrderByDescending(a => a.FechaAsignacion)
-                    .FirstOrDefaultAsync();
-
-                if (asignacion == null || asignacion.Bus == null)
-                {
-                    MensajeError = "No tienes un bus asignado actualmente. Contacta al administrador.";
-                    return;
-                }
-
-                IdBus = asignacion.IdBus;
-                Console.WriteLine($"[PILOTO] Usuario {NombrePiloto} ({IdPiloto}) asignado al Bus #{IdBus}");
+                // TODO: En producción, obtener IdBus del piloto autenticado
+                // var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                // IdBus = await _pilotoService.GetBusDelPilotoAsync(userId);
 
                 // Obtener próxima fecha hábil (omite fines de semana)
                 FechaRuta = ObtenerProximaFechaHabil();

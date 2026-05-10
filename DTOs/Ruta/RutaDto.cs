@@ -21,21 +21,12 @@ namespace TransportesGenesis.DTOs.Ruta
         public int IdParada { get; set; }
         public int? IdAlumno { get; set; } // Nullable para paradas del colegio
         public string NombreAlumno { get; set; }
-        public string? NombreParada { get; set; } // Nombre de la parada (para vistas agrupadas)
         public decimal Latitud { get; set; }
         public decimal Longitud { get; set; }
         public string? Direccion { get; set; }
         public int Orden { get; set; }
         public TimeSpan? HoraEstimada { get; set; }
         public bool Completada { get; set; }
-        public List<AlumnoEnParadaDto>? Alumnos { get; set; } // Lista de alumnos en esta parada (para vistas agrupadas)
-    }
-
-    public class AlumnoEnParadaDto
-    {
-        public int IdAlumno { get; set; }
-        public string NombreCompleto { get; set; }
-        public string? Grado { get; set; }
     }
 
     public class CalcularRutaDto

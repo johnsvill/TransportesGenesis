@@ -47,18 +47,12 @@ namespace TransportesGenesis.Repositories.Implementations
 
         public async Task<IEnumerable<Ruta>> GetRutasDelDiaAsync(DateTime fecha, string tipoRuta)
         {
-            // TODO PRODUCCIÓN: Agregar filtro por fecha cuando se implemente gestión de fechas de rutas
-            // Actualmente solo filtra por tipo de ruta y estado activo
-            // En producción debería filtrar: r.FechaRuta.Date == fecha.Date
-
-            // ⚠️ MODO TESTING: Ordenar por cantidad de paradas descendente para priorizar rutas completas
             return await _dbSet
                 .Where(r => r.TipoRuta == tipoRuta && r.EsActiva)
                 .Include(r => r.Bus)
                 .Include(r => r.ParadasLink.Where(p => !p.Completada))
                     .ThenInclude(p => p.Alumno)
-                .OrderByDescending(r => r.ParadasLink.Count) // Priorizar rutas con más paradas
-                .ThenBy(r => r.HoraInicio)
+                .OrderBy(r => r.HoraInicio)
                 .ToListAsync();
         }
 

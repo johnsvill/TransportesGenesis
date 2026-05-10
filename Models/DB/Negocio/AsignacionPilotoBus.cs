@@ -13,9 +13,6 @@ namespace TransportesGenesis.Models.DB.Negocio
         [StringLength(450)]
         public string IdUsuarioPiloto { get; set; } // FK a AspNetUsers
 
-        [Required]
-        public int IdBus { get; set; } // FK a Bus
-
         [ForeignKey("IdBus")]
         public Bus Bus { get; set; }
 

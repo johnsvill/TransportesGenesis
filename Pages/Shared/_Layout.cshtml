@@ -257,104 +257,83 @@
                                 <span>Inicio</span>
                             </a>
                         </li>
-
-                        @if (User.Identity?.IsAuthenticated == true)
+                        @if (User.IsInRole("Piloto"))
                         {
-                            @if (User.IsInRole("Piloto"))
-                            {
-                                <!-- Navegación para Piloto -->
-                                <li class="nav-item">
-                                    <a class="nav-link" href="/Piloto/MiRuta">
-                                        <i class="bi bi-geo-alt-fill me-1"></i>
-                                        <span>Mi Ruta</span>
-                                    </a>
-                                </li>
-                            }
-
-                            @if (User.IsInRole("Monitor"))
-                            {
-                                <!-- Navegación para Monitor -->
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                        <i class="bi bi-clipboard-check me-1"></i>
-                                        <span>Monitor</span>
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="/Monitor/MiRuta">
-                                            <i class="bi bi-geo-alt text-primary me-2"></i>Mi Ruta
-                                        </a></li>
-                                        <li><a class="dropdown-item" href="/Geolocalizacion/MapaEnTiempoReal">
-                                            <i class="bi bi-map text-success me-2"></i>Mapa en Vivo
-                                        </a></li>
-                                    </ul>
-                                </li>
-                            }
-
-                            @if (User.IsInRole("Administrador"))
-                            {
-                                <!-- Navegación para Administrador -->
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                        <i class="bi bi-speedometer2 me-1"></i>
-                                        <span>Admin</span>
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="/Admin/CalcularRutas">
-                                            <i class="bi bi-calculator text-info me-2"></i>Calcular Rutas
-                                        </a></li>
-                                        <li><a class="dropdown-item" href="/Admin/CrearUsuariosPrueba">
-                                            <i class="bi bi-person-plus text-warning me-2"></i>Crear Usuarios Prueba
-                                        </a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item" href="/Piloto/MiRuta">
-                                            <i class="bi bi-eye text-primary me-2"></i>Vista Piloto
-                                        </a></li>
-                                        <li><a class="dropdown-item" href="/Monitor/MiRuta">
-                                            <i class="bi bi-eye text-success me-2"></i>Vista Monitor
-                                        </a></li>
-                                    </ul>
-                                </li>
-                            }
-
-                            @if (User.IsInRole("PadreDeFamilia"))
-                            {
-                                <!-- Navegación para Padre de Familia -->
-                                <li class="nav-item">
-                                    <a class="nav-link" href="/Padres/ConfirmarAsistencia">
-                                        <i class="bi bi-calendar-check-fill me-1"></i>
-                                        <span>Asistencia</span>
-                                    </a>
-                                </li>
-                            }
-
-                            <!-- Mapa disponible para todos los roles -->
-                            <li class="nav-item">
-                                <a class="nav-link" href="/Geolocalizacion/MapaEnTiempoReal">
-                                    <i class="bi bi-geo-alt-fill me-1"></i>
-                                    <span>Mapa</span>
+                            <li class="nav-item d-none d-lg-block">
+                                <a class="nav-link" href="/Piloto/MiRuta">
+                                    <i class="bi bi-geo-alt me-1"></i>
+                                    <span>Mi Ruta</span>
                                 </a>
                             </li>
-
-                            <!-- Usuario autenticado -->
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                    <i class="bi bi-person-circle me-1"></i>
-                                    <span>@User.Identity?.Name</span>
+                        }
+                        @if (User.IsInRole("Monitor"))
+                        {
+                            <li class="nav-item d-none d-lg-block">
+                                <a class="nav-link" href="/">
+                                    <i class="bi bi-clipboard-check me-1"></i>
+                                    <span>Dashboard Monitor</span>
                                 </a>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li><a class="dropdown-item" href="/Auth/Logout">
-                                        <i class="bi bi-box-arrow-right text-danger me-2"></i>Cerrar Sesión
+                            </li>
+                            <li class="nav-item d-none d-lg-block">
+                                <a class="nav-link" href="/Monitor/ListadoNinos">
+                                    <i class="bi bi-person-check me-1"></i>
+                                    <span>Registrar Asistencia</span>
+                                </a>
+                            </li>
+                        }
+                        @if (User.IsInRole("Administrador"))
+                        {
+                            <li class="nav-item dropdown d-none d-lg-block">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-speedometer2 me-1"></i>
+                                    <span>Panel</span>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="/Admin/CalcularRutas">
+                                        <i class="bi bi-calculator text-info me-2"></i>Calcular Rutas
                                     </a></li>
                                 </ul>
                             </li>
                         }
-                        else
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Geolocalizacion/MapaEnTiempoReal">
+                                <i class="bi bi-geo-alt-fill me-1"></i>
+                                <span>Mapa</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Padres/ConfirmarAsistencia">
+                                <i class="bi bi-calendar-check-fill me-1"></i>
+                                <span>Asistencia</span>
+                            </a>
+                        </li>
+                        <!-- Enlaces móviles -->
+                        @if (User.IsInRole("Piloto"))
                         {
-                            <!-- Usuario no autenticado -->
-                            <li class="nav-item">
-                                <a class="nav-link" href="/Auth/Login">
-                                    <i class="bi bi-box-arrow-in-right me-1"></i>
-                                    <span>Iniciar Sesión</span>
+                            <li class="nav-item d-lg-none">
+                                <a class="nav-link" href="/Piloto/MiRuta">
+                                    <i class="bi bi-geo-alt me-1"></i>Mi Ruta
+                                </a>
+                            </li>
+                        }
+                        @if (User.IsInRole("Monitor"))
+                        {
+                            <li class="nav-item d-lg-none">
+                                <a class="nav-link" href="/">
+                                    <i class="bi bi-clipboard-check me-1"></i>Dashboard Monitor
+                                </a>
+                            </li>
+                            <li class="nav-item d-lg-none">
+                                <a class="nav-link" href="/Monitor/ListadoNinos">
+                                    <i class="bi bi-person-check me-1"></i>Registrar Asistencia
+                                </a>
+                            </li>
+                        }
+                        @if (User.IsInRole("Administrador"))
+                        {
+                            <li class="nav-item d-lg-none">
+                                <a class="nav-link" href="/Admin/CalcularRutas">
+                                    <i class="bi bi-calculator me-1"></i>Calcular Rutas
                                 </a>
                             </li>
                         }

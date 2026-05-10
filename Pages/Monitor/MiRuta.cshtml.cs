@@ -1,10 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using TransportesGenesis.Data.Context;
 using TransportesGenesis.DTOs.Ruta;
 using System.Net.Http;
-using System.Security.Claims;
 using System.Text.Json;
 
 namespace TransportesGenesis.Pages.Monitor
@@ -13,21 +10,19 @@ namespace TransportesGenesis.Pages.Monitor
     public class MiRutaModel : PageModel
     {
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly ApplicationDbContext _context;
 
-        public MiRutaModel(IHttpClientFactory httpClientFactory, ApplicationDbContext context)
+        public MiRutaModel(IHttpClientFactory httpClientFactory)
         {
             _httpClientFactory = httpClientFactory;
-            _context = context;
         }
 
         public RutaDto? RutaActiva { get; set; }
-        public int IdBus { get; set; }
+        public int IdBus { get; set; } = 4; // TODO: Obtener del usuario autenticado (Claims)
         public string TipoRuta { get; set; } = "Mañana";
         public string MensajeError { get; set; } = string.Empty;
         public string MensajeExito { get; set; } = string.Empty;
-        public string NombreMonitor { get; set; } = string.Empty;
-        public string IdMonitor { get; set; } = string.Empty;
+        public string NombreMonitor { get; set; } = "Monitor 1"; // TODO: Obtener del usuario autenticado
+        public int IdMonitor { get; set; } = 1; // TODO: Obtener del usuario autenticado
         public DateTime FechaRuta { get; set; }
         public bool EsFinDeSemana { get; set; }
 
@@ -35,52 +30,25 @@ namespace TransportesGenesis.Pages.Monitor
         {
             try
             {
-                // ========================================
-                // LOOKUP DINÁMICO DEL BUS ASIGNADO
-                // ========================================
-                IdMonitor = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
-                NombreMonitor = User.Identity?.Name ?? "Monitor";
+                // TODO: En producción, obtener IdBus del monitor autenticado
+                // var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                // IdBus = await _monitorService.GetBusDelMonitorAsync(userId);
 
-                if (string.IsNullOrEmpty(IdMonitor))
-                {
-                    MensajeError = "No se pudo identificar al usuario. Por favor, cierra sesión e intenta de nuevo.";
-                    return;
-                }
-
-                // Buscar asignación activa del monitor (reutilizando AsignacionPilotoBus)
-                var asignacion = await _context.AsignacionesPilotoBusDb
-                    .Include(a => a.Bus)
-                    .Where(a => a.IdUsuarioPiloto == IdMonitor && a.EsActual)
-                    .OrderByDescending(a => a.FechaAsignacion)
-                    .FirstOrDefaultAsync();
-
-                if (asignacion == null || asignacion.Bus == null)
-                {
-                    MensajeError = "No tienes un bus asignado actualmente. Contacta al administrador.";
-                    return;
-                }
-
-                IdBus = asignacion.IdBus;
-                Console.WriteLine($"[MONITOR] Usuario {NombreMonitor} ({IdMonitor}) asignado al Bus #{IdBus}");
-
-                // ⚠️ MODO TESTING: Desactivar validación de fin de semana
-                // TODO PRODUCCIÓN: Restaurar validación de días hábiles
                 FechaRuta = ObtenerProximaFechaHabil();
-                EsFinDeSemana = false; // FORZADO A FALSE PARA TESTING
+                EsFinDeSemana = DateTime.Now.DayOfWeek == DayOfWeek.Saturday || DateTime.Now.DayOfWeek == DayOfWeek.Sunday;
 
-                Console.WriteLine($"[MONITOR - TESTING] Modo prueba: ignorando validación de fin de semana");
-
-                // Determinar turno según hora actual
                 var horaActual = DateTime.Now.Hour;
                 TipoRuta = horaActual < 12 ? "Mañana" : "Tarde";
 
-                Console.WriteLine($"[MONITOR] Buscando ruta activa para Bus #{IdBus}, Turno: {TipoRuta}");
+                var fechaBusqueda = DateTime.Now.DayOfWeek >= DayOfWeek.Monday && DateTime.Now.DayOfWeek <= DayOfWeek.Friday
+                    ? DateTime.Now.Date
+                    : FechaRuta;
 
-                // Llamar a la API para obtener la ruta activa
+                Console.WriteLine($"[MONITOR] Buscando ruta para: {fechaBusqueda:dd/MM/yyyy}, Turno: {TipoRuta}");
+
                 var client = _httpClientFactory.CreateClient();
                 client.BaseAddress = new Uri($"{Request.Scheme}://{Request.Host}");
 
-                // IMPORTANTE: Buscar rutas del día calculado (no de "hoy" si es fin de semana)
                 var response = await client.GetAsync($"/api/rutas/bus/{IdBus}/activa?tipoRuta={TipoRuta}");
 
                 if (response.IsSuccessStatusCode)
@@ -102,8 +70,14 @@ namespace TransportesGenesis.Pages.Monitor
                     }
                     else
                     {
-                        // ⚠️ MODO TESTING: Mensaje genérico sin distinción de fin de semana
-                        MensajeError = apiResponse?.Message ?? "No hay ruta calculada para este bus en el turno actual. Solicita al administrador que calcule las rutas del día.";
+                        if (EsFinDeSemana)
+                        {
+                            MensajeError = $"Es fin de semana. La próxima ruta será el {FechaRuta:dddd dd/MM/yyyy}.";
+                        }
+                        else
+                        {
+                            MensajeError = apiResponse?.Message ?? "No hay ruta calculada para este bus en el turno actual.";
+                        }
                         Console.WriteLine($"[MONITOR] Sin ruta: {MensajeError}");
                     }
                 }
@@ -120,14 +94,10 @@ namespace TransportesGenesis.Pages.Monitor
             }
         }
 
-        /// <summary>
-        /// Obtiene la próxima fecha hábil (omite sábados y domingos)
-        /// </summary>
         private DateTime ObtenerProximaFechaHabil()
         {
             var fecha = DateTime.Now.Date;
 
-            // Si es fin de semana, avanzar al próximo lunes
             while (fecha.DayOfWeek == DayOfWeek.Saturday || fecha.DayOfWeek == DayOfWeek.Sunday)
             {
                 fecha = fecha.AddDays(1);
@@ -136,7 +106,6 @@ namespace TransportesGenesis.Pages.Monitor
             return fecha;
         }
 
-        // Clase auxiliar para deserializar respuesta de API
         private class ApiResponse
         {
             public bool Success { get; set; }

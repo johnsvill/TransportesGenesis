@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TransportesGenesis.Data.Context;
 
@@ -11,9 +12,11 @@ using TransportesGenesis.Data.Context;
 namespace TransportesGenesis.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241030190844_Create_TipoRecorridoPago_Banco_Padres_Alumnos_TipoCuentaEntity")]
+    partial class Create_TipoRecorridoPago_Banco_Padres_Alumnos_TipoCuentaEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -176,10 +179,12 @@ namespace TransportesGenesis.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("ProviderKey")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("nvarchar(max)");
@@ -216,10 +221,12 @@ namespace TransportesGenesis.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Value")
                         .HasColumnType("nvarchar(max)");
@@ -314,105 +321,6 @@ namespace TransportesGenesis.Migrations
                     b.ToTable("Padres", "genesis");
                 });
 
-            modelBuilder.Entity("TransportesGenesis.Models.DB.Negocio.Pago", b =>
-                {
-                    b.Property<int>("IdPago")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdPago"));
-
-                    b.Property<int>("Activo")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Anio")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("FechaModif")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("FechaRegistro")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("IdAlumno")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("IdPadre")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("IdTipoCuenta")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("IdTipoRecorrido")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Imagen")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.Property<int>("MesPagado")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("MontoParcial")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<bool>("PagoCompleto")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Ubicacion")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.HasKey("IdPago");
-
-                    b.HasIndex("FechaRegistro");
-
-                    b.HasIndex("IdAlumno");
-
-                    b.HasIndex("IdPadre");
-
-                    b.HasIndex("IdTipoCuenta");
-
-                    b.HasIndex("IdTipoRecorrido");
-
-                    b.ToTable("Pagos", "genesis");
-                });
-
-            modelBuilder.Entity("TransportesGenesis.Models.DB.Negocio.PagoPadre", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Anio")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ComprobanteUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("Fecha")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Mes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("Monto")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("TipoPago")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UsuarioId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("PagosPadres", (string)null);
-                });
-
             modelBuilder.Entity("TransportesGenesis.Models.DB.Negocio.TipoCuenta", b =>
                 {
                     b.Property<int>("IdTipoCuenta")
@@ -459,9 +367,6 @@ namespace TransportesGenesis.Migrations
                     b.Property<int>("Activo")
                         .HasColumnType("int");
 
-                    b.Property<int>("DiaMaximoPago")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("FechaRegistro")
                         .HasColumnType("datetime2");
 
@@ -480,12 +385,6 @@ namespace TransportesGenesis.Migrations
             modelBuilder.Entity("TransportesGenesis.Models.DB.Usuarios.AppUser", b =>
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
-
-                    b.Property<bool>("IsFirstLogin")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("LastLoginDate")
-                        .HasColumnType("datetime2");
 
                     b.HasDiscriminator().HasValue("AppUser");
                 });
@@ -556,33 +455,6 @@ namespace TransportesGenesis.Migrations
                     b.Navigation("Padres");
                 });
 
-            modelBuilder.Entity("TransportesGenesis.Models.DB.Negocio.Pago", b =>
-                {
-                    b.HasOne("TransportesGenesis.Models.DB.Negocio.Alumnos", "Alumnos")
-                        .WithMany("PagosLink")
-                        .HasForeignKey("IdAlumno");
-
-                    b.HasOne("TransportesGenesis.Models.DB.Negocio.Padres", "Padres")
-                        .WithMany("PagosLink")
-                        .HasForeignKey("IdPadre");
-
-                    b.HasOne("TransportesGenesis.Models.DB.Negocio.TipoCuenta", "TipoCuenta")
-                        .WithMany("PagosLink")
-                        .HasForeignKey("IdTipoCuenta");
-
-                    b.HasOne("TransportesGenesis.Models.DB.Negocio.TipoRecorridoPago", "TipoRecorridoPago")
-                        .WithMany("PagosLink")
-                        .HasForeignKey("IdTipoRecorrido");
-
-                    b.Navigation("Alumnos");
-
-                    b.Navigation("Padres");
-
-                    b.Navigation("TipoCuenta");
-
-                    b.Navigation("TipoRecorridoPago");
-                });
-
             modelBuilder.Entity("TransportesGenesis.Models.DB.Negocio.TipoCuenta", b =>
                 {
                     b.HasOne("TransportesGenesis.Models.DB.Negocio.Banco", "Bancos")
@@ -598,11 +470,6 @@ namespace TransportesGenesis.Migrations
                     b.Navigation("Padres");
                 });
 
-            modelBuilder.Entity("TransportesGenesis.Models.DB.Negocio.Alumnos", b =>
-                {
-                    b.Navigation("PagosLink");
-                });
-
             modelBuilder.Entity("TransportesGenesis.Models.DB.Negocio.Banco", b =>
                 {
                     b.Navigation("TipoCuentasLink");
@@ -612,21 +479,12 @@ namespace TransportesGenesis.Migrations
                 {
                     b.Navigation("AlumnosLink");
 
-                    b.Navigation("PagosLink");
-
                     b.Navigation("TipoCuentasLink");
-                });
-
-            modelBuilder.Entity("TransportesGenesis.Models.DB.Negocio.TipoCuenta", b =>
-                {
-                    b.Navigation("PagosLink");
                 });
 
             modelBuilder.Entity("TransportesGenesis.Models.DB.Negocio.TipoRecorridoPago", b =>
                 {
                     b.Navigation("IdAlumno");
-
-                    b.Navigation("PagosLink");
                 });
 #pragma warning restore 612, 618
         }
