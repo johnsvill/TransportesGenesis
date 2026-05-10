@@ -78,6 +78,10 @@ namespace TransportesGenesis.Controllers
                 {
                     return RedirectToPage("/Piloto/MiRuta");
                 }
+                else if (roles.Contains("Monitor"))
+                {
+                    return RedirectToPage("/Monitor/MiRuta");
+                }
                 else
                 {
                     return RedirectToAction("Index", "Home");

@@ -27,9 +27,5 @@
     <Folder Include="wwwroot\BoletasPago\" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Migrations\" />
-  </ItemGroup>
-
 </Project>
 

@@ -9,8 +9,14 @@ namespace TransportesGenesis.Models.DB.Negocio
         [Key]
         public int IdRegistro { get; set; }
 
+        [Required]
+        public int IdParada { get; set; } // FK a Parada
+
         [ForeignKey("IdParada")]
         public Parada Parada { get; set; }
+
+        [Required]
+        public int IdAlumno { get; set; } // FK a Alumnos
 
         [ForeignKey("IdAlumno")]
         public Alumnos Alumno { get; set; }

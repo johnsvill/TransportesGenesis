@@ -1,0 +1,188 @@
+@page
+@model TransportesGenesis.Pages.Monitor.MiRutaModel
+@{
+    ViewData["Title"] = "Mi Ruta - Monitor";
+}
+
+<div class="container-fluid py-4">
+    <!-- Encabezado -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-gradient-info shadow-lg">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h2 class="text-white mb-2">
+                                <i class="fas fa-route me-2"></i>Mi Ruta - Monitor
+                            </h2>
+                            <p class="text-white mb-0 opacity-8">
+                                <i class="fas fa-user-check me-2"></i>@Model.NombreMonitor | 
+                                <i class="fas fa-bus me-2"></i>Bus #@Model.IdBus | 
+                                <i class="fas fa-clock me-2"></i>Turno: @Model.TipoRuta
+                            </p>
+                        </div>
+                        <div class="text-end">
+                            <h4 class="text-white mb-0">@Model.FechaRuta.ToString("dddd, dd/MM/yyyy")</h4>
+                            @if (Model.EsFinDeSemana)
+                            {
+                                <span class="badge bg-warning">Fin de Semana</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mensajes -->
+    @if (!string.IsNullOrEmpty(Model.MensajeError))
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>@Model.MensajeError
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.MensajeExito))
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>@Model.MensajeExito
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (Model.RutaActiva != null && Model.RutaActiva.Paradas != null && Model.RutaActiva.Paradas.Any())
+    {
+        <!-- Resumen de la Ruta -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-map-marker-alt fa-2x text-primary mb-2"></i>
+                        <h3 class="mb-0">@Model.RutaActiva.Paradas.Count</h3>
+                        <p class="text-muted mb-0">Paradas Totales</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-child fa-2x text-success mb-2"></i>
+                        <h3 class="mb-0">@Model.RutaActiva.Paradas.Sum(p => p.Alumnos?.Count ?? 0)</h3>
+                        <p class="text-muted mb-0">Alumnos Totales</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-clock fa-2x text-info mb-2"></i>
+                        <h3 class="mb-0">@Model.RutaActiva.Paradas.First().HoraEstimada?.ToString("hh\\:mm")</h3>
+                        <p class="text-muted mb-0">Hora Inicio</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-flag-checkered fa-2x text-danger mb-2"></i>
+                        <h3 class="mb-0">@Model.RutaActiva.Paradas.Last().HoraEstimada?.ToString("hh\\:mm")</h3>
+                        <p class="text-muted mb-0">Hora Fin</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botón para Registrar Recogidas -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <a asp-page="/Monitor/RegistrarRecogidas" asp-route-idRuta="@Model.RutaActiva.IdRuta" 
+                   class="btn btn-success btn-lg w-100">
+                    <i class="fas fa-clipboard-check me-2"></i>Registrar Recogidas de Alumnos
+                </a>
+            </div>
+        </div>
+
+        <!-- Listado de Paradas -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-list me-2"></i>Paradas de la Ruta</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="text-center">Orden</th>
+                                        <th>Parada</th>
+                                        <th class="text-center">Alumnos</th>
+                                        <th class="text-center">Hora Estimada</th>
+                                        <th>Ubicación</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var parada in Model.RutaActiva.Paradas.OrderBy(p => p.Orden))
+                                    {
+                                        <tr>
+                                            <td class="text-center">
+                                                <span class="badge bg-primary rounded-circle p-2">@parada.Orden</span>
+                                            </td>
+                                            <td>
+                                                <strong>@parada.NombreParada</strong>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-success">@(parada.Alumnos?.Count ?? 0) niños</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <i class="far fa-clock text-muted me-1"></i>
+                                                @(parada.HoraEstimada?.ToString("hh\\:mm") ?? "N/A")
+                                            </td>
+                                            <td>
+                                                @if (parada.Latitud != 0 && parada.Longitud != 0)
+                                                {
+                                                    <a href="https://www.google.com/maps?q=@parada.Latitud,@parada.Longitud" 
+                                                       target="_blank" class="btn btn-sm btn-outline-primary">
+                                                        <i class="fas fa-map-marked-alt me-1"></i>Ver mapa
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Sin coordenadas</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-lg border-0">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-calendar-times fa-5x text-muted mb-4"></i>
+                        <h4 class="text-muted">No hay ruta asignada para este turno</h4>
+                        <p class="text-muted">Contacta al administrador para que calcule las rutas del día.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-refresh cada 2 minutos para obtener actualizaciones
+        setTimeout(function() {
+            location.reload();
+        }, 120000);
+    </script>
+}

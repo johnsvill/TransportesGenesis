@@ -7,9 +7,9 @@ using System.Net.Http;
 using System.Security.Claims;
 using System.Text.Json;
 
-namespace TransportesGenesis.Pages.Piloto
+namespace TransportesGenesis.Pages.Monitor
 {
-    [Authorize(Roles = "Piloto")]
+    [Authorize(Roles = "Monitor")]
     public class MiRutaModel : PageModel
     {
         private readonly IHttpClientFactory _httpClientFactory;
@@ -26,8 +26,8 @@ namespace TransportesGenesis.Pages.Piloto
         public string TipoRuta { get; set; } = "Mañana";
         public string MensajeError { get; set; } = string.Empty;
         public string MensajeExito { get; set; } = string.Empty;
-        public string NombrePiloto { get; set; } = string.Empty;
-        public string IdPiloto { get; set; } = string.Empty;
+        public string NombreMonitor { get; set; } = string.Empty;
+        public string IdMonitor { get; set; } = string.Empty;
         public DateTime FechaRuta { get; set; }
         public bool EsFinDeSemana { get; set; }
 
@@ -38,19 +38,19 @@ namespace TransportesGenesis.Pages.Piloto
                 // ========================================
                 // LOOKUP DINÁMICO DEL BUS ASIGNADO
                 // ========================================
-                IdPiloto = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
-                NombrePiloto = User.Identity?.Name ?? "Piloto";
+                IdMonitor = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+                NombreMonitor = User.Identity?.Name ?? "Monitor";
 
-                if (string.IsNullOrEmpty(IdPiloto))
+                if (string.IsNullOrEmpty(IdMonitor))
                 {
                     MensajeError = "No se pudo identificar al usuario. Por favor, cierra sesión e intenta de nuevo.";
                     return;
                 }
 
-                // Buscar asignación activa del piloto
+                // Buscar asignación activa del monitor (reutilizando AsignacionPilotoBus)
                 var asignacion = await _context.AsignacionesPilotoBusDb
                     .Include(a => a.Bus)
-                    .Where(a => a.IdUsuarioPiloto == IdPiloto && a.EsActual)
+                    .Where(a => a.IdUsuarioPiloto == IdMonitor && a.EsActual)
                     .OrderByDescending(a => a.FechaAsignacion)
                     .FirstOrDefaultAsync();
 
@@ -61,7 +61,7 @@ namespace TransportesGenesis.Pages.Piloto
                 }
 
                 IdBus = asignacion.IdBus;
-                Console.WriteLine($"[PILOTO] Usuario {NombrePiloto} ({IdPiloto}) asignado al Bus #{IdBus}");
+                Console.WriteLine($"[MONITOR] Usuario {NombreMonitor} ({IdMonitor}) asignado al Bus #{IdBus}");
 
                 // Obtener próxima fecha hábil (omite fines de semana)
                 FechaRuta = ObtenerProximaFechaHabil();
@@ -77,7 +77,7 @@ namespace TransportesGenesis.Pages.Piloto
                     ? DateTime.Now.Date
                     : FechaRuta;
 
-                Console.WriteLine($"[PILOTO] Buscando ruta para: {fechaBusqueda:dd/MM/yyyy}, Turno: {TipoRuta}");
+                Console.WriteLine($"[MONITOR] Buscando ruta para: {fechaBusqueda:dd/MM/yyyy}, Turno: {TipoRuta}");
 
                 // Llamar a la API para obtener la ruta activa
                 var client = _httpClientFactory.CreateClient();
@@ -101,7 +101,7 @@ namespace TransportesGenesis.Pages.Piloto
                             new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
                         );
 
-                        Console.WriteLine($"[PILOTO] Ruta encontrada: ID {RutaActiva?.IdRuta}, Paradas: {RutaActiva?.Paradas?.Count ?? 0}");
+                        Console.WriteLine($"[MONITOR] Ruta encontrada: ID {RutaActiva?.IdRuta}, Paradas: {RutaActiva?.Paradas?.Count ?? 0}");
                     }
                     else
                     {
@@ -113,19 +113,19 @@ namespace TransportesGenesis.Pages.Piloto
                         {
                             MensajeError = apiResponse?.Message ?? "No hay ruta calculada para este bus en el turno actual. Solicita al administrador que calcule las rutas del día.";
                         }
-                        Console.WriteLine($"[PILOTO] Sin ruta: {MensajeError}");
+                        Console.WriteLine($"[MONITOR] Sin ruta: {MensajeError}");
                     }
                 }
                 else
                 {
                     MensajeError = "Error al obtener la ruta del servidor.";
-                    Console.WriteLine($"[PILOTO] Error HTTP: {response.StatusCode}");
+                    Console.WriteLine($"[MONITOR] Error HTTP: {response.StatusCode}");
                 }
             }
             catch (Exception ex)
             {
                 MensajeError = $"Error inesperado: {ex.Message}";
-                Console.WriteLine($"[PILOTO] Excepción: {ex}");
+                Console.WriteLine($"[MONITOR] Excepción: {ex}");
             }
         }
 

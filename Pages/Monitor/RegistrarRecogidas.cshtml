@@ -1,0 +1,246 @@
+@page "{idRuta:int}"
+@model TransportesGenesis.Pages.Monitor.RegistrarRecogidasModel
+@{
+    ViewData["Title"] = "Registrar Recogidas";
+}
+
+<div class="container-fluid py-4">
+    <!-- Encabezado -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-gradient-success shadow-lg">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h2 class="text-white mb-2">
+                                <i class="fas fa-clipboard-check me-2"></i>Registrar Recogidas
+                            </h2>
+                            <p class="text-white mb-0 opacity-8">
+                                <i class="fas fa-user-check me-2"></i>@Model.NombreMonitor | 
+                                <i class="fas fa-bus me-2"></i>Bus #@Model.IdBus | 
+                                <i class="fas fa-clock me-2"></i>Turno: @Model.TipoRuta
+                            </p>
+                        </div>
+                        <div class="text-end">
+                            <a asp-page="/Monitor/MiRuta" class="btn btn-light">
+                                <i class="fas fa-arrow-left me-2"></i>Volver a Mi Ruta
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mensajes -->
+    @if (!string.IsNullOrEmpty(Model.MensajeError))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>@Model.MensajeError
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.MensajeExito))
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>@Model.MensajeExito
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (Model.RutaActiva != null && Model.RutaActiva.Paradas != null && Model.RutaActiva.Paradas.Any())
+    {
+        <!-- Resumen Superior -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-map-marker-alt fa-2x text-primary mb-2"></i>
+                        <h3 class="mb-0">@Model.RutaActiva.Paradas.Count</h3>
+                        <p class="text-muted mb-0">Paradas Totales</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-child fa-2x text-info mb-2"></i>
+                        <h3 class="mb-0">@Model.RutaActiva.Paradas.Sum(p => p.Alumnos?.Count ?? 0)</h3>
+                        <p class="text-muted mb-0">Alumnos Totales</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                        <h3 class="mb-0" id="contadorRecogidos">0</h3>
+                        <p class="text-muted mb-0">Alumnos Recogidos</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario de Registro -->
+        <form method="post">
+            <input type="hidden" name="IdRuta" value="@Model.RutaActiva.IdRuta" />
+
+            @foreach (var parada in Model.RutaActiva.Paradas.OrderBy(p => p.Orden))
+            {
+                @if (parada.Alumnos != null && parada.Alumnos.Any())
+                {
+                    <div class="card shadow mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <h5 class="mb-0">
+                                    <span class="badge bg-light text-dark me-2">@parada.Orden</span>
+                                    @parada.NombreParada
+                                </h5>
+                                <span class="badge bg-light text-dark">
+                                    <i class="far fa-clock me-1"></i>@(parada.HoraEstimada?.ToString("hh\\:mm") ?? "N/A")
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                @foreach (var alumno in parada.Alumnos)
+                                {
+                                    var registroKey = $"Registros_{parada.IdParada}_{alumno.IdAlumno}";
+                                    var registroExistente = Model.RegistrosExistentes
+                                        .FirstOrDefault(r => r.IdParada == parada.IdParada && r.IdAlumno == alumno.IdAlumno);
+                                    var estaRecogido = registroExistente != null;
+                                    var cardClass = estaRecogido ? "border-success bg-light" : "border-secondary";
+                                    var iconClass = estaRecogido ? "fa-check-circle text-success" : "fa-circle text-secondary";
+
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="card @cardClass h-100 shadow-sm alumno-card" data-idparada="@parada.IdParada" data-idalumno="@alumno.IdAlumno">
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                                    <h6 class="mb-0">
+                                                        <i class="fas @iconClass me-2"></i>
+                                                        @alumno.NombreCompleto
+                                                    </h6>
+                                                    @if (estaRecogido)
+                                                    {
+                                                        <span class="badge bg-success">Recogido</span>
+                                                    }
+                                                </div>
+                                                <p class="text-muted small mb-2">Grado: @alumno.Grado</p>
+
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input alumno-checkbox" 
+                                                           type="checkbox" 
+                                                           name="@registroKey" 
+                                                           id="@registroKey"
+                                                           @(estaRecogido ? "checked disabled" : "")
+                                                           onchange="actualizarContador()">
+                                                    <label class="form-check-label" for="@registroKey">
+                                                        @(estaRecogido ? "Ya registrado" : "Marcar como recogido")
+                                                    </label>
+                                                </div>
+
+                                                @if (estaRecogido && registroExistente != null)
+                                                {
+                                                    <small class="text-muted d-block mt-2">
+                                                        <i class="far fa-clock me-1"></i>
+                                                        @registroExistente.FechaHoraRecogida.ToString("dd/MM/yyyy HH:mm")
+                                                    </small>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+
+            <!-- Botón de Guardar -->
+            <div class="row">
+                <div class="col-12">
+                    <button type="submit" class="btn btn-success btn-lg w-100" id="btnGuardar">
+                        <i class="fas fa-save me-2"></i>Guardar Registros de Recogida
+                    </button>
+                </div>
+            </div>
+        </form>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-lg border-0">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-exclamation-triangle fa-5x text-warning mb-4"></i>
+                        <h4 class="text-muted">No se pudo cargar la información de la ruta</h4>
+                        <a asp-page="/Monitor/MiRuta" class="btn btn-primary mt-3">
+                            <i class="fas fa-arrow-left me-2"></i>Volver a Mi Ruta
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Actualizar contador de alumnos recogidos
+        function actualizarContador() {
+            var checkboxes = document.querySelectorAll('.alumno-checkbox:checked:not(:disabled)');
+            var existentes = document.querySelectorAll('.alumno-checkbox:checked:disabled').length;
+            var nuevos = checkboxes.length;
+            var total = existentes + nuevos;
+
+            document.getElementById('contadorRecogidos').textContent = total;
+
+            // Cambiar apariencia de las tarjetas al marcar
+            checkboxes.forEach(function(checkbox) {
+                var card = checkbox.closest('.alumno-card');
+                if (checkbox.checked) {
+                    card.classList.remove('border-secondary');
+                    card.classList.add('border-success', 'bg-light');
+                    var icon = card.querySelector('.fa-circle');
+                    if (icon) {
+                        icon.classList.remove('fa-circle', 'text-secondary');
+                        icon.classList.add('fa-check-circle', 'text-success');
+                    }
+                } else {
+                    card.classList.remove('border-success', 'bg-light');
+                    card.classList.add('border-secondary');
+                    var icon = card.querySelector('.fa-check-circle');
+                    if (icon) {
+                        icon.classList.remove('fa-check-circle', 'text-success');
+                        icon.classList.add('fa-circle', 'text-secondary');
+                    }
+                }
+            });
+
+            // Habilitar/deshabilitar botón de guardar
+            var btnGuardar = document.getElementById('btnGuardar');
+            btnGuardar.disabled = nuevos === 0;
+        }
+
+        // Inicializar contador al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            actualizarContador();
+        });
+
+        // Confirmación antes de guardar
+        document.querySelector('form').addEventListener('submit', function(e) {
+            var checkboxes = document.querySelectorAll('.alumno-checkbox:checked:not(:disabled)');
+            if (checkboxes.length === 0) {
+                e.preventDefault();
+                alert('No has seleccionado ningún alumno para registrar.');
+                return false;
+            }
+
+            if (!confirm(`¿Confirmas el registro de ${checkboxes.length} alumno(s)?`)) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    </script>
+}
