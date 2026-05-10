@@ -63,21 +63,18 @@ namespace TransportesGenesis.Pages.Monitor
                 IdBus = asignacion.IdBus;
                 Console.WriteLine($"[MONITOR] Usuario {NombreMonitor} ({IdMonitor}) asignado al Bus #{IdBus}");
 
-                // Obtener próxima fecha hábil (omite fines de semana)
+                // ⚠️ MODO TESTING: Desactivar validación de fin de semana
+                // TODO PRODUCCIÓN: Restaurar validación de días hábiles
                 FechaRuta = ObtenerProximaFechaHabil();
-                EsFinDeSemana = DateTime.Now.DayOfWeek == DayOfWeek.Saturday || DateTime.Now.DayOfWeek == DayOfWeek.Sunday;
+                EsFinDeSemana = false; // FORZADO A FALSE PARA TESTING
+
+                Console.WriteLine($"[MONITOR - TESTING] Modo prueba: ignorando validación de fin de semana");
 
                 // Determinar turno según hora actual
                 var horaActual = DateTime.Now.Hour;
                 TipoRuta = horaActual < 12 ? "Mañana" : "Tarde";
 
-                // Si es día hábil (lunes-viernes), buscar ruta de HOY
-                // Si es fin de semana, buscar ruta del próximo lunes
-                var fechaBusqueda = DateTime.Now.DayOfWeek >= DayOfWeek.Monday && DateTime.Now.DayOfWeek <= DayOfWeek.Friday
-                    ? DateTime.Now.Date
-                    : FechaRuta;
-
-                Console.WriteLine($"[MONITOR] Buscando ruta para: {fechaBusqueda:dd/MM/yyyy}, Turno: {TipoRuta}");
+                Console.WriteLine($"[MONITOR] Buscando ruta activa para Bus #{IdBus}, Turno: {TipoRuta}");
 
                 // Llamar a la API para obtener la ruta activa
                 var client = _httpClientFactory.CreateClient();
@@ -105,14 +102,8 @@ namespace TransportesGenesis.Pages.Monitor
                     }
                     else
                     {
-                        if (EsFinDeSemana)
-                        {
-                            MensajeError = $"Es fin de semana. La próxima ruta será el {FechaRuta:dddd dd/MM/yyyy}.";
-                        }
-                        else
-                        {
-                            MensajeError = apiResponse?.Message ?? "No hay ruta calculada para este bus en el turno actual. Solicita al administrador que calcule las rutas del día.";
-                        }
+                        // ⚠️ MODO TESTING: Mensaje genérico sin distinción de fin de semana
+                        MensajeError = apiResponse?.Message ?? "No hay ruta calculada para este bus en el turno actual. Solicita al administrador que calcule las rutas del día.";
                         Console.WriteLine($"[MONITOR] Sin ruta: {MensajeError}");
                     }
                 }

@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using TransportesGenesis.Data.Context;
 using TransportesGenesis.Models.DB.Usuarios;
+using TransportesGenesis.Models.DB.Negocio;
 
 namespace TransportesGenesis.Pages.Admin.Usuarios
 {
@@ -97,7 +98,37 @@ namespace TransportesGenesis.Pages.Admin.Usuarios
 
                     if (roleResult.Succeeded)
                     {
-                        Mensaje = $"Usuario {Input.UserName} creado exitosamente con rol {Input.Rol}";
+                        // Si es Piloto o Monitor, asignar Bus #1 automáticamente (SOLO PARA PRUEBAS)
+                        if (Input.Rol == "Piloto" || Input.Rol == "Monitor")
+                        {
+                            var bus1 = await _context.BusesDb.FirstOrDefaultAsync(b => b.IdBus == 1);
+                            if (bus1 != null)
+                            {
+                                var asignacion = new AsignacionPilotoBus
+                                {
+                                    IdUsuarioPiloto = user.Id,
+                                    IdBus = 1,
+                                    FechaAsignacion = DateTime.Now,
+                                    EsActual = true,
+                                    Activo = 1,
+                                    FechaRegistro = DateTime.Now
+                                };
+
+                                _context.AsignacionesPilotoBusDb.Add(asignacion);
+                                await _context.SaveChangesAsync();
+
+                                Mensaje = $"Usuario {Input.UserName} creado exitosamente con rol {Input.Rol} y asignado al Bus #1";
+                            }
+                            else
+                            {
+                                Mensaje = $"Usuario {Input.UserName} creado con rol {Input.Rol}, pero no se pudo asignar bus (Bus #1 no existe)";
+                            }
+                        }
+                        else
+                        {
+                            Mensaje = $"Usuario {Input.UserName} creado exitosamente con rol {Input.Rol}";
+                        }
+
                         TipoMensaje = "success";
 
                         // Limpiar formulario

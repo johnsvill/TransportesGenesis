@@ -129,7 +129,30 @@ namespace TransportesGenesis.Controllers
             {
                 user.IsFirstLogin = false;
                 await _userManager.UpdateAsync(user);
-                return RedirectToAction("Index", "Home");
+
+                // Redirigir según el rol del usuario
+                var roles = await _userManager.GetRolesAsync(user);
+
+                if (roles.Contains("Administrador"))
+                {
+                    return RedirectToAction("Index", "Admin");
+                }
+                else if (roles.Contains("PadreDeFamilia"))
+                {
+                    return RedirectToAction("Index", "PagosPadresFamilia");
+                }
+                else if (roles.Contains("Piloto"))
+                {
+                    return RedirectToPage("/Piloto/MiRuta");
+                }
+                else if (roles.Contains("Monitor"))
+                {
+                    return RedirectToPage("/Monitor/MiRuta");
+                }
+                else
+                {
+                    return RedirectToAction("Index", "Home");
+                }
             }
 
             foreach (var error in result.Errors)
