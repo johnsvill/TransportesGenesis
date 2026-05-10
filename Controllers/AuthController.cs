@@ -76,11 +76,13 @@ namespace TransportesGenesis.Controllers
                 }
                 else if (roles.Contains("Piloto"))
                 {
-                    return RedirectToPage("/Piloto/MiRuta");
+                    // Usar vista intermedia que redirige a Razor Page
+                    return View("PilotoDashboard");
                 }
                 else if (roles.Contains("Monitor"))
                 {
-                    return RedirectToPage("/Monitor/MiRuta");
+                    // Usar vista intermedia que redirige a Razor Page
+                    return View("MonitorDashboard");
                 }
                 else
                 {
@@ -143,11 +145,13 @@ namespace TransportesGenesis.Controllers
                 }
                 else if (roles.Contains("Piloto"))
                 {
-                    return RedirectToPage("/Piloto/MiRuta");
+                    // Usar vista intermedia que redirige a Razor Page
+                    return View("PilotoDashboard");
                 }
                 else if (roles.Contains("Monitor"))
                 {
-                    return RedirectToPage("/Monitor/MiRuta");
+                    // Usar vista intermedia que redirige a Razor Page
+                    return View("MonitorDashboard");
                 }
                 else
                 {

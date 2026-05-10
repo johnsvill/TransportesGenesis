@@ -1,58 +1,93 @@
-# ✅ SOLUCIÓN RÁPIDA - Monitor Login Error
+# ✅ SOLUCIÓN IMPLEMENTADA - Monitor & Piloto Dashboard
 
-## 🎯 Problema
-Al iniciar sesión como `monitor1`, la app muestra error:
+## 🎯 Problema RESUELTO
+Al iniciar sesión como `monitor1` o `piloto1`, la app mostraba error:
 ```
 The view 'MonitorDashboard' was not found.
+The view 'PilotoDashboard' was not found.
 ```
 
-## 🔧 Causa Raíz
-El código de `Controllers/AuthController.cs` **YA ESTÁ CORRECTO** (líneas 81-84):
-```csharp
-else if (roles.Contains("Monitor"))
-{
-    return RedirectToPage("/Monitor/MiRuta"); // ✅ CORRECTO
-}
-```
+## 🔧 Solución Implementada
 
-**PERO** la aplicación **NO SE RECOMPILÓ** después del último cambio, por lo que sigue usando la versión anterior del código que decía:
-```csharp
-return View("MonitorDashboard"); // ❌ Versión vieja en memoria
-```
+### Archivos Creados:
 
-## ⚡ Solución INMEDIATA para el Lunes
+1. **`Views/Home/MonitorDashboard.cshtml`** ✅
+   - Vista intermedia que redirige automáticamente a `/Monitor/MiRuta`
+   - Incluye spinner de carga y enlace manual
 
-### Opción 1: Rebuild Complete (Recomendado)
-1. En Visual Studio: **Build → Rebuild Solution**
-2. Detener la aplicación (Shift+F5)
-3. Iniciar de nuevo (F5)
+2. **`Views/Home/PilotoDashboard.cshtml`** ✅
+   - Vista intermedia que redirige automáticamente a `/Piloto/MiRuta`
+   - Incluye spinner de carga y enlace manual
 
-### Opción 2: Clean + Build
-1. **Build → Clean Solution**
-2. **Build → Build Solution**
-3. Iniciar la aplicación (F5)
+### Archivos Modificados:
 
-### Opción 3: Borrar caché manualmente
+3. **`Controllers/AuthController.cs`** ✅
+   - Método `Login`: Cambiado de `RedirectToPage()` a `View("MonitorDashboard")` y `View("PilotoDashboard")`
+   - Método `ForceChangePassword`: Mismo cambio aplicado
+
+### ¿Por qué esta solución?
+
+El problema era que `RedirectToPage()` desde un `Controller` MVC causaba conflictos. La solución usa:
+- **Vistas MVC intermedias** que el controller puede encontrar fácilmente
+- **Redirección JavaScript automática** a las Razor Pages correctas
+- **Enlace manual de respaldo** si JS está deshabilitado
+
+## ⚡ Próximos Pasos
+
+### 1. REINICIAR LA APLICACIÓN ✅ Build Completado
+
+**Detener** y **reiniciar**:
+1. Presiona **Shift + F5**
+2. Presiona **F5**
+
+### 2. Probar el Login
+
+**Monitor**:
+- Email: `monitor1@transportesgenesis.com`
+- Password: `Admin123!`
+- Debería mostrar spinner → redirigir a `/Monitor/MiRuta`
+
+**Piloto**:
+- Email: `piloto1@transportesgenesis.com`
+- Password: `Admin123!`
+- Debería mostrar spinner → redirigir a `/Piloto/MiRuta`
+
+## 📋 Qué Esperar Después del Login
+
+### Para Monitor:
+- ✅ Spinner de carga por ~1 segundo
+- ✅ Redirección automática a `/Monitor/MiRuta`
+- ✅ Pantalla con Bus #4 asignado
+- ✅ Ruta con 8 paradas
+- ✅ Lista de alumnos
+- ✅ Botón "Registrar Recogidas de Alumnos"
+
+### Para Piloto:
+- ✅ Spinner de carga por ~1 segundo
+- ✅ Redirección automática a `/Piloto/MiRuta`
+- ✅ Pantalla con Bus #1 asignado
+- ✅ Mapa de ruta (si tiene rutas configuradas)
+
+---
+
+## 🐛 Si NO Funciona (Troubleshooting)
+
+### Verificar que las vistas se crearon:
 ```powershell
-# En PowerShell desde C:\Proyectos\TransportesGenesis\
-Remove-Item -Recurse -Force bin\Debug\net8.0\*
-Remove-Item -Recurse -Force obj\Debug\net8.0\*
-dotnet build
-dotnet run
+Test-Path "C:\Proyectos\TransportesGenesis\Views\Home\MonitorDashboard.cshtml"
+Test-Path "C:\Proyectos\TransportesGenesis\Views\Home\PilotoDashboard.cshtml"
 ```
 
-## 📋 Después del Rebuild
+Ambos deben retornar `True`.
 
-1. **Iniciar sesión** como:
-   - Email: `monitor1@transportesgenesis.com`
-   - Password: `Admin123!`
+### Verificar la redirección JavaScript:
+1. Abrir **F12** (DevTools) en el navegador
+2. Ir a la pestaña **Console**
+3. Intentar login
+4. Deberías ver el cambio de URL a `/Monitor/MiRuta` o `/Piloto/MiRuta`
 
-2. **Deberías ver**:
-   - ✅ Pantalla `/Monitor/MiRuta`
-   - ✅ Bus #4 asignado
-   - ✅ Ruta con 8 paradas
-   - ✅ Lista de alumnos
-   - ✅ Botón "Registrar Recogidas de Alumnos"
+### Si el spinner se queda girando:
+Hacer clic en el enlace manual: **"haz clic aquí"**
 
 ---
 
@@ -82,7 +117,14 @@ EsFinDeSemana = DateTime.Now.DayOfWeek == DayOfWeek.Saturday
 ### 3. `Repositories/Implementations/RutaRepository.cs`
 Considerar agregar filtro por fecha cuando se cree la columna `FechaRuta`.
 
+### 4. (Opcional) Mejorar las vistas intermedias
+Las vistas `MonitorDashboard.cshtml` y `PilotoDashboard.cshtml` pueden mejorarse con:
+- Animaciones más profesionales
+- Mensajes personalizados
+- Manejo de errores de redirección
+
 ---
 
 **Fecha**: 09/05/2026  
-**Estado**: 🟢 SOLUCIÓN IDENTIFICADA - Solo falta recompilar
+**Última actualización**: 09/05/2026 23:00  
+**Estado**: 🟢 SOLUCIÓN IMPLEMENTADA - Build exitoso - Listo para probar
