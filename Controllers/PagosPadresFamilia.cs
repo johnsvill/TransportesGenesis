@@ -37,7 +37,7 @@ namespace TransportesGenesis.Controllers
             var diaActual = DateTime.Now.Day;
 
             var mesesDisponibles = new[] { "Enero","Febrero","Marzo","Abril","Mayo","Junio",
-        "Julio","Agosto","Septiembre","Octubre" };
+                                                "Julio","Agosto","Septiembre","Octubre" };
 
             var pagosUsuario = _context.PagosPadresDb
                 .Where(p => p.UsuarioId == usuarioId && p.Anio == anioActual)
@@ -275,7 +275,7 @@ namespace TransportesGenesis.Controllers
             {
                 UsuarioId = usuarioId,
                 Monto = monto,
-                Fecha = DateTime.Now,
+                Fecha = DateTime.Now,              
                 TipoPago = "Boleta",
                 ComprobanteUrl = "/BoletasPago/" + nombreArchivo,
                 Mes = mesLimpio, 

@@ -1,0 +1,203 @@
+﻿@{
+    ViewData["Title"] = "Calendario de Pagos";
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">Calendario de Pagos</h2>
+
+    <!-- Filtros -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label for="usuarioFiltro" class="form-label">Usuario</label>
+            <input type="text" id="usuarioFiltro" class="form-control" placeholder="Correo del usuario">
+        </div>
+        <div class="col-md-4">
+            <label for="tipoFiltro" class="form-label">Tipo de Pago</label>
+            <select id="tipoFiltro" class="form-select">
+                <option value="">Todos</option>
+                <option value="Boleta">Boleta</option>
+                <option value="En línea">En línea</option>
+            </select>
+        </div>
+        <div class="col-md-4 d-flex align-items-end gap-2">
+            <button id="btnFiltrar" class="btn btn-primary w-50" data-bs-toggle="tooltip" data-bs-placement="top" title="Aplicar filtros seleccionados">
+                <i class="fa-solid fa-filter"></i> Aplicar Filtros
+            </button>
+            <button id="btnLimpiar" class="btn btn-outline-secondary w-50" data-bs-toggle="tooltip" data-bs-placement="top" title="Restablecer filtros">
+                <i class="fa-solid fa-broom"></i> Limpiar
+            </button>
+        </div>
+    </div>
+
+    <!-- Calendario -->
+    <div id="calendario"></div>
+
+    <!-- Exportar -->
+    <h4 class="mt-5">Detalle de Pagos del Mes</h4>
+    <div class="d-flex justify-content-end mb-2 gap-2">
+        <a href="/Admin/ExportarPagosExcel" class="btn btn-success">
+            <i class="fa-solid fa-file-excel"></i> Exportar a Excel
+        </a>
+        <a href="/Admin/ExportarPagosPdf" class="btn btn-danger">
+            <i class="fa-solid fa-file-pdf"></i> Exportar a PDF
+        </a>
+    </div>
+
+    <!-- Tabla de detalle -->
+    <table class="table table-striped table-hover mt-3" id="tablaPagos">
+        <thead class="table-dark">
+            <tr>
+                <th>Usuario</th>
+                <th>Monto</th>
+                <th>Tipo</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+                <th>Comprobante</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal Detalles Pago -->
+<div class="modal fade" id="modalPago" tabindex="-1" aria-labelledby="modalPagoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalPagoLabel">Detalles del Pago</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Usuario:</strong> <span id="usuarioModal"></span></p>
+                <p><strong>Monto:</strong> <span id="montoModal"></span></p>
+                <p><strong>Tipo de Pago:</strong> <span id="tipoModal"></span></p>
+                <p><strong>Fecha:</strong> <span id="fechaModal"></span></p>
+                <p><strong>Comprobante:</strong> <span id="comprobanteModal"></span></p>
+                <p><strong>Estado:</strong> <span id="estadoModal"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let calendario;
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const calendarioEl = document.getElementById('calendario');
+            calendario = new FullCalendar.Calendar(calendarioEl, {
+                initialView: 'dayGridMonth',
+                height: 650,
+                locale: 'es',
+                firstDay: 0,
+                buttonText: {
+                    today: 'Hoy',
+                    month: 'Mes',
+                    week: 'Semana',
+                    day: 'Día',
+                    list: 'Lista'
+                },
+                events: function(fetchInfo, successCallback, failureCallback) {
+                    const usuario = document.getElementById('usuarioFiltro').value;
+                    const tipo = document.getElementById('tipoFiltro').value;
+
+                    fetch(`/Admin/ObtenerPagosCalendario?start=${fetchInfo.startStr}&end=${fetchInfo.endStr}&usuario=${usuario}&tipo=${tipo}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            successCallback(data);
+                            actualizarTabla(data);
+                        })
+                        .catch(error => failureCallback(error));
+                },
+                eventDidMount: function(info) {
+                    info.el.classList.add("evento-hover");
+                },
+                eventClick: function(info) {
+                    const evento = info.event.extendedProps;
+
+                    document.getElementById('usuarioModal').textContent = evento.usuario;
+                    document.getElementById('montoModal').textContent = "Q " + evento.monto;
+                    document.getElementById('tipoModal').textContent = evento.tipo;
+                    document.getElementById('fechaModal').textContent = info.event.startStr;
+                    document.getElementById('estadoModal').textContent = evento.estado ?? "Pendiente";
+
+                    const comprobanteEl = document.getElementById('comprobanteModal');
+                    if (evento.comprobante) {
+                        comprobanteEl.innerHTML = `<a href="${evento.comprobante}" target="_blank" class="btn btn-sm btn-outline-primary">Ver comprobante</a>`;
+                    } else {
+                        comprobanteEl.textContent = "N/A";
+                    }
+
+                    var modal = new bootstrap.Modal(document.getElementById('modalPago'));
+                    modal.show();
+                }
+            });
+
+            calendario.render();
+            
+            document.getElementById('btnFiltrar').addEventListener('click', function () {
+                calendario.refetchEvents();
+            });
+            
+            document.getElementById('btnLimpiar').addEventListener('click', function () {
+                document.getElementById('usuarioFiltro').value = "";
+                document.getElementById('tipoFiltro').value = "";
+                calendario.refetchEvents();
+            });
+            
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            });
+        });
+        
+        function actualizarTabla(eventos) {
+            const tbody = document.querySelector("#tablaPagos tbody");
+            tbody.innerHTML = "";
+
+            if (eventos.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">No hay pagos en este rango</td></tr>`;
+                return;
+            }
+
+            eventos.forEach(ev => {
+                const fila = document.createElement("tr");
+                fila.innerHTML = `
+                    <td>${ev.usuario}</td>
+                    <td>Q ${ev.monto}</td>
+                    <td>${ev.tipo}</td>
+                    <td>${ev.start}</td>
+                    <td>${ev.estado ?? "Pendiente"}</td>
+                    <td>${ev.comprobante ? `<a href="${ev.comprobante}" target="_blank" class="btn btn-sm btn-outline-primary">Ver</a>` : "N/A"}</td>
+                    <td>
+                        <a href="/Admin/ValidarPago/${ev.id}" class="btn btn-success btn-sm me-1">
+                            <i class="fa-solid fa-check"></i> Validar
+                        </a>
+                        <a href="/Admin/RechazarPago/${ev.id}" class="btn btn-danger btn-sm">
+                            <i class="fa-solid fa-xmark"></i> Rechazar
+                        </a>
+                    </td>
+                `;
+                tbody.appendChild(fila);
+            });
+        }
+    </script>
+
+    <style>
+        .fc-event.evento-hover {
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+            .fc-event.evento-hover:hover {
+                transform: scale(1.05);
+                box-shadow: 0 0 8px rgba(0,0,0,0.3);
+            }
+    </style>
+}

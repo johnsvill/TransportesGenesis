@@ -7,11 +7,11 @@
 
     <div class="row g-4">
         <!-- Tarjeta Asignar Montos -->
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card shadow-lg border-0 h-100">
                 <div class="card-body text-center">
                     <div class="mb-3">
-                        <i class="bi bi-cash-stack display-4 text-primary"></i>
+                        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135706.png" alt="Montos" width="64" />
                     </div>
                     <h5 class="card-title fw-bold">Asignar Montos</h5>
                     <p class="card-text text-muted">
@@ -25,11 +25,11 @@
         </div>
 
         <!-- Tarjeta Gestión de Usuarios -->
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card shadow-lg border-0 h-100">
                 <div class="card-body text-center">
                     <div class="mb-3">
-                        <i class="bi bi-people-fill display-4 text-success"></i>
+                        <img src="https://cdn-icons-png.flaticon.com/512/1077/1077114.png" alt="Usuarios" width="64" />
                     </div>
                     <h5 class="card-title fw-bold">Gestión de Usuarios</h5>
                     <p class="card-text text-muted">
@@ -43,17 +43,35 @@
         </div>
 
         <!-- Tarjeta Pagos -->
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card shadow-lg border-0 h-100">
                 <div class="card-body text-center">
                     <div class="mb-3">
-                        <i class="bi bi-credit-card-2-front display-4 text-danger"></i>
+                        <img src="https://cdn-icons-png.flaticon.com/512/1170/1170576.png" alt="Pagos" width="64" />
                     </div>
                     <h5 class="card-title fw-bold">Pagos</h5>
                     <p class="card-text text-muted">
                         Revisa y valida los pagos realizados por los padres de familia.
                     </p>
                     <a asp-controller="Admin" asp-action="DashboardPagos" class="btn btn-danger w-100">
+                        Entrar
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tarjeta Calendario -->
+        <div class="col-md-3">
+            <div class="card shadow-lg border-0 h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <img src="https://cdn-icons-png.flaticon.com/512/747/747310.png" alt="Calendario" width="64" />
+                    </div>
+                    <h5 class="card-title fw-bold">Calendario</h5>
+                    <p class="card-text text-muted">
+                        Visualiza los pagos en un calendario interactivo.
+                    </p>
+                    <a asp-controller="Admin" asp-action="Calendario" class="btn btn-info w-100">
                         Entrar
                     </a>
                 </div>

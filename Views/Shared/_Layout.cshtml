@@ -11,6 +11,8 @@
     <!-- CSS personalizado -->
     <link rel="stylesheet" href="~/css/site.css" />    
     <link rel="stylesheet" href="~/lib/fontawesome/css/all.min.css" />
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/main.min.css" rel="stylesheet" />
+
 
 </head>
 <body>
@@ -86,12 +88,14 @@
     <footer class="bg-light text-center p-3 mt-4">
         <p class="text-muted">© 2026 Transportes Génesis - Sistema de Transporte Escolar</p>
     </footer>
-
+    
     <!-- Scripts -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+
     @RenderSection("Scripts", required: false)
 </body>
 </html>
