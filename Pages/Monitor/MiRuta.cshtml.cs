@@ -54,17 +54,18 @@ namespace TransportesGenesis.Pages.Monitor
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
-                    var apiResponse = JsonSerializer.Deserialize<ApiResponse>(content, new JsonSerializerOptions 
+                    var jsonOptions = new JsonSerializerOptions 
                     { 
-                        PropertyNameCaseInsensitive = true 
-                    });
+                        PropertyNameCaseInsensitive = true,
+                        NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString
+                    };
+
+                    var apiResponse = JsonSerializer.Deserialize<ApiResponse>(content, jsonOptions);
 
                     if (apiResponse?.Success == true && apiResponse.Data != null)
                     {
-                        RutaActiva = JsonSerializer.Deserialize<RutaDto>(
-                            apiResponse.Data.ToString()!, 
-                            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
-                        );
+                        var dataJson = JsonSerializer.Serialize(apiResponse.Data);
+                        RutaActiva = JsonSerializer.Deserialize<RutaDto>(dataJson, jsonOptions);
 
                         Console.WriteLine($"[MONITOR] Ruta encontrada: ID {RutaActiva?.IdRuta}, Paradas: {RutaActiva?.Paradas?.Count ?? 0}");
                     }

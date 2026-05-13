@@ -91,7 +91,13 @@ public static class Startup
         });
 
         // MVC y Razor Pages
-        services.AddControllersWithViews();
+        services.AddControllersWithViews()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.PropertyNamingPolicy = null; // Usar PascalCase
+                options.JsonSerializerOptions.PropertyNameCaseInsensitive = true; // Aceptar ambos
+                options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+            });
         services.AddRazorPages().AddRazorRuntimeCompilation();
     }
 

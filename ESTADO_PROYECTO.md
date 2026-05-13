@@ -3,8 +3,8 @@
 **Proyecto**: TransportesGenesis - Sistema de Buses Escolares  
 **Módulo**: Geolocalización y Gestión de Rutas  
 **Desarrollador**: David  
-**Compañero**: Trabajando en Login y Pagos  
-**Última actualización**: Enero 2025
+**Compañero**: Trabajando en Login y Pagos ✅ COMPLETADO  
+**Última actualización**: Mayo 2026
 
 ---
 
@@ -13,41 +13,45 @@
 Sistema de geolocalización en tiempo real para buses escolares con:
 - **Padres**: Ver ubicación del bus de su hijo en tiempo real, confirmar asistencia, solicitar traslados temporales
 - **Admin**: Ver todos los buses en el mapa, aprobar/rechazar traslados, gestionar rutas
-- **Piloto**: Ver rutas asignadas, recibir alertas de paradas próximas
+- **Piloto/Monitor**: Ver rutas asignadas, recibir alertas de paradas próximas, registrar asistencia
 
 ---
 
 ## 📋 Plan de 7 Fases
 
-### ✅ **FASE 1: Configuración Inicial** - COMPLETADA
+### ✅ **FASE 1: Configuración Inicial** - COMPLETADA 100%
 - [x] Proyecto ASP.NET Core 8.0 con Razor Pages
 - [x] Entity Framework Core con SQL Server (schema: genesis)
 - [x] Estructura de carpetas: Models, DTOs, Repositories, Services
 - [x] AutoMapper configurado
 - [x] Bootstrap 5.3 + Bootstrap Icons en layout
 - [x] Configuración de puertos (7240)
+- [x] SignalR configurado para notificaciones en tiempo real
 
 ---
 
-### ✅ **FASE 2: API Base de Ubicaciones** - COMPLETADA
+### ✅ **FASE 2: API Base de Ubicaciones** - COMPLETADA 100%
 - [x] Modelo: `Bus`, `UbicacionBus`, `Alumnos`
 - [x] Repositorio: `BusRepository`, `UbicacionBusRepository`
 - [x] Servicio: `BusService`, `UbicacionBusService`
 - [x] API Controller: `/api/ubicaciones` con endpoints GET
 - [x] DTOs: `BusDto`, `UbicacionBusDto`
 - [x] Script SQL: Datos de prueba (3 buses con ubicaciones)
+- [x] **Seed Data para presentaciones**: Scripts completos con alumnos, rutas y paradas
 
 **Archivos clave**:
 - `Models/DB/Negocio/Bus.cs`
-- `Models/DB/Negocio/UbicacionBus.cs`
+- `Models/DB/Negocio/UbicacionBusEnTiempoReal.cs`
 - `Repositories/Implementations/BusRepository.cs`
 - `Repositories/Implementations/UbicacionBusRepository.cs`
 - `Controllers/Api/UbicacionesController.cs`
-- `Scripts/InsertarDatosPrueba_Geolocalizacion.sql`
+- `Scripts/SeedData_DashboardMonitor_Test.sql` ⭐ NUEVO
+- `Scripts/EJECUTAR_FINAL_DashboardMonitor.sql` ⭐ NUEVO
+- `INICIO_RAPIDO_DashboardMonitor.md` ⭐ NUEVO
 
 ---
 
-### ✅ **FASE 3: Mapa en Tiempo Real** - COMPLETADA
+### ✅ **FASE 3: Mapa en Tiempo Real** - COMPLETADA 100%
 - [x] Integración de Leaflet.js 1.9.4 con OpenStreetMap
 - [x] Página: `/Geolocalizacion/MapaEnTiempoReal`
 - [x] Marcadores de buses con colores según estado:
@@ -65,39 +69,191 @@ Sistema de geolocalización en tiempo real para buses escolares con:
 - `Pages/Geolocalizacion/MapaEnTiempoReal.cshtml`
 - `Pages/Geolocalizacion/MapaEnTiempoReal.cshtml.cs`
 
-**Scripts útiles**:
-- `Scripts/ActualizarUbicaciones_Tiempo_Real.sql` - Actualiza timestamps a fecha actual
-
 ---
 
-### ✅ **FASE 4: Calendario de Confirmación de Asistencia** - COMPLETADA
+### ✅ **FASE 4: Calendario de Confirmación de Asistencia** - COMPLETADA 100%
 - [x] Modelo: `AsistenciaAlumno` con campos IdBusTemporalMañana/Tarde
 - [x] Repositorio: `AsistenciaAlumnoRepository`
 - [x] Servicio: `AsistenciaService` con validación de horarios
 - [x] API Controller: `/api/asistencia` con modo simulación
 - [x] Página: `/Padres/ConfirmarAsistencia`
-- [x] Calendario mensual con:
-  - Vista L-V (solo días de semana)
-  - Colores por estado:
-    - 🟢 Verde: Ambas rutas confirmadas
-    - 🔵 Azul: Solo una ruta confirmada
-    - 🔴 Rojo: Ninguna ruta confirmada
-    - ⚫ Gris: Días pasados o fines de semana
-  - Switches grandes y animados para Mañana/Tarde
-  - Confirmación de fechas futuras permitida
-  - Validación de horarios:
-    - Mañana: 2PM - 4AM día siguiente
-    - Tarde: 5PM - 11AM día siguiente
-  - Detección de fines de semana con mensaje informativo
-  - Persistencia en localStorage (modo prueba)
-  - Permite cancelar ambas rutas (padre puede desmarcar todo)
+- [x] Calendario mensual completo con switches animados
+- [x] Validación de horarios y detección de fines de semana
+- [x] Persistencia en base de datos
 
 **Archivos clave**:
 - `Models/DB/Negocio/AsistenciaAlumno.cs`
-- `Repositories/Implementations/AsistenciaAlumnoRepository.cs`
-- `Services/Implementations/AsistenciaService.cs`
+- `Pages/Padres/ConfirmarAsistencia.cshtml`
 - `Controllers/Api/AsistenciaController.cs`
-- `Pages/Padres/ConfirmarAsistencia.cshtml` (496 líneas limpias)
+
+---
+
+### ✅ **FASE 5: Cálculo Dinámico de Rutas** - COMPLETADA 100%
+- [x] Modelo: `Ruta`, `Parada`
+- [x] Algoritmo de optimización de rutas (Nearest Neighbor)
+- [x] Consideración de confirmaciones de asistencia
+- [x] Aplicación de traslados temporales aprobados
+- [x] Cálculo de tiempos estimados de llegada
+- [x] Visualización de ruta en mapa con línea de recorrido
+- [x] API: `/api/rutas/calcular` POST con fecha y turno
+- [x] API: `/api/rutas/bus/{id}/activa` GET para ruta del día
+- [x] Página: `/Piloto/MiRuta` - Vista de paradas del día
+
+**Archivos clave**:
+- `Models/DB/Negocio/Ruta.cs`
+- `Models/DB/Negocio/Parada.cs`
+- `Services/Implementations/RutaService.cs`
+- `Controllers/Api/RutasController.cs`
+- `Pages/Piloto/MiRuta.cshtml`
+
+---
+
+### ✅ **FASE 6: Solicitudes de Traslado Temporal** - COMPLETADA 100%
+- [x] **Backend**: Modelos, Repositorios, Servicios
+- [x] **Frontend Padre**: Modal de solicitud, historial, navegación
+- [x] **Frontend Admin**: Panel de gestión de traslados ⭐ COMPLETADO
+- [x] **Indicadores visuales**: Iconos en calendario con traslados
+- [x] API completa: `/api/traslados`
+- [x] Integración con sistema de rutas
+
+**Archivos clave**:
+- `Models/DB/Negocio/SolicitudTraslado.cs`
+- `Services/Implementations/TrasladoService.cs`
+- `Pages/Padres/Traslados.cshtml`
+- `Pages/Admin/GestionarTraslados.cshtml`
+- `Controllers/Api/TrasladosController.cs`
+
+---
+
+### ✅ **FASE 7: Notificaciones en Tiempo Real** - COMPLETADA 100%
+- [x] Integración de SignalR para WebSockets
+- [x] Hub: `NotificacionesHub`
+- [x] Servicio: `NotificacionService`, `AlertaService`
+- [x] Detección de proximidad (1 parada antes)
+- [x] Envío de notificación push al navegador
+- [x] Componente de notificaciones en layout
+- [x] Historial de notificaciones: `/Admin/AlertasHistorial`
+- [x] Modelo: `AlertaProximidad` con confirmación de padres
+
+**Archivos clave**:
+- `Hubs/NotificacionesHub.cs`
+- `Services/Implementations/NotificacionService.cs`
+- `Services/Implementations/AlertaService.cs`
+- `Models/DB/Negocio/AlertaProximidad.cs`
+- `Pages/Admin/AlertasHistorial.cshtml`
+
+---
+
+## 🆕 **NUEVAS FUNCIONALIDADES - Dashboard Monitor** ⭐
+
+### ✅ **Dashboard Monitor/Piloto** - COMPLETADA 90%
+- [x] **Página principal**: `/Monitor/MiRuta`
+  - Vista de ruta activa del día
+  - Mapa con recorrido y paradas
+  - Lista de alumnos en orden de parada
+  - Detección automática de turno (Mañana/Tarde)
+  - Manejo de fin de semana
+  - Integración con API de rutas
+
+- [x] **Registro de Asistencia**: `/Monitor/ListadoNinos`
+  - Lista completa de alumnos de la ruta
+  - Toggles para marcar presente/ausente
+  - Guardado automático en base de datos
+  - Estadísticas en tiempo real (Presentes, Ausentes, Total)
+  - Tabla responsive con direcciones
+  - Toast notifications para feedback
+  - Token CSRF implementado
+
+- [x] **Configuración de JSON**:
+  - Serialización en PascalCase
+  - Manejo correcto de valores null
+  - PropertyNameCaseInsensitive habilitado
+
+- [ ] **Pendiente (10%)**:
+  - Navegación hacia "Ver Mapa de Ruta" (falta implementar la vista del mapa)
+  - Integración con ubicación GPS del bus
+  - Marcar paradas como completadas en el mapa
+
+**Archivos clave**:
+- `Pages/Monitor/MiRuta.cshtml` ⭐ NUEVO
+- `Pages/Monitor/MiRuta.cshtml.cs` ⭐ NUEVO
+- `Pages/Monitor/ListadoNinos.cshtml` ⭐ COMPLETADO
+- `Pages/Monitor/ListadoNinos.cshtml.cs` ⭐ COMPLETADO
+- `Models/DB/Negocio/RegistroRecogida.cs`
+- `Startup.cs` (configuración JSON) ⭐ ACTUALIZADO
+
+**Scripts de Seed Data**:
+- `Scripts/SeedData_DashboardMonitor_Test.sql` - Script SQL principal
+- `Scripts/EJECUTAR_FINAL_DashboardMonitor.sql` - Script optimizado
+- `Scripts/SeedData_DashboardMonitor_Configuracion.sql` - Ajustes en vivo
+- `Scripts/README_DashboardMonitor.md` - Documentación completa
+- `Migrations/20260512200000_SeedData_DashboardMonitor.cs` - Migración EF
+- `Migrations/README_SeedData_Migration.md` - Guía de migración
+- `INICIO_RAPIDO_DashboardMonitor.md` - Guía rápida
+
+**Datos de prueba incluidos**:
+- ✅ 1 Bus (BUS-001, IdBus = 4)
+- ✅ 8 Padres de familia
+- ✅ 10 Alumnos con coordenadas GPS reales de Guatemala
+- ✅ 2 Rutas (Mañana 6:00 AM, Tarde 2:00 PM)
+- ✅ 22 Paradas (11 por ruta)
+
+---
+
+## 🗄️ **Migraciones y Base de Datos**
+
+### ✅ **Sistema de Migraciones** - COMPLETADO 100%
+- [x] Todas las migraciones aplicadas correctamente
+- [x] Schema `genesis` completamente funcional
+- [x] Datos de prueba documentados
+- [x] Scripts SQL listos para producción
+- [x] Migración de Seed Data creada
+
+**Migraciones principales**:
+1. `00000000000000_CreateIdentitySchema` - Identity ASP.NET
+2. `20241029172435_Scaffold_de_usuarios` - Usuarios base
+3. `20241030190844_Create_TipoRecorridoPago_Banco_Padres_Alumnos_TipoCuentaEntity` - Módulo de pagos
+4. `20241030214842_Create_Pago_Entity` - Pagos
+5. `20241105000000_Add_Sistema_Geolocalizacion_Completo` - Geolocalización
+6. `20260425154631_AddIsFirstLoginToAppUser` - Login tracking
+7. `20260426162657_AddLoginTrackingToAppUser` - Login tracking ampliado
+8. `20260426174720_AddPagosPadres` - Pagos padres
+9. `20260426185106_AddPagosPadresMesAnio` - Pagos por mes
+10. `20260502193500_FixDiscriminatorValues` - Fix discriminators
+11. `20260503173203_InitialCreate` - Recreación limpia
+12. `20260503183800_CreateMontoPadre` - Montos
+13. `20260505170000_CreateAlertaProximidadTable` - Alertas
+14. `20260512200000_SeedData_DashboardMonitor` ⭐ NUEVA - Datos de prueba
+
+**Tablas del módulo** (schema `genesis`):
+- ✅ `Buses` - Información de buses
+- ✅ `UbicacionBusEnTiempoReal` - Ubicaciones GPS
+- ✅ `Alumnos` - Estudiantes con bus asignado
+- ✅ `Padres` - Padres de familia
+- ✅ `AsistenciaAlumno` - Confirmaciones diarias
+- ✅ `SolicitudTraslado` - Traslados temporales
+- ✅ `Rutas` - Rutas planificadas
+- ✅ `Paradas` - Paradas de cada ruta
+- ✅ `RegistroRecogida` - Registro de asistencia por parada
+- ✅ `AlertaProximidad` - Alertas de proximidad
+- ✅ `NotificacionProximidad` - Notificaciones a padres
+- ✅ `NotificacionRetraso` - Notificaciones de retraso
+- ✅ `ConfiguracionSistema` - Configuración general
+
+---
+
+## 💰 **Módulo de Pagos** (Compañero)
+
+### ✅ **Sistema de Pagos** - COMPLETADO 100%
+- [x] Integración con Stripe
+- [x] Modelos: `Pago`, `PagoPadre`, `TipoCuenta`, `Banco`
+- [x] Controlador: `PagosPadresFamilia`
+- [x] Migraciones aplicadas
+- [x] Sistema funcional
+
+**Nota**: Este módulo fue desarrollado por tu compañero y está completamente funcional.
+
+---
 - `Pages/Padres/ConfirmarAsistencia.cshtml.cs`
 - `DTOs/Asistencia/AsistenciaDto.cs`
 - `Mappings/AsistenciaMappingProfile.cs`
@@ -242,6 +398,158 @@ Sistema de geolocalización en tiempo real para buses escolares con:
 ## 🔐 **Sistema de Roles** (Transversal a todas las fases)
 
 ### **Roles definidos**:
+1. **Padre** ✅:
+   - ✅ Ver geolocalización del bus de su hijo
+   - ✅ Confirmar asistencia diaria
+   - ✅ Solicitar traslados temporales
+   - ✅ Ver historial de traslados
+   - ✅ Recibir notificaciones de proximidad
+
+2. **Piloto/Monitor** 🔄 90%:
+   - ✅ Ver solo sus rutas asignadas
+   - ✅ Ver niños en su ruta del día
+   - ✅ Registrar asistencia de alumnos
+   - [ ] Marcar paradas completadas en mapa (pendiente 10%)
+   - ✅ Ver alertas de cambios de última hora
+
+3. **Admin** ✅:
+   - ✅ Ver todos los buses en el mapa
+   - ✅ Gestionar rutas y buses
+   - ✅ Aprobar/rechazar traslados
+   - ✅ Ver reportes y estadísticas
+   - ✅ Ver historial de alertas
+
+### **Estado de implementación**:
+- [x] Integración con módulo de Login ✅ COMPLETADO
+- [x] Middleware de autorización por rol ✅
+- [x] Filtrado de datos según rol ✅
+- [x] Redirección a páginas según permiso ✅
+
+---
+
+## 🛠️ **Stack Técnico**
+
+### **Backend**:
+- ASP.NET Core 8.0 Razor Pages
+- Entity Framework Core 8.0 (SQL Server provider)
+- AutoMapper 13.0.1 para DTOs
+- Repository Pattern + Service Layer
+- Dependency Injection
+- SignalR para notificaciones en tiempo real
+- System.Text.Json para serialización
+
+### **Frontend**:
+- Bootstrap 5.3.2
+- Bootstrap Icons 1.11.1
+- Leaflet.js 1.9.4 (mapas)
+- Chart.js (gráficos)
+- Vanilla JavaScript (ES6+)
+- Fetch API para llamadas AJAX
+- SignalR Client para WebSockets
+
+### **Base de Datos**:
+- SQL Server 2019+
+- Schema personalizado: `genesis`
+- Migrations con Entity Framework Core
+- Scripts SQL para datos de prueba
+
+### **Herramientas de Desarrollo**:
+- Visual Studio 2026 Community (18.5.2)
+- SQL Server Management Studio (SSMS)
+- Git (branch: dev_david)
+- Postman (testing de APIs)
+
+---
+
+## 📊 **Progreso General del Proyecto**
+
+### **Resumen por Módulos**:
+| Módulo | Progreso | Estado |
+|--------|----------|--------|
+| **Login y Autenticación** | 100% | ✅ Completado (compañero) |
+| **Sistema de Pagos** | 100% | ✅ Completado (compañero) |
+| **Geolocalización en Tiempo Real** | 100% | ✅ Completado |
+| **Confirmación de Asistencia** | 100% | ✅ Completado |
+| **Traslados Temporales** | 100% | ✅ Completado |
+| **Cálculo de Rutas** | 100% | ✅ Completado |
+| **Notificaciones SignalR** | 100% | ✅ Completado |
+| **Dashboard Monitor** | 90% | 🔄 En progreso |
+| **Migraciones y BD** | 100% | ✅ Completado |
+
+### **Progreso Total**: **~97%** 🎉
+
+---
+
+## 📝 **Pendientes (3% restante)**
+
+### **Dashboard Monitor/Piloto** (10% del módulo):
+- [ ] Vista del mapa de ruta interactivo con paradas
+- [ ] Marcar paradas como completadas desde el mapa
+- [ ] Integración con ubicación GPS del bus en tiempo real
+
+### **Mejoras Opcionales**:
+- [ ] Reportes en PDF
+- [ ] Exportación de datos a Excel
+- [ ] Configuración de notificaciones por padre
+- [ ] Dashboard con métricas de rendimiento
+
+---
+
+## 🚀 **Próximos Pasos Recomendados**
+
+1. **Completar Dashboard Monitor (10%)**:
+   - Implementar vista de mapa con paradas interactivas
+   - Conectar con GPS en tiempo real
+   - Permitir marcar paradas completadas
+
+2. **Testing y QA**:
+   - Pruebas de integración completas
+   - Validar flujos de usuario de principio a fin
+   - Verificar rendimiento con carga
+
+3. **Documentación**:
+   - Manual de usuario para cada rol
+   - Documentación técnica de APIs
+   - Guía de despliegue
+
+4. **Preparación para Producción**:
+   - Revisar seguridad
+   - Optimizar consultas de base de datos
+   - Configurar logging robusto
+   - Preparar scripts de deployment
+
+---
+
+## 📚 **Documentación Adicional**
+
+Archivos de documentación disponibles:
+- `INICIO_RAPIDO_DashboardMonitor.md` - Guía rápida de datos de prueba
+- `Scripts/README_DashboardMonitor.md` - Documentación de scripts SQL
+- `Migrations/README_SeedData_Migration.md` - Guía de migraciones
+- `TECNOLOGIAS-UTILIZADAS.md` - Stack técnico completo
+- `ROADMAP_TRAFICO_RECALCULO.md` - Planificación de funcionalidades futuras
+
+---
+
+## 🎯 **Conclusión**
+
+El proyecto **TransportesGenesis** está en un estado avanzado de desarrollo:
+
+- ✅ **Todas las fases principales completadas** (FASE 1-7)
+- ✅ **Módulos de Login y Pagos funcionando** (compañero)
+- ✅ **Sistema de geolocalización completo** con mapas, rutas y notificaciones
+- 🔄 **Dashboard Monitor al 90%** (falta solo vista de mapa interactivo)
+- ✅ **Base de datos estable** con migraciones aplicadas
+- ✅ **Scripts de seed data listos** para presentaciones y demos
+
+**Estado**: **CASI LISTO PARA PRODUCCIÓN** 🚀  
+**Próximo milestone**: Completar vista de mapa del monitor (1-2 días de trabajo estimado)
+
+---
+
+**Última actualización**: Mayo 13, 2026  
+**Branch activo**: `dev_david`  
+**Desarrolladores**: David (Geolocalización) + Compañero (Login/Pagos)
 1. **Padre**:
    - Ver geolocalización del bus de su hijo
    - Confirmar asistencia diaria

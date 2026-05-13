@@ -5,6 +5,11 @@
     Layout = "~/Pages/Shared/_Layout.cshtml";
 }
 
+<!-- Token Anti-Forgery (CSRF) -->
+<form id="formAntiforgery" method="post">
+    @Html.AntiForgeryToken()
+</form>
+
 <div class="container-fluid">
     @if (!string.IsNullOrEmpty(Model.MensajeError))
     {
@@ -208,13 +213,21 @@
                         // Mostrar loading
                         this.disabled = true;
 
+                        // Obtener token CSRF
+                        const tokenElement = document.querySelector('input[name="__RequestVerificationToken"]');
+                        const headers = {
+                            'Content-Type': 'application/json'
+                        };
+
+                        // Agregar token si existe
+                        if (tokenElement) {
+                            headers['RequestVerificationToken'] = tokenElement.value;
+                        }
+
                         // Enviar petición AJAX
                         const response = await fetch('/Monitor/ListadoNinos?handler=ActualizarAsistencia', {
                             method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                            },
+                            headers: headers,
                             body: JSON.stringify({
                                 idAlumno: idAlumno,
                                 idParada: idParada,

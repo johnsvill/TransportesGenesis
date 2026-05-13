@@ -70,8 +70,8 @@ namespace TransportesGenesis.Pages.Monitor
                         {
                             IdRuta = rutaDto.IdRuta;
 
-                            // Obtener listado de alumnos de todas las paradas
-                            foreach (var parada in rutaDto.Paradas.OrderBy(p => p.Orden))
+                            // Obtener listado de alumnos de todas las paradas (excluyendo paradas sin alumno, como el colegio)
+                            foreach (var parada in rutaDto.Paradas.Where(p => p.IdAlumno.HasValue).OrderBy(p => p.Orden))
                             {
                                 // Verificar si ya existe registro de asistencia para hoy
                                 var registroExistente = await _context.Set<RegistroRecogida>()
@@ -81,7 +81,7 @@ namespace TransportesGenesis.Pages.Monitor
 
                                 Alumnos.Add(new AlumnoAsistencia
                                 {
-                                    IdAlumno = parada.IdAlumno,
+                                    IdAlumno = parada.IdAlumno.Value, // Ya sabemos que no es null
                                     IdParada = parada.IdParada,
                                     NombreCompleto = parada.NombreAlumno,
                                     Direccion = parada.Direccion,
@@ -202,7 +202,7 @@ namespace TransportesGenesis.Pages.Monitor
         private class ParadaDto
         {
             public int IdParada { get; set; }
-            public int IdAlumno { get; set; }
+            public int? IdAlumno { get; set; } // Nullable para paradas del colegio
             public string NombreAlumno { get; set; } = string.Empty;
             public string Direccion { get; set; } = string.Empty;
             public int Orden { get; set; }
