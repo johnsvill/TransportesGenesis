@@ -1,26 +1,31 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Security.Claims;
 using TransportesGenesis.DTOs.Ruta;
+using TransportesGenesis.Services.Interfaces;
 using System.Net.Http;
 using System.Text.Json;
 
 namespace TransportesGenesis.Pages.Piloto
 {
+    [Authorize(Roles = "Piloto")]
     public class MiRutaModel : PageModel
     {
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IPilotoService _pilotoService;
 
-        public MiRutaModel(IHttpClientFactory httpClientFactory)
+        public MiRutaModel(IHttpClientFactory httpClientFactory, IPilotoService pilotoService)
         {
             _httpClientFactory = httpClientFactory;
+            _pilotoService = pilotoService;
         }
 
         public RutaDto? RutaActiva { get; set; }
-        public int IdBus { get; set; } = 4; // TODO: Obtener del usuario autenticado (Claims)
+        public int? IdBus { get; set; }
         public string TipoRuta { get; set; } = "Mañana";
         public string MensajeError { get; set; } = string.Empty;
         public string MensajeExito { get; set; } = string.Empty;
-        public string NombrePiloto { get; set; } = "Juan Pérez"; // TODO: Obtener del usuario autenticado
-        public int IdPiloto { get; set; } = 1; // TODO: Obtener del usuario autenticado
+        public string NombrePiloto { get; set; } = string.Empty;
         public DateTime FechaRuta { get; set; }
         public bool EsFinDeSemana { get; set; }
 
@@ -28,9 +33,25 @@ namespace TransportesGenesis.Pages.Piloto
         {
             try
             {
-                // TODO: En producción, obtener IdBus del piloto autenticado
-                // var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                // IdBus = await _pilotoService.GetBusDelPilotoAsync(userId);
+                // Obtener ID del usuario autenticado
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    MensajeError = "No se pudo identificar al usuario autenticado.";
+                    return;
+                }
+
+                // Obtener nombre del piloto
+                NombrePiloto = User.Identity?.Name ?? "Piloto";
+
+                // Obtener IdBus asignado al piloto desde la base de datos
+                IdBus = await _pilotoService.GetIdBusAsignadoAsync(userId);
+
+                if (!IdBus.HasValue)
+                {
+                    MensajeError = "No tienes un bus asignado. Por favor contacta al administrador.";
+                    return;
+                }
 
                 // Obtener próxima fecha hábil (omite fines de semana)
                 FechaRuta = ObtenerProximaFechaHabil();
@@ -46,13 +67,12 @@ namespace TransportesGenesis.Pages.Piloto
                     ? DateTime.Now.Date
                     : FechaRuta;
 
-                Console.WriteLine($"[PILOTO] Buscando ruta para: {fechaBusqueda:dd/MM/yyyy}, Turno: {TipoRuta}");
+                Console.WriteLine($"[PILOTO] Usuario: {NombrePiloto}, IdBus: {IdBus}, Buscando ruta para: {fechaBusqueda:dd/MM/yyyy}, Turno: {TipoRuta}");
 
                 // Llamar a la API para obtener la ruta activa
                 var client = _httpClientFactory.CreateClient();
                 client.BaseAddress = new Uri($"{Request.Scheme}://{Request.Host}");
 
-                // IMPORTANTE: Buscar rutas del día calculado (no de "hoy" si es fin de semana)
                 var response = await client.GetAsync($"/api/rutas/bus/{IdBus}/activa?tipoRuta={TipoRuta}");
 
                 if (response.IsSuccessStatusCode)

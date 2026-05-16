@@ -22,13 +22,13 @@ namespace TransportesGenesis.Controllers
                 }
                 else if (User.IsInRole("Piloto"))
                 {
-                    // Placeholder para piloto
-                    return View("PilotoDashboard");
+                    // Redirigir al dashboard de Piloto (Razor Page)
+                    return RedirectToPage("/Piloto/MiRuta");
                 }
                 else if (User.IsInRole("Monitor"))
                 {
-                    // Placeholder para monitor
-                    return View("MonitorDashboard");
+                    // Redirigir al dashboard de Monitor (Razor Page)
+                    return RedirectToPage("/Monitor/MiRuta");
                 }
             }
 

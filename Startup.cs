@@ -81,6 +81,7 @@ public static class Startup
         services.AddScoped<TransportesGenesis.Services.Interfaces.IConfiguracionService, TransportesGenesis.Services.Implementations.ConfiguracionService>();
         services.AddScoped<TransportesGenesis.Services.Interfaces.IAlertaService, TransportesGenesis.Services.Implementations.AlertaService>();
         services.AddScoped<TransportesGenesis.Services.Interfaces.INotificacionService, TransportesGenesis.Services.Implementations.NotificacionService>();
+        services.AddScoped<TransportesGenesis.Services.Interfaces.IPilotoService, TransportesGenesis.Services.Implementations.PilotoService>();
 
         // SignalR para notificaciones en tiempo real
         services.AddSignalR(options =>

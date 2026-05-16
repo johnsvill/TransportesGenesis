@@ -156,7 +156,7 @@
                 <div class="card-body">
                     <h6 class="card-title">@Model.NombrePiloto</h6>
                     <p class="card-text">
-                        <strong>ID:</strong> @Model.IdPiloto<br>
+                        <strong>Bus Asignado:</strong> @(Model.IdBus.HasValue ? $"Bus #{Model.IdBus}" : "Sin asignar")<br>
                         <strong>Estado:</strong> <span class="badge bg-success">Activo</span>
                     </p>
                 </div>
