@@ -195,5 +195,47 @@ public static class Startup
                 await userManager.AddToRoleAsync(adminUser, "Administrador");
             }
         }
+
+        // ============================================
+        // CREAR PILOTOS Y MONITORES DE PRUEBA
+        // ============================================
+        var pilotosMonitores = new[]
+        {
+            new { UserName = "piloto2", Email = "piloto2@transportesgenesis.com", Rol = "Piloto" },
+            new { UserName = "piloto3", Email = "piloto3@transportesgenesis.com", Rol = "Piloto" },
+            new { UserName = "piloto4", Email = "piloto4@transportesgenesis.com", Rol = "Piloto" },
+            new { UserName = "piloto5", Email = "piloto5@transportesgenesis.com", Rol = "Piloto" },
+            new { UserName = "monitor2", Email = "monitor2@transportesgenesis.com", Rol = "Monitor" },
+            new { UserName = "monitor3", Email = "monitor3@transportesgenesis.com", Rol = "Monitor" },
+            new { UserName = "monitor4", Email = "monitor4@transportesgenesis.com", Rol = "Monitor" },
+            new { UserName = "monitor5", Email = "monitor5@transportesgenesis.com", Rol = "Monitor" }
+        };
+
+        foreach (var usuario in pilotosMonitores)
+        {
+            var existeUsuario = await userManager.FindByEmailAsync(usuario.Email);
+            if (existeUsuario == null)
+            {
+                var nuevoUsuario = new AppUser
+                {
+                    UserName = usuario.UserName,
+                    Email = usuario.Email,
+                    EmailConfirmed = true,
+                    IsFirstLogin = false, // Para testing, no obligar cambio de contraseña
+                    LastLoginDate = DateTime.Now
+                };
+
+                var result = await userManager.CreateAsync(nuevoUsuario, "Admin123!");
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(nuevoUsuario, usuario.Rol);
+                    Console.WriteLine($"✅ Usuario {usuario.UserName} creado con rol {usuario.Rol}");
+                }
+                else
+                {
+                    Console.WriteLine($"❌ Error al crear {usuario.UserName}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                }
+            }
+        }
     }
 }

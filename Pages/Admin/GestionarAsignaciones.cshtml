@@ -27,6 +27,15 @@
         </div>
     }
 
+    <!-- DEBUG INFO (remover en producción) -->
+    <div class="alert alert-info">
+        <strong>📊 DEBUG INFO:</strong><br/>
+        Pilotos sin asignar: <strong>@Model.Pilotos.Count</strong> |
+        Monitores sin asignar: <strong>@Model.Monitores.Count</strong> |
+        Buses sin asignar: <strong>@Model.BusesDisponibles.Count</strong> |
+        Asignaciones activas: <strong>@Model.AsignacionesActivas.Count</strong>
+    </div>
+
     <!-- Formulario para crear nueva asignación -->
     <div class="card mb-4">
         <div class="card-header bg-primary text-white">
@@ -35,11 +44,12 @@
             </h5>
         </div>
         <div class="card-body">
-            <form method="post" asp-page-handler="CrearAsignacion">
+            <form method="post">
+                @Html.AntiForgeryToken()
                 <div class="row">
                     <div class="col-md-5">
                         <label for="IdUsuario" class="form-label">Seleccionar Personal:</label>
-                        <select class="form-select" asp-for="IdUsuario" required>
+                        <select class="form-select" name="IdUsuario" id="IdUsuario" required>
                             <option value="">-- Seleccione --</option>
                             @if (Model.Pilotos.Any())
                             {
@@ -68,7 +78,7 @@
 
                     <div class="col-md-5">
                         <label for="IdBus" class="form-label">Seleccionar Bus:</label>
-                        <select class="form-select" asp-for="IdBus" required>
+                        <select class="form-select" name="IdBus" id="IdBus" required>
                             <option value="0">-- Seleccione --</option>
                             @foreach (var bus in Model.BusesDisponibles)
                             {
@@ -119,8 +129,7 @@
                         <tbody>
                             @foreach (var asignacion in Model.AsignacionesActivas)
                             {
-                                var usuario = Model.Pilotos.FirstOrDefault(p => p.Id == asignacion.IdUsuarioPiloto)
-                                    ?? Model.Monitores.FirstOrDefault(m => m.Id == asignacion.IdUsuarioPiloto);
+                                var usuario = Model.TodosLosUsuarios.FirstOrDefault(u => u.Id == asignacion.IdUsuarioPiloto);
 
                                 <tr>
                                     <td>@asignacion.IdAsignacion</td>
@@ -135,7 +144,10 @@
                                     </td>
                                     <td>@asignacion.FechaAsignacion.ToString("dd/MM/yyyy HH:mm")</td>
                                     <td>
-                                        <form method="post" asp-page-handler="FinalizarAsignacion" asp-route-idAsignacion="@asignacion.IdAsignacion" class="d-inline">
+                                        <form method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="action" value="finalizar" />
+                                            <input type="hidden" name="idAsignacion" value="@asignacion.IdAsignacion" />
                                             <button type="submit" class="btn btn-sm btn-danger" 
                                                     onclick="return confirm('¿Está seguro de finalizar esta asignación?')">
                                                 <i class="bi bi-x-circle"></i> Finalizar
@@ -157,7 +169,7 @@
             <div class="card text-center">
                 <div class="card-body">
                     <h3 class="text-primary">@Model.Pilotos.Count</h3>
-                    <p class="text-muted">Pilotos Disponibles</p>
+                    <p class="text-muted">Pilotos Sin Asignar</p>
                 </div>
             </div>
         </div>
@@ -165,7 +177,7 @@
             <div class="card text-center">
                 <div class="card-body">
                     <h3 class="text-info">@Model.Monitores.Count</h3>
-                    <p class="text-muted">Monitores Disponibles</p>
+                    <p class="text-muted">Monitores Sin Asignar</p>
                 </div>
             </div>
         </div>
@@ -173,7 +185,7 @@
             <div class="card text-center">
                 <div class="card-body">
                     <h3 class="text-warning">@Model.BusesDisponibles.Count</h3>
-                    <p class="text-muted">Buses Disponibles</p>
+                    <p class="text-muted">Buses Sin Asignar</p>
                 </div>
             </div>
         </div>
