@@ -6,7 +6,7 @@ Sistema de gestión de transporte escolar con seguimiento en tiempo real, dashbo
 
 ## 🚀 Estado del Proyecto
 
-**Progreso General: 95% Completado**
+**Progreso General: 98% Completado**
 
 | Módulo | Estado |
 |--------|--------|
@@ -16,7 +16,8 @@ Sistema de gestión de transporte escolar con seguimiento en tiempo real, dashbo
 | Dashboard Monitor | ✅ 100% |
 | Gestión de Asignaciones | ✅ 100% |
 | Reportes | ✅ 100% |
-| Mapa en Tiempo Real | ⚠️ 90% |
+| **Gestión de Paradas Interactiva** | ✅ **100%** |
+| Mapa en Tiempo Real | ✅ 100% |
 | Planner de Rutas | ⚠️ 70% |
 
 ---
@@ -52,15 +53,22 @@ Sistema de gestión de transporte escolar con seguimiento en tiempo real, dashbo
 - Validaciones automáticas de disponibilidad
 - Historial de asignaciones
 
-#### 6. **Reportes**
+#### 6. **Gestión de Paradas Interactiva** ✨ **NUEVO** (`/Admin/GestionarParadas`)
+- Mapa interactivo con Leaflet para gestionar paradas
+- Crear paradas haciendo clic en el mapa
+- Editar paradas con drag-and-drop
+- Eliminar paradas (soft delete)
+- API REST completa (`/api/paradas`)
+- Visualización en tabla con estado activo/inactivo
+
+#### 7. **Reportes**
 - Reporte de rutas con buses asignados
 - Reporte de asignaciones de personal
 - Datos en tiempo real desde SQL Server
 
 ### ⚠️ Pendientes
 
-- **Mapa Interactivo (10%):** Interfaz para agregar/editar paradas desde el mapa
-- **Planner de Rutas:** Revisión y actualización
+- **Planner de Rutas:** Revisión y actualización (70% completado)
 
 ---
 

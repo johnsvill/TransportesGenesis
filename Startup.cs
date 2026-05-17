@@ -95,7 +95,7 @@ public static class Startup
         services.AddControllersWithViews()
             .AddJsonOptions(options =>
             {
-                options.JsonSerializerOptions.PropertyNamingPolicy = null; // Usar PascalCase
+                options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase; // ✅ Usar camelCase para APIs
                 options.JsonSerializerOptions.PropertyNameCaseInsensitive = true; // Aceptar ambos
                 options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
             });

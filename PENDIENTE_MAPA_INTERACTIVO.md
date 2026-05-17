@@ -1,103 +1,113 @@
-# 🗺️ Mapa Interactivo de Paradas - Pendiente (10%)
+# 🗺️ Mapa Interactivo de Paradas - ✅ COMPLETADO (100%)
 
 ## 📋 Estado Actual
 
-### ✅ Completado (90%)
+### ✅ Completado (100%)
 - Visualización de mapa en dashboards Piloto/Monitor
 - Ubicación en tiempo real del bus
 - Paradas mostradas en el mapa (marcadores fijos)
 - Integración con base de datos `genesis.Paradas`
 - Visualización de rutas activas
-
-### ⚠️ Pendiente (10%)
-
-#### Funcionalidad Faltante: **Editor Interactivo de Paradas**
-
-Actualmente, las paradas se crean/editan directamente en la base de datos o mediante formularios tradicionales. Se requiere una interfaz visual que permita:
-
-1. **Agregar Paradas desde el Mapa**
-   - Click en el mapa para colocar una nueva parada
-   - Capturar coordenadas lat/lng automáticamente
-   - Modal/form para ingresar detalles de la parada
-
-2. **Editar Paradas Existentes**
-   - Drag-and-drop de marcadores para mover paradas
-   - Click en marcador para editar detalles
-   - Actualización en tiempo real en la BD
-
-3. **Eliminar Paradas**
-   - Botón de eliminación en marcador
-   - Confirmación antes de eliminar
-   - Validación de paradas asociadas a rutas activas
+- **✅ Editor Interactivo de Paradas** (Recién implementado)
+  - Página `/Admin/GestionarParadas` con mapa Leaflet
+  - Crear paradas haciendo clic en el mapa
+  - Editar paradas existentes (drag-and-drop y formulario)
+  - Eliminar paradas (soft delete)
+  - API REST completa en `/api/paradas`
+  - Visualización en tabla con filtros
+  - Integración con base de datos real
 
 ---
 
-## 🎯 Requisitos Técnicos
+## 🎉 Funcionalidad Implementada
 
-### Frontend (Razor Pages + JavaScript)
+### 1. **Página Administrativa**: `/Admin/GestionarParadas`
+- Mapa interactivo con Leaflet
+- Tabla de paradas registradas
+- Panel de control con botones "Agregar Parada" y "Refrescar"
 
-#### Página Recomendada: `/Admin/GestionarParadas`
+### 2. **API REST**: `/api/paradas`
+- `GET /api/paradas` - Listar todas las paradas
+- `GET /api/paradas/{id}` - Obtener una parada
+- `POST /api/paradas` - Crear nueva parada
+- `PUT /api/paradas/{id}` - Actualizar parada
+- `DELETE /api/paradas/{id}` - Eliminar (soft delete) parada
 
-```html
-@page
-@model TransportesGenesis.Pages.Admin.GestionarParadasModel
-@{
-    ViewData["Title"] = "Gestionar Paradas";
-}
+### 3. **Funcionalidades del Mapa**
+- **Agregar**: Click en "Agregar Parada" → Click en el mapa → Modal con coordenadas capturadas
+- **Editar**: Click en marcador o botón de tabla → Modal con datos precargados
+- **Mover**: Drag-and-drop de marcadores → Actualización automática de coordenadas
+- **Eliminar**: Botón eliminar → Confirmación → Soft delete (marca como inactivo)
 
-<div class="container-fluid">
-    <h2>Gestionar Paradas</h2>
+### 4. **Archivos Creados**
+```
+Pages/Admin/GestionarParadas.cshtml       # Vista Razor con mapa
+Pages/Admin/GestionarParadas.cshtml.cs    # PageModel
+Controllers/Api/ParadasController.cs       # API REST
+wwwroot/js/gestionarParadas.js            # Lógica JavaScript del mapa
+```
 
-    <!-- Mapa Interactivo -->
-    <div id="mapa-paradas" style="height: 600px;"></div>
+### 5. **Tarjeta en Dashboard Admin**
+- Agregada tarjeta "📍 Gestionar Paradas" en `Views/Admin/Index.cshtml`
+- Enlace directo: `/Admin/GestionarParadas`
 
-    <!-- Panel de Control -->
-    <div class="paradas-controls mt-3">
-        <button id="btn-agregar-parada" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Agregar Parada
-        </button>
-        <button id="btn-guardar-cambios" class="btn btn-success">
-            <i class="bi bi-save"></i> Guardar Cambios
-        </button>
-    </div>
+---
 
-    <!-- Lista de Paradas -->
-    <div class="paradas-lista mt-4">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                    <th>Latitud</th>
-                    <th>Longitud</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="paradas-table-body">
-                <!-- Generado dinámicamente -->
-            </tbody>
-        </table>
-    </div>
-</div>
+## 🔧 Detalles Técnicos
 
-<!-- Modal para Editar Parada -->
-<div class="modal fade" id="modal-editar-parada">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Editar Parada</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="form-parada">
-                    <input type="hidden" id="parada-id" />
-                    <div class="mb-3">
-                        <label for="parada-nombre" class="form-label">Nombre</label>
-                        <input type="text" class="form-control" id="parada-nombre" required />
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="parada-lat" class="form-label">Latitud</label>
+### Base de Datos
+- Tabla: `genesis.Paradas`
+- Campos:
+  - `IdParada` (PK)
+  - `IdRuta` (FK) - Relación con ruta
+  - `IdAlumno` (FK, nullable) - Alumno asociado
+  - `Latitud`, `Longitud` (decimal 10,7)
+  - `Direccion` (string 250)
+  - `Orden` (int) - Orden en la ruta
+  - `HoraEstimada` (TimeSpan?)
+  - `Completada` (bool)
+  - `Activo` (int - 1/0) - Soft delete
+  - `FechaRegistro` (DateTime) - Heredad de `Auditoria`
+
+### Seguridad
+- Toda la funcionalidad está protegida con `[Authorize(Roles = "Administrador")]`
+- Solo usuarios con rol Administrador pueden acceder
+
+### Características Especiales
+- **Soft Delete**: Las paradas no se eliminan físicamente, se marcan como inactivas (`Activo = 0`)
+- **Captura Automática de Coordenadas**: Al hacer clic en el mapa, se capturan lat/lng automáticamente
+- **Validación**: No permite crear paradas sin dirección
+- **Drag-and-Drop**: Los marcadores son movibles y actualizan automáticamente la BD
+
+---
+
+## ✨ Próximos Pasos Opcionales (Mejoras Futuras)
+
+1. **Filtros Avanzados**
+   - Filtrar paradas por ruta
+   - Filtrar paradas activas/inactivas
+   - Búsqueda por dirección
+
+2. **Asignación Automática**
+   - Sugerir paradas cercanas al crear una nueva
+   - Geocodificación inversa (dirección desde coordenadas)
+
+3. **Historial de Cambios**
+   - Auditoría de movimientos de paradas
+   - Registro de quién modificó qué
+
+4. **Importación Masiva**
+   - Cargar paradas desde archivo CSV/Excel
+   - Exportar paradas a Excel
+
+---
+
+## 📝 Conclusión
+
+El **Mapa Interactivo de Paradas** está ahora **100% funcional** y cumple con todos los requisitos iniciales. Los administradores pueden gestionar paradas de manera visual e intuitiva desde `/Admin/GestionarParadas`.
+
+**Fecha de Finalización**: 2025-01-XX  
+**Estado**: ✅ **COMPLETADO**
                             <input type="number" class="form-control" id="parada-lat" step="0.000001" readonly />
                         </div>
                         <div class="col-md-6 mb-3">
