@@ -237,5 +237,43 @@ public static class Startup
                 }
             }
         }
+
+        // CREAR PADRES DE FAMILIA DE PRUEBA
+        // ============================================
+        var padres = new[]
+        {
+            new { UserName = "padre1", Email = "padre1@gmail.com", Nombre = "Juan", Apellido = "Pérez" },
+            new { UserName = "padre2", Email = "padre2@gmail.com", Nombre = "María", Apellido = "González" },
+            new { UserName = "padre3", Email = "padre3@gmail.com", Nombre = "Carlos", Apellido = "Rodríguez" },
+            new { UserName = "padre4", Email = "padre4@gmail.com", Nombre = "Ana", Apellido = "Martínez" },
+            new { UserName = "padre5", Email = "padre5@gmail.com", Nombre = "Luis", Apellido = "López" }
+        };
+
+        foreach (var padre in padres)
+        {
+            var existeUsuario = await userManager.FindByEmailAsync(padre.Email);
+            if (existeUsuario == null)
+            {
+                var nuevoUsuario = new AppUser
+                {
+                    UserName = padre.UserName,
+                    Email = padre.Email,
+                    EmailConfirmed = true,
+                    IsFirstLogin = false, // Para testing, no obligar cambio de contraseña
+                    LastLoginDate = DateTime.Now
+                };
+
+                var result = await userManager.CreateAsync(nuevoUsuario, "Admin123!");
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(nuevoUsuario, "PadreDeFamilia");
+                    Console.WriteLine($"✅ Usuario {padre.UserName} creado con rol PadreDeFamilia ({padre.Nombre} {padre.Apellido})");
+                }
+                else
+                {
+                    Console.WriteLine($"❌ Error al crear {padre.UserName}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                }
+            }
+        }
     }
 }
