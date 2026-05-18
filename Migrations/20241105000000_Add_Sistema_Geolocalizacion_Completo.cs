@@ -185,47 +185,51 @@ namespace TransportesGenesis.Migrations
 
             // Crear tabla AsistenciaAlumno
             migrationBuilder.CreateTable(
-                name: "AsistenciaAlumno",
-                schema: "genesis",
-                columns: table => new
-                {
-                    IdAsistencia = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    IdAlumno = table.Column<int>(type: "int", nullable: false),
-                    Fecha = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    AsisteMañana = table.Column<bool>(type: "bit", nullable: false),
-                    AsisteTarde = table.Column<bool>(type: "bit", nullable: false),
-                    FechaConfirmacion = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IdBusTemporalMañana = table.Column<int>(type: "int", nullable: true),
-                    IdBusTemporalTarde = table.Column<int>(type: "int", nullable: true),
-                    Activo = table.Column<int>(type: "int", nullable: false),
-                    FechaRegistro = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AsistenciaAlumno", x => x.IdAsistencia);
-                    table.ForeignKey(
-                        name: "FK_AsistenciaAlumno_Alumnos_IdAlumno",
-                        column: x => x.IdAlumno,
-                        principalSchema: "genesis",
-                        principalTable: "Alumnos",
-                        principalColumn: "IdAlumno",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_AsistenciaAlumno_Buses_IdBusTemporalMañana",
-                        column: x => x.IdBusTemporalMañana,
-                        principalSchema: "genesis",
-                        principalTable: "Buses",
-                        principalColumn: "IdBus",
-                        onDelete: ReferentialAction.SetNull);
-                    table.ForeignKey(
-                        name: "FK_AsistenciaAlumno_Buses_IdBusTemporalTarde",
-                        column: x => x.IdBusTemporalTarde,
-                        principalSchema: "genesis",
-                        principalTable: "Buses",
-                        principalColumn: "IdBus",
-                        onDelete: ReferentialAction.SetNull);
-                });
+    name: "AsistenciaAlumno",
+    schema: "genesis",
+    columns: table => new
+    {
+        IdAsistencia = table.Column<int>(type: "int", nullable: false)
+            .Annotation("SqlServer:Identity", "1, 1"),
+        IdAlumno = table.Column<int>(type: "int", nullable: false),
+        Fecha = table.Column<DateTime>(type: "datetime2", nullable: false),
+        AsisteMañana = table.Column<bool>(type: "bit", nullable: false),
+        AsisteTarde = table.Column<bool>(type: "bit", nullable: false),
+        FechaConfirmacion = table.Column<DateTime>(type: "datetime2", nullable: true),
+        IdBusTemporalMañana = table.Column<int>(type: "int", nullable: true),
+        IdBusTemporalTarde = table.Column<int>(type: "int", nullable: true),
+        Activo = table.Column<int>(type: "int", nullable: false),
+        FechaRegistro = table.Column<DateTime>(type: "datetime2", nullable: false)
+    },
+    constraints: table =>
+    {
+        table.PrimaryKey("PK_AsistenciaAlumno", x => x.IdAsistencia);
+
+        table.ForeignKey(
+            name: "FK_AsistenciaAlumno_Alumnos_IdAlumno",
+            column: x => x.IdAlumno,
+            principalSchema: "genesis",
+            principalTable: "Alumnos",
+            principalColumn: "IdAlumno",
+            onDelete: ReferentialAction.Restrict);
+
+        table.ForeignKey(
+            name: "FK_AsistenciaAlumno_Buses_IdBusTemporalMañana",
+            column: x => x.IdBusTemporalMañana,
+            principalSchema: "genesis",
+            principalTable: "Buses",
+            principalColumn: "IdBus",
+            onDelete: ReferentialAction.Restrict);
+
+        table.ForeignKey(
+            name: "FK_AsistenciaAlumno_Buses_IdBusTemporalTarde",
+            column: x => x.IdBusTemporalTarde,
+            principalSchema: "genesis",
+            principalTable: "Buses",
+            principalColumn: "IdBus",
+            onDelete: ReferentialAction.Restrict);
+    });
+
 
             // Crear tabla SolicitudTraslado
             migrationBuilder.CreateTable(
