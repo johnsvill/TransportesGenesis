@@ -29,11 +29,7 @@ namespace TransportesGenesis.Migrations
                 oldType: "nvarchar(128)",
                 oldMaxLength: 128);
 
-            migrationBuilder.AddColumn<DateTime>(
-                name: "LastLoginDate",
-                table: "AspNetUsers",
-                type: "datetime2",
-                nullable: true);
+            
 
             migrationBuilder.AlterColumn<string>(
                 name: "ProviderKey",
@@ -57,9 +53,7 @@ namespace TransportesGenesis.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "LastLoginDate",
-                table: "AspNetUsers");
+            
 
             migrationBuilder.AlterColumn<string>(
                 name: "Name",

@@ -10,19 +10,12 @@ namespace TransportesGenesis.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<bool>(
-                name: "IsFirstLogin",
-                table: "AspNetUsers",
-                type: "bit",
-                nullable: true);
-        }
 
+        }
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "IsFirstLogin",
-                table: "AspNetUsers");
+           
         }
     }
 }

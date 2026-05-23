@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
+using System.Reflection.Emit;
 using TransportesGenesis.Models.DB.Negocio;
 using TransportesGenesis.Models.DB.Usuarios;
 
@@ -56,6 +57,10 @@ namespace TransportesGenesis.Data.Context
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            builder.Entity<AppUser>()
+               .HasDiscriminator<string>("Discriminator")
+               .HasValue<AppUser>("AppUser");
 
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         }
