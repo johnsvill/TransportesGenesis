@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Geocodificación - Nominatim</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .input-group {
+            margin: 20px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        #resultado {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .logs {
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+        .log-entry {
+            margin: 5px 0;
+            padding: 3px 0;
+        }
+        .log-info { color: #4fc3f7; }
+        .log-success { color: #81c784; }
+        .log-error { color: #e57373; }
+        .log-warning { color: #ffb74d; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗺️ Test de Geocodificación</h1>
+        <p style="text-align: center; color: #666;">Prueba la API de Nominatim (OpenStreetMap)</p>
+
+        <div class="input-group">
+            <label for="direccion">Dirección a buscar:</label>
+            <input type="text" id="direccion" placeholder="Ej: Centro Comercial Pradera, Guatemala" value="Centro Comercial Pradera, Guatemala">
+        </div>
+
+        <button id="btn-buscar" onclick="buscarDireccion()">🔍 Buscar Ubicación</button>
+
+        <div id="resultado"></div>
+
+        <div class="logs" id="logs">
+            <div class="log-entry log-info">Consola de logs - Esperando búsqueda...</div>
+        </div>
+    </div>
+
+    <script>
+        function log(mensaje, tipo = 'info') {
+            const logs = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${tipo}`;
+            entry.textContent = `[${timestamp}] ${mensaje}`;
+            logs.appendChild(entry);
+            logs.scrollTop = logs.scrollHeight;
+            console.log(`[${tipo.toUpperCase()}] ${mensaje}`);
+        }
+
+        async function buscarDireccion() {
+            const direccionInput = document.getElementById('direccion');
+            const direccion = direccionInput.value.trim();
+            const btn = document.getElementById('btn-buscar');
+            const resultado = document.getElementById('resultado');
+
+            // Limpiar logs previos
+            document.getElementById('logs').innerHTML = '';
+
+            log('=== INICIO DE BÚSQUEDA ===', 'info');
+            log(`Dirección ingresada: "${direccion}"`, 'info');
+
+            if (!direccion) {
+                log('ERROR: Dirección vacía', 'error');
+                mostrarResultado('Por favor ingresa una dirección', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = '⏳ Buscando...';
+            resultado.style.display = 'none';
+
+            try {
+                // Agregar "Guatemala" si no está presente
+                const queryDireccion = direccion.toLowerCase().includes('guatemala') 
+                    ? direccion 
+                    : `${direccion}, Guatemala`;
+
+                log(`Query final: "${queryDireccion}"`, 'info');
+
+                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryDireccion)}&limit=5`;
+
+                log(`URL generada: ${url}`, 'info');
+                log('Realizando petición HTTP...', 'info');
+
+                const response = await fetch(url, {
+                    headers: {
+                        'User-Agent': 'TransportesGenesis-Test/1.0'
+                    }
+                });
+
+                log(`Respuesta HTTP recibida - Status: ${response.status} (${response.statusText})`, response.ok ? 'success' : 'error');
+
+                if (!response.ok) {
+                    throw new Error(`Error HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const resultados = await response.json();
+                log(`Resultados recibidos: ${resultados.length} ubicaciones encontradas`, 'success');
+
+                if (resultados.length === 0) {
+                    log('No se encontraron resultados', 'warning');
+                    mostrarResultado('❌ No se encontró la dirección. Intenta:<br>- Agregar más detalles (Zona, Ciudad)<br>- Usar un lugar conocido<br>- Ejemplo: "6ta Avenida 9-50 Zona 9, Guatemala"', 'error');
+                    return;
+                }
+
+                // Mostrar todos los resultados en logs
+                log('--- RESULTADOS ENCONTRADOS ---', 'info');
+                resultados.forEach((r, i) => {
+                    log(`${i + 1}. ${r.display_name}`, 'info');
+                    log(`   Lat: ${r.lat}, Lon: ${r.lon}`, 'info');
+                    log(`   Tipo: ${r.type}, Clase: ${r.class}`, 'info');
+                });
+
+                // Usar el primer resultado
+                const ubicacion = resultados[0];
+                const lat = parseFloat(ubicacion.lat);
+                const lng = parseFloat(ubicacion.lon);
+
+                log('=== UBICACIÓN SELECCIONADA ===', 'success');
+                log(`Nombre: ${ubicacion.display_name}`, 'success');
+                log(`Latitud: ${lat}`, 'success');
+                log(`Longitud: ${lng}`, 'success');
+
+                // Mostrar resultado en la página
+                let html = '<h3 style="color: green;">✅ Ubicación encontrada</h3>';
+                html += `<p><strong>Dirección:</strong> ${ubicacion.display_name}</p>`;
+                html += `<p><strong>Coordenadas:</strong></p>`;
+                html += `<ul>`;
+                html += `<li><strong>Latitud:</strong> ${lat.toFixed(6)}</li>`;
+                html += `<li><strong>Longitud:</strong> ${lng.toFixed(6)}</li>`;
+                html += `</ul>`;
+                html += `<p><strong>Tipo:</strong> ${ubicacion.type} | <strong>Clase:</strong> ${ubicacion.class}</p>`;
+
+                if (resultados.length > 1) {
+                    html += `<hr><p><small><strong>Otras ${resultados.length - 1} ubicaciones encontradas:</strong></small></p>`;
+                    html += '<ul style="font-size: 12px;">';
+                    for (let i = 1; i < Math.min(resultados.length, 5); i++) {
+                        html += `<li>${resultados[i].display_name}</li>`;
+                    }
+                    html += '</ul>';
+                }
+
+                html += '<hr>';
+                html += `<p><small><a href="https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}&zoom=15" target="_blank">📍 Ver en OpenStreetMap</a></small></p>`;
+
+                mostrarResultado(html, 'success');
+                log('=== BÚSQUEDA COMPLETADA EXITOSAMENTE ===', 'success');
+
+            } catch (error) {
+                log('=== ERROR EN LA BÚSQUEDA ===', 'error');
+                log(`Tipo: ${error.name}`, 'error');
+                log(`Mensaje: ${error.message}`, 'error');
+                log(`Stack: ${error.stack}`, 'error');
+
+                mostrarResultado(`❌ <strong>Error:</strong> ${error.message}<br><br>Posibles causas:<br>- Sin conexión a internet<br>- Problema con el servicio de Nominatim<br>- CORS bloqueado por el navegador`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🔍 Buscar Ubicación';
+            }
+        }
+
+        function mostrarResultado(html, tipo) {
+            const resultado = document.getElementById('resultado');
+            resultado.className = tipo;
+            resultado.innerHTML = html;
+            resultado.style.display = 'block';
+        }
+
+        // Permitir buscar con Enter
+        document.getElementById('direccion').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                buscarDireccion();
+            }
+        });
+
+        // Log inicial
+        log('Test de geocodificación cargado correctamente', 'success');
+        log('Ingresa una dirección y presiona el botón para probar', 'info');
+    </script>
+</body>
+</html>

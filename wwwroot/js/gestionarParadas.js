@@ -55,6 +55,21 @@ function configurarEventos() {
     document.getElementById('btn-guardar-parada').addEventListener('click', function() {
         guardarParada();
     });
+
+    // Botón Geocodificar - Usar delegación de eventos
+    // Escuchamos clicks en todo el body y filtramos por el ID
+    document.body.addEventListener('click', function(e) {
+        // Verificar si el click fue en el botón o en un hijo del botón (icono)
+        const target = e.target.closest('#btn-geocodificar');
+        if (target) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('✅ Click detectado en btn-geocodificar');
+            geocodificarDireccion();
+        }
+    });
+
+    console.log('✅ Eventos configurados correctamente');
 }
 
 // Cargar paradas desde la API
@@ -160,6 +175,10 @@ function agregarParadaTemporal(latlng) {
     document.getElementById('parada-orden').value = marcadores.length + 1;
     document.getElementById('parada-activo').checked = true;
 
+    // Limpiar info de geocodificación
+    document.getElementById('geocoding-info').style.display = 'none';
+    document.getElementById('geocoding-info-text').textContent = '';
+
     // Cerrar modo agregar
     modoAgregar = false;
     document.getElementById('btn-agregar-parada').classList.remove('active');
@@ -188,6 +207,10 @@ window.editarParada = async function(idParada) {
         document.getElementById('parada-orden').value = parada.orden || '';
         document.getElementById('parada-activo').checked = parada.activo === 1;
 
+        // Limpiar info de geocodificación
+        document.getElementById('geocoding-info').style.display = 'none';
+        document.getElementById('geocoding-info-text').textContent = '';
+
         const modal = new bootstrap.Modal(document.getElementById('modal-editar-parada'));
         modal.show();
     } catch (error) {
@@ -207,6 +230,11 @@ async function guardarParada() {
 
     if (!direccion) {
         mostrarNotificacion('La dirección es obligatoria', 'warning');
+        return;
+    }
+
+    if (isNaN(latitud) || isNaN(longitud)) {
+        mostrarNotificacion('Las coordenadas son inválidas. Usa "Buscar en Mapa" o haz clic en el mapa.', 'warning');
         return;
     }
 
@@ -235,6 +263,12 @@ async function guardarParada() {
         if (response.ok) {
             const modal = bootstrap.Modal.getInstance(document.getElementById('modal-editar-parada'));
             modal.hide();
+
+            // Limpiar marcador temporal si existe
+            if (window.marcadorTemporal) {
+                mapa.removeLayer(window.marcadorTemporal);
+                window.marcadorTemporal = null;
+            }
 
             mostrarNotificacion(
                 idParada ? 'Parada actualizada correctamente' : 'Parada creada correctamente',
@@ -356,3 +390,147 @@ function mostrarNotificacion(mensaje, tipo) {
     console.log(`[${tipo.toUpperCase()}] ${mensaje}`);
     // Aquí podrías implementar un toast de Bootstrap si lo deseas
 }
+
+// ===========================
+// GEOCODIFICACIÓN DE DIRECCIÓN
+// ===========================
+window.geocodificarDireccion = async function() {
+    console.log('===================================');
+    console.log('🚀 FUNCIÓN GEOCODIFICAR EJECUTADA');
+    console.log('===================================');
+
+    const inputDireccion = document.getElementById('parada-nombre');
+    console.log('Elemento parada-nombre:', inputDireccion);
+
+    if (!inputDireccion) {
+        alert('❌ ERROR: No se encontró el campo de dirección. Asegúrate de que el modal esté abierto.');
+        console.error('ERROR: Elemento parada-nombre no existe en el DOM');
+        return;
+    }
+
+    const direccion = inputDireccion.value.trim();
+
+    console.log('=== INICIO GEOCODIFICACIÓN ===');
+    console.log('Dirección ingresada:', direccion);
+
+    if (!direccion) {
+        alert('Por favor ingresa una dirección');
+        console.log('ERROR: Dirección vacía');
+        return;
+    }
+
+    const btn = document.getElementById('btn-geocodificar');
+    const btnOriginalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Buscando...';
+
+    try {
+        // Agregar "Guatemala" a la búsqueda si no está presente
+        const queryDireccion = direccion.toLowerCase().includes('guatemala') 
+            ? direccion 
+            : `${direccion}, Guatemala`;
+
+        console.log('Dirección a buscar:', queryDireccion);
+
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryDireccion)}&limit=3`;
+
+        console.log('URL de la API:', url);
+        console.log('Realizando petición fetch...');
+
+        const response = await fetch(url, {
+            headers: {
+                'User-Agent': 'TransportesGenesis/1.0'
+            }
+        });
+
+        console.log('Respuesta recibida. Status:', response.status);
+        console.log('Response OK:', response.ok);
+
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status}`);
+        }
+
+        const resultados = await response.json();
+        console.log('Resultados recibidos:', resultados);
+        console.log('Número de resultados:', resultados.length);
+
+        if (resultados.length === 0) {
+            const mensaje = '❌ No se encontró la dirección. Intenta:\n- Agregar más detalles (Zona, Ciudad)\n- Usar un lugar conocido\n- Ejemplo: "6ta Avenida 9-50 Zona 9, Guatemala"';
+            alert(mensaje);
+            document.getElementById('geocoding-info').style.display = 'block';
+            document.getElementById('geocoding-info-text').textContent = 
+                '❌ Dirección no encontrada. Intenta agregar más detalles (Zona, Ciudad, Guatemala).';
+            console.log('ERROR: No se encontraron resultados');
+            return;
+        }
+
+        // Mostrar los 3 primeros resultados en consola
+        resultados.forEach((r, i) => {
+            console.log(`Resultado ${i + 1}:`, r.display_name);
+            console.log(`  - Lat: ${r.lat}, Lon: ${r.lon}`);
+        });
+
+        // Usar el primer resultado
+        const ubicacion = resultados[0];
+        const lat = parseFloat(ubicacion.lat);
+        const lng = parseFloat(ubicacion.lon);
+
+        console.log('Ubicación seleccionada:', ubicacion.display_name);
+        console.log('Coordenadas - Lat:', lat, 'Lng:', lng);
+
+        // Actualizar campos
+        document.getElementById('parada-lat').value = lat.toFixed(6);
+        document.getElementById('parada-lng').value = lng.toFixed(6);
+
+        console.log('Campos actualizados en el formulario');
+
+        // Mostrar información
+        document.getElementById('geocoding-info').style.display = 'block';
+        document.getElementById('geocoding-info-text').textContent = 
+            `✅ Ubicación encontrada: ${ubicacion.display_name}`;
+
+        alert(`✅ Ubicación encontrada!\n\n${ubicacion.display_name}\n\nLat: ${lat.toFixed(6)}\nLng: ${lng.toFixed(6)}`);
+
+        // Agregar marcador temporal en el mapa
+        if (window.marcadorTemporal) {
+            mapa.removeLayer(window.marcadorTemporal);
+        }
+
+        window.marcadorTemporal = L.marker([lat, lng], {
+            icon: L.icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            })
+        }).addTo(mapa);
+
+        window.marcadorTemporal.bindPopup(`<b>Nueva Ubicación</b><br>${direccion}`).openPopup();
+
+        // Centrar mapa en la nueva ubicación
+        mapa.setView([lat, lng], 15);
+
+        console.log('Marcador agregado y mapa centrado');
+        console.log('=== FIN GEOCODIFICACIÓN EXITOSA ===');
+
+    } catch (error) {
+        console.error('=== ERROR EN GEOCODIFICACIÓN ===');
+        console.error('Tipo de error:', error.name);
+        console.error('Mensaje:', error.message);
+        console.error('Stack:', error.stack);
+
+        const mensajeError = `❌ Error al buscar la dirección:\n${error.message}\n\nPosibles causas:\n- Sin conexión a internet\n- Problema con el servicio de mapas\n- Intenta con el método de "Click en el Mapa"`;
+        alert(mensajeError);
+
+        document.getElementById('geocoding-info').style.display = 'block';
+        document.getElementById('geocoding-info-text').textContent = 
+            `❌ Error: ${error.message}. Intenta nuevamente o usa el método de "Click en el Mapa".`;
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = btnOriginalText;
+        console.log('Botón restaurado');
+    }
+}
+
