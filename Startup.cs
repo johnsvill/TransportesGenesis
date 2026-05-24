@@ -71,6 +71,7 @@ public static class Startup
         services.AddScoped<TransportesGenesis.Repositories.Interfaces.IAsistenciaAlumnoRepository, TransportesGenesis.Repositories.Implementations.AsistenciaAlumnoRepository>();
         services.AddScoped<TransportesGenesis.Repositories.Interfaces.ISolicitudTrasladoRepository, TransportesGenesis.Repositories.Implementations.SolicitudTrasladoRepository>();
         services.AddScoped<TransportesGenesis.Repositories.Interfaces.IAlertaProximidadRepository, TransportesGenesis.Repositories.Implementations.AlertaProximidadRepository>();
+        services.AddScoped<TransportesGenesis.Repositories.Interfaces.IAlumnoRepository, TransportesGenesis.Repositories.Implementations.AlumnoRepository>();
 
         // Services de Geolocalización
         services.AddScoped<TransportesGenesis.Services.Interfaces.IBusService, TransportesGenesis.Services.Implementations.BusService>();

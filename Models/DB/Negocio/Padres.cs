@@ -11,7 +11,11 @@ namespace TransportesGenesis.Models.DB.Negocio
 
         public string Nombre { get; set; }
 
-        public string Apellido { get; set; }        
+        public string Apellido { get; set; }
+
+        // Relación con AspNetUsers (Identity)
+        [StringLength(450)]
+        public string? UsuarioId { get; set; }
 
         public List<Alumnos> AlumnosLink { get; set; }
 

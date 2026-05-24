@@ -1,0 +1,398 @@
+@page
+@model TransportesGenesis.Pages.Padre.ConfiguracionInicialModel
+@{
+    ViewData["Title"] = "Configuración Inicial";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Header -->
+            <div class="card shadow-lg border-0 mb-4">
+                <div class="card-header bg-primary text-white text-center py-4">
+                    <h2 class="mb-0"><i class="bi bi-house-fill"></i> Bienvenido a Transportes Genesis</h2>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-info">
+                        <h5><i class="bi bi-info-circle-fill"></i> Configuración Inicial Requerida</h5>
+                        <p class="mb-2">Para poder usar el sistema de seguimiento de buses, necesitamos saber dónde recoger a tu hijo(s).</p>
+                        <p class="mb-0"><strong>Por favor indica la dirección donde el bus debe recoger al alumno.</strong></p>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.Mensaje))
+                    {
+                        <div class="alert alert-@Model.TipoMensaje alert-dismissible fade show" role="alert">
+                            @Model.Mensaje
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (Model.Alumnos == null || !Model.Alumnos.Any())
+                    {
+                        <div class="alert alert-warning">
+                            <h5><i class="bi bi-exclamation-triangle-fill"></i> No hay alumnos registrados</h5>
+                            <p>No tienes alumnos asignados en el sistema. Por favor contacta al administrador para que registre a tu(s) hijo(s).</p>
+                            <a href="/" class="btn btn-primary">Volver al Inicio</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <form method="post" id="form-configuracion">
+                            @Html.AntiForgeryToken()
+
+                            <!-- Selección de Alumno -->
+                            @if (Model.Alumnos.Count > 1)
+                            {
+                                <div class="mb-4">
+                                    <label for="IdAlumno" class="form-label fw-bold">
+                                        <i class="bi bi-person-fill"></i> Selecciona el Alumno
+                                    </label>
+                                    <select class="form-select form-select-lg" asp-for="IdAlumno" required>
+                                        <option value="">-- Selecciona un alumno --</option>
+                                        @foreach (var alumno in Model.Alumnos)
+                                        {
+                                            <option value="@alumno.IdAlumno">
+                                                @alumno.Nombre @alumno.Apellido
+                                                @if (alumno.IdBusAsignado.HasValue)
+                                                {
+                                                    <text> - Bus Asignado</text>
+                                                }
+                                            </option>
+                                        }
+                                    </select>
+                                    <small class="text-muted">Si tienes más de un hijo, configúralos uno por uno.</small>
+                                </div>
+                            }
+                            else
+                            {
+                                @* Solo hay un alumno, usar hidden input con el valor *@
+                                <input type="hidden" id="IdAlumno" name="IdAlumno" value="@Model.IdAlumno" />
+                                <div class="mb-4">
+                                    <div class="alert alert-light border">
+                                        <h5 class="mb-0">
+                                            <i class="bi bi-person-circle"></i> 
+                                            Configurando para: <strong>@Model.Alumnos[0].Nombre @Model.Alumnos[0].Apellido</strong>
+                                        </h5>
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- Dirección con Geocodificación -->
+                            <div class="mb-4">
+                                <label for="Direccion" class="form-label fw-bold">
+                                    <i class="bi bi-geo-alt-fill"></i> Dirección de Recogida *
+                                </label>
+                                <div class="input-group input-group-lg">
+                                    <input type="text" 
+                                           class="form-control" 
+                                           asp-for="Direccion" 
+                                           id="direccion-input"
+                                           placeholder="Ej: 5ta Avenida 12-34 Zona 10, Guatemala" 
+                                           required />
+                                    <button class="btn btn-primary" 
+                                            type="button" 
+                                            id="btn-buscar-mapa"
+                                            onclick="buscarEnMapa()">
+                                        <i class="bi bi-search"></i> Buscar en Mapa
+                                    </button>
+                                </div>
+                                <small class="text-muted">
+                                    <i class="bi bi-info-circle"></i> 
+                                    Escribe tu dirección completa y haz clic en "Buscar en Mapa"
+                                </small>
+                            </div>
+
+                            <!-- Información de Geocodificación -->
+                            <div class="alert alert-info mb-4" id="geocoding-info" style="display: none;">
+                                <i class="bi bi-check-circle-fill"></i> 
+                                <span id="geocoding-info-text"></span>
+                            </div>
+
+                            <!-- Coordenadas Obtenidas (Visible después de geocodificar) -->
+                            <div id="coordenadas-section" style="display: none;" class="mb-4">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">
+                                            <i class="bi bi-geo"></i> Latitud
+                                        </label>
+                                        <input type="text" 
+                                               class="form-control form-control-lg bg-light" 
+                                               id="latitud-display" 
+                                               readonly 
+                                               placeholder="Se llenará automáticamente" />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">
+                                            <i class="bi bi-geo-alt"></i> Longitud
+                                        </label>
+                                        <input type="text" 
+                                               class="form-control form-control-lg bg-light" 
+                                               id="longitud-display" 
+                                               readonly 
+                                               placeholder="Se llenará automáticamente" />
+                                    </div>
+                                </div>
+                                <small class="text-muted">
+                                    <i class="bi bi-info-circle"></i> 
+                                    Estas coordenadas fueron obtenidas automáticamente de la dirección
+                                </small>
+                            </div>
+
+                            <!-- Campos Hidden para enviar al servidor -->
+                            <input type="hidden" asp-for="Latitud" id="latitud-input" />
+                            <input type="hidden" asp-for="Longitud" id="longitud-input" />
+
+                            <!-- Mapa de Previsualización -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-map-fill"></i> Vista Previa de la Ubicación
+                                </label>
+                                <div id="mapa-preview" style="height: 400px; border: 2px solid #dee2e6; border-radius: 8px;"></div>
+                                <small class="text-muted">
+                                    <i class="bi bi-info-circle"></i> 
+                                    Verifica que el marcador esté en la ubicación correcta
+                                </small>
+                            </div>
+
+                            <!-- Instrucciones Adicionales -->
+                            <div class="alert alert-light border mb-4">
+                                <h6 class="alert-heading"><i class="bi bi-lightbulb-fill"></i> Consejos:</h6>
+                                <ul class="mb-0">
+                                    <li>Sé lo más específico posible con la dirección</li>
+                                    <li>Incluye zona, colonia o referencias conocidas</li>
+                                    <li>Verifica en el mapa que la ubicación sea correcta</li>
+                                    <li>Ejemplo: "6ta Avenida 9-50 Zona 9, Guatemala"</li>
+                                </ul>
+                            </div>
+
+                            <!-- Botones -->
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-success btn-lg" id="btn-guardar" disabled>
+                                    <i class="bi bi-check-circle-fill"></i> Guardar y Continuar
+                                </button>
+                                <a href="/" class="btn btn-outline-secondary">
+                                    <i class="bi bi-x-circle"></i> Cancelar
+                                </a>
+                            </div>
+                        </form>
+                    }
+                </div>
+            </div>
+
+            <!-- Información de Ayuda -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title"><i class="bi bi-question-circle-fill text-primary"></i> ¿Necesitas ayuda?</h6>
+                    <p class="card-text small mb-0">
+                        Si tienes problemas para configurar tu dirección, contacta al administrador del sistema 
+                        o llama al número de soporte: <strong>(502) 1234-5678</strong>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        .card {
+            border-radius: 15px;
+        }
+
+        .form-label {
+            color: #495057;
+            font-size: 1rem;
+        }
+
+        .input-group-lg .btn {
+            padding: 0.75rem 1.5rem;
+        }
+
+        #btn-buscar-mapa:disabled {
+            cursor: not-allowed;
+        }
+
+        .alert-light {
+            background-color: #f8f9fa;
+        }
+
+        #mapa-preview {
+            background-color: #f0f0f0;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        let mapa;
+        let marcador;
+
+        // Inicializar mapa
+        document.addEventListener('DOMContentLoaded', function() {
+            // Centrar en Guatemala
+            mapa = L.map('mapa-preview').setView([14.6349, -90.5069], 12);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(mapa);
+
+            console.log('Mapa inicializado');
+        });
+
+        // Función de geocodificación
+        async function buscarEnMapa() {
+            const direccionInput = document.getElementById('direccion-input');
+            const direccion = direccionInput.value.trim();
+
+            console.log('Buscando dirección:', direccion);
+
+            if (!direccion) {
+                alert('Por favor ingresa una dirección');
+                return;
+            }
+
+            const btn = document.getElementById('btn-buscar-mapa');
+            const btnOriginalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Buscando...';
+
+            try {
+                const queryDireccion = direccion.toLowerCase().includes('guatemala') 
+                    ? direccion 
+                    : `${direccion}, Guatemala`;
+
+                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryDireccion)}&limit=3`;
+
+                console.log('URL de búsqueda:', url);
+
+                const response = await fetch(url, {
+                    headers: {
+                        'User-Agent': 'TransportesGenesis/1.0'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+
+                const resultados = await response.json();
+                console.log('Resultados:', resultados);
+
+                if (resultados.length === 0) {
+                    alert('❌ No se encontró la dirección.\n\nIntenta:\n- Agregar más detalles (Zona, Ciudad)\n- Usar referencias conocidas\n- Ejemplo: "6ta Avenida 9-50 Zona 9, Guatemala"');
+                    document.getElementById('geocoding-info').style.display = 'none';
+                    return;
+                }
+
+                const ubicacion = resultados[0];
+                const lat = parseFloat(ubicacion.lat);
+                const lng = parseFloat(ubicacion.lon);
+
+                console.log('Ubicación encontrada:', lat, lng);
+
+                // Actualizar campos hidden (para el servidor)
+                document.getElementById('latitud-input').value = lat;
+                document.getElementById('longitud-input').value = lng;
+
+                // Actualizar campos visibles (para que el usuario vea)
+                document.getElementById('latitud-display').value = lat.toFixed(6);
+                document.getElementById('longitud-display').value = lng.toFixed(6);
+
+                // Mostrar sección de coordenadas
+                document.getElementById('coordenadas-section').style.display = 'block';
+
+                // Mostrar información
+                document.getElementById('geocoding-info').style.display = 'block';
+                document.getElementById('geocoding-info-text').textContent = 
+                    `✅ Ubicación encontrada: ${ubicacion.display_name}`;
+
+                // Agregar/mover marcador en el mapa
+                if (marcador) {
+                    mapa.removeLayer(marcador);
+                }
+
+                marcador = L.marker([lat, lng], {
+                    icon: L.icon({
+                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41],
+                        popupAnchor: [1, -34],
+                        shadowSize: [41, 41]
+                    })
+                }).addTo(mapa);
+
+                marcador.bindPopup(`<b>Tu Ubicación</b><br>${direccion}`).openPopup();
+
+                // Centrar mapa
+                mapa.setView([lat, lng], 16);
+
+                // Habilitar botón de guardar
+                document.getElementById('btn-guardar').disabled = false;
+
+                alert(`✅ Ubicación encontrada correctamente!\n\n${ubicacion.display_name}\n\nCoordenadas:\nLatitud: ${lat.toFixed(6)}\nLongitud: ${lng.toFixed(6)}\n\nVerifica en el mapa y en los campos de coordenadas que sea la ubicación correcta, luego haz clic en "Guardar y Continuar".`);
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`❌ Error al buscar la dirección:\n${error.message}\n\nPor favor intenta nuevamente o contacta al administrador.`);
+                document.getElementById('geocoding-info').style.display = 'none';
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = btnOriginalText;
+            }
+        }
+
+        // Validar formulario antes de enviar
+        document.getElementById('form-configuracion')?.addEventListener('submit', function(e) {
+            const lat = parseFloat(document.getElementById('latitud-input').value);
+            const lng = parseFloat(document.getElementById('longitud-input').value);
+            const direccion = document.getElementById('direccion-input').value;
+
+            // Buscar el campo IdAlumno de diferentes formas
+            const inputIdAlumno = document.querySelector('input[name="IdAlumno"]');
+            const selectIdAlumno = document.querySelector('select[name="IdAlumno"]');
+            const inputById = document.getElementById('IdAlumno');
+
+            console.log('[DEBUG] inputIdAlumno element:', inputIdAlumno);
+            console.log('[DEBUG] selectIdAlumno element:', selectIdAlumno);
+            console.log('[DEBUG] inputById element:', inputById);
+
+            // Ver todos los inputs del formulario
+            const allInputs = document.querySelectorAll('#form-configuracion input');
+            console.log('[DEBUG] Todos los inputs del formulario:');
+            allInputs.forEach(input => {
+                console.log(`  - name="${input.name}", id="${input.id}", value="${input.value}", type="${input.type}"`);
+            });
+
+            const idAlumno = inputIdAlumno?.value || selectIdAlumno?.value || inputById?.value;
+
+            console.log('[DEBUG] Submit - IdAlumno:', idAlumno);
+            console.log('[DEBUG] Submit - Direccion:', direccion);
+            console.log('[DEBUG] Submit - Latitud:', lat, 'Longitud:', lng);
+
+            if (!idAlumno || idAlumno === '0') {
+                e.preventDefault();
+                alert('⚠️ Error: No se ha seleccionado un alumno.');
+                return false;
+            }
+
+            if (!direccion) {
+                e.preventDefault();
+                alert('⚠️ Por favor ingresa una dirección.');
+                return false;
+            }
+
+            if (!lat || !lng || lat === 0 || lng === 0) {
+                e.preventDefault();
+                alert('⚠️ Por favor usa el botón "Buscar en Mapa" para obtener las coordenadas de tu dirección.');
+                return false;
+            }
+
+            console.log('[DEBUG] Formulario válido, enviando...');
+            return true;
+        });
+    </script>
+}

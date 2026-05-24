@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using TransportesGenesis.Models.DB.Usuarios;
 using TransportesGenesis.ViewModels;
+using TransportesGenesis.Repositories.Interfaces;
 
 namespace TransportesGenesis.Controllers
 {
@@ -12,15 +13,18 @@ namespace TransportesGenesis.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IAlumnoRepository _alumnoRepository;
 
         public AuthController(
             UserManager<AppUser> userManager,
             SignInManager<AppUser> signInManager,
-            RoleManager<IdentityRole> roleManager)
+            RoleManager<IdentityRole> roleManager,
+            IAlumnoRepository alumnoRepository)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
+            _alumnoRepository = alumnoRepository;
         }
 
         // GET: /Auth/Login
@@ -72,6 +76,13 @@ namespace TransportesGenesis.Controllers
                 }
                 else if (roles.Contains("PadreDeFamilia"))
                 {
+                    // Verificar si el padre necesita configurar dirección de recogida
+                    var necesitaConfiguracion = await VerificarSiNecesitaConfiguracionInicial(user.Id);
+                    if (necesitaConfiguracion)
+                    {
+                        return RedirectToPage("/Padre/ConfiguracionInicial");
+                    }
+
                     return RedirectToAction("Index", "PagosPadresFamilia");
                 }
                 else if (roles.Contains("Piloto"))
@@ -157,6 +168,39 @@ namespace TransportesGenesis.Controllers
         public IActionResult AccessDenied()
         {
             return View();
+        }
+
+        /// <summary>
+        /// Verifica si el padre necesita configurar la dirección de recogida de sus alumnos
+        /// </summary>
+        private async Task<bool> VerificarSiNecesitaConfiguracionInicial(string userId)
+        {
+            try
+            {
+                // Obtener alumnos del padre
+                var alumnos = await _alumnoRepository.GetAlumnosByPadreUserIdAsync(userId);
+
+                if (alumnos == null || !alumnos.Any())
+                {
+                    // Si no tiene alumnos, no necesita configuración
+                    return false;
+                }
+
+                // Verificar si algún alumno NO tiene coordenadas configuradas
+                var necesitaConfiguracion = alumnos.Any(a =>
+                    !a.Latitud.HasValue ||
+                    !a.Longitud.HasValue ||
+                    a.Latitud == 0 ||
+                    a.Longitud == 0
+                );
+
+                return necesitaConfiguracion;
+            }
+            catch (Exception)
+            {
+                // En caso de error, no bloquear el login
+                return false;
+            }
         }
     }
 }
