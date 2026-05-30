@@ -17,6 +17,11 @@
                         <h5><i class="bi bi-info-circle-fill"></i> Configuración Inicial Requerida</h5>
                         <p class="mb-2">Para poder usar el sistema de seguimiento de buses, necesitamos saber dónde recoger a tu hijo(s).</p>
                         <p class="mb-0"><strong>Por favor indica la dirección donde el bus debe recoger al alumno.</strong></p>
+                        <hr class="my-2" />
+                        <p class="mb-0 text-muted">
+                            <i class="bi bi-lightbulb"></i> 
+                            <small>Si lo prefieres, puedes configurar esto más tarde haciendo clic en "Configurar Después".</small>
+                        </p>
                     </div>
 
                     @if (!string.IsNullOrEmpty(Model.Mensaje))
@@ -169,6 +174,9 @@
                             <div class="d-grid gap-2">
                                 <button type="submit" class="btn btn-success btn-lg" id="btn-guardar" disabled>
                                     <i class="bi bi-check-circle-fill"></i> Guardar y Continuar
+                                </button>
+                                <button type="submit" asp-page-handler="ConfigurarDespues" class="btn btn-outline-warning btn-lg" formnovalidate>
+                                    <i class="bi bi-clock-history"></i> Configurar Después
                                 </button>
                                 <a href="/" class="btn btn-outline-secondary">
                                     <i class="bi bi-x-circle"></i> Cancelar
@@ -347,6 +355,18 @@
 
         // Validar formulario antes de enviar
         document.getElementById('form-configuracion')?.addEventListener('submit', function(e) {
+            // Detectar si se presionó el botón "Configurar Después"
+            const submitButton = e.submitter;
+
+            console.log('[DEBUG] Submit button:', submitButton);
+            console.log('[DEBUG] Submit button text:', submitButton?.textContent);
+
+            // Si el botón es "Configurar Después", no validar
+            if (submitButton && submitButton.textContent.includes('Configurar Después')) {
+                console.log('[DEBUG] Botón "Configurar Después" detectado - saltando validación');
+                return true;
+            }
+
             const lat = parseFloat(document.getElementById('latitud-input').value);
             const lng = parseFloat(document.getElementById('longitud-input').value);
             const direccion = document.getElementById('direccion-input').value;

@@ -176,6 +176,37 @@ namespace TransportesGenesis.Pages.Padre
             }
         }
 
+        public async Task<IActionResult> OnPostConfigurarDespuesAsync()
+        {
+            Console.WriteLine("[DEBUG] OnPostConfigurarDespuesAsync - Usuario decidió configurar después");
+
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    return RedirectToPage("/Account/Login");
+                }
+
+                // Marcar configuración como completa (aunque no haya configurado)
+                // Esto permite que no vuelva a mostrar la pantalla
+                await MarcarConfiguracionCompleta(user.Id);
+
+                Console.WriteLine("[DEBUG] Configuración marcada como 'pospuesta', redirigiendo al dashboard");
+
+                // Redirigir al dashboard del padre
+                return RedirectToAction("Index", "PagosPadresFamilia");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ERROR] Error en OnPostConfigurarDespuesAsync: {ex.Message}");
+                TipoMensaje = "danger";
+                Mensaje = $"Error al procesar la solicitud: {ex.Message}";
+                Alumnos = await CargarAlumnos();
+                return Page();
+            }
+        }
+
         private async Task<bool> VerificarConfiguracionCompleta(string userId)
         {
             var alumnos = await _alumnoRepository.GetAlumnosByPadreUserIdAsync(userId);
