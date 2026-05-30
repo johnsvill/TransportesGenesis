@@ -6,6 +6,7 @@ namespace TransportesGenesis.Repositories.Interfaces
     {
         Task<Alumnos?> GetByIdAsync(int id);
         Task<List<Alumnos>> GetAllAsync();
+        Task<List<Alumnos>> GetAllWithIncludesAsync(); // Nuevo: Carga con Padres y BusAsignado
         Task<List<Alumnos>> GetAlumnosByPadreIdAsync(int idPadre);
         Task<List<Alumnos>> GetAlumnosByPadreUserIdAsync(string userId);
         Task<List<Alumnos>> GetAlumnosByBusAsync(int idBus);

@@ -30,6 +30,14 @@ namespace TransportesGenesis.Repositories.Implementations
                 .ToListAsync();
         }
 
+        public async Task<List<Alumnos>> GetAllWithIncludesAsync()
+        {
+            return await _context.AlumnosDb
+                .Include(a => a.Padres)
+                .Include(a => a.BusAsignado)
+                .ToListAsync();
+        }
+
         public async Task<List<Alumnos>> GetAlumnosByPadreIdAsync(int idPadre)
         {
             return await _context.AlumnosDb
