@@ -1,0 +1,354 @@
+@page
+@model TransportesGenesis.Pages.Admin.DashboardModel
+@{
+    ViewData["Title"] = "Dashboard Analítico";
+}
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-primary">
+            <i class="bi bi-graph-up-arrow"></i> Dashboard Analítico Gerencial
+        </h2>
+        <a href="/Admin/Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Volver al Panel
+        </a>
+    </div>
+
+    <!-- KPIs Principales -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h4 class="text-secondary mb-3"><i class="bi bi-speedometer2"></i> Indicadores Clave (KPIs)</h4>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <!-- Buses -->
+        <div class="col-md-3 mb-3">
+            <div class="card bg-primary text-white h-100 shadow">
+                <div class="card-body text-center">
+                    <i class="bi bi-bus-front" style="font-size: 2.5rem;"></i>
+                    <h2 class="mt-2">@Model.TotalBuses</h2>
+                    <p class="mb-1">Total Buses</p>
+                    <small>@Model.BusesActivos activos (@Model.PorcentajeBusesActivos.ToString("F1")%)</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rutas -->
+        <div class="col-md-3 mb-3">
+            <div class="card bg-success text-white h-100 shadow">
+                <div class="card-body text-center">
+                    <i class="bi bi-map" style="font-size: 2.5rem;"></i>
+                    <h2 class="mt-2">@Model.TotalRutas</h2>
+                    <p class="mb-1">Total Rutas</p>
+                    <small>@Model.RutasActivas activas (@Model.PorcentajeRutasActivas.ToString("F1")%)</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alumnos -->
+        <div class="col-md-3 mb-3">
+            <div class="card bg-info text-white h-100 shadow">
+                <div class="card-body text-center">
+                    <i class="bi bi-people-fill" style="font-size: 2.5rem;"></i>
+                    <h2 class="mt-2">@Model.TotalAlumnos</h2>
+                    <p class="mb-1">Total Alumnos</p>
+                    <small>@Model.AlumnosConBus con bus (@Model.PorcentajeAlumnosConBus.ToString("F1")%)</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alertas -->
+        <div class="col-md-3 mb-3">
+            <div class="card bg-warning text-dark h-100 shadow">
+                <div class="card-body text-center">
+                    <i class="bi bi-bell-fill" style="font-size: 2.5rem;"></i>
+                    <h2 class="mt-2">@Model.TotalAlertas</h2>
+                    <p class="mb-1">Total Alertas</p>
+                    <small>@Model.AlertasActivas activas</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Usuarios del Sistema -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card border-primary h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-person-badge text-primary" style="font-size: 2rem;"></i>
+                    <h3 class="mt-2">@Model.TotalPilotos</h3>
+                    <p class="mb-0 text-muted">Pilotos</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card border-success h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-clipboard-check text-success" style="font-size: 2rem;"></i>
+                    <h3 class="mt-2">@Model.TotalMonitores</h3>
+                    <p class="mb-0 text-muted">Monitores</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card border-info h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-person-hearts text-info" style="font-size: 2rem;"></i>
+                    <h3 class="mt-2">@Model.TotalPadres</h3>
+                    <p class="mb-0 text-muted">Padres de Familia</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Métricas de Eficiencia -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h4 class="text-secondary mb-3"><i class="bi bi-bar-chart-line"></i> Métricas de Eficiencia</h4>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-calculator"></i> Promedio de Paradas por Ruta
+                    </h5>
+                    <h2 class="text-primary">@Model.PromedioParadasPorRuta.ToString("F1")</h2>
+                    <p class="text-muted mb-0">paradas por ruta en promedio</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-people"></i> Promedio de Alumnos por Bus
+                    </h5>
+                    <h2 class="text-success">@Model.PromedioAlumnosPorBus.ToString("F1")</h2>
+                    <p class="text-muted mb-0">alumnos por bus en promedio</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h4 class="text-secondary mb-3"><i class="bi bi-graph-up"></i> Análisis Gráfico</h4>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <!-- Gráfico de Asistencias por Mes -->
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-calendar-week"></i> Asistencias por Mes (Últimos 6 meses)</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartAsistencias" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfico de Alertas por Tipo -->
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Alertas por Tipo</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartAlertas" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <!-- Gráfico de Alumnos por Bus -->
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-bus-front"></i> Top 5 Buses con Más Alumnos</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartAlumnosBus" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfico de Rutas por Tipo -->
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Rutas por Tipo</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartRutasTipo" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actividad Reciente -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> Actividad Reciente</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <p><strong>Última Ruta Creada:</strong></p>
+                            <p class="text-muted">
+                                @if (Model.UltimaRutaCreada.HasValue)
+                                {
+                                    @Model.UltimaRutaCreada.Value.ToString("dd/MM/yyyy HH:mm")
+                                }
+                                else
+                                {
+                                    <span>No hay rutas</span>
+                                }
+                            </p>
+                        </div>
+                        <div class="col-md-4">
+                            <p><strong>Última Alerta Generada:</strong></p>
+                            <p class="text-muted">
+                                @if (Model.UltimaAlertaGenerada.HasValue)
+                                {
+                                    @Model.UltimaAlertaGenerada.Value.ToString("dd/MM/yyyy HH:mm")
+                                }
+                                else
+                                {
+                                    <span>No hay alertas</span>
+                                }
+                            </p>
+                        </div>
+                        <div class="col-md-4">
+                            <p><strong>Asistencias de Hoy:</strong></p>
+                            <p class="text-muted">
+                                <span class="badge bg-primary rounded-pill">@Model.AsistenciasHoy registros</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Datos desde el servidor
+        const asistenciasPorMes = @Html.Raw(Model.AsistenciasPorMesJson);
+        const alertasPorTipo = @Html.Raw(Model.AlertasPorTipoJson);
+        const alumnosPorBus = @Html.Raw(Model.AlumnosPorBusJson);
+        const rutasPorTipo = @Html.Raw(Model.RutasPorTipoJson);
+
+        // Gráfico 1: Asistencias por Mes (Línea)
+        const ctxAsistencias = document.getElementById('chartAsistencias').getContext('2d');
+        new Chart(ctxAsistencias, {
+            type: 'line',
+            data: {
+                labels: asistenciasPorMes.map(x => x.Mes || x.mes),
+                datasets: [{
+                    label: 'Asistencias',
+                    data: asistenciasPorMes.map(x => x.Total || x.total),
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.1,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: true, position: 'top' },
+                    title: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // Gráfico 2: Alertas por Tipo (Doughnut)
+        const ctxAlertas = document.getElementById('chartAlertas').getContext('2d');
+        new Chart(ctxAlertas, {
+            type: 'doughnut',
+            data: {
+                labels: alertasPorTipo.map(x => x.Tipo || x.tipo),
+                datasets: [{
+                    data: alertasPorTipo.map(x => x.Total || x.total),
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.8)',
+                        'rgba(54, 162, 235, 0.8)',
+                        'rgba(255, 206, 86, 0.8)',
+                        'rgba(75, 192, 192, 0.8)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: true, position: 'bottom' }
+                }
+            }
+        });
+
+        // Gráfico 3: Alumnos por Bus (Barra Horizontal)
+        const ctxAlumnosBus = document.getElementById('chartAlumnosBus').getContext('2d');
+        new Chart(ctxAlumnosBus, {
+            type: 'bar',
+            data: {
+                labels: alumnosPorBus.map(x => x.Bus || x.bus),
+                datasets: [{
+                    label: 'Alumnos',
+                    data: alumnosPorBus.map(x => x.Total || x.total),
+                    backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: { beginAtZero: true }
+                }
+            }
+        });
+
+        // Gráfico 4: Rutas por Tipo (Pie)
+        const ctxRutasTipo = document.getElementById('chartRutasTipo').getContext('2d');
+        new Chart(ctxRutasTipo, {
+            type: 'pie',
+            data: {
+                labels: rutasPorTipo.map(x => x.Tipo || x.tipo),
+                datasets: [{
+                    data: rutasPorTipo.map(x => x.Total || x.total),
+                    backgroundColor: [
+                        'rgba(255, 206, 86, 0.8)',
+                        'rgba(75, 192, 192, 0.8)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: true, position: 'bottom' }
+                }
+            }
+        });
+    </script>
+}
