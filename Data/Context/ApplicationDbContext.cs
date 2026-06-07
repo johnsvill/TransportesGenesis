@@ -8,7 +8,7 @@ using TransportesGenesis.Models.ViewModels;
 
 namespace TransportesGenesis.Data.Context
 {
-    public class ApplicationDbContext : IdentityDbContext
+    public class ApplicationDbContext : IdentityDbContext<AppUser>
     {
         public ApplicationDbContext()
         {
@@ -33,6 +33,21 @@ namespace TransportesGenesis.Data.Context
         public DbSet<MontoPadreViewModel> MontosPadresView { get; set; }
 
 
+        // Entidades de Geolocalización
+        public virtual DbSet<Bus> BusesDb { get; set; }
+        public virtual DbSet<Ruta> RutasDb { get; set; }
+        public virtual DbSet<Parada> ParadasDb { get; set; }
+        public virtual DbSet<AsistenciaAlumno> AsistenciasAlumnoDb { get; set; }
+        public virtual DbSet<UbicacionBusEnTiempoReal> UbicacionesBusDb { get; set; }
+        public virtual DbSet<Alerta> AlertasDb { get; set; }
+        public virtual DbSet<SolicitudTraslado> SolicitudesTrasladoDb { get; set; }
+        public virtual DbSet<AsignacionPilotoBus> AsignacionesPilotoBusDb { get; set; }
+        public virtual DbSet<NotificacionProximidad> NotificacionesProximidadDb { get; set; }
+        public virtual DbSet<RegistroRecogida> RegistrosRecogidaDb { get; set; }
+        public virtual DbSet<NotificacionRetraso> NotificacionesRetrasoDb { get; set; }
+        public virtual DbSet<ConfiguracionSistema> ConfiguracionSistemaDb { get; set; }
+        public virtual DbSet<AlertaProximidad> AlertasProximidadDb { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
@@ -52,6 +67,10 @@ namespace TransportesGenesis.Data.Context
             builder.Entity<MontoPadreViewModel>().HasNoKey();
 
             base.OnModelCreating(builder);
+
+            builder.Entity<AppUser>()
+               .HasDiscriminator<string>("Discriminator")
+               .HasValue<AppUser>("AppUser");
 
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         }

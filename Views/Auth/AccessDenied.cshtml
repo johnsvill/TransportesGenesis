@@ -1,0 +1,30 @@
+@{
+    ViewData["Title"] = "Acceso Denegado";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg mt-5">
+                <div class="card-body p-5 text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-exclamation-triangle text-warning" style="font-size: 4rem;"></i>
+                    </div>
+
+                    <h2 class="text-danger mb-3">Acceso Denegado</h2>
+                    <p class="text-muted lead">No tienes los permisos necesarios para acceder a esta página.</p>
+
+                    <div class="mt-4">
+                        <a href="/Auth/Login" class="btn btn-primary me-2">
+                            <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                        </a>
+                        <a href="/" class="btn btn-secondary">
+                            <i class="fas fa-home"></i> Ir al Inicio
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

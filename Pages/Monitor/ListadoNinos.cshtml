@@ -1,0 +1,329 @@
+@page
+@model TransportesGenesis.Pages.Monitor.ListadoNinosModel
+@{
+    ViewData["Title"] = $"Bus {Model.NumeroBus} - Listado de Niños";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<!-- Token Anti-Forgery (CSRF) -->
+<form id="formAntiforgery" method="post">
+    @Html.AntiForgeryToken()
+</form>
+
+<div class="container-fluid">
+    @if (!string.IsNullOrEmpty(Model.MensajeError))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle"></i>
+            <strong>Error:</strong> @Model.MensajeError
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.MensajeExito))
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle"></i>
+            <strong>Éxito:</strong> @Model.MensajeExito
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white;">
+                    <h4 class="mb-0">
+                        <i class="bi bi-bus-front-fill"></i> Bus @Model.NumeroBus - Registro de Asistencia
+                    </h4>
+                    <p class="mb-0 mt-2 text-white-50">
+                        Turno: @Model.TipoRuta | @DateTime.Now.ToString("dddd, d 'de' MMMM 'de' yyyy", new System.Globalization.CultureInfo("es-ES"))
+                    </p>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle-fill"></i>
+                        <strong>Instrucciones:</strong> Marca con el toggle qué niños subieron al bus. Los cambios se guardan automáticamente.
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <a href="/Monitor/MiRuta" class="btn btn-outline-primary">
+                                <i class="bi bi-arrow-left"></i> Ver Mapa de Ruta
+                            </a>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <a href="/" class="btn btn-outline-secondary">
+                                <i class="bi bi-house"></i> Volver al Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Alumnos.Any())
+    {
+        <!-- Estadísticas -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card text-center border-success">
+                    <div class="card-body">
+                        <h5 class="text-success">
+                            <i class="bi bi-person-check-fill"></i>
+                        </h5>
+                        <h2 id="totalPresentes" class="text-success">@Model.Alumnos.Count(a => a.Presente)</h2>
+                        <p class="card-text">Presentes</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center border-danger">
+                    <div class="card-body">
+                        <h5 class="text-danger">
+                            <i class="bi bi-person-x-fill"></i>
+                        </h5>
+                        <h2 id="totalAusentes" class="text-danger">@Model.Alumnos.Count(a => !a.Presente)</h2>
+                        <p class="card-text">Ausentes</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center border-primary">
+                    <div class="card-body">
+                        <h5 class="text-primary">
+                            <i class="bi bi-people-fill"></i>
+                        </h5>
+                        <h2 class="text-primary">@Model.Alumnos.Count</h2>
+                        <p class="card-text">Total</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de Niños -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <i class="bi bi-list-check"></i> Listado de Niños (@Model.Alumnos.Count)
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 60px;">Orden</th>
+                                        <th>Nombre Completo</th>
+                                        <th>Dirección</th>
+                                        <th class="text-center" style="width: 150px;">Asistencia</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var alumno in Model.Alumnos.OrderBy(a => a.Orden))
+                                    {
+                                        <tr id="fila-@alumno.IdAlumno" class="@(alumno.Presente ? "table-success" : "")">
+                                            <td>
+                                                <span class="badge bg-primary">@alumno.Orden</span>
+                                            </td>
+                                            <td>
+                                                <strong>@alumno.NombreCompleto</strong>
+                                            </td>
+                                            <td>
+                                                <small class="text-muted">
+                                                    <i class="bi bi-geo-alt"></i> @alumno.Direccion
+                                                </small>
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="form-check form-switch d-inline-block">
+                                                    <input 
+                                                        class="form-check-input toggle-asistencia" 
+                                                        type="checkbox" 
+                                                        id="toggle-@alumno.IdAlumno" 
+                                                        data-alumno-id="@alumno.IdAlumno"
+                                                        data-parada-id="@alumno.IdParada"
+                                                        @(alumno.Presente ? "checked" : "")
+                                                        style="width: 3em; height: 1.5em; cursor: pointer;">
+                                                    <label class="form-check-label" for="toggle-@alumno.IdAlumno" style="cursor: pointer;">
+                                                        <span id="estado-@alumno.IdAlumno" class="badge @(alumno.Presente ? "bg-success" : "bg-danger")">
+                                                            @(alumno.Presente ? "Presente" : "Ausente")
+                                                        </span>
+                                                    </label>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Sin datos -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="bi bi-inbox text-muted" style="font-size: 4rem;"></i>
+                        <h4 class="mt-3 text-muted">No hay alumnos en la ruta</h4>
+                        <p class="text-muted">
+                            No se encontraron alumnos asignados a esta ruta o no hay ruta activa para el turno actual.
+                        </p>
+                        <a href="/Monitor/MiRuta" class="btn btn-primary">
+                            <i class="bi bi-map"></i> Ver Mapa de Ruta
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Toast para notificaciones -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="toastNotificacion" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body" id="toastMensaje">
+                Mensaje
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Manejar cambios en los toggles de asistencia
+            const toggles = document.querySelectorAll('.toggle-asistencia');
+
+            toggles.forEach(toggle => {
+                toggle.addEventListener('change', async function() {
+                    const idAlumno = parseInt(this.getAttribute('data-alumno-id'));
+                    const idParada = parseInt(this.getAttribute('data-parada-id'));
+                    const presente = this.checked;
+
+                    try {
+                        // Mostrar loading
+                        this.disabled = true;
+
+                        // Obtener token CSRF
+                        const tokenElement = document.querySelector('input[name="__RequestVerificationToken"]');
+                        const headers = {
+                            'Content-Type': 'application/json'
+                        };
+
+                        // Agregar token si existe
+                        if (tokenElement) {
+                            headers['RequestVerificationToken'] = tokenElement.value;
+                        }
+
+                        // Enviar petición AJAX
+                        const response = await fetch('/Monitor/ListadoNinos?handler=ActualizarAsistencia', {
+                            method: 'POST',
+                            headers: headers,
+                            body: JSON.stringify({
+                                idAlumno: idAlumno,
+                                idParada: idParada,
+                                presente: presente
+                            })
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            // Actualizar UI
+                            const fila = document.getElementById(`fila-${idAlumno}`);
+                            const estadoBadge = document.getElementById(`estado-${idAlumno}`);
+
+                            if (presente) {
+                                fila.classList.add('table-success');
+                                estadoBadge.classList.remove('bg-danger');
+                                estadoBadge.classList.add('bg-success');
+                                estadoBadge.textContent = 'Presente';
+                            } else {
+                                fila.classList.remove('table-success');
+                                estadoBadge.classList.remove('bg-success');
+                                estadoBadge.classList.add('bg-danger');
+                                estadoBadge.textContent = 'Ausente';
+                            }
+
+                            // Actualizar contadores
+                            actualizarContadores();
+
+                            // Mostrar notificación de éxito
+                            mostrarToast('Asistencia guardada correctamente', 'success');
+                        } else {
+                            // Error del servidor
+                            this.checked = !presente; // Revertir cambio
+                            mostrarToast('Error: ' + result.message, 'danger');
+                        }
+                    } catch (error) {
+                        console.error('Error al guardar asistencia:', error);
+                        this.checked = !presente; // Revertir cambio
+                        mostrarToast('Error de conexión. Intenta nuevamente.', 'danger');
+                    } finally {
+                        this.disabled = false;
+                    }
+                });
+            });
+
+            // Función para actualizar contadores
+            function actualizarContadores() {
+                const togglesPresentes = document.querySelectorAll('.toggle-asistencia:checked').length;
+                const totalToggles = toggles.length;
+                const ausentes = totalToggles - togglesPresentes;
+
+                document.getElementById('totalPresentes').textContent = togglesPresentes;
+                document.getElementById('totalAusentes').textContent = ausentes;
+            }
+
+            // Función para mostrar toast
+            function mostrarToast(mensaje, tipo) {
+                const toastElement = document.getElementById('toastNotificacion');
+                const toastMensaje = document.getElementById('toastMensaje');
+
+                toastMensaje.textContent = mensaje;
+
+                // Aplicar color según tipo
+                toastElement.classList.remove('text-bg-success', 'text-bg-danger', 'text-bg-warning');
+                if (tipo === 'success') {
+                    toastElement.classList.add('text-bg-success');
+                } else if (tipo === 'danger') {
+                    toastElement.classList.add('text-bg-danger');
+                } else {
+                    toastElement.classList.add('text-bg-warning');
+                }
+
+                const toast = new bootstrap.Toast(toastElement, { delay: 3000 });
+                toast.show();
+            }
+        });
+    </script>
+}
+
+<style>
+    .table tbody tr {
+        transition: background-color 0.3s ease;
+    }
+
+    .form-switch .form-check-input {
+        transition: all 0.3s ease;
+    }
+
+    .form-switch .form-check-input:checked {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+
+    .form-switch .form-check-input:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+</style>

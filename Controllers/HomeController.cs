@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace TransportesGenesis.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         public IActionResult Index()
@@ -17,12 +19,14 @@ namespace TransportesGenesis.Controllers
                     return RedirectToAction("Index", "Admin");
                 }
                 else if (User.IsInRole("Piloto"))
-                {                    
-                    return View("PilotoDashboard");
+                {
+                    // Redirigir al dashboard de Piloto (Razor Page)
+                    return RedirectToPage("/Piloto/MiRuta");
                 }
                 else if (User.IsInRole("Monitor"))
-                {                    
-                    return View("MonitorDashboard");
+                {
+                    // Redirigir al dashboard de Monitor (Razor Page)
+                    return RedirectToPage("/Monitor/MiRuta");
                 }
             }         
             return View(); 

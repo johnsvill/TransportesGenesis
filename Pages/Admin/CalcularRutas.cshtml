@@ -1,0 +1,338 @@
+@page
+@model TransportesGenesis.Pages.Admin.CalcularRutasModel
+@{
+    ViewData["Title"] = "Calcular Rutas - Admin";
+}
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="mb-0">
+                <i class="bi bi-calculator text-primary"></i>
+                Calcular Rutas Escolares - Administrador
+            </h2>
+            <p class="text-muted">Genere rutas optimizadas para todos los buses en un día específico</p>
+        </div>
+    </div>
+
+    @* Mensaje de Error General *@
+    @if (!string.IsNullOrEmpty(Model.MensajeError))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <strong>Error:</strong> @Model.MensajeError
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @* Formulario de Configuración *@
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-gear-fill"></i>
+                Configuración del Cálculo
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                <div class="row g-3">
+                    <div class="col-md-5">
+                        <label for="fechaCalculo" class="form-label fw-bold">
+                            <i class="bi bi-calendar-event"></i> Fecha de la Ruta
+                        </label>
+                        <input type="date" 
+                               class="form-control form-control-lg" 
+                               id="fechaCalculo" 
+                               asp-for="FechaCalculo" 
+                               required />
+                        <div class="form-text">
+                            <i class="bi bi-info-circle"></i>
+                            Solo días hábiles (lunes a viernes)
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="tipoRuta" class="form-label fw-bold">
+                            <i class="bi bi-signpost-2"></i> Turno / Tipo de Ruta
+                        </label>
+                        <select class="form-select form-select-lg" 
+                                id="tipoRuta" 
+                                asp-for="TipoRuta" 
+                                required>
+                            <option value="Mañana">🌅 Mañana (Casa → Colegio)</option>
+                            <option value="Tarde">🌆 Tarde (Colegio → Casa)</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="submit" 
+                                class="btn btn-primary btn-lg w-100" 
+                                asp-page-handler="CalcularRutas"
+                                id="btnCalcular">
+                            <i class="bi bi-play-circle-fill"></i>
+                            Calcular Todas las Rutas
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @* Indicador de Progreso *@
+    <div id="progressContainer" style="display: none;">
+        <div class="card shadow-sm mb-4 border-info">
+            <div class="card-body text-center py-4">
+                <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                    <span class="visually-hidden">Calculando...</span>
+                </div>
+                <h5 class="mb-2">Calculando rutas para todos los buses...</h5>
+                <p class="text-muted mb-0">Este proceso puede tomar algunos segundos. Por favor espere.</p>
+            </div>
+        </div>
+    </div>
+
+    @* Resumen de Resultados *@
+    @if (Model.CalculoCompletado)
+    {
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card shadow-sm border-primary">
+                    <div class="card-body text-center">
+                        <i class="bi bi-bus-front fs-1 text-primary"></i>
+                        <h3 class="mt-2 mb-0">@Model.TotalBusesProcesados</h3>
+                        <p class="text-muted mb-0">Buses Procesados</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm border-success">
+                    <div class="card-body text-center">
+                        <i class="bi bi-geo-alt-fill fs-1 text-success"></i>
+                        <h3 class="mt-2 mb-0">@Model.TotalParadasGeneradas</h3>
+                        <p class="text-muted mb-0">Paradas Generadas</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm border-info">
+                    <div class="card-body text-center">
+                        <i class="bi bi-calendar-check fs-1 text-info"></i>
+                        <h3 class="mt-2 mb-0">@Model.FechaCalculo.ToString("dd/MM/yyyy")</h3>
+                        <p class="text-muted mb-0">@Model.TipoRuta</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* Tabla de Resultados Detallados *@
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-table"></i>
+                    Resultados del Cálculo
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="text-center" style="width: 80px;">
+                                    <i class="bi bi-hash"></i> ID
+                                </th>
+                                <th>
+                                    <i class="bi bi-bus-front"></i> Bus
+                                </th>
+                                <th class="text-center">
+                                    <i class="bi bi-check-circle"></i> Estado
+                                </th>
+                                <th class="text-center">
+                                    <i class="bi bi-geo-alt"></i> Paradas
+                                </th>
+                                <th class="text-center">
+                                    <i class="bi bi-clock"></i> Hora Inicio
+                                </th>
+                                <th class="text-center">
+                                    <i class="bi bi-hourglass-split"></i> Tiempo Total
+                                </th>
+                                <th>
+                                    <i class="bi bi-info-circle"></i> Mensaje
+                                </th>
+                                <th class="text-center" style="width: 120px;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.ResultadosCalculo != null && Model.ResultadosCalculo.Any())
+                            {
+                                @foreach (var resultado in Model.ResultadosCalculo)
+                                {
+                                    <tr class="@(resultado.Exitoso ? "" : "table-warning")">
+                                        <td class="text-center fw-bold">@resultado.IdBus</td>
+                                        <td>
+                                            <span class="badge bg-secondary">@resultado.PlacaBus</span>
+                                        </td>
+                                        <td class="text-center">
+                                            @if (resultado.Exitoso)
+                                            {
+                                                <span class="badge bg-success">
+                                                    <i class="bi bi-check-circle-fill"></i> Exitoso
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-warning text-dark">
+                                                    <i class="bi bi-exclamation-triangle-fill"></i> Fallo
+                                                </span>
+                                            }
+                                        </td>
+                                        <td class="text-center">
+                                            @if (resultado.Exitoso)
+                                            {
+                                                <span class="badge bg-info text-dark fs-6">@resultado.CantidadParadas</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">-</span>
+                                            }
+                                        </td>
+                                        <td class="text-center">
+                                            @if (resultado.Exitoso)
+                                            {
+                                                <span class="fw-bold">@resultado.HoraInicio</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">-</span>
+                                            }
+                                        </td>
+                                        <td class="text-center">
+                                            @if (resultado.Exitoso)
+                                            {
+                                                <span class="badge bg-primary">@resultado.TiempoEstimado</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">-</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <small class="@(resultado.Exitoso ? "text-success" : "text-danger")">
+                                                @resultado.Mensaje
+                                            </small>
+                                        </td>
+                                        <td class="text-center">
+                                            @if (resultado.Exitoso && resultado.IdRuta.HasValue)
+                                            {
+                                                <a href="/Piloto/MiRuta?idRuta=@resultado.IdRuta" 
+                                                   class="btn btn-sm btn-outline-primary"
+                                                   target="_blank"
+                                                   title="Ver ruta en mapa">
+                                                    <i class="bi bi-map"></i> Ver
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">-</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-light">
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle"></i>
+                        Cálculo completado el @DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")
+                    </small>
+                    <a href="/Admin/CalcularRutas" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-arrow-clockwise"></i> Nueva Consulta
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+    else if (!Model.CalculoCompletado && string.IsNullOrEmpty(Model.MensajeError))
+    {
+        @* Mensaje inicial *@
+        <div class="card shadow-sm border-info">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-info-circle text-info" style="font-size: 4rem;"></i>
+                <h4 class="mt-3 mb-2">Listo para Calcular Rutas</h4>
+                <p class="text-muted mb-3">
+                    Seleccione una fecha y turno, luego presione el botón <strong>"Calcular Todas las Rutas"</strong>
+                </p>
+                <div class="alert alert-light border-primary d-inline-block">
+                    <i class="bi bi-lightbulb"></i>
+                    <strong>Tip:</strong> El sistema calculará automáticamente las rutas óptimas para todos los buses
+                    considerando las asistencias confirmadas y traslados temporales activos.
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@* Toast para notificaciones *@
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="notificacionToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <i class="bi bi-bell-fill text-primary me-2"></i>
+            <strong class="me-auto">Notificación</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="toastMessage"></div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Mostrar indicador de progreso al enviar formulario
+        document.querySelector('form').addEventListener('submit', function() {
+            const btnCalcular = document.getElementById('btnCalcular');
+            const progressContainer = document.getElementById('progressContainer');
+
+            // Deshabilitar botón
+            btnCalcular.disabled = true;
+            btnCalcular.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Calculando...';
+
+            // Mostrar progreso
+            progressContainer.style.display = 'block';
+
+            // Scroll al indicador
+            progressContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+
+        // Mostrar toast si hay resultados
+        @if (Model.CalculoCompletado)
+        {
+            <text>
+            window.addEventListener('DOMContentLoaded', function() {
+                mostrarToast('✅ Cálculo completado: @Model.TotalBusesProcesados buses procesados con @Model.TotalParadasGeneradas paradas generadas');
+            });
+            </text>
+        }
+
+        function mostrarToast(mensaje) {
+            const toastElement = document.getElementById('notificacionToast');
+            const toastBody = document.getElementById('toastMessage');
+            toastBody.innerHTML = mensaje;
+
+            const toast = new bootstrap.Toast(toastElement, { delay: 5000 });
+            toast.show();
+        }
+
+        // Validación de fin de semana en el cliente
+        document.getElementById('fechaCalculo').addEventListener('change', function() {
+            const fecha = new Date(this.value + 'T00:00:00');
+            const diaSemana = fecha.getDay();
+
+            if (diaSemana === 0 || diaSemana === 6) {
+                alert('⚠️ Atención: Ha seleccionado un fin de semana.\n\nLas rutas escolares solo se calculan de lunes a viernes.\n\nPor favor seleccione un día hábil.');
+                this.value = '';
+            }
+        });
+    </script>
+}

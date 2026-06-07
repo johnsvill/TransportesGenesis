@@ -22,14 +22,17 @@ public static class Startup
 
     private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
+        // Connection string
         var connectionString = configuration.GetConnectionString("TransportesGenesisConnection")
             ?? throw new InvalidOperationException("Connection string 'TransportesGenesisConnection' not found.");
 
+        // Database context
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(connectionString));
 
         services.AddDatabaseDeveloperPageExceptionFilter();
 
+        // Identity configuration (de tu compañero)
         services.AddIdentity<AppUser, IdentityRole>(options =>
         {
             options.Password.RequireDigit = true;
@@ -39,16 +42,69 @@ public static class Startup
             options.Password.RequireNonAlphanumeric = false;
         })
         .AddEntityFrameworkStores<ApplicationDbContext>()
-        .AddDefaultTokenProviders();     
+        .AddDefaultTokenProviders();
 
+        // Configurar rutas de autenticación personalizadas (de tu compañero)
+        services.ConfigureApplicationCookie(options =>
+        {
+            options.LoginPath = "/Auth/Login";
+            options.LogoutPath = "/Auth/Logout";
+            options.AccessDeniedPath = "/Auth/AccessDenied";
+        });
+
+        // Email sender (de tu compañero)
         services.AddTransient<IEmailSender, EmailSender>();
-        services.AddControllersWithViews();
-        services.AddRazorPages().AddRazorRuntimeCompilation();
+
+        // Stripe configuration (de tu compañero)
         services.Configure<StripeSettings>(configuration.GetSection("Stripe"));
+
+        // AutoMapper (Geolocalización)
+        services.AddAutoMapper(typeof(Startup).Assembly);
+
+        // HttpClient para llamadas internas a APIs
+        services.AddHttpClient();
+
+        // Repositorios de Geolocalización
+        services.AddScoped<TransportesGenesis.Repositories.Interfaces.IBusRepository, TransportesGenesis.Repositories.Implementations.BusRepository>();
+        services.AddScoped<TransportesGenesis.Repositories.Interfaces.IRutaRepository, TransportesGenesis.Repositories.Implementations.RutaRepository>();
+        services.AddScoped<TransportesGenesis.Repositories.Interfaces.IUbicacionBusRepository, TransportesGenesis.Repositories.Implementations.UbicacionBusRepository>();
+        services.AddScoped<TransportesGenesis.Repositories.Interfaces.IAsistenciaAlumnoRepository, TransportesGenesis.Repositories.Implementations.AsistenciaAlumnoRepository>();
+        services.AddScoped<TransportesGenesis.Repositories.Interfaces.ISolicitudTrasladoRepository, TransportesGenesis.Repositories.Implementations.SolicitudTrasladoRepository>();
+        services.AddScoped<TransportesGenesis.Repositories.Interfaces.IAlertaProximidadRepository, TransportesGenesis.Repositories.Implementations.AlertaProximidadRepository>();
+
+        // Services de Geolocalización
+        services.AddScoped<TransportesGenesis.Services.Interfaces.IBusService, TransportesGenesis.Services.Implementations.BusService>();
+        services.AddScoped<TransportesGenesis.Services.Interfaces.IUbicacionBusService, TransportesGenesis.Services.Implementations.UbicacionBusService>();
+        services.AddScoped<TransportesGenesis.Services.Interfaces.IAsistenciaService, TransportesGenesis.Services.Implementations.AsistenciaService>();
+        services.AddScoped<TransportesGenesis.Services.Interfaces.ITrasladoService, TransportesGenesis.Services.Implementations.TrasladoService>();
+        services.AddScoped<TransportesGenesis.Services.Interfaces.IRutaService, TransportesGenesis.Services.Implementations.RutaService>();
+        services.AddScoped<TransportesGenesis.Services.Interfaces.IConfiguracionService, TransportesGenesis.Services.Implementations.ConfiguracionService>();
+        services.AddScoped<TransportesGenesis.Services.Interfaces.IAlertaService, TransportesGenesis.Services.Implementations.AlertaService>();
+        services.AddScoped<TransportesGenesis.Services.Interfaces.INotificacionService, TransportesGenesis.Services.Implementations.NotificacionService>();
+        services.AddScoped<TransportesGenesis.Services.Interfaces.IPilotoService, TransportesGenesis.Services.Implementations.PilotoService>();
+
+        // SignalR para notificaciones en tiempo real
+        services.AddSignalR(options =>
+        {
+            options.EnableDetailedErrors = true;
+            options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+            options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
+        });
+
+        // MVC y Razor Pages
+        services.AddControllersWithViews()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase; // ✅ Usar camelCase para APIs
+                options.JsonSerializerOptions.PropertyNameCaseInsensitive = true; // Aceptar ambos
+                options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+            });
+        services.AddRazorPages().AddRazorRuntimeCompilation();
     }
 
     private static void Configure(WebApplication app, IWebHostEnvironment env)
     {
+        // Configure the HTTP request pipeline
         if (env.IsDevelopment())
         {
             app.UseMigrationsEndPoint();
@@ -67,9 +123,11 @@ public static class Startup
         app.UseAuthentication();
         app.UseAuthorization();
 
+        // Configuración de Stripe (de tu compañero)
         var stripeSettings = app.Services.GetRequiredService<IOptions<StripeSettings>>().Value;
         Stripe.StripeConfiguration.ApiKey = stripeSettings.SecretKey;
 
+        // Seed de roles y usuario admin (de tu compañero)
         using (var scope = app.Services.CreateScope())
         {
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
@@ -77,9 +135,15 @@ public static class Startup
             SeedRolesAndAdmin(roleManager, userManager).GetAwaiter().GetResult();
         }
 
+        // SignalR endpoint para notificaciones
+        app.MapHub<TransportesGenesis.Hubs.NotificacionesHub>("/notificacionesHub");
+
+        // Mapear rutas de controladores MVC ANTES que Razor Pages para que AuthController tenga prioridad
         app.MapControllerRoute(
             name: "default",
             pattern: "{controller=Home}/{action=Index}/{id?}");
+
+        // Habilitar Razor Pages (necesarias para Admin, Padres, Geolocalizacion, etc.)
         app.MapRazorPages();
     }
 
@@ -95,24 +159,120 @@ public static class Startup
             }
         }
 
+        // Crear usuario admin por defecto con credenciales conocidas
         var adminEmail = "admin@transportesgenesis.com";
+        var adminUserName = "admin";
         var adminPassword = "Admin123!";
 
         var adminUser = await userManager.FindByEmailAsync(adminEmail);
         if (adminUser == null)
         {
+            adminUser = await userManager.FindByNameAsync(adminUserName);
+        }
+
+        if (adminUser == null)
+        {
             var newAdmin = new AppUser
             {
-                UserName = adminEmail,
+                UserName = adminUserName,
                 Email = adminEmail,
                 EmailConfirmed = true,
-                IsFirstLogin = false
+                IsFirstLogin = false,
+                LastLoginDate = DateTime.Now
             };
 
             var result = await userManager.CreateAsync(newAdmin, adminPassword);
             if (result.Succeeded)
             {
                 await userManager.AddToRoleAsync(newAdmin, "Administrador");
+            }
+        }
+        else
+        {
+            // Asegurar que el admin existente tenga el rol correcto
+            if (!await userManager.IsInRoleAsync(adminUser, "Administrador"))
+            {
+                await userManager.AddToRoleAsync(adminUser, "Administrador");
+            }
+        }
+
+        // ============================================
+        // CREAR PILOTOS Y MONITORES DE PRUEBA
+        // ============================================
+        var pilotosMonitores = new[]
+        {
+            new { UserName = "piloto2", Email = "piloto2@transportesgenesis.com", Rol = "Piloto" },
+            new { UserName = "piloto3", Email = "piloto3@transportesgenesis.com", Rol = "Piloto" },
+            new { UserName = "piloto4", Email = "piloto4@transportesgenesis.com", Rol = "Piloto" },
+            new { UserName = "piloto5", Email = "piloto5@transportesgenesis.com", Rol = "Piloto" },
+            new { UserName = "monitor2", Email = "monitor2@transportesgenesis.com", Rol = "Monitor" },
+            new { UserName = "monitor3", Email = "monitor3@transportesgenesis.com", Rol = "Monitor" },
+            new { UserName = "monitor4", Email = "monitor4@transportesgenesis.com", Rol = "Monitor" },
+            new { UserName = "monitor5", Email = "monitor5@transportesgenesis.com", Rol = "Monitor" }
+        };
+
+        foreach (var usuario in pilotosMonitores)
+        {
+            var existeUsuario = await userManager.FindByEmailAsync(usuario.Email);
+            if (existeUsuario == null)
+            {
+                var nuevoUsuario = new AppUser
+                {
+                    UserName = usuario.UserName,
+                    Email = usuario.Email,
+                    EmailConfirmed = true,
+                    IsFirstLogin = false, // Para testing, no obligar cambio de contraseña
+                    LastLoginDate = DateTime.Now
+                };
+
+                var result = await userManager.CreateAsync(nuevoUsuario, "Admin123!");
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(nuevoUsuario, usuario.Rol);
+                    Console.WriteLine($"✅ Usuario {usuario.UserName} creado con rol {usuario.Rol}");
+                }
+                else
+                {
+                    Console.WriteLine($"❌ Error al crear {usuario.UserName}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                }
+            }
+        }
+
+        // CREAR PADRES DE FAMILIA DE PRUEBA
+        // ============================================
+        var padres = new[]
+        {
+            new { UserName = "padre1", Email = "padre1@gmail.com", Nombre = "Juan", Apellido = "Pérez" },
+            new { UserName = "padre2", Email = "padre2@gmail.com", Nombre = "María", Apellido = "González" },
+            new { UserName = "padre3", Email = "padre3@gmail.com", Nombre = "Carlos", Apellido = "Rodríguez" },
+            new { UserName = "padre4", Email = "padre4@gmail.com", Nombre = "Ana", Apellido = "Martínez" },
+            new { UserName = "padre5", Email = "padre5@gmail.com", Nombre = "Luis", Apellido = "López" }
+        };
+
+        foreach (var padre in padres)
+        {
+            var existeUsuario = await userManager.FindByEmailAsync(padre.Email);
+            if (existeUsuario == null)
+            {
+                var nuevoUsuario = new AppUser
+                {
+                    UserName = padre.UserName,
+                    Email = padre.Email,
+                    EmailConfirmed = true,
+                    IsFirstLogin = false, // Para testing, no obligar cambio de contraseña
+                    LastLoginDate = DateTime.Now
+                };
+
+                var result = await userManager.CreateAsync(nuevoUsuario, "Admin123!");
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(nuevoUsuario, "PadreDeFamilia");
+                    Console.WriteLine($"✅ Usuario {padre.UserName} creado con rol PadreDeFamilia ({padre.Nombre} {padre.Apellido})");
+                }
+                else
+                {
+                    Console.WriteLine($"❌ Error al crear {padre.UserName}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                }
             }
         }
     }

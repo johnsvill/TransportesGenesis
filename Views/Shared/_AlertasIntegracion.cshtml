@@ -1,0 +1,251 @@
+@* 
+    Ejemplo de integración de AlertasSignalR en páginas de padres
+    Agregar al final de DashboardRutaBusAsignado.cshtml o cualquier página de padre
+*@
+
+@section Scripts {
+    @* Scripts existentes del mapa *@
+    <script>
+        // ... código existente del mapa ...
+    </script>
+
+    @* 🚀 NUEVO: Integración de AlertasSignalR (Módulo 3) *@
+    <script src="~/js/alertas-signalr.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔄 Inicializando integración de alertas...');
+
+            // Configurar callbacks para alertas
+            alertasSignalR.on('onAlertaPersonal', function(data) {
+                console.log('🎯 Alerta personal recibida en página padre:', data);
+
+                // Actualizar indicadores en el mapa si es necesario
+                if (window.mapaBusAsignado && data.TipoAlerta === 'proximidad') {
+                    actualizarMapaConAlerta(data);
+                }
+
+                // Actualizar contadores de alertas
+                actualizarContadorAlertas();
+
+                // Efecto visual adicional
+                if (data.RequiereConfirmacion) {
+                    resaltarParadaEnMapa(data.IdAlumno);
+                }
+            });
+
+            alertasSignalR.on('onAlertaRecibida', function(data) {
+                console.log('🚨 Alerta general del bus:', data);
+
+                // Mostrar en lista de alertas del bus si existe
+                agregarAlertaALista(data);
+            });
+
+            alertasSignalR.on('onAlertaResuelta', function(data) {
+                console.log('✅ Alerta resuelta:', data);
+
+                // Limpiar efectos visuales
+                limpiarEfectosAlerta(data.IdAlerta);
+                actualizarContadorAlertas();
+            });
+
+            // Verificar estado de conexión periódicamente
+            setInterval(function() {
+                const conectado = alertasSignalR.estaConectado();
+                actualizarIndicadorConexion(conectado);
+            }, 5000);
+        });
+
+        /**
+         * Actualiza el mapa con información de la alerta
+         */
+        function actualizarMapaConAlerta(alerta) {
+            if (!window.busMarker) return;
+
+            // Hacer que el bus destelle en el mapa
+            const busElement = document.querySelector('.bus-marker');
+            if (busElement) {
+                busElement.style.animation = 'alerta-proximidad 1s ease-in-out 3';
+                busElement.style.border = '4px solid #ff6b35';
+
+                // Restaurar después de 5 segundos
+                setTimeout(() => {
+                    busElement.style.animation = '';
+                    busElement.style.border = '3px solid white';
+                }, 5000);
+            }
+
+            // Centrar mapa en el bus si está fuera de vista
+            if (window.busMarker) {
+                window.mapaBusAsignado.setView(window.busMarker.getLatLng(), 15);
+                window.busMarker.openPopup();
+            }
+        }
+
+        /**
+         * Resalta la parada del alumno en el mapa
+         */
+        function resaltarParadaEnMapa(idAlumno) {
+            // Encontrar marcador de parada del alumno
+            const paradaElement = document.querySelector('.stop-marker');
+            if (paradaElement) {
+                paradaElement.classList.add('parada-resaltada');
+
+                setTimeout(() => {
+                    paradaElement.classList.remove('parada-resaltada');
+                }, 10000);
+            }
+        }
+
+        /**
+         * Agrega alerta a lista visual (crear si no existe)
+         */
+        function agregarAlertaALista(alerta) {
+            let listaAlertas = document.getElementById('lista-alertas');
+
+            if (!listaAlertas) {
+                // Crear contenedor de alertas si no existe
+                const container = document.querySelector('.route-legend') || document.body;
+                listaAlertas = document.createElement('div');
+                listaAlertas.id = 'lista-alertas';
+                listaAlertas.innerHTML = '<h6 class="fw-bold mb-2">🚨 Alertas Activas</h6>';
+                listaAlertas.className = 'mt-3 p-3 bg-light rounded';
+                container.appendChild(listaAlertas);
+            }
+
+            const alertaElement = document.createElement('div');
+            alertaElement.id = `alerta-${alerta.IdAlerta}`;
+            alertaElement.className = `alert alert-${alerta.TipoAlerta === 'proximidad' ? 'info' : 'warning'} alert-sm`;
+            alertaElement.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <small><strong>${alerta.TipoAlerta.toUpperCase()}</strong></small><br>
+                        <small>${alerta.Mensaje}</small><br>
+                        <small class="text-muted">${new Date(alerta.FechaHora).toLocaleTimeString()}</small>
+                    </div>
+                    ${alerta.RequiereConfirmacion ? `
+                        <button class="btn btn-success btn-sm" 
+                                onclick="confirmarAlertaRapida(${alerta.IdAlerta})" 
+                                id="btn-confirmar-${alerta.IdAlerta}">
+                            ✓ Confirmar
+                        </button>
+                    ` : ''}
+                </div>
+            `;
+
+            listaAlertas.appendChild(alertaElement);
+        }
+
+        /**
+         * Confirmación rápida desde la lista
+         */
+        window.confirmarAlertaRapida = async function(idAlerta) {
+            const confirmado = await alertasSignalR.confirmarAlerta(idAlerta);
+            if (confirmado) {
+                const btn = document.getElementById(`btn-confirmar-${idAlerta}`);
+                if (btn) {
+                    btn.textContent = '✅ Confirmado';
+                    btn.disabled = true;
+                    btn.className = 'btn btn-outline-success btn-sm';
+                }
+
+                // Mostrar notificación de éxito
+                if (typeof toastr !== 'undefined') {
+                    toastr.success('Confirmación enviada correctamente', 'Confirmado');
+                }
+            }
+        };
+
+        /**
+         * Limpia efectos visuales de una alerta
+         */
+        function limpiarEfectosAlerta(idAlerta) {
+            const alertaElement = document.getElementById(`alerta-${idAlerta}`);
+            if (alertaElement) {
+                alertaElement.style.transition = 'opacity 0.5s';
+                alertaElement.style.opacity = '0.5';
+
+                setTimeout(() => {
+                    alertaElement.remove();
+                }, 2000);
+            }
+        }
+
+        /**
+         * Actualiza contador de alertas activas
+         */
+        function actualizarContadorAlertas() {
+            const alertasActivas = alertasSignalR.obtenerAlertasActivas();
+            let contador = document.getElementById('contador-alertas');
+
+            if (!contador) {
+                // Crear contador si no existe
+                const header = document.querySelector('.route-header .row .col-md-8');
+                if (header) {
+                    contador = document.createElement('span');
+                    contador.id = 'contador-alertas';
+                    contador.className = 'badge bg-warning ms-2';
+                    header.appendChild(contador);
+                }
+            }
+
+            if (contador) {
+                const cantidad = alertasActivas.length;
+                contador.textContent = cantidad > 0 ? `${cantidad} alerta${cantidad !== 1 ? 's' : ''}` : '';
+                contador.style.display = cantidad > 0 ? 'inline' : 'none';
+            }
+        }
+
+        /**
+         * Actualiza indicador de conexión SignalR
+         */
+        function actualizarIndicadorConexion(conectado) {
+            let indicador = document.getElementById('signalr-status');
+
+            if (!indicador) {
+                // Crear indicador si no existe
+                indicador = document.createElement('div');
+                indicador.id = 'signalr-status';
+                indicador.style.cssText = `
+                    position: fixed;
+                    bottom: 20px;
+                    left: 20px;
+                    padding: 4px 8px;
+                    border-radius: 12px;
+                    font-size: 10px;
+                    z-index: 1000;
+                    transition: all 0.3s ease;
+                `;
+                document.body.appendChild(indicador);
+            }
+
+            if (conectado) {
+                indicador.innerHTML = '🟢 Conectado';
+                indicador.style.backgroundColor = '#d4edda';
+                indicador.style.color = '#155724';
+                indicador.style.border = '1px solid #c3e6cb';
+            } else {
+                indicador.innerHTML = '🔴 Desconectado';
+                indicador.style.backgroundColor = '#f8d7da';
+                indicador.style.color = '#721c24';
+                indicador.style.border = '1px solid #f5c6cb';
+            }
+        }
+
+        // CSS adicional para animaciones
+        const alertaCSS = `
+            @@keyframes alerta-proximidad {
+                0%, 100% { transform: scale(1); box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4); }
+                50% { transform: scale(1.1); box-shadow: 0 6px 20px rgba(255, 107, 53, 0.8); }
+            }
+
+            .parada-resaltada {
+                animation: pulse 0.5s ease-in-out 6;
+                filter: brightness(1.3);
+            }
+        `;
+
+        const style = document.createElement('style');
+        style.textContent = alertaCSS;
+        document.head.appendChild(style);
+    </script>
+}

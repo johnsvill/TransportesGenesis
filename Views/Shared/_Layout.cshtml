@@ -55,13 +55,18 @@
                     @if (User.IsInRole("PadreDeFamilia"))
                     {
                         <li class="nav-item">
-                            <a class="nav-link nav-hover-icon" asp-controller="Pagos" asp-action="Index">
+                            <a class="nav-link nav-hover-icon" asp-controller="PagosPadresFamilia" asp-action="Index">
                                 <i class="fa-solid fa-credit-card"></i> Pagos
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link nav-hover-icon" asp-controller="Rutas" asp-action="Index">
-                                <i class="fa-solid fa-map"></i> Rutas
+                            <a class="nav-link nav-hover-icon" href="/Padres/DashboardRutaBusAsignado">
+                                <i class="fa-solid fa-route"></i> Ruta del Bus
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-hover-icon" href="/Padres/ConfirmarAsistencia">
+                                <i class="fa-solid fa-calendar-check"></i> Calendario
                             </a>
                         </li>
                     }

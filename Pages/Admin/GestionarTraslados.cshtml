@@ -1,0 +1,535 @@
+@page
+@model TransportesGenesis.Pages.Admin.GestionarTrasladosModel
+@{
+    ViewData["Title"] = "Gestionar Traslados";
+}
+
+<div class="container-fluid my-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <h2>
+                <i class="bi bi-clipboard-check"></i> Gestión de Traslados Temporales
+            </h2>
+            <p class="text-muted">Aprobar o rechazar solicitudes de traslado de bus</p>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Estado:</label>
+                    <select class="form-select" id="filtroEstado" onchange="cargarSolicitudes()">
+                        <option value="Pendiente" selected>Pendiente</option>
+                        <option value="Aprobado">Aprobado</option>
+                        <option value="Rechazado">Rechazado</option>
+                        <option value="Todos">Todos</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Ordenar por:</label>
+                    <select class="form-select" id="filtroOrden" onchange="cargarSolicitudes()">
+                        <option value="fecha_asc">Fecha (más próxima)</option>
+                        <option value="fecha_desc">Fecha (más lejana)</option>
+                        <option value="registro_desc" selected>Solicitud (más reciente)</option>
+                        <option value="registro_asc">Solicitud (más antigua)</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Búsqueda:</label>
+                    <input type="text" class="form-control" id="busqueda" placeholder="Buscar por alumno..." onkeyup="filtrarTabla()">
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button class="btn btn-primary w-100" onclick="cargarSolicitudes()">
+                        <i class="bi bi-arrow-clockwise"></i> Actualizar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-warning">
+                <div class="card-body text-center">
+                    <h3 class="text-warning mb-0" id="totalPendientes">0</h3>
+                    <small class="text-muted">Pendientes</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-success">
+                <div class="card-body text-center">
+                    <h3 class="text-success mb-0" id="totalAprobadas">0</h3>
+                    <small class="text-muted">Aprobadas Hoy</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-danger">
+                <div class="card-body text-center">
+                    <h3 class="text-danger mb-0" id="totalRechazadas">0</h3>
+                    <small class="text-muted">Rechazadas Hoy</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-info">
+                <div class="card-body text-center">
+                    <h3 class="text-info mb-0" id="totalGeneral">0</h3>
+                    <small class="text-muted">Total</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de solicitudes -->
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-list-ul"></i> Solicitudes de Traslado
+            </h5>
+        </div>
+        <div class="card-body">
+            <div id="contenedorSolicitudes">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <p class="text-muted mt-3">Cargando solicitudes...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mensaje cuando no hay solicitudes -->
+    <div id="mensajeSinSolicitudes" class="alert alert-info mt-4" style="display: none;">
+        <i class="bi bi-info-circle"></i>
+        <strong>No hay solicitudes pendientes</strong><br>
+        Todas las solicitudes han sido procesadas.
+    </div>
+</div>
+
+<!-- Modal para Aprobar/Rechazar -->
+<div class="modal fade" id="modalResponder" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" id="modalHeader">
+                <h5 class="modal-title" id="modalTitulo">
+                    <i class="bi bi-clipboard-check"></i> Responder Solicitud
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Información de la solicitud -->
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h6 class="card-title">Detalles de la Solicitud</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-2"><strong>Alumno:</strong> <span id="detalleAlumno"></span></p>
+                                <p class="mb-2"><strong>Fecha traslado:</strong> <span id="detalleFecha"></span></p>
+                                <p class="mb-2"><strong>Turno:</strong> <span id="detalleTurno"></span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-2"><strong>Bus origen:</strong> <span id="detalleBusOrigen"></span></p>
+                                <p class="mb-2"><strong>Bus solicitado:</strong> <span id="detalleBusDestino"></span></p>
+                                <p class="mb-2"><strong>Fecha solicitud:</strong> <span id="detalleFechaSolicitud"></span></p>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <strong>Motivo:</strong>
+                            <p class="mb-0 text-muted" id="detalleMotivo">Sin motivo especificado</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formulario de respuesta -->
+                <input type="hidden" id="solicitudId" value="">
+
+                <div class="mb-3">
+                    <label class="form-label"><strong>Acción:</strong></label>
+                    <div class="btn-group w-100" role="group">
+                        <input type="radio" class="btn-check" name="accion" id="accionAprobar" value="Aprobado" checked>
+                        <label class="btn btn-outline-success" for="accionAprobar">
+                            <i class="bi bi-check-circle"></i> Aprobar
+                        </label>
+
+                        <input type="radio" class="btn-check" name="accion" id="accionRechazar" value="Rechazado">
+                        <label class="btn btn-outline-danger" for="accionRechazar">
+                            <i class="bi bi-x-circle"></i> Rechazar
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-3" id="divBusDestino">
+                    <label for="selectBusDestino" class="form-label"><strong>Bus destino:</strong></label>
+                    <select class="form-select" id="selectBusDestino">
+                        <option value="">-- Cargando buses --</option>
+                    </select>
+                    <small class="text-muted">Seleccione el bus para el traslado</small>
+                </div>
+
+                <div class="mb-3">
+                    <label for="comentarioAdmin" class="form-label"><strong>Comentario (opcional):</strong></label>
+                    <textarea class="form-control" id="comentarioAdmin" rows="3" 
+                              placeholder="Ej: Aprobado - Bus con capacidad disponible"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="enviarRespuesta()">
+                    <i class="bi bi-send"></i> Enviar Respuesta
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmación -->
+<div class="modal fade" id="modalExito" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="bi bi-check-circle-fill"></i> ¡Éxito!</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+                <h4 class="mt-3" id="mensajeExito"></h4>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Entendido</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    let solicitudesOriginales = [];
+    let solicitudesFiltradas = [];
+    let busesDisponibles = [];
+
+    // Cargar solicitudes al iniciar
+    document.addEventListener('DOMContentLoaded', async () => {
+        await cargarBusesDisponibles();
+        await cargarSolicitudes();
+
+        // Cambiar visibilidad del select de bus según acción
+        document.querySelectorAll('input[name="accion"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+                const divBus = document.getElementById('divBusDestino');
+                divBus.style.display = radio.value === 'Aprobado' ? 'block' : 'none';
+            });
+        });
+    });
+
+    // Cargar buses disponibles
+    async function cargarBusesDisponibles() {
+        try {
+            const response = await fetch('/api/traslados/buses-disponibles');
+            busesDisponibles = await response.json();
+
+            const select = document.getElementById('selectBusDestino');
+            select.innerHTML = '<option value="">-- Seleccione un bus --</option>';
+
+            busesDisponibles.forEach(bus => {
+                const option = document.createElement('option');
+                option.value = bus.idBus;
+                option.textContent = `${bus.placa} - ${bus.modelo} (${bus.asientosDisponibles} asientos)`;
+                select.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error al cargar buses:', error);
+        }
+    }
+
+    // Cargar solicitudes según filtros
+    async function cargarSolicitudes() {
+        const estado = document.getElementById('filtroEstado').value;
+
+        try {
+            let url = '/api/traslados/pendientes';
+
+            if (estado !== 'Pendiente') {
+                // Si no es pendiente, cargar todas y filtrar
+                url = '/api/traslados/alumno/1'; // TODO: Cargar todas las solicitudes
+            }
+
+            const response = await fetch(url);
+            solicitudesOriginales = await response.json();
+
+            // Filtrar según estado seleccionado
+            if (estado === 'Todos') {
+                solicitudesFiltradas = [...solicitudesOriginales];
+            } else {
+                solicitudesFiltradas = solicitudesOriginales.filter(s => s.estado === estado);
+            }
+
+            // Ordenar
+            ordenarSolicitudes();
+
+            // Mostrar
+            mostrarSolicitudes();
+            actualizarEstadisticas();
+
+        } catch (error) {
+            console.error('Error al cargar solicitudes:', error);
+            mostrarError('Error al cargar solicitudes');
+        }
+    }
+
+    // Ordenar solicitudes
+    function ordenarSolicitudes() {
+        const orden = document.getElementById('filtroOrden').value;
+
+        solicitudesFiltradas.sort((a, b) => {
+            switch(orden) {
+                case 'fecha_asc':
+                    return new Date(a.fechaTraslado) - new Date(b.fechaTraslado);
+                case 'fecha_desc':
+                    return new Date(b.fechaTraslado) - new Date(a.fechaTraslado);
+                case 'registro_asc':
+                    return new Date(a.fechaRegistro) - new Date(b.fechaRegistro);
+                case 'registro_desc':
+                default:
+                    return new Date(b.fechaRegistro) - new Date(a.fechaRegistro);
+            }
+        });
+    }
+
+    // Mostrar solicitudes en la tabla
+    function mostrarSolicitudes() {
+        const contenedor = document.getElementById('contenedorSolicitudes');
+        const mensajeSin = document.getElementById('mensajeSinSolicitudes');
+
+        if (solicitudesFiltradas.length === 0) {
+            contenedor.innerHTML = '';
+            mensajeSin.style.display = 'block';
+            return;
+        }
+
+        mensajeSin.style.display = 'none';
+
+        let html = '<div class="table-responsive"><table class="table table-hover">';
+        html += '<thead class="table-light">';
+        html += '<tr>';
+        html += '<th>Alumno</th>';
+        html += '<th>Fecha Traslado</th>';
+        html += '<th>Turno</th>';
+        html += '<th>Bus Origen</th>';
+        html += '<th>Bus Destino</th>';
+        html += '<th>Estado</th>';
+        html += '<th>Solicitud</th>';
+        html += '<th>Acciones</th>';
+        html += '</tr>';
+        html += '</thead>';
+        html += '<tbody>';
+
+        solicitudesFiltradas.forEach(s => {
+            const fechaTras = new Date(s.fechaTraslado);
+            const fechaReg = new Date(s.fechaRegistro);
+            const estadoBadge = obtenerBadgeEstado(s.estado);
+            const iconoTurno = obtenerIconoTurno(s.turno);
+
+            // Calcular días restantes
+            const hoy = new Date();
+            const diffDias = Math.ceil((fechaTras - hoy) / (1000 * 60 * 60 * 24));
+            const urgente = diffDias <= 2 && s.estado === 'Pendiente';
+
+            html += `<tr ${urgente ? 'class="table-warning"' : ''}>`;
+            html += `<td><strong>${s.nombreAlumno || 'Desconocido'}</strong></td>`;
+            html += `<td>${fechaTras.toLocaleDateString('es-ES', {weekday: 'short', day: '2-digit', month: 'short'})}`;
+            if (urgente) html += `<br><small class="text-danger"><strong>¡${diffDias} día(s)!</strong></small>`;
+            html += `</td>`;
+            html += `<td>${iconoTurno} ${s.turno}</td>`;
+            html += `<td><span class="badge bg-secondary">${s.placaBusOrigen || 'N/A'}</span></td>`;
+            html += `<td><span class="badge bg-info">${s.placaBusDestino || 'Por asignar'}</span></td>`;
+            html += `<td>${estadoBadge}</td>`;
+            html += `<td><small>${fechaReg.toLocaleDateString('es-ES')}</small></td>`;
+            html += `<td>`;
+
+            if (s.estado === 'Pendiente') {
+                html += `<button class="btn btn-sm btn-success me-1" onclick="abrirModalResponder(${s.idSolicitud}, 'Aprobado')" title="Aprobar">
+                            <i class="bi bi-check-lg"></i>
+                         </button>`;
+                html += `<button class="btn btn-sm btn-danger" onclick="abrirModalResponder(${s.idSolicitud}, 'Rechazado')" title="Rechazar">
+                            <i class="bi bi-x-lg"></i>
+                         </button>`;
+            } else {
+                html += `<span class="text-muted"><small>Procesado</small></span>`;
+            }
+
+            html += `</td>`;
+            html += '</tr>';
+        });
+
+        html += '</tbody></table></div>';
+        contenedor.innerHTML = html;
+    }
+
+    // Abrir modal para responder
+    async function abrirModalResponder(idSolicitud, accionSugerida = 'Aprobado') {
+        const solicitud = solicitudesOriginales.find(s => s.idSolicitud === idSolicitud);
+        if (!solicitud) return;
+
+        // Llenar datos
+        document.getElementById('solicitudId').value = idSolicitud;
+        document.getElementById('detalleAlumno').textContent = solicitud.nombreAlumno || 'Desconocido';
+        document.getElementById('detalleFecha').textContent = new Date(solicitud.fechaTraslado).toLocaleDateString('es-ES', {
+            weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+        });
+        document.getElementById('detalleTurno').textContent = solicitud.turno;
+        document.getElementById('detalleBusOrigen').textContent = solicitud.placaBusOrigen || 'N/A';
+        document.getElementById('detalleBusDestino').textContent = solicitud.placaBusDestino || 'Por asignar';
+        document.getElementById('detalleFechaSolicitud').textContent = new Date(solicitud.fechaRegistro).toLocaleDateString('es-ES');
+        document.getElementById('detalleMotivo').textContent = solicitud.motivo || 'Sin motivo especificado';
+
+        // Seleccionar acción
+        if (accionSugerida === 'Aprobado') {
+            document.getElementById('accionAprobar').checked = true;
+            document.getElementById('divBusDestino').style.display = 'block';
+        } else {
+            document.getElementById('accionRechazar').checked = true;
+            document.getElementById('divBusDestino').style.display = 'none';
+        }
+
+        // Pre-seleccionar bus si ya tiene
+        if (solicitud.idBusDestino) {
+            document.getElementById('selectBusDestino').value = solicitud.idBusDestino;
+        }
+
+        // Limpiar comentario
+        document.getElementById('comentarioAdmin').value = '';
+
+        // Cambiar color del header
+        const header = document.getElementById('modalHeader');
+        header.className = accionSugerida === 'Aprobado' ? 'modal-header bg-success text-white' : 'modal-header bg-danger text-white';
+
+        // Abrir modal
+        new bootstrap.Modal(document.getElementById('modalResponder')).show();
+    }
+
+    // Enviar respuesta
+    async function enviarRespuesta() {
+        const idSolicitud = document.getElementById('solicitudId').value;
+        const accion = document.querySelector('input[name="accion"]:checked').value;
+        const comentario = document.getElementById('comentarioAdmin').value;
+        const idBusDestino = document.getElementById('selectBusDestino').value;
+
+        // Validar
+        if (accion === 'Aprobado' && !idBusDestino) {
+            alert('Debe seleccionar un bus destino para aprobar la solicitud');
+            return;
+        }
+
+        const dto = {
+            idSolicitud: parseInt(idSolicitud),
+            estado: accion,
+            idBusDestino: idBusDestino ? parseInt(idBusDestino) : null,
+            comentarioAdmin: comentario || null
+        };
+
+        try {
+            const response = await fetch(`/api/traslados/${idSolicitud}/responder`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dto)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Cerrar modal
+                bootstrap.Modal.getInstance(document.getElementById('modalResponder')).hide();
+
+                // Mostrar éxito
+                document.getElementById('mensajeExito').textContent = 
+                    accion === 'Aprobado' ? 'Solicitud aprobada correctamente' : 'Solicitud rechazada';
+                new bootstrap.Modal(document.getElementById('modalExito')).show();
+
+                // Recargar lista
+                setTimeout(() => {
+                    cargarSolicitudes();
+                }, 1500);
+            } else {
+                alert('Error: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Error al enviar respuesta:', error);
+            alert('Error al procesar la solicitud');
+        }
+    }
+
+    // Filtrar tabla por búsqueda
+    function filtrarTabla() {
+        const busqueda = document.getElementById('busqueda').value.toLowerCase();
+
+        if (!busqueda) {
+            solicitudesFiltradas = [...solicitudesOriginales];
+        } else {
+            solicitudesFiltradas = solicitudesOriginales.filter(s => 
+                (s.nombreAlumno || '').toLowerCase().includes(busqueda) ||
+                (s.motivo || '').toLowerCase().includes(busqueda)
+            );
+        }
+
+        ordenarSolicitudes();
+        mostrarSolicitudes();
+        actualizarEstadisticas();
+    }
+
+    // Actualizar estadísticas
+    function actualizarEstadisticas() {
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+
+        const pendientes = solicitudesOriginales.filter(s => s.estado === 'Pendiente').length;
+        const aprobadasHoy = solicitudesOriginales.filter(s => {
+            if (s.estado !== 'Aprobado') return false;
+            const fechaResp = new Date(s.fechaRespuesta);
+            fechaResp.setHours(0, 0, 0, 0);
+            return fechaResp.getTime() === hoy.getTime();
+        }).length;
+        const rechazadasHoy = solicitudesOriginales.filter(s => {
+            if (s.estado !== 'Rechazado') return false;
+            const fechaResp = new Date(s.fechaRespuesta);
+            fechaResp.setHours(0, 0, 0, 0);
+            return fechaResp.getTime() === hoy.getTime();
+        }).length;
+
+        document.getElementById('totalPendientes').textContent = pendientes;
+        document.getElementById('totalAprobadas').textContent = aprobadasHoy;
+        document.getElementById('totalRechazadas').textContent = rechazadasHoy;
+        document.getElementById('totalGeneral').textContent = solicitudesFiltradas.length;
+    }
+
+    // Obtener badge según estado
+    function obtenerBadgeEstado(estado) {
+        const badges = {
+            'Pendiente': '<span class="badge bg-warning text-dark"><i class="bi bi-clock"></i> Pendiente</span>',
+            'Aprobado': '<span class="badge bg-success"><i class="bi bi-check-circle"></i> Aprobado</span>',
+            'Rechazado': '<span class="badge bg-danger"><i class="bi bi-x-circle"></i> Rechazado</span>'
+        };
+        return badges[estado] || `<span class="badge bg-secondary">${estado}</span>`;
+    }
+
+    // Obtener icono según turno
+    function obtenerIconoTurno(turno) {
+        const iconos = {
+            'Mañana': '🌅',
+            'Tarde': '🌆',
+            'Ambos': '🔄'
+        };
+        return iconos[turno] || '⏰';
+    }
+
+    function mostrarError(mensaje) {
+        alert(mensaje);
+    }
+</script>
+}

@@ -1,0 +1,806 @@
+@page
+@model TransportesGenesis.Pages.Planner.IndexModel
+@{
+    ViewData["Title"] = "Planner del Proyecto";
+}
+
+<style>
+    .planner-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+
+    .sprint-card {
+        border-left: 4px solid;
+        margin-bottom: 1.5rem;
+        transition: transform 0.2s;
+    }
+
+    .sprint-card:hover {
+        transform: translateX(5px);
+    }
+
+    .sprint-completado {
+        border-left-color: #28a745;
+        background-color: #d4edda;
+    }
+
+    .sprint-en-progreso {
+        border-left-color: #ffc107;
+        background-color: #fff3cd;
+    }
+
+    .sprint-pendiente {
+        border-left-color: #6c757d;
+        background-color: #f8f9fa;
+    }
+
+    .task-item {
+        border-left: 3px solid #007bff;
+        padding: 0.5rem 1rem;
+        margin: 0.5rem 0;
+        background-color: white;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .task-completada {
+        border-left-color: #28a745;
+        opacity: 0.8;
+    }
+
+    .task-en-progreso {
+        border-left-color: #ffc107;
+    }
+
+    .task-pendiente {
+        border-left-color: #dc3545;
+    }
+
+    .developer-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin-right: 0.5rem;
+    }
+
+    .badge-jonathan {
+        background-color: #e3f2fd;
+        color: #1976d2;
+        border: 1px solid #1976d2;
+    }
+
+    .badge-david {
+        background-color: #f3e5f5;
+        color: #7b1fa2;
+        border: 1px solid #7b1fa2;
+    }
+
+    .progress-section {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+
+    .team-member {
+        text-align: center;
+        padding: 1rem;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .team-member i {
+        font-size: 3rem;
+        color: #667eea;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <!-- Header -->
+    <div class="planner-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1><i class="bi bi-kanban"></i> Planner - Sistema de Transporte Escolar</h1>
+                <p class="mb-0">Gestión de Buses, Rutas y Geolocalización en Tiempo Real</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <h3><i class="bi bi-check-circle-fill text-success"></i> Fase Final</h3>
+                <p class="mb-0">Mayo 2026 - 97% Completado</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progreso General -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="progress-section">
+                <h4 class="mb-3"><i class="bi bi-graph-up"></i> Progreso General del Proyecto</h4>
+                <div class="row">
+                    <div class="col-md-3 text-center">
+                        <h2 class="text-success">7</h2>
+                        <p class="text-muted">Fases Completadas</p>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <h2 class="text-warning">1</h2>
+                        <p class="text-muted">Módulos En Progreso</p>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <h2 class="text-secondary">0</h2>
+                        <p class="text-muted">Fases Pendientes</p>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <h2 class="text-primary">97%</h2>
+                        <p class="text-muted">Avance Total</p>
+                    </div>
+                </div>
+                <div class="progress" style="height: 25px;">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: 97%" aria-valuenow="97" aria-valuemin="0" aria-valuemax="100">
+                        97% Completado
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle"></i> 
+                        <strong>ESTADO ACTUAL:</strong> Dashboard Monitor completado al 90%. Solo falta vista de mapa interactivo (3% del proyecto total). Login y Pagos 100% completados. Todas las fases 1-7 finalizadas. ✅
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Equipo -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="team-member">
+                <i class="bi bi-person-circle"></i>
+                <h5 class="mt-2">Jonathan Villeda</h5>
+                <span class="badge-jonathan developer-badge">Backend & Pagos</span>
+                <p class="text-muted mb-0">Autenticación, Login, Módulo de Pagos</p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="team-member">
+                <i class="bi bi-person-circle"></i>
+                <h5 class="mt-2">David</h5>
+                <span class="badge-david developer-badge">Geolocalización</span>
+                <p class="text-muted mb-0">Sistema GPS, Mapas, Tracking en Tiempo Real</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sprints -->
+    <div class="row">
+        <div class="col-12">
+            <h3 class="mb-3"><i class="bi bi-list-task"></i> Sprints del Proyecto</h3>
+        </div>
+    </div>
+
+    <!-- Sprint 1: COMPLETADO -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card sprint-card sprint-completado">
+                <div class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h4>
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                Sprint 1: Autenticación y Login
+                            </h4>
+                            <p class="mb-0 text-muted">Semana pasada (13-19 Abril) - <strong>COMPLETADO</strong></p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <span class="developer-badge badge-jonathan">Jonathan Villeda</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-clipboard-check"></i> Tareas Completadas:</h6>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Scaffold de Identity</strong>
+                                <br><small class="text-muted">Sistema de autenticación ASP.NET Core Identity</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Páginas de Login/Register</strong>
+                                <br><small class="text-muted">Interfaces de usuario para autenticación</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Configuración de Base de Datos</strong>
+                                <br><small class="text-muted">Entity Framework + SQL Server</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-journal-code"></i> Entregables:</h6>
+                            <ul>
+                                <li>✅ Sistema de login funcional</li>
+                                <li>✅ Registro de usuarios</li>
+                                <li>✅ Confirmación de email</li>
+                                <li>✅ Recuperación de contraseña</li>
+                                <li>✅ Migraciones de BD completadas</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sprint 2: EN PROGRESO -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card sprint-card sprint-completado">
+                <div class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h4>
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                Sprint 2: Módulo de Pagos & Geolocalización (Base)
+                            </h4>
+                            <p class="mb-0 text-muted">Esta semana (20-26 Abril) - <strong>COMPLETADO (100%)</strong></p>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <span class="developer-badge badge-jonathan">Jonathan Villeda</span>
+                            <span class="developer-badge badge-david">David</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Tareas de Jonathan -->
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-person-badge"></i> Jonathan Villeda - Módulo de Pagos:</h6>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Entidades de Pagos</strong>
+                                <br><small class="text-muted">Pago, TipoRecorridoPago, Banco, TipoCuenta</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Migraciones de Pagos</strong>
+                                <br><small class="text-muted">Tablas en BD creadas</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Repositorios y Services de Pagos</strong>
+                                <br><small class="text-muted">Completado ✓</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Páginas CRUD de Pagos</strong>
+                                <br><small class="text-muted">Completado ✓</small>
+                            </div>
+                        </div>
+
+                        <!-- Tareas de David -->
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-person-badge"></i> David - Geolocalización & Calendario:</h6>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Base de Datos Geolocalización</strong>
+                                <br><small class="text-muted">11 entidades nuevas + migración</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Backend: DTOs y Repositorios</strong>
+                                <br><small class="text-muted">Bus, Ruta, UbicacionBus</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Integración de Leaflet.js</strong>
+                                <br><small class="text-muted">Mapa con OpenStreetMap</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Mapa en Tiempo Real</strong>
+                                <br><small class="text-muted">Visualización de buses activos</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Integrar Geolocalización con Login</strong>
+                                <br><small class="text-muted">✅ Completado: Autorización por roles</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Calendario de Asistencias</strong>
+                                <br><small class="text-muted">✅ Completado: Integrado con Login</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Progreso del Sprint -->
+                    <div class="mt-3">
+                        <h6>Progreso del Sprint:</h6>
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar bg-success" style="width: 100%">100% Completado</div>
+                        </div>
+                        <small class="text-muted mt-2 d-block">
+                            <i class="bi bi-check-circle-fill text-success"></i> ✅ Sprint completado exitosamente
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sprint 3: EN PROGRESO (David) -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card sprint-card sprint-completado">
+                <div class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h4>
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                Sprint 3: SignalR, Rutas & Notificaciones
+                            </h4>
+                            <p class="mb-0 text-muted">Semana 3 (27 Abril - 3 Mayo) - <strong>COMPLETADO (100%)</strong></p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <span class="developer-badge badge-david">David</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-check-circle"></i> Completado:</h6>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Hub de SignalR (NotificacionesHub)</strong>
+                                <br><small class="text-muted">Conexión, grupos, broadcasting implementado</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Backend de Rutas Completo</strong>
+                                <br><small class="text-muted">Entidades, Repositorios, Services, DTOs</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>API REST de Rutas</strong>
+                                <br><small class="text-muted">RutasController con endpoints CRUD</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Página "Mi Ruta" para Pilotos</strong>
+                                <br><small class="text-muted">Visualización de ruta diaria con mapa y paradas</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-check-circle"></i> Completado:</h6>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Integrar SignalR con Login</strong>
+                                <br><small class="text-muted">✅ Autenticación de usuarios en Hub</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Algoritmo TSP para Rutas</strong>
+                                <br><small class="text-muted">✅ Optimización automática de recorridos</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Página Admin: Calcular Rutas</strong>
+                                <br><small class="text-muted">✅ Conectado con lógica de optimización</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <h6>Progreso del Sprint:</h6>
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar bg-success" style="width: 100%">100% Completado</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sprint 4: EN PROGRESO (David) -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card sprint-card sprint-completado">
+                <div class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h4>
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                Sprint 4: Calendario de Asistencia
+                            </h4>
+                            <p class="mb-0 text-muted">Semana 4 (4-10 Mayo) - <strong>COMPLETADO (100%)</strong></p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <span class="developer-badge badge-david">David</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-check-circle"></i> Completado:</h6>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Backend de Asistencia</strong>
+                                <br><small class="text-muted">AsistenciaAlumnoRepository, Service, DTOs</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>API de Asistencia</strong>
+                                <br><small class="text-muted">AsistenciaController con CRUD completo</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Página "Confirmar Asistencia"</strong>
+                                <br><small class="text-muted">Calendario mensual interactivo para padres</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Validación de Horarios</strong>
+                                <br><small class="text-muted">Mañana: 2:00 PM-4:00 AM, Tarde: 5:00 PM-11:00 AM</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-check-circle"></i> Completado:</h6>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Integrar Calendario con Login</strong>
+                                <br><small class="text-muted">✅ Filtrado por usuario autenticado, autorización</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Procesamiento Automático</strong>
+                                <br><small class="text-muted">✅ Jobs en segundo plano (5 AM / 11 AM)</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Vista del Piloto</strong>
+                                <br><small class="text-muted">✅ Lista de asistencias confirmadas del día</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <h6>Progreso del Sprint:</h6>
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar bg-success" style="width: 100%">100% Completado</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sprint 5: COMPLETADO -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card sprint-card sprint-completado">
+                <div class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h4>
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                Sprint 5: Sistema de Traslados y Pagos
+                            </h4>
+                            <p class="mb-0 text-muted">Semana 5 (11-17 Mayo) - <strong>COMPLETADO (100%)</strong></p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <span class="developer-badge badge-david">David</span>
+                            <span class="developer-badge badge-jonathan">Jonathan</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-check-circle"></i> Completado:</h6>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Backend de Traslados</strong>
+                                <br><small class="text-muted">SolicitudTrasladoRepository, Service, DTOs</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>API de Traslados</strong>
+                                <br><small class="text-muted">TrasladosController con endpoints completos</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Página "Mis Traslados" (Padres)</strong>
+                                <br><small class="text-muted">Ver, crear y gestionar solicitudes de traslado</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Página "Gestionar Traslados" (Admin)</strong>
+                                <br><small class="text-muted">Aprobar/rechazar solicitudes con filtros</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Gestión de Usuarios Completa</strong>
+                                <br><small class="text-muted">✅ CRUD, roles, validaciones, autorización</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-check-circle"></i> Completado:</h6>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Dashboard de Ruta del Bus</strong>
+                                <br><small class="text-muted">✅ Horarios dinámicos, mapas adaptativos</small>
+                            </div>
+
+                            <h6 class="mt-3"><i class="bi bi-check-circle-fill text-success"></i> Completado (Jonathan):</h6>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Migraciones de Tabla Pagos</strong>
+                                <br><small class="text-muted">✅ COMPLETADO: Todas las migraciones aplicadas</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Validaciones de Pagos</strong>
+                                <br><small class="text-muted">✅ COMPLETADO: Validación de fechas implementada</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Integración Login con Pagos</strong>
+                                <br><small class="text-muted">✅ COMPLETADO: Sistema unificado y funcional</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <h6>Progreso del Sprint:</h6>
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar bg-success" style="width: 100%">100% Completado</div>
+                        </div>
+                        <small class="text-muted mt-2 d-block">
+                            <i class="bi bi-check-circle-fill text-success"></i> ✅ Sistema de traslados y módulo de pagos completados exitosamente
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sprint 6: COMPLETADO -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card sprint-card sprint-completado">
+                <div class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h4>
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                Sprint 6: Sistema de Alertas y Notificaciones
+                            </h4>
+                            <p class="mb-0 text-muted">Semana 6 (18-24 Mayo) - <strong>COMPLETADO (100%)</strong></p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <span class="developer-badge badge-david">David</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Sistema de Alertas Completado -->
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-check-circle-fill text-success"></i> Sistema de Alertas Completado:</h6>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Módulo 1: Base de Datos</strong>
+                                <br><small class="text-muted">✅ Entidad AlertaProximidad, DTOs, Migración EF Core</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Módulo 2: Servicios y API</strong>
+                                <br><small class="text-muted">✅ AlertaService, Repository, AutoMapper, REST API</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Módulo 3: SignalR Real-time</strong>
+                                <br><small class="text-muted">✅ Integración con NotificacionesHub, JavaScript client</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Módulo 4: Dashboard Admin</strong>
+                                <br><small class="text-muted">✅ Historial completo con filtros y gestión</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Módulo 5: Botones Dashboard</strong>
+                                <br><small class="text-muted">✅ Accesos rápidos a alertas desde panel admin</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Módulo 6: Datos de Ejemplo</strong>
+                                <br><small class="text-muted">✅ Generación automática para testing</small>
+                            </div>
+                        </div>
+
+                        <!-- Funcionalidades Específicas Completadas -->
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-check-circle-fill text-success"></i> Funcionalidades Específicas:</h6>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Alertas de Proximidad</strong>
+                                <br><small class="text-muted">✅ Notificar a padres cuando bus está cerca</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Alertas de Retraso</strong>
+                                <br><small class="text-muted">✅ Notificaciones automáticas de retrasos</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Panel de Notificaciones</strong>
+                                <br><small class="text-muted">✅ Historial completo con estado y filtros</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Notificaciones en Tiempo Real</strong>
+                                <br><small class="text-muted">✅ SignalR integrado para alertas instantáneas</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Gestión de Alertas</strong>
+                                <br><small class="text-muted">✅ Marcar como resueltas, estadísticas, limpieza</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <h6>Progreso del Sprint:</h6>
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar bg-success" style="width: 100%">100% Completado - Sistema de Alertas Completo</div>
+                        </div>
+                        <small class="text-muted mt-2 d-block">
+                            <i class="bi bi-check-circle-fill text-success"></i> ✅ Sistema de alertas de proximidad y retrasos completamente funcional
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sprint 7: EN PROGRESO -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card sprint-card sprint-en-progreso">
+                <div class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h4>
+                                <i class="bi bi-hourglass-split text-warning"></i> 
+                                Sprint 7: Dashboards de Piloto/Monitor & Testing Final
+                            </h4>
+                            <p class="mb-0 text-muted">Semana 7 (25-31 Mayo) - <strong>EN PROGRESO (80%)</strong></p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <span class="developer-badge badge-david">David</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Dashboards de Piloto y Monitor -->
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-check-circle text-success"></i> Dashboard Monitor (90% Completado):</h6>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Vista Mi Ruta (Monitor)</strong>
+                                <br><small class="text-muted">✅ Consulta de ruta activa con mapa y paradas</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Listado de Alumnos</strong>
+                                <br><small class="text-muted">✅ Vista de alumnos asignados con registro de asistencia</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Registro de Asistencia</strong>
+                                <br><small class="text-muted">✅ Toggle de presente/ausente con persistencia en BD</small>
+                            </div>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Seed Data y Migraciones</strong>
+                                <br><small class="text-muted">✅ Datos de prueba para demo (Bus BUS-001, 18 alumnos)</small>
+                            </div>
+                            <div class="task-item task-en-progreso">
+                                <i class="bi bi-arrow-repeat text-warning"></i> 
+                                <strong>Mapa Interactivo de Paradas</strong>
+                                <br><small class="text-muted">⚠️ PENDIENTE: Vista de mapa con paradas marcables (10% restante)</small>
+                            </div>
+
+                            <h6 class="mt-3"><i class="bi bi-hourglass-split text-warning"></i> Dashboard Piloto (70% Completado):</h6>
+                            <div class="task-item task-completada">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Dashboard Piloto Base</strong>
+                                <br><small class="text-muted">✅ Estructura básica implementada</small>
+                            </div>
+                            <div class="task-item task-en-progreso">
+                                <i class="bi bi-arrow-repeat text-warning"></i> 
+                                <strong>Panel de Control Piloto</strong>
+                                <br><small class="text-muted">⚠️ EN PROGRESO: Integración completa pendiente (30% restante)</small>
+                            </div>
+                        </div>
+
+                        <!-- Testing y Calidad -->
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-bug"></i> Testing y Optimización:</h6>
+                            <div class="task-item task-pendiente">
+                                <strong>Testing de Integración Monitor</strong>
+                                <br><small class="text-muted">⚠️ FALTABA: Probar flujos completos de monitoreo</small>
+                            </div>
+                            <div class="task-item task-pendiente">
+                                <strong>Testing del Sistema de Alertas</strong>
+                                <br><small class="text-muted">Validar funcionamiento completo de notificaciones</small>
+                            </div>
+                            <div class="task-item task-pendiente">
+                                <strong>Testing de Integración</strong>
+                                <br><small class="text-muted">Probar flujos completos end-to-end por rol</small>
+                            </div>
+                            <div class="task-item task-pendiente">
+                                <strong>Corrección de Bugs</strong>
+                                <br><small class="text-muted">Resolver issues encontrados en testing</small>
+                            </div>
+                            <div class="task-item task-pendiente">
+                                <strong>Optimización de Performance</strong>
+                                <br><small class="text-muted">Mejorar tiempos de carga y respuesta</small>
+                            </div>
+                            <div class="task-item task-pendiente">
+                                <strong>Testing de Seguridad</strong>
+                                <br><small class="text-muted">Validar autorización y protección de datos</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Documentación y Entrega -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h6><i class="bi bi-file-earmark-text"></i> Documentación y Entrega Final:</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="task-item task-pendiente">
+                                        <strong>Documentación Final</strong>
+                                        <br><small class="text-muted">Manual de usuario y documentación técnica</small>
+                                    </div>
+                                    <div class="task-item task-pendiente">
+                                        <strong>Guía de Instalación</strong>
+                                        <br><small class="text-muted">Setup completo para producción</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="task-item task-pendiente">
+                                        <strong>Video Demostrativo</strong>
+                                        <br><small class="text-muted">Grabación del sistema funcionando</small>
+                                    </div>
+                                    <div class="task-item task-pendiente">
+                                        <strong>Presentación del Proyecto</strong>
+                                        <br><small class="text-muted">Demo final ante instructores</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <h6>Progreso del Sprint:</h6>
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar bg-success" style="width: 80%">80% Completado</div>
+                            <div class="progress-bar bg-warning" style="width: 20%">20% Pendiente</div>
+                        </div>
+                        <small class="text-muted mt-2 d-block">
+                            <i class="bi bi-info-circle text-info"></i> ℹ️ <strong>ESTADO:</strong> Dashboard Monitor al 90% (solo falta mapa interactivo). Dashboard Piloto al 70%. Testing y documentación iniciados.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+

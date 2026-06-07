@@ -1,0 +1,1219 @@
+@page
+@model TransportesGenesis.Pages.Monitor.MiRutaModel
+@{
+    ViewData["Title"] = "Mi Ruta - Monitor";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<!-- Leaflet Routing Machine CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+
+<!-- Estilos personalizados -->
+<style>
+    #mapa {
+        height: 400px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .parada-item {
+        transition: all 0.3s ease;
+        border-left: 4px solid transparent;
+    }
+
+    .parada-item:hover {
+        background-color: #f8f9fa !important;
+        border-left-color: #007bff;
+    }
+
+    .parada-item[data-completada="true"] {
+        border-left-color: #28a745;
+        background-color: #f8fff9 !important;
+    }
+
+    .ruta-header {
+        background: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%);
+        color: white;
+        border-radius: 10px 10px 0 0;
+        padding: 15px;
+        margin-bottom: 0;
+        box-shadow: 0 4px 12px rgba(255,165,0,0.3);
+    }
+
+    .badge-gps {
+        animation: pulse 2s infinite;
+    }
+
+    @@keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+
+    @@keyframes simulacion-pulse {
+        0%, 100% { 
+            transform: scale(1); 
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4); 
+        }
+        50% { 
+            transform: scale(1.1); 
+            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.6); 
+        }
+    }
+
+    .bus-simulacion {
+        animation: simulacion-pulse 1.5s ease-in-out infinite;
+    }
+
+    .parada-alerta {
+        animation: pulse 0.5s ease-in-out 3;
+    }
+
+    /* Responsive styles para panel de simulación */
+    @@media (max-width: 768px) {
+        #btnSimularRutaPiloto {
+            font-size: 16px;
+            padding: 12px;
+        }
+
+        .card-header {
+            font-size: 14px;
+        }
+
+        .badge {
+            font-size: 10px;
+        }
+    }
+
+    /* Audio indicator */
+    .audio-indicator {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .audio-indicator.show {
+        opacity: 1;
+    }
+</style>
+
+<div class="container-fluid">
+    @if (!string.IsNullOrEmpty(Model.MensajeError))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle"></i>
+            <strong>Error:</strong> @Model.MensajeError
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.MensajeExito))
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle"></i>
+            <strong>Éxito:</strong> @Model.MensajeExito
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Header Principal -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="ruta-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="mb-1">
+                                <i class="bi bi-geo-alt-fill"></i> Mi Ruta del Día
+                            </h4>
+                            <p class="mb-0 text-white-50">
+                                @DateTime.Now.ToString("dddd, d 'de' MMMM 'de' yyyy", new System.Globalization.CultureInfo("es-ES"))
+                            </p>
+                        </div>
+                        <div class="text-end">
+                            <span id="estadoGPS" class="badge bg-secondary badge-gps">
+                                <i class="bi bi-geo-alt"></i> Detectando GPS...
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información del Piloto y Estado GPS -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <i class="bi bi-person-badge"></i> Información del Monitor
+                </div>
+                <div class="card-body">
+                    <h6 class="card-title">@Model.NombreMonitor</h6>
+                    <p class="card-text">
+                        <strong>ID:</strong> @Model.IdMonitor<br>
+                        <strong>Estado:</strong> <span class="badge bg-success">Activo</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <i class="bi bi-geo-alt-fill"></i> Ubicación GPS
+                </div>
+                <div class="card-body">
+                    <div id="ubicacionInfo">
+                        <p class="text-muted mb-0">
+                            <i class="bi bi-hourglass-split"></i> Obteniendo ubicación...
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mapa -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="bi bi-map"></i> Mapa de Ruta
+                    </div>
+                    <div>
+                        <button onclick="centrarEnUsuario()" class="btn btn-sm btn-light">
+                            <i class="bi bi-crosshair"></i> Mi Ubicación
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div id="mapa"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel de Control de Simulación -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi bi-play-circle-fill"></i> Control de Simulación de Ruta
+                        </div>
+                        <div class="d-none d-md-block">
+                            <small class="badge bg-light text-dark">
+                                <i class="bi bi-volume-up-fill"></i> Audio habilitado
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <p class="mb-2">
+                                <strong>Simular recorrido de ruta con alertas sonoras</strong>
+                            </p>
+                            <div id="estadoSimulacionPiloto" class="text-muted">
+                                Reproduce la animación del bus con sonidos de alerta al llegar a cada parada
+                            </div>
+                            <div class="mt-2">
+                                <span class="badge bg-info me-2">
+                                    <i class="bi bi-volume-up"></i> Sonidos de alerta
+                                </span>
+                                <span class="badge bg-success me-2">
+                                    <i class="bi bi-phone"></i> Responsive
+                                </span>
+                                <span class="badge bg-warning">
+                                    <i class="bi bi-eye-slash"></i> Manos libres
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                            <button id="btnSimularRutaPiloto" onclick="simularRutaPiloto()" 
+                                    class="btn btn-primary btn-lg w-100">
+                                <i class="bi bi-play-circle-fill me-2"></i>Simular Ruta
+                            </button>
+                            <div class="mt-2 text-center">
+                                <small class="text-muted" id="tiempoSimulacion">
+                                    Duración estimada: 5-8 minutos
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.RutaActiva != null && Model.RutaActiva.Paradas.Any())
+    {
+        <!-- Lista de Paradas -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <i class="bi bi-list-check"></i> Paradas del Día 
+                        <span class="badge bg-dark ms-2">@Model.RutaActiva.Paradas.Count paradas</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group">
+                            @foreach (var parada in Model.RutaActiva.Paradas.OrderBy(p => p.Orden))
+                            {
+                                <div class="list-group-item parada-item @(parada.Completada ? "bg-light" : "")" 
+                                     data-id="@parada.IdParada"
+                                     data-completada="@parada.Completada.ToString().ToLower()">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <span class="badge bg-primary me-2">@parada.Orden</span>
+                                                <strong>@parada.NombreAlumno</strong>
+                                                @if (parada.Completada)
+                                                {
+                                                    <span class="badge bg-success ms-2">
+                                                        <i class="bi bi-check-circle-fill"></i> Completada
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning ms-2">
+                                                        <i class="bi bi-clock"></i> Pendiente
+                                                    </span>
+                                                }
+                                            </div>
+                                            <small class="text-muted">
+                                                <i class="bi bi-geo-alt"></i> @parada.Direccion
+                                                @if (parada.HoraEstimada.HasValue)
+                                                {
+                                                    <br><i class="bi bi-clock"></i> @parada.HoraEstimada.Value.ToString(@"hh\:mm")
+                                                }
+                                            </small>
+                                        </div>
+                                        <div class="text-end">
+                                            @if (!parada.Completada)
+                                            {
+                                                <button onclick="marcarCompletada(@parada.IdParada, true)" 
+                                                        class="btn btn-sm btn-success">
+                                                    <i class="bi bi-check"></i> Completar
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button onclick="marcarCompletada(@parada.IdParada, false)" 
+                                                        class="btn btn-sm btn-outline-secondary">
+                                                    <i class="bi bi-arrow-counterclockwise"></i> Desmarcar
+                                                </button>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">
+                            <i class="bi bi-check-circle"></i>
+                        </h5>
+                        <h3 class="text-primary">@Model.RutaActiva.Paradas.Count(p => p.Completada)</h3>
+                        <p class="card-text">Completadas</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <h5 class="card-title text-warning">
+                            <i class="bi bi-clock"></i>
+                        </h5>
+                        <h3 class="text-warning">@Model.RutaActiva.Paradas.Count(p => !p.Completada)</h3>
+                        <p class="card-text">Pendientes</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <h5 class="card-title text-info">
+                            <i class="bi bi-list-ul"></i>
+                        </h5>
+                        <h3 class="text-info">@Model.RutaActiva.Paradas.Count</h3>
+                        <p class="card-text">Total</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Mensaje cuando NO hay ruta -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        @if (Model.EsFinDeSemana)
+                        {
+                            <i class="bi bi-calendar-x text-info" style="font-size: 4rem;"></i>
+                            <h4 class="mt-3 text-info">Es fin de semana</h4>
+                            <p class="text-muted mb-4">
+                                No hay rutas programadas para hoy. Puedes consultar la ruta del próximo lunes.
+                            </p>
+                            <button onclick="mostrarRutaLunes()" class="btn btn-primary">
+                                <i class="bi bi-calendar-week"></i> Ver Ruta del Lunes
+                            </button>
+                        }
+                        else
+                        {
+                            <i class="bi bi-geo-alt text-warning" style="font-size: 4rem;"></i>
+                            <h4 class="mt-3 text-warning">No hay ruta asignada</h4>
+                            <p class="text-muted mb-4">
+                                No tienes una ruta asignada para hoy. Contacta con el administrador.
+                            </p>
+                            <button onclick="buscarRutaAlternativa()" class="btn btn-outline-primary">
+                                <i class="bi bi-search"></i> Buscar Mi Ruta
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Funciones avanzadas (cuando NO hay ruta) -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-secondary text-white">
+                        <i class="bi bi-lightning-charge"></i> Funciones Avanzadas
+                    </div>
+                    <div class="card-body">
+                        @if (Model.EsFinDeSemana)
+                        {
+                            <button onclick="mostrarRutaLunes()" class="btn btn-primary me-2">
+                                <i class="bi bi-calendar-week"></i> Ver Ruta del Lunes
+                            </button>
+                        }
+                        <button onclick="buscarRutaAlternativa()" class="btn btn-outline-primary me-2">
+                            <i class="bi bi-search"></i> Buscar Mi Ruta
+                        </button>
+                        <button class="btn btn-outline-secondary" disabled>
+                            <i class="bi bi-diagram-3"></i> Verificar Tráfico
+                        </button>
+                        <button class="btn btn-outline-secondary ms-2" disabled>
+                            <i class="bi bi-arrow-repeat"></i> Recalcular Ruta
+                        </button>
+                        <p class="text-muted mt-2 mb-0">
+                            <small>
+                                <i class="bi bi-info-circle"></i> 
+                                Funcionalidad de tráfico en tiempo real estará disponible en FASE 7.
+                            </small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Indicador de Audio -->
+<div id="audioIndicator" class="audio-indicator">
+    <div class="alert alert-warning border-0 shadow">
+        <i class="bi bi-volume-up-fill me-2"></i>
+        <strong>Alerta de Parada</strong>
+        <div id="mensajeAudio" class="small mt-1">Próxima parada</div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Leaflet Routing Machine -->
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+
+    <script>
+        // Variables globales
+        let mapa;
+        let marcadores = [];
+        let marcadorUsuario = null;
+        let rutaData = @Html.Raw(Model.RutaActiva != null ? System.Text.Json.JsonSerializer.Serialize(Model.RutaActiva) : "null");
+
+        // Variables de simulación
+        let simulacionPilotoActiva = false;
+        let marcadorBusSimulacion = null;
+        let intervaloSimulacion = null;
+        let audioContext = null;
+        let rutaSimulacionPiloto = [];
+        let rutaPolyline = null; // Línea que muestra la ruta del bus
+        let indiceParadaActual = 0;
+
+        // Datos de simulación de prueba
+        const datosSimulacionPiloto = {
+            bus: "Bus #001",
+            piloto: "Juan Pérez",
+            ruta: "Centro - Yulimay PC",
+            paradas: [
+                { nombre: "Parada Central - 6ta Avenida", coordenadas: [14.6349, -90.5069], orden: 1 },
+                { nombre: "Plaza Central", coordenadas: [14.6335, -90.5055], orden: 2 },
+                { nombre: "Mercado Municipal", coordenadas: [14.6320, -90.5045], orden: 3 },
+                { nombre: "Terminal de Buses", coordenadas: [14.6305, -90.5030], orden: 4 },
+                { nombre: "Centro Comercial", coordenadas: [14.6290, -90.5015], orden: 5 },
+                { nombre: "Colegio Yulimay PC", coordenadas: [14.6235, -90.4956], orden: 6 }
+            ]
+        };
+
+        // Generar ruta completa usando servicio de routing real (OSRM)
+        async function generarRutaCompleta() {
+            rutaSimulacionPiloto = [];
+
+            console.log('Generando ruta completa con routing real...');
+
+            // Procesar cada segmento entre paradas
+            for (let i = 0; i < datosSimulacionPiloto.paradas.length - 1; i++) {
+                const inicio = datosSimulacionPiloto.paradas[i];
+                const fin = datosSimulacionPiloto.paradas[i + 1];
+
+                // Agregar punto de parada inicial
+                rutaSimulacionPiloto.push({
+                    coordenadas: inicio.coordenadas,
+                    esParada: true,
+                    nombreParada: inicio.nombre,
+                    orden: inicio.orden
+                });
+
+                // Obtener ruta real usando OSRM
+                try {
+                    const rutaReal = await obtenerRutaReal(inicio.coordenadas, fin.coordenadas);
+
+                    // Agregar puntos de la ruta real
+                    rutaReal.forEach(punto => {
+                        rutaSimulacionPiloto.push({
+                            coordenadas: punto,
+                            esParada: false
+                        });
+                    });
+                } catch (error) {
+                    console.warn('Error obteniendo ruta real, usando interpolación:', error);
+                    // Fallback: usar interpolación mejorada si falla el servicio
+                    const puntosIntermedios = generarRutaRealista(inicio.coordenadas, fin.coordenadas, 8);
+                    puntosIntermedios.forEach(punto => {
+                        rutaSimulacionPiloto.push({
+                            coordenadas: punto,
+                            esParada: false
+                        });
+                    });
+                }
+            }
+
+            // Agregar última parada
+            const ultimaParada = datosSimulacionPiloto.paradas[datosSimulacionPiloto.paradas.length - 1];
+            rutaSimulacionPiloto.push({
+                coordenadas: ultimaParada.coordenadas,
+                esParada: true,
+                nombreParada: ultimaParada.nombre,
+                orden: ultimaParada.orden
+            });
+
+            console.log(`Ruta generada con ${rutaSimulacionPiloto.length} puntos siguiendo calles reales`);
+        }
+
+        // Obtener ruta real usando servicio OSRM
+        async function obtenerRutaReal(inicio, fin) {
+            // Formato de coordenadas para OSRM: lng,lat (invertido)
+            const url = `https://router.project-osrm.org/route/v1/driving/${inicio[1]},${inicio[0]};${fin[1]},${fin[0]}?overview=full&geometries=geojson&steps=true`;
+
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data.code !== 'Ok' || !data.routes || data.routes.length === 0) {
+                throw new Error('No se pudo obtener la ruta');
+            }
+
+            // Extraer coordenadas de la geometría (viene como [lng, lat], necesitamos [lat, lng])
+            const coordenadas = data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
+
+            // Simplificar la ruta para tener puntos manejables (cada 3 puntos)
+            const puntosSimplificados = [];
+            for (let i = 0; i < coordenadas.length; i += 3) {
+                puntosSimplificados.push(coordenadas[i]);
+            }
+
+            // Asegurar que el último punto esté incluido
+            if (puntosSimplificados[puntosSimplificados.length - 1] !== coordenadas[coordenadas.length - 1]) {
+                puntosSimplificados.push(coordenadas[coordenadas.length - 1]);
+            }
+
+            return puntosSimplificados;
+        }
+
+        // Generar ruta realista que simula seguir calles
+        function generarRutaRealista(inicio, fin, numPuntos) {
+            const puntos = [];
+            const latDiff = fin[0] - inicio[0];
+            const lngDiff = fin[1] - inicio[1];
+
+            // Determinar si el movimiento es más horizontal o vertical
+            const esHorizontal = Math.abs(lngDiff) > Math.abs(latDiff);
+
+            // Calcular puntos intermedios con patrón de calle
+            for (let i = 1; i <= numPuntos; i++) {
+                const ratio = i / (numPuntos + 1);
+
+                // Interpolación base
+                let lat = inicio[0] + (latDiff * ratio);
+                let lng = inicio[1] + (lngDiff * ratio);
+
+                // Añadir variación para simular seguir calles en lugar de línea recta
+                // Patrón de "escalera" suave
+                if (esHorizontal) {
+                    // Movimiento principalmente horizontal
+                    // Ajustar latitud en escalones suaves
+                    const escalon = Math.floor(ratio * 3) / 3; // Divide en 3 tramos
+                    lat = inicio[0] + (latDiff * escalon);
+
+                    // Pequeña variación para suavizar
+                    lat += (Math.sin(ratio * Math.PI * 2) * Math.abs(latDiff) * 0.05);
+                } else {
+                    // Movimiento principalmente vertical
+                    // Ajustar longitud en escalones suaves
+                    const escalon = Math.floor(ratio * 3) / 3;
+                    lng = inicio[1] + (lngDiff * escalon);
+
+                    // Pequeña variación para suavizar
+                    lng += (Math.sin(ratio * Math.PI * 2) * Math.abs(lngDiff) * 0.05);
+                }
+
+                puntos.push([lat, lng]);
+            }
+
+            return puntos;
+        }
+
+        // Interpolar puntos entre dos coordenadas (versión mejorada con curva suave)
+        function interpolarPuntos(inicio, fin, numPuntos) {
+            const puntos = [];
+            const latDiff = fin[0] - inicio[0];
+            const lngDiff = fin[1] - inicio[1];
+
+            for (let i = 1; i <= numPuntos; i++) {
+                const ratio = i / (numPuntos + 1);
+
+                // Usar interpolación suave (ease-in-out)
+                const smoothRatio = ratio < 0.5 
+                    ? 2 * ratio * ratio 
+                    : 1 - Math.pow(-2 * ratio + 2, 2) / 2;
+
+                const lat = inicio[0] + (latDiff * smoothRatio);
+                const lng = inicio[1] + (lngDiff * smoothRatio);
+
+                puntos.push([lat, lng]);
+            }
+            return puntos;
+        }
+
+        // Inicializar mapa SIEMPRE
+        function inicializarMapa() {
+            console.log('Inicializando mapa...');
+
+            // Guatemala City como centro por defecto
+            const centroDefecto = [14.6349, -90.5069];
+
+            // Crear mapa centrado en Guatemala City
+            mapa = L.map('mapa').setView(centroDefecto, 12);
+
+            // Agregar capa de OpenStreetMap
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(mapa);
+
+            // SIEMPRE intentar obtener ubicación del usuario
+            obtenerUbicacionUsuario();
+
+            // Solo si hay ruta activa, mostrar paradas y ruta
+            if (rutaData && rutaData.paradas) {
+                mostrarRutaEnMapa();
+            } else {
+                console.log('No hay ruta activa, mostrando solo ubicación del usuario');
+            }
+        }
+
+        // Obtener ubicación actual del usuario
+        function obtenerUbicacionUsuario() {
+            const estadoGPS = document.getElementById('estadoGPS');
+            const ubicacionInfo = document.getElementById('ubicacionInfo');
+
+            if (navigator.geolocation) {
+                estadoGPS.innerHTML = '<i class="bi bi-geo-alt"></i> Obteniendo GPS...';
+                estadoGPS.className = 'badge bg-warning badge-gps';
+
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        const accuracy = position.coords.accuracy;
+
+                        console.log('Ubicación del usuario:', lat, lon);
+
+                        // Actualizar estado GPS
+                        estadoGPS.innerHTML = '<i class="bi bi-geo-alt-fill"></i> GPS Activo';
+                        estadoGPS.className = 'badge bg-success badge-gps';
+
+                        // Actualizar info de ubicación
+                        if (ubicacionInfo) {
+                            ubicacionInfo.innerHTML = `
+                                <p class="mb-1">
+                                    <strong>Lat:</strong> ${lat.toFixed(6)}<br>
+                                    <strong>Lon:</strong> ${lon.toFixed(6)}<br>
+                                    <small class="text-muted">Precisión: ${Math.round(accuracy)}m</small>
+                                </p>
+                                <span class="badge bg-success">
+                                    <i class="bi bi-geo-alt-fill"></i> Ubicación obtenida
+                                </span>
+                            `;
+                        }
+
+                        // Agregar marcador del usuario al mapa
+                        if (marcadorUsuario) {
+                            mapa.removeLayer(marcadorUsuario);
+                        }
+
+                        // Crear marcador azul para el usuario
+                        marcadorUsuario = L.marker([lat, lon], {
+                            icon: L.divIcon({
+                                className: 'custom-div-icon',
+                                html: `
+                                    <div style="background-color: #007bff; color: white; border-radius: 50%; 
+                                                width: 20px; height: 20px; text-align: center; line-height: 20px; 
+                                                border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                                        <i class="bi bi-person-fill" style="font-size: 10px;"></i>
+                                    </div>
+                                `,
+                                iconSize: [20, 20],
+                                iconAnchor: [10, 10]
+                            })
+                        }).addTo(mapa);
+
+                        // Popup con información
+                        marcadorUsuario.bindPopup(`
+                            <div class="text-center">
+                                <strong><i class="bi bi-geo-alt-fill text-primary"></i> Mi Ubicación</strong><br>
+                                <small>
+                                    <strong>Lat:</strong> ${lat.toFixed(6)}<br>
+                                    <strong>Lon:</strong> ${lon.toFixed(6)}<br>
+                                    <span class="badge bg-info">Precisión: ${Math.round(accuracy)}m</span>
+                                </small>
+                            </div>
+                        `);
+
+                        // Centrar el mapa en la ubicación del usuario si no hay ruta
+                        if (!rutaData || !rutaData.paradas) {
+                            mapa.setView([lat, lon], 15);
+                        }
+                    },
+                    function(error) {
+                        console.error('Error obteniendo ubicación:', error);
+
+                        // Actualizar estado GPS a error
+                        estadoGPS.innerHTML = '<i class="bi bi-geo-alt-slash"></i> GPS No Disponible';
+                        estadoGPS.className = 'badge bg-danger';
+
+                        if (ubicacionInfo) {
+                            ubicacionInfo.innerHTML = `
+                                <p class="text-danger mb-0">
+                                    <i class="bi bi-exclamation-triangle"></i> No se pudo obtener la ubicación
+                                    <br><small>Verifica que el GPS esté habilitado</small>
+                                </p>
+                            `;
+                        }
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 60000
+                    }
+                );
+            } else {
+                estadoGPS.innerHTML = '<i class="bi bi-geo-alt-slash"></i> GPS No Soportado';
+                estadoGPS.className = 'badge bg-secondary';
+
+                if (ubicacionInfo) {
+                    ubicacionInfo.innerHTML = `
+                        <p class="text-warning mb-0">
+                            <i class="bi bi-exclamation-triangle"></i> 
+                            El navegador no soporta geolocalización
+                        </p>
+                    `;
+                }
+            }
+        }
+
+        // Centrar mapa en la ubicación del usuario
+        function centrarEnUsuario() {
+            if (marcadorUsuario) {
+                const latlng = marcadorUsuario.getLatLng();
+                mapa.setView(latlng, 16);
+                marcadorUsuario.openPopup();
+            } else {
+                alert('Ubicación del usuario no disponible');
+            }
+        }
+
+        // Mostrar ruta en el mapa
+        function mostrarRutaEnMapa() {
+            if (!rutaData || !rutaData.paradas) return;
+
+            console.log('Mostrando ruta en mapa:', rutaData);
+
+            // Limpiar marcadores existentes
+            marcadores.forEach(marker => mapa.removeLayer(marker));
+            marcadores = [];
+
+            // Array para ajustar la vista del mapa
+            let coordenadas = [];
+
+            // Agregar marcadores para cada parada
+            rutaData.paradas.forEach(function(parada, index) {
+                if (parada.latitud && parada.longitud) {
+                    coordenadas.push([parada.latitud, parada.longitud]);
+
+                    // Color del marcador según estado
+                    const color = parada.completada ? '#28a745' : '#ffc107';
+                    const iconClass = parada.completada ? 'bi-check-circle-fill' : 'bi-clock';
+
+                    // Crear marcador
+                    const marcador = L.marker([parada.latitud, parada.longitud], {
+                        icon: L.divIcon({
+                            className: 'custom-div-icon',
+                            html: `
+                                <div style="background-color: ${color}; color: white; border-radius: 50%; 
+                                            width: 30px; height: 30px; text-align: center; line-height: 30px; 
+                                            border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); 
+                                            font-weight: bold; font-size: 12px;">
+                                    ${parada.orden}
+                                </div>
+                            `,
+                            iconSize: [30, 30],
+                            iconAnchor: [15, 15]
+                        })
+                    }).addTo(mapa);
+
+                    // Popup con información de la parada
+                    marcador.bindPopup(`
+                        <div>
+                            <strong>Parada ${parada.orden}</strong><br>
+                            <strong>${parada.nombreAlumno}</strong><br>
+                            <small>${parada.direccion}</small><br>
+                            ${parada.horaEstimada ? `<small><i class="bi bi-clock"></i> ${parada.horaEstimada}</small><br>` : ''}
+                            <span class="badge ${parada.completada ? 'bg-success' : 'bg-warning'}">
+                                <i class="${iconClass}"></i> ${parada.completada ? 'Completada' : 'Pendiente'}
+                            </span>
+                        </div>
+                    `);
+
+                    marcadores.push(marcador);
+                }
+            });
+
+            // Ajustar vista del mapa para mostrar todas las coordenadas
+            if (coordenadas.length > 0) {
+                if (marcadorUsuario) {
+                    coordenadas.push(marcadorUsuario.getLatLng());
+                }
+
+                const grupo = new L.featureGroup(marcadores);
+                if (marcadorUsuario) {
+                    grupo.addLayer(marcadorUsuario);
+                }
+
+                mapa.fitBounds(grupo.getBounds().pad(0.1));
+            }
+        }
+
+        // Marcar parada como completada/no completada
+        function marcarCompletada(idParada, completada) {
+            fetch('/Piloto/MiRuta?handler=MarcarCompletada', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                body: JSON.stringify({
+                    idParada: idParada,
+                    completada: completada
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al actualizar el estado de la parada');
+            });
+        }
+
+        // Buscar ruta alternativa
+        function buscarRutaAlternativa() {
+            alert('Función de búsqueda de ruta alternativa estará disponible en FASE 6');
+        }
+
+        // Mostrar ruta del lunes (para fines de semana)
+        function mostrarRutaLunes() {
+            alert('Función para mostrar ruta del lunes estará disponible en FASE 6');
+        }
+
+        // Inicializar mapa cuando la página carga
+        document.addEventListener('DOMContentLoaded', async function() {
+            inicializarMapa();
+            await generarRutaCompleta(); // Esperar a que se genere la ruta
+            inicializarAudio();
+        });
+
+        // Inicializar contexto de audio
+        function inicializarAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.warn('Audio Context no soportado:', e);
+            }
+        }
+
+        // Función principal para simular la ruta del piloto
+        function simularRutaPiloto() {
+            if (simulacionPilotoActiva) {
+                detenerSimulacionPiloto();
+                return;
+            }
+
+            const btn = document.getElementById('btnSimularRutaPiloto');
+            const estado = document.getElementById('estadoSimulacionPiloto');
+            const tiempo = document.getElementById('tiempoSimulacion');
+
+            // Cambiar estado del botón
+            btn.innerHTML = '<i class="bi bi-stop-circle-fill me-2"></i>Detener Simulación';
+            btn.className = 'btn btn-danger btn-lg w-100';
+            estado.innerHTML = '🚌 Preparando simulación de ruta...';
+            tiempo.textContent = 'Simulación en progreso...';
+
+            simulacionPilotoActiva = true;
+            indiceParadaActual = 0;
+
+            // Crear marcador de bus de simulación
+            crearBusSimulacionPiloto();
+
+            // Mostrar todas las paradas de simulación
+            mostrarParadasSimulacion();
+
+            // Ajustar vista del mapa
+            ajustarVistaMapa();
+
+            // Reproducir sonido de inicio
+            reproducirSonidoInicio();
+
+            // Iniciar animación después de 2 segundos
+            setTimeout(() => {
+                estado.innerHTML = '🚌 Simulación iniciada - Bus en movimiento';
+                animarBusSimulacion();
+            }, 2000);
+        }
+
+        // Crear marcador de bus para simulación
+        function crearBusSimulacionPiloto() {
+            if (marcadorBusSimulacion) {
+                mapa.removeLayer(marcadorBusSimulacion);
+            }
+
+            marcadorBusSimulacion = L.marker(rutaSimulacionPiloto[0].coordenadas, {
+                icon: L.divIcon({
+                    className: 'custom-marker',
+                    html: `
+                        <div class="bus-simulacion" style="
+                            width: 50px; height: 50px; 
+                            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%); 
+                            border: 4px solid white; 
+                            border-radius: 50%; 
+                            display: flex; 
+                            align-items: center; 
+                            justify-content: center; 
+                            font-size: 28px; 
+                            color: white; 
+                            box-shadow: 0 4px 15px rgba(255,107,53,0.4);
+                        ">🚌</div>
+                    `,
+                    iconSize: [50, 50],
+                    iconAnchor: [25, 25],
+                    popupAnchor: [0, -25]
+                })
+            }).addTo(mapa)
+              .bindPopup(`
+                  <div style="min-width: 200px;">
+                      <h6 class="mb-2"><strong>🚌 ${datosSimulacionPiloto.bus} (SIMULACIÓN)</strong></h6>
+                      <div class="mb-1"><strong>Piloto:</strong> ${datosSimulacionPiloto.piloto}</div>
+                      <div class="mb-1"><strong>Ruta:</strong> ${datosSimulacionPiloto.ruta}</div>
+                      <div class="mb-1"><strong>Estado:</strong> <span class="badge bg-warning">Simulación activa</span></div>
+                      <div class="mb-1"><strong>Audio:</strong> <span class="badge bg-success">Habilitado</span></div>
+                  </div>
+              `);
+        }
+
+        // Mostrar paradas de simulación
+        function mostrarParadasSimulacion() {
+            // Dibujar línea de ruta completa
+            const coordenadasRuta = rutaSimulacionPiloto.map(p => p.coordenadas);
+
+            if (rutaPolyline) {
+                mapa.removeLayer(rutaPolyline);
+            }
+
+            rutaPolyline = L.polyline(coordenadasRuta, {
+                color: '#FF6B35',
+                weight: 4,
+                opacity: 0.7,
+                dashArray: '10, 5',
+                lineJoin: 'round',
+                lineCap: 'round'
+            }).addTo(mapa);
+
+            // Agregar marcadores para paradas de simulación
+            datosSimulacionPiloto.paradas.forEach(parada => {
+                const marcadorParada = L.marker(parada.coordenadas, {
+                    icon: L.divIcon({
+                        className: 'custom-marker',
+                        html: `
+                            <div style="
+                                width: 30px; height: 30px; 
+                                background: #dc3545; 
+                                border: 3px solid white; 
+                                border-radius: 50%; 
+                                display: flex; 
+                                align-items: center; 
+                                justify-content: center; 
+                                color: white; 
+                                font-weight: bold; 
+                                font-size: 14px;
+                                box-shadow: 0 2px 8px rgba(220,53,69,0.4);
+                            ">${parada.orden}</div>
+                        `,
+                        iconSize: [30, 30],
+                        iconAnchor: [15, 15],
+                        popupAnchor: [0, -15]
+                    })
+                }).addTo(mapa)
+                  .bindPopup(`
+                      <div style="min-width: 180px;">
+                          <h6 class="mb-2"><strong>🚏 Parada ${parada.orden}</strong></h6>
+                          <div class="mb-1">${parada.nombre}</div>
+                          <div class="badge bg-info">Simulación</div>
+                      </div>
+                  `);
+
+                marcadores.push(marcadorParada);
+            });
+        }
+
+        // Animar bus en la simulación con movimiento suave
+        function animarBusSimulacion() {
+            let indicePunto = 0;
+            const velocidad = 800; // milisegundos entre puntos (más rápido para más fluidez)
+
+            function moverSiguientePunto() {
+                if (!simulacionPilotoActiva || indicePunto >= rutaSimulacionPiloto.length) {
+                    finalizarSimulacion();
+                    return;
+                }
+
+                const puntoActual = rutaSimulacionPiloto[indicePunto];
+
+                // Mover bus al punto actual con transición suave
+                marcadorBusSimulacion.setLatLng(puntoActual.coordenadas);
+
+                // Centrar mapa en el bus con transición suave
+                mapa.panTo(puntoActual.coordenadas, {
+                    animate: true,
+                    duration: 0.5
+                });
+
+                // Actualizar estado de movimiento
+                const progreso = Math.floor((indicePunto / rutaSimulacionPiloto.length) * 100);
+                document.getElementById('estadoSimulacionPiloto').innerHTML = 
+                    `🚌 Bus en movimiento - Progreso: ${progreso}%`;
+
+                // Verificar si es una parada
+                if (puntoActual.esParada) {
+                    // Reproducir sonido de alerta
+                    reproducirSonidoParada();
+
+                    // Mostrar alerta visual
+                    mostrarAlertaParada(puntoActual);
+
+                    // Actualizar estado
+                    document.getElementById('estadoSimulacionPiloto').innerHTML = 
+                        `🚏 Llegando a: ${puntoActual.nombreParada}`;
+
+                    // Mostrar popup del bus
+                    marcadorBusSimulacion.setPopupContent(`
+                        <div style="min-width: 200px;">
+                            <h6 class="mb-2"><strong>🚌 ${datosSimulacionPiloto.bus}</strong></h6>
+                            <div class="mb-1"><strong>Parada:</strong> ${puntoActual.nombreParada}</div>
+                            <div class="mb-1"><strong>Progreso:</strong> ${puntoActual.orden}/${datosSimulacionPiloto.paradas.length}</div>
+                            <div class="mb-1"><span class="badge bg-warning">Detenido en parada</span></div>
+                        </div>
+                    `).openPopup();
+
+                    // Tiempo extra en paradas (3 segundos)
+                    setTimeout(() => {
+                        indicePunto++;
+                        setTimeout(moverSiguientePunto, velocidad + 2000); // +2 segundos en paradas
+                    }, 1000);
+                } else {
+                    // Punto intermedio - movimiento normal
+                    indicePunto++;
+                    setTimeout(moverSiguientePunto, velocidad);
+                }
+            }
+
+            moverSiguientePunto();
+        }
+
+        // Reproducir sonido de inicio
+        function reproducirSonidoInicio() {
+            reproducirSonido([440, 554, 659], [0.2, 0.2, 0.4]); // Acorde C-E-E mayor
+        }
+
+        // Reproducir sonido de alerta en parada
+        function reproducirSonidoParada() {
+            // Sonido de alerta más llamativo para el piloto
+            reproducirSonido([880, 880, 1100], [0.3, 0.1, 0.4]); // Sonido de alerta agudo
+        }
+
+        // Función base para reproducir sonidos
+        function reproducirSonido(frecuencias, duraciones) {
+            if (!audioContext) return;
+
+            let tiempoInicio = audioContext.currentTime;
+
+            frecuencias.forEach((freq, index) => {
+                const oscilador = audioContext.createOscillator();
+                const ganancia = audioContext.createGain();
+
+                oscilador.connect(ganancia);
+                ganancia.connect(audioContext.destination);
+
+                oscilador.frequency.setValueAtTime(freq, tiempoInicio);
+                oscilador.type = 'sine';
+
+                ganancia.gain.setValueAtTime(0, tiempoInicio);
+                ganancia.gain.linearRampToValueAtTime(0.3, tiempoInicio + 0.01);
+                ganancia.gain.exponentialRampToValueAtTime(0.001, tiempoInicio + duraciones[index]);
+
+                oscilador.start(tiempoInicio);
+                oscilador.stop(tiempoInicio + duraciones[index]);
+
+                tiempoInicio += duraciones[index] + 0.1;
+            });
+        }
+
+        // Mostrar alerta visual de parada
+        function mostrarAlertaParada(punto) {
+            const indicator = document.getElementById('audioIndicator');
+            const mensaje = document.getElementById('mensajeAudio');
+
+            mensaje.innerHTML = `<strong>${punto.nombreParada}</strong><br>
+                               <small>Parada ${punto.orden} de ${datosSimulacionPiloto.paradas.length}</small>`;
+
+            indicator.classList.add('show');
+
+            // Ocultar después de 3 segundos
+            setTimeout(() => {
+                indicator.classList.remove('show');
+            }, 3000);
+        }
+
+        // Ajustar vista del mapa para simulación
+        function ajustarVistaMapa() {
+            const coordenadas = datosSimulacionPiloto.paradas.map(p => p.coordenadas);
+            const bounds = L.latLngBounds(coordenadas);
+            mapa.fitBounds(bounds.pad(0.1));
+        }
+
+        // Finalizar simulación
+        function finalizarSimulacion() {
+            document.getElementById('estadoSimulacionPiloto').innerHTML = 
+                '✅ Simulación completada - Todas las paradas visitadas';
+
+            // Sonido de finalización
+            reproducirSonidoInicio();
+
+            setTimeout(() => {
+                if (simulacionPilotoActiva) {
+                    detenerSimulacionPiloto();
+                }
+            }, 3000);
+        }
+
+        // Detener simulación del piloto
+        function detenerSimulacionPiloto() {
+            simulacionPilotoActiva = false;
+
+            const btn = document.getElementById('btnSimularRutaPiloto');
+            const estado = document.getElementById('estadoSimulacionPiloto');
+            const tiempo = document.getElementById('tiempoSimulacion');
+
+            // Restaurar botón
+            btn.innerHTML = '<i class="bi bi-play-circle-fill me-2"></i>Simular Ruta';
+            btn.className = 'btn btn-primary btn-lg w-100';
+            estado.textContent = 'Reproduce la animación del bus con sonidos de alerta al llegar a cada parada';
+            tiempo.textContent = 'Duración estimada: 5-8 minutos';
+
+            // Remover bus de simulación
+            if (marcadorBusSimulacion) {
+                mapa.removeLayer(marcadorBusSimulacion);
+                marcadorBusSimulacion = null;
+            }
+
+            // Remover línea de ruta
+            if (rutaPolyline) {
+                mapa.removeLayer(rutaPolyline);
+                rutaPolyline = null;
+            }
+
+            // Limpiar marcadores de simulación
+            marcadores.forEach(marker => {
+                if (mapa.hasLayer(marker)) {
+                    mapa.removeLayer(marker);
+                }
+            });
+            marcadores = [];
+
+            // Ocultar indicador de audio
+            document.getElementById('audioIndicator').classList.remove('show');
+
+            // Restaurar vista original
+            if (rutaData && rutaData.paradas) {
+                mostrarRutaEnMapa();
+            } else {
+                if (marcadorUsuario) {
+                    mapa.setView(marcadorUsuario.getLatLng(), 15);
+                } else {
+                    mapa.setView([14.6349, -90.5069], 12);
+                }
+            }
+        }
+    </script>
+}

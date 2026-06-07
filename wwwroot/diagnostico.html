@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Diagnóstico - Transportes Génesis</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .result-box { 
+            background: #f8f9fa; 
+            border: 1px solid #dee2e6; 
+            border-radius: 8px; 
+            padding: 15px; 
+            margin: 10px 0; 
+        }
+        .success { border-left: 4px solid #28a745; }
+        .error { border-left: 4px solid #dc3545; }
+        .warning { border-left: 4px solid #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">🩺 Diagnóstico del Sistema</h1>
+        <p class="text-center text-muted">Herramienta para diagnosticar y solucionar problemas de autenticación</p>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5>1. Verificar Sistema</h5>
+                    </div>
+                    <div class="card-body">
+                        <button onclick="verificarSistema()" class="btn btn-primary">Verificar Estado del Sistema</button>
+                        <div id="sistema-result" class="result-box" style="display:none;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5>2. Crear/Verificar Admin</h5>
+                    </div>
+                    <div class="card-body">
+                        <button onclick="crearAdmin()" class="btn btn-success">Crear Admin Si No Existe</button>
+                        <div id="admin-result" class="result-box" style="display:none;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5>3. Verificar Credenciales Admin</h5>
+                    </div>
+                    <div class="card-body">
+                        <button onclick="verificarAdmin()" class="btn btn-info">Verificar Admin (admin/Admin123!)</button>
+                        <div id="verify-result" class="result-box" style="display:none;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h5>4. Crear Usuario Padre de Prueba</h5>
+                    </div>
+                    <div class="card-body">
+                        <button onclick="crearPadre()" class="btn btn-warning">Crear padre.test/123456</button>
+                        <div id="padre-result" class="result-box" style="display:none;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-dark text-white">
+                        <h5>5. Listar Todos los Usuarios</h5>
+                    </div>
+                    <div class="card-body">
+                        <button onclick="listarUsuarios()" class="btn btn-dark">Ver Todos los Usuarios</button>
+                        <div id="usuarios-result" class="result-box" style="display:none;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-purple text-white" style="background: linear-gradient(135deg, #6f42c1 0%, #6610f2 100%);">
+                        <h5>6. Verificar Enlaces de Padres</h5>
+                    </div>
+                    <div class="card-body">
+                        <button onclick="verificarRutasPadres()" class="btn btn-outline-primary">Verificar Rutas de Padres</button>
+                        <div id="rutas-result" class="result-box" style="display:none;"></div>
+
+                        <div class="mt-3">
+                            <h6>Enlaces Directos de Prueba:</h6>
+                            <div class="btn-group-vertical d-grid gap-2">
+                                <a href="/PagosPadresFamilia" target="_blank" class="btn btn-outline-primary btn-sm">Dashboard Pagos</a>
+                                <a href="/PagosPadresFamilia/Pagos" target="_blank" class="btn btn-outline-secondary btn-sm">Realizar Pagos</a>
+                                <a href="/PagosPadresFamilia/Historial" target="_blank" class="btn btn-outline-success btn-sm">Historial de Pagos</a>
+                                <a href="/Padres/ConfirmarAsistencia" target="_blank" class="btn btn-outline-warning btn-sm">Confirmar Asistencia</a>
+                                <a href="/Padres/Traslados" target="_blank" class="btn btn-outline-info btn-sm">Mis Traslados</a>
+                                <a href="/Padres/DashboardRutaBusAsignado" target="_blank" class="btn btn-outline-danger btn-sm">Ruta del Bus</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <h5>📋 Instrucciones para Corregir Enlaces:</h5>
+                    <ol>
+                        <li><strong>Crear Usuario Padre de Prueba:</strong> Usa el botón de arriba para crear padre.test</li>
+                        <li><strong>Probar Login como Padre:</strong> Ve a <a href="/Auth/Login">/Auth/Login</a> con padre.test/123456</li>
+                        <li><strong>Verificar Enlaces:</strong> Una vez logueado como padre, usa los botones de "Enlaces Directos de Prueba"</li>
+                        <li><strong>Dashboard Principal:</strong> El dashboard de padres debería estar en <a href="/PagosPadresFamilia">/PagosPadresFamilia</a></li>
+                        <li><strong>Si hay errores 404:</strong> Significa que las páginas necesitan autorización de rol "PadreDeFamilia"</li>
+                    </ol>
+
+                    <div class="alert alert-warning mt-3">
+                        <strong>⚠️ Importante:</strong> Debes estar logueado como un usuario con rol "PadreDeFamilia" para acceder a estas páginas.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-12 text-center">
+                <a href="/Auth/Login" class="btn btn-lg btn-primary me-3">🔑 Ir al Login</a>
+                <a href="/Admin" class="btn btn-lg btn-success">👨‍💼 Panel Admin</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function mostrarResultado(elementId, data, tipo = 'success') {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.className = `result-box ${tipo}`;
+            element.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+        }
+
+        async function verificarSistema() {
+            try {
+                const response = await fetch('/Diagnostico');
+                const data = await response.json();
+                mostrarResultado('sistema-result', data, 'success');
+            } catch (error) {
+                mostrarResultado('sistema-result', { error: error.message }, 'error');
+            }
+        }
+
+        async function crearAdmin() {
+            try {
+                const response = await fetch('/Diagnostico/CrearAdminSiNoExiste');
+                const data = await response.json();
+                mostrarResultado('admin-result', data, data.success ? 'success' : 'error');
+            } catch (error) {
+                mostrarResultado('admin-result', { error: error.message }, 'error');
+            }
+        }
+
+        async function verificarAdmin() {
+            try {
+                const response = await fetch('/Diagnostico/VerificarCredenciales?usuario=admin&password=Admin123!');
+                const data = await response.json();
+                mostrarResultado('verify-result', data, data.passwordCorrecta ? 'success' : 'warning');
+            } catch (error) {
+                mostrarResultado('verify-result', { error: error.message }, 'error');
+            }
+        }
+
+        async function crearPadre() {
+            try {
+                const response = await fetch('/Diagnostico/CrearUsuarioPrueba');
+                const data = await response.json();
+                mostrarResultado('padre-result', data, data.success ? 'success' : 'error');
+            } catch (error) {
+                mostrarResultado('padre-result', { error: error.message }, 'error');
+            }
+        }
+
+        async function listarUsuarios() {
+            try {
+                const response = await fetch('/Diagnostico/ListarTodosLosUsuarios');
+                const data = await response.json();
+                mostrarResultado('usuarios-result', data, 'success');
+            } catch (error) {
+                mostrarResultado('usuarios-result', { error: error.message }, 'error');
+            }
+        }
+
+        async function verificarRutasPadres() {
+            try {
+                const response = await fetch('/Diagnostico/VerificarRutasPadres');
+                const data = await response.json();
+                mostrarResultado('rutas-result', data, 'success');
+            } catch (error) {
+                mostrarResultado('rutas-result', { error: error.message }, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

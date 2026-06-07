@@ -1,0 +1,1162 @@
+@page
+@model TransportesGenesis.Pages.Padres.ConfirmarAsistenciaModel
+@{
+    ViewData["Title"] = "Confirmar Asistencia";
+}
+
+<style>
+    .attendance-header {
+        background: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%);
+        color: white;
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 30px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 8px 25px rgba(255,165,0,0.3);
+    }
+
+    .attendance-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 200px;
+        height: 200px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+        animation: float 8s ease-in-out infinite;
+    }
+
+    .info-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        height: 100%;
+    }
+
+    .info-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+
+    .student-card .card-header {
+        background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+        border: none;
+    }
+
+    .morning-card .card-header {
+        background: linear-gradient(135deg, #FF6B35 0%, #FF4500 100%);
+        border: none;
+        color: white;
+    }
+
+    .afternoon-card .card-header {
+        background: linear-gradient(135deg, #228B22 0%, #32CD32 100%);
+        border: none;
+    }
+
+    .calendar-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+
+    .calendar-card .card-header {
+        background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%);
+        border: none;
+        padding: 20px;
+    }
+
+    .calendar-table {
+        border: none !important;
+    }
+
+    .calendar-table th {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: none !important;
+        padding: 15px 8px;
+        font-weight: 600;
+        color: #495057;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 1px;
+    }
+
+    .calendar-table td {
+        border: 1px solid #e9ecef !important;
+        padding: 0;
+        position: relative;
+        height: 80px;
+        vertical-align: top;
+        transition: all 0.3s ease;
+    }
+
+    .calendar-table td:hover {
+        background-color: #f8f9fa;
+        transform: scale(1.02);
+        z-index: 10;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .calendar-day {
+        padding: 10px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        cursor: pointer;
+        position: relative;
+    }
+
+    .day-number {
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 5px;
+    }
+
+    .day-status {
+        font-size: 1.5rem;
+        position: absolute;
+        bottom: 8px;
+        right: 8px;
+    }
+
+    .status-confirmed {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        box-shadow: 0 2px 8px rgba(40, 167, 69, 0.4);
+    }
+
+    .status-partial {
+        background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%);
+        color: white;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        box-shadow: 0 2px 8px rgba(23, 162, 184, 0.4);
+    }
+
+    .status-pending {
+        background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+        color: white;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        box-shadow: 0 2px 8px rgba(255, 193, 7, 0.4);
+    }
+
+    .status-absent {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        box-shadow: 0 2px 8px rgba(220, 53, 69, 0.4);
+    }
+
+    .weekend-day {
+        background-color: #f8f9fa;
+        color: #6c757d;
+        opacity: 0.7;
+    }
+
+    .legend-item {
+        background: white;
+        border-radius: 15px;
+        padding: 15px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        margin-bottom: 10px;
+    }
+
+    .legend-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    }
+
+    .nav-btn {
+        background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
+        color: white;
+        border: none;
+        border-radius: 25px;
+        padding: 10px 20px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+    }
+
+    .nav-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+        color: white;
+    }
+
+    .confirmation-panel {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(40, 167, 69, 0.3);
+        overflow: hidden;
+    }
+
+    .confirmation-panel .card-body {
+        background: white;
+        color: #333;
+    }
+
+    .pulse-animation {
+        animation: pulse 2s infinite;
+    }
+
+    @@keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-10px) rotate(5deg); }
+    }
+
+    @@keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+
+    /* Mejoras responsivas */
+    @@media (max-width: 768px) {
+        .calendar-table td {
+            height: 60px;
+        }
+
+        .calendar-day {
+            padding: 5px;
+        }
+
+        .day-number {
+            font-size: 0.9rem;
+        }
+
+        .status-confirmed, .status-partial, .status-pending, .status-absent {
+            width: 25px;
+            height: 25px;
+            font-size: 12px;
+        }
+
+        .nav-btn {
+            padding: 8px 15px;
+            font-size: 0.9rem;
+        }
+    }
+</style>
+
+<div class="container-fluid px-3 px-md-4">
+    <!-- Header mejorado -->
+    <div class="attendance-header animate__animated animate__fadeInDown">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="mb-2 fw-bold">
+                    <i class="bi bi-calendar-check-fill me-3"></i>
+                    Calendario de Asistencia
+                </h1>
+                <p class="mb-0 opacity-75">
+                    <i class="bi bi-bus-front me-2"></i>
+                    Gestiona la asistencia de tu hijo(a) al transporte escolar
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <a href="/Padres/Traslados" class="btn btn-light btn-lg">
+                    <i class="bi bi-list-check me-2"></i>
+                    Mis Traslados
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards de información -->
+    <div class="row g-4 mb-4">
+        <!-- Alumno seleccionado -->
+        <div class="col-12 col-lg-4">
+            <div class="info-card student-card animate__animated animate__fadeInUp" style="animation-delay: 0.1s">
+                <div class="card-header text-white">
+                    <h6 class="mb-0 fw-bold">
+                        <i class="bi bi-person-circle me-2"></i>
+                        Estudiante
+                    </h6>
+                </div>
+                <div class="card-body p-4">
+                    <select class="form-select mb-3 border-0 bg-light" id="selectAlumno" onchange="cargarCalendario()">
+                        <option value="1" selected>Alumno de Prueba 1</option>
+                    </select>
+
+                    <div id="infoAlumno">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-person-badge text-success me-3 fs-4"></i>
+                            <div>
+                                <div class="fw-semibold">Nombre</div>
+                                <div class="text-muted" id="nombreAlumno">Juan Pérez Rodríguez</div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-bus-front-fill text-primary me-3 fs-4"></i>
+                            <div>
+                                <div class="fw-semibold">Bus Asignado</div>
+                                <div class="text-muted" id="busAsignado">Bus #001 - Ruta Centro</div>
+                            </div>
+                        </div>
+
+                        <div id="mensajeFinSemana" class="alert alert-info mt-3" style="display: none;">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <span id="textoFinSemana"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estado Mañana -->
+        <div class="col-12 col-lg-4">
+            <div class="info-card morning-card animate__animated animate__fadeInUp" style="animation-delay: 0.2s">
+                <div class="card-header">
+                    <h6 class="mb-0 fw-bold">
+                        <i class="bi bi-sunrise-fill me-2"></i>
+                        Ruta Matutina (Ida)
+                    </h6>
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-clock-fill text-warning me-2"></i>
+                            <small class="fw-semibold">Horario de confirmación</small>
+                        </div>
+                        <div class="bg-light rounded-3 p-3">
+                            <div class="fw-bold text-center">
+                                2:00 PM - 4:00 AM
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="estadoMañana" class="alert alert-info mb-0 border-0">
+                        <div class="d-flex align-items-center">
+                            <div class="spinner-border spinner-border-sm me-2"></div>
+                            <span>Verificando estado...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estado Tarde -->
+        <div class="col-12 col-lg-4">
+            <div class="info-card afternoon-card animate__animated animate__fadeInUp" style="animation-delay: 0.3s">
+                <div class="card-header text-white">
+                    <h6 class="mb-0 fw-bold">
+                        <i class="bi bi-sunset-fill me-2"></i>
+                        Ruta Vespertina (Regreso)
+                    </h6>
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-clock-fill text-info me-2"></i>
+                            <small class="fw-semibold">Horario de confirmación</small>
+                        </div>
+                        <div class="bg-light rounded-3 p-3">
+                            <div class="fw-bold text-center">
+                                5:00 PM - 11:00 AM
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="estadoTarde" class="alert alert-info mb-0 border-0">
+                        <div class="d-flex align-items-center">
+                            <div class="spinner-border spinner-border-sm me-2"></div>
+                            <span>Verificando estado...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendario -->
+    <div class="row">
+        <div class="col-12 col-lg-9">
+            <div class="calendar-card animate__animated animate__fadeInUp" style="animation-delay: 0.4s">
+                <div class="card-header text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold">
+                            <i class="bi bi-calendar3 me-2"></i>
+                            <span id="mesActual">Noviembre 2024</span>
+                        </h5>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table calendar-table" id="calendarioTabla">
+                            <thead>
+                                <tr id="diasSemana">
+                                    <th class="text-center">Dom</th>
+                                    <th class="text-center">Lun</th>
+                                    <th class="text-center">Mar</th>
+                                    <th class="text-center">Mié</th>
+                                    <th class="text-center">Jue</th>
+                                    <th class="text-center">Vie</th>
+                                    <th class="text-center">Sáb</th>
+                                </tr>
+                            </thead>
+                            <tbody id="calendarioBody">
+                                <!-- Se llena dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Navegación mejorada -->
+                    <div class="d-flex justify-content-between align-items-center p-4 bg-light flex-wrap">
+                        <button class="nav-btn" onclick="mesAnterior()">
+                            <i class="bi bi-chevron-left me-2"></i>
+                            <span class="d-none d-sm-inline">Mes </span>Anterior
+                        </button>
+
+                        <div class="text-center my-2 my-md-0">
+                            <button class="btn btn-outline-primary" onclick="irHoy()">
+                                <i class="bi bi-calendar-day me-2"></i>
+                                Hoy
+                            </button>
+                        </div>
+
+                        <button class="nav-btn" onclick="mesSiguiente()">
+                            <span class="d-none d-sm-inline">Mes </span>Siguiente
+                            <i class="bi bi-chevron-right ms-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leyenda -->
+        <div class="col-12 col-lg-3">
+            <div class="sticky-top" style="top: 20px;">
+                <div class="legend-item animate__animated animate__fadeInRight" style="animation-delay: 0.5s">
+                    <h6 class="fw-bold mb-3">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Leyenda de Estados
+                    </h6>
+
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="status-confirmed me-3">
+                                <i class="bi bi-check"></i>
+                            </div>
+                            <div>
+                                <div class="fw-semibold">Ambas rutas confirmadas</div>
+                                <small class="text-muted">Mañana y tarde</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="status-partial me-3">
+                                <i class="bi bi-dash"></i>
+                            </div>
+                            <div>
+                                <div class="fw-semibold">Parcialmente confirmado</div>
+                                <small class="text-muted">Solo una ruta</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="status-pending me-3">
+                                <i class="bi bi-clock"></i>
+                            </div>
+                            <div>
+                                <div class="fw-semibold">Pendiente</div>
+                                <small class="text-muted">Falta confirmar</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="status-absent me-3">
+                                <i class="bi bi-x"></i>
+                            </div>
+                            <div>
+                                <div class="fw-semibold">No asistirá</div>
+                                <small class="text-muted">Ambas rutas canceladas</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="legend-item animate__animated animate__fadeInRight" style="animation-delay: 0.7s">
+                    <h6 class="fw-bold mb-3">
+                        <i class="bi bi-lightbulb me-2"></i>
+                        Instrucciones
+                    </h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="bi bi-1-circle text-primary me-2"></i>
+                            Haz clic en cualquier día del calendario
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-2-circle text-primary me-2"></i>
+                            Selecciona las rutas deseadas
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-3-circle text-primary me-2"></i>
+                            Confirma la asistencia
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel de confirmación mejorado -->
+    <div class="row mt-4" id="panelConfirmacion" style="display: none;">
+        <div class="col-12">
+            <div class="confirmation-panel animate__animated animate__bounceInUp">
+                <div class="card-header text-white">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-calendar-check me-2"></i>
+                        Confirmar Asistencia
+                        <small id="fechaSeleccionada" class="ms-2 opacity-75"></small>
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="card border-warning">
+                                <div class="card-header bg-warning text-dark">
+                                    <i class="bi bi-sunrise-fill me-2"></i>
+                                    Ruta Matutina (Ida)
+                                </div>
+                                <div class="card-body text-center">
+                                    <div id="estadoActualMañana" class="mb-3"></div>
+                                    <div class="btn-group w-100" role="group">
+                                        <button class="btn btn-success" onclick="confirmarRuta('mañana', true)">
+                                            <i class="bi bi-check-circle me-1"></i>
+                                            Asistirá
+                                        </button>
+                                        <button class="btn btn-danger" onclick="confirmarRuta('mañana', false)">
+                                            <i class="bi bi-x-circle me-1"></i>
+                                            No asistirá
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card border-info">
+                                <div class="card-header bg-info text-white">
+                                    <i class="bi bi-sunset-fill me-2"></i>
+                                    Ruta Vespertina (Regreso)
+                                </div>
+                                <div class="card-body text-center">
+                                    <div id="estadoActualTarde" class="mb-3"></div>
+                                    <div class="btn-group w-100" role="group">
+                                        <button class="btn btn-success" onclick="confirmarRuta('tarde', true)">
+                                            <i class="bi bi-check-circle me-1"></i>
+                                            Asistirá
+                                        </button>
+                                        <button class="btn btn-danger" onclick="confirmarRuta('tarde', false)">
+                                            <i class="bi bi-x-circle me-1"></i>
+                                            No asistirá
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button class="btn btn-secondary" onclick="cerrarPanelConfirmacion()">
+                            <i class="bi bi-x-lg me-2"></i>
+                            Cerrar
+                        </button>
+                        <button class="btn btn-info ms-2" onclick="console.log('Botón traslado clickeado'); abrirModalTraslado()">
+                            <i class="bi bi-arrow-left-right me-2"></i>
+                            Solicitar Traslado
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Traslado -->
+<div class="modal fade" id="modalTraslado" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-arrow-left-right"></i> Solicitar Traslado Temporal de Bus
+                </h5>
+                <button type="button" class="btn-close btn-close-white" onclick="cerrarModalTraslado()"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    <strong>¿Qué es un traslado?</strong> Permite que su hijo(a) viaje en otro bus temporalmente 
+                    (por ejemplo, si se quedará en casa de un familiar).
+                </div>
+
+                <form id="formTraslado">
+                    <input type="hidden" id="trasladoIdAlumno" value="1">
+                    <input type="hidden" id="trasladoFecha" value="">
+
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Fecha del traslado:</strong></label>
+                        <p id="trasladoFechaTexto" class="text-muted"></p>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="trasladoTurno" class="form-label"><strong>Turno:</strong></label>
+                        <select class="form-select" id="trasladoTurno" required onchange="cargarBusesDisponibles()">
+                            <option value="Ambos">Ambos (Mañana y Tarde)</option>
+                            <option value="Mañana">Solo Mañana (Ida)</option>
+                            <option value="Tarde">Solo Tarde (Regreso)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="trasladoBusDestino" class="form-label"><strong>Seleccionar bus destino:</strong></label>
+                        <select class="form-select" id="trasladoBusDestino" required>
+                            <option value="">-- Seleccione un bus --</option>
+                            <option value="2">Bus #002 - Ruta Norte (15 espacios)</option>
+                            <option value="3">Bus #003 - Ruta Sur (8 espacios)</option>
+                            <option value="4">Bus #004 - Ruta Este (22 espacios)</option>
+                        </select>
+                        <small class="text-muted">Buses disponibles con espacio</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="trasladoMotivo" class="form-label"><strong>Motivo del traslado:</strong></label>
+                        <textarea class="form-control" id="trasladoMotivo" rows="3" 
+                                  placeholder="Ejemplo: Se quedará en casa de su abuela esa semana"
+                                  maxlength="250"></textarea>
+                        <small class="text-muted">Opcional - máximo 250 caracteres</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cerrarModalTraslado()">Cancelar</button>
+                <button type="button" class="btn btn-info" onclick="enviarSolicitudTraslado()">
+                    <i class="bi bi-send"></i> Enviar Solicitud
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Variables globales
+        let fechaActual = new Date();
+        let fechaSeleccionada = null;
+        let asistenciaData = {}; // Simulación de datos
+
+        document.addEventListener('DOMContentLoaded', function() {
+            inicializarPagina();
+        });
+
+        function inicializarPagina() {
+            cargarCalendario();
+            verificarEstadoRutas();
+
+            // Animaciones de entrada
+            setTimeout(() => {
+                const cards = document.querySelectorAll('.info-card');
+                cards.forEach((card, index) => {
+                    setTimeout(() => {
+                        card.classList.add('animate__animated', 'animate__fadeInUp');
+                    }, index * 200);
+                });
+            }, 500);
+        }
+
+        function cargarCalendario() {
+            const year = fechaActual.getFullYear();
+            const month = fechaActual.getMonth();
+
+            // Actualizar título del mes
+            const meses = [
+                'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+            ];
+            document.getElementById('mesActual').textContent = `${meses[month]} ${year}`;
+
+            // Generar calendario
+            generarCalendario(year, month);
+
+            // Cargar datos de asistencia (simulados)
+            cargarDatosAsistencia();
+        }
+
+        function generarCalendario(year, month) {
+            const calendarioBody = document.getElementById('calendarioBody');
+            calendarioBody.innerHTML = '';
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            let date = 1;
+            const today = new Date();
+
+            // Generar filas del calendario
+            for (let i = 0; i < 6; i++) {
+                const row = calendarioBody.insertRow();
+
+                for (let j = 0; j < 7; j++) {
+                    const cell = row.insertCell();
+                    cell.className = 'position-relative';
+
+                    if (i === 0 && j < firstDay) {
+                        // Días vacíos del mes anterior
+                        cell.innerHTML = '<div class="calendar-day"></div>';
+                        cell.classList.add('text-muted');
+                    } else if (date > daysInMonth) {
+                        // Días vacíos del siguiente mes
+                        cell.innerHTML = '<div class="calendar-day"></div>';
+                        cell.classList.add('text-muted');
+                        break;
+                    } else {
+                        // Días del mes actual
+                        const isToday = (year === today.getFullYear() && 
+                                       month === today.getMonth() && 
+                                       date === today.getDate());
+
+                        const isWeekend = (j === 0 || j === 6);
+                        const fechaKey = `${year}-${month + 1}-${date}`;
+
+                        let statusClass = '';
+                        let statusIcon = '';
+                        let statusElement = '';
+
+                        // Determinar estado de asistencia
+                        if (asistenciaData[fechaKey]) {
+                            const data = asistenciaData[fechaKey];
+                            if (data.mañana === true && data.tarde === true) {
+                                statusClass = 'status-confirmed';
+                                statusIcon = '<i class="bi bi-check"></i>';
+                            } else if (data.mañana === true || data.tarde === true) {
+                                statusClass = 'status-partial';
+                                statusIcon = '<i class="bi bi-dash"></i>';
+                            } else if (data.mañana === false && data.tarde === false) {
+                                statusClass = 'status-absent';
+                                statusIcon = '<i class="bi bi-x"></i>';
+                            } else {
+                                statusClass = 'status-pending';
+                                statusIcon = '<i class="bi bi-clock"></i>';
+                            }
+                            statusElement = `<div class="${statusClass}">${statusIcon}</div>`;
+                        } else if (!isWeekend && date <= today.getDate() && year === today.getFullYear() && month === today.getMonth()) {
+                            // Días pasados sin datos
+                            statusClass = 'status-pending pulse-animation';
+                            statusIcon = '<i class="bi bi-clock"></i>';
+                            statusElement = `<div class="${statusClass}">${statusIcon}</div>`;
+                        }
+
+                        cell.innerHTML = `
+                            <div class="calendar-day ${isWeekend ? 'weekend-day' : ''} ${isToday ? 'border border-primary' : ''}" 
+                                 onclick="${!isWeekend ? `seleccionarDia(${date}, ${month + 1}, ${year})` : ''}"
+                                 style="${!isWeekend ? 'cursor: pointer;' : ''}">
+                                <div class="day-number ${isToday ? 'text-primary fw-bold' : ''}">${date}</div>
+                                ${statusElement}
+                            </div>
+                        `;
+
+                        if (isWeekend) {
+                            cell.classList.add('weekend-day');
+                        }
+
+                        date++;
+                    }
+                }
+            }
+        }
+
+        function cargarDatosAsistencia() {
+            // Simulación de datos de asistencia
+            const year = fechaActual.getFullYear();
+            const month = fechaActual.getMonth() + 1;
+
+            // Generar algunos datos de ejemplo
+            for (let i = 1; i <= 15; i++) {
+                const fechaKey = `${year}-${month}-${i}`;
+                const random = Math.random();
+
+                if (random > 0.7) {
+                    asistenciaData[fechaKey] = { mañana: true, tarde: true };
+                } else if (random > 0.4) {
+                    asistenciaData[fechaKey] = { mañana: true, tarde: false };
+                } else if (random > 0.2) {
+                    asistenciaData[fechaKey] = { mañana: false, tarde: false };
+                }
+            }
+        }
+
+        function seleccionarDia(dia, mes, año) {
+            fechaSeleccionada = new Date(año, mes - 1, dia);
+            const fechaKey = `${año}-${mes}-${dia}`;
+
+            // Mostrar panel de confirmación
+            document.getElementById('panelConfirmacion').style.display = 'block';
+            document.getElementById('fechaSeleccionada').textContent = 
+                `- ${dia} de ${obtenerNombreMes(mes - 1)} de ${año}`;
+
+            // Actualizar estado actual
+            const data = asistenciaData[fechaKey] || { mañana: null, tarde: null };
+
+            actualizarEstadoPanel('estadoActualMañana', data.mañana);
+            actualizarEstadoPanel('estadoActualTarde', data.tarde);
+
+            // Scroll al panel
+            document.getElementById('panelConfirmacion').scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'nearest'
+            });
+
+            // Actualizar modal de traslado
+            document.getElementById('trasladoFecha').value = fechaKey;
+            document.getElementById('trasladoFechaTexto').textContent = 
+                `${dia} de ${obtenerNombreMes(mes - 1)} de ${año}`;
+        }
+
+        function actualizarEstadoPanel(elementId, estado) {
+            const element = document.getElementById(elementId);
+            let html = '';
+
+            if (estado === true) {
+                html = '<span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Confirmado: Asistirá</span>';
+            } else if (estado === false) {
+                html = '<span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Confirmado: No asistirá</span>';
+            } else {
+                html = '<span class="badge bg-warning"><i class="bi bi-clock me-1"></i>Pendiente de confirmar</span>';
+            }
+
+            element.innerHTML = html;
+        }
+
+        function confirmarRuta(ruta, asistira) {
+            if (!fechaSeleccionada) return;
+
+            const year = fechaSeleccionada.getFullYear();
+            const month = fechaSeleccionada.getMonth() + 1;
+            const day = fechaSeleccionada.getDate();
+            const fechaKey = `${year}-${month}-${day}`;
+
+            // Actualizar datos
+            if (!asistenciaData[fechaKey]) {
+                asistenciaData[fechaKey] = { mañana: null, tarde: null };
+            }
+
+            asistenciaData[fechaKey][ruta] = asistira;
+
+            // Actualizar panel
+            const elementId = ruta === 'mañana' ? 'estadoActualMañana' : 'estadoActualTarde';
+            actualizarEstadoPanel(elementId, asistira);
+
+            // Regenerar calendario para actualizar colores
+            generarCalendario(year, month - 1);
+
+            // Mostrar notificación
+            const rutaTexto = ruta === 'mañana' ? 'Matutina' : 'Vespertina';
+            const estadoTexto = asistira ? 'asistirá' : 'no asistirá';
+
+            // Crear notificación simple
+            mostrarNotificacion(`Ruta ${rutaTexto}: ${estadoTexto} confirmado`, 'success');
+        }
+
+        function cerrarPanelConfirmacion() {
+            document.getElementById('panelConfirmacion').style.display = 'none';
+            fechaSeleccionada = null;
+        }
+
+        function mesAnterior() {
+            fechaActual.setMonth(fechaActual.getMonth() - 1);
+            cargarCalendario();
+        }
+
+        function mesSiguiente() {
+            fechaActual.setMonth(fechaActual.getMonth() + 1);
+            cargarCalendario();
+        }
+
+        function irHoy() {
+            fechaActual = new Date();
+            cargarCalendario();
+        }
+
+        function obtenerNombreMes(mes) {
+            const meses = [
+                'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+            ];
+            return meses[mes];
+        }
+
+        function verificarEstadoRutas() {
+            // Simulación de verificación de horarios
+            setTimeout(() => {
+                const ahora = new Date();
+                const hora = ahora.getHours();
+
+                // Verificar horario mañana (14:00 - 04:00)
+                let puedeConfirmarMañana = (hora >= 14) || (hora < 4);
+
+                // Verificar horario tarde (17:00 - 11:00) 
+                let puedeConfirmarTarde = (hora >= 17) || (hora < 11);
+
+                // Actualizar estado mañana
+                const estadoMañana = document.getElementById('estadoMañana');
+                if (puedeConfirmarMañana) {
+                    estadoMañana.innerHTML = `
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            <span class="text-success fw-semibold">Disponible para confirmar</span>
+                        </div>
+                    `;
+                    estadoMañana.className = 'alert alert-success border-0';
+                } else {
+                    estadoMañana.innerHTML = `
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-clock-fill text-warning me-2"></i>
+                            <span class="text-warning fw-semibold">Fuera de horario</span>
+                        </div>
+                    `;
+                    estadoMañana.className = 'alert alert-warning border-0';
+                }
+
+                // Actualizar estado tarde
+                const estadoTarde = document.getElementById('estadoTarde');
+                if (puedeConfirmarTarde) {
+                    estadoTarde.innerHTML = `
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            <span class="text-success fw-semibold">Disponible para confirmar</span>
+                        </div>
+                    `;
+                    estadoTarde.className = 'alert alert-success border-0';
+                } else {
+                    estadoTarde.innerHTML = `
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-clock-fill text-warning me-2"></i>
+                            <span class="text-warning fw-semibold">Fuera de horario</span>
+                        </div>
+                    `;
+                    estadoTarde.className = 'alert alert-warning border-0';
+                }
+
+                // Verificar si es fin de semana
+                const diaSemana = ahora.getDay();
+                if (diaSemana === 0 || diaSemana === 6) {
+                    document.getElementById('mensajeFinSemana').style.display = 'block';
+                    document.getElementById('textoFinSemana').textContent = 
+                        'Es fin de semana. Las confirmaciones están habilitadas para días laborables.';
+                }
+            }, 1000);
+        }
+
+        function abrirModalTraslado() {
+            if (!fechaSeleccionada) {
+                mostrarNotificacion('Por favor, selecciona un día del calendario primero', 'warning');
+                return;
+            }
+
+            console.log('Intentando abrir modal de traslado...');
+
+            // Verificar que el elemento del modal existe
+            const modalElement = document.getElementById('modalTraslado');
+            if (!modalElement) {
+                console.error('Elemento modal no encontrado');
+                mostrarNotificacion('Error: Modal no encontrado', 'error');
+                return;
+            }
+
+            // Intentar abrir el modal con diferentes métodos
+            try {
+                if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                    // Bootstrap 5
+                    const modal = new bootstrap.Modal(modalElement);
+                    modal.show();
+                    console.log('Modal abierto con Bootstrap 5');
+                } else if (typeof $ !== 'undefined' && $.fn.modal) {
+                    // jQuery/Bootstrap 4 fallback
+                    $('#modalTraslado').modal('show');
+                    console.log('Modal abierto con jQuery');
+                } else {
+                    // Fallback manual
+                    modalElement.style.display = 'block';
+                    modalElement.classList.add('show');
+                    modalElement.setAttribute('aria-hidden', 'false');
+
+                    // Añadir backdrop
+                    const backdrop = document.createElement('div');
+                    backdrop.className = 'modal-backdrop fade show';
+                    backdrop.id = 'modal-backdrop-traslado';
+                    document.body.appendChild(backdrop);
+
+                    console.log('Modal abierto manualmente');
+                }
+            } catch (error) {
+                console.error('Error al abrir modal:', error);
+                mostrarNotificacion('Error al abrir formulario de traslado', 'error');
+            }
+        }
+
+        function enviarSolicitudTraslado() {
+            const turno = document.getElementById('trasladoTurno').value;
+            const busDestino = document.getElementById('trasladoBusDestino').value;
+            const motivo = document.getElementById('trasladoMotivo').value;
+
+            if (!busDestino) {
+                mostrarNotificacion('Por favor, selecciona un bus destino', 'warning');
+                return;
+            }
+
+            // Simular envío
+            console.log('Enviando solicitud de traslado...', {
+                fecha: document.getElementById('trasladoFecha').value,
+                turno: turno,
+                busDestino: busDestino,
+                motivo: motivo
+            });
+
+            // Cerrar modal con diferentes métodos
+            try {
+                const modalElement = document.getElementById('modalTraslado');
+
+                if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                    // Bootstrap 5
+                    const modal = bootstrap.Modal.getInstance(modalElement);
+                    if (modal) {
+                        modal.hide();
+                    } else {
+                        const newModal = new bootstrap.Modal(modalElement);
+                        newModal.hide();
+                    }
+                } else if (typeof $ !== 'undefined' && $.fn.modal) {
+                    // jQuery fallback
+                    $('#modalTraslado').modal('hide');
+                } else {
+                    // Manual close
+                    modalElement.style.display = 'none';
+                    modalElement.classList.remove('show');
+                    modalElement.setAttribute('aria-hidden', 'true');
+
+                    // Remover backdrop
+                    const backdrop = document.getElementById('modal-backdrop-traslado');
+                    if (backdrop) {
+                        backdrop.remove();
+                    }
+                }
+
+                console.log('Modal cerrado correctamente');
+            } catch (error) {
+                console.error('Error al cerrar modal:', error);
+            }
+
+            // Mostrar confirmación
+            mostrarNotificacion('Solicitud de traslado enviada correctamente', 'success');
+        }
+
+        function cerrarModalTraslado() {
+            try {
+                const modalElement = document.getElementById('modalTraslado');
+
+                if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                    // Bootstrap 5
+                    const modal = bootstrap.Modal.getInstance(modalElement);
+                    if (modal) {
+                        modal.hide();
+                    } else {
+                        const newModal = new bootstrap.Modal(modalElement);
+                        newModal.hide();
+                    }
+                } else if (typeof $ !== 'undefined' && $.fn.modal) {
+                    // jQuery fallback
+                    $('#modalTraslado').modal('hide');
+                } else {
+                    // Manual close
+                    modalElement.style.display = 'none';
+                    modalElement.classList.remove('show');
+                    modalElement.setAttribute('aria-hidden', 'true');
+
+                    // Remover backdrop
+                    const backdrop = document.getElementById('modal-backdrop-traslado');
+                    if (backdrop) {
+                        backdrop.remove();
+                    }
+                }
+
+                console.log('Modal cerrado por el usuario');
+            } catch (error) {
+                console.error('Error al cerrar modal:', error);
+            }
+        }
+
+        function mostrarNotificacion(mensaje, tipo) {
+            // Crear elemento de notificación
+            const notificacion = document.createElement('div');
+            notificacion.className = `alert alert-${tipo} alert-dismissible fade show position-fixed`;
+            notificacion.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            notificacion.innerHTML = `
+                <strong>${tipo === 'success' ? '✓' : tipo === 'warning' ? '⚠' : 'ℹ'}</strong> ${mensaje}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            document.body.appendChild(notificacion);
+
+            // Auto-remover después de 5 segundos
+            setTimeout(() => {
+                if (notificacion.parentNode) {
+                    notificacion.remove();
+                }
+            }, 5000);
+        }
+
+        // Cerrar panel al hacer clic fuera
+        document.addEventListener('click', function(event) {
+            const panel = document.getElementById('panelConfirmacion');
+            if (panel.style.display === 'block' && !panel.contains(event.target) && 
+                !event.target.closest('.calendar-day')) {
+                cerrarPanelConfirmacion();
+            }
+        });
+
+        // Manejo de teclado
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                cerrarPanelConfirmacion();
+            }
+        });
+    </script>
+}

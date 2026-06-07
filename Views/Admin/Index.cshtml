@@ -1,79 +1,177 @@
 ﻿@{
-    ViewData["Title"] = "Dashboard Administrador";
+    ViewData["Title"] = "Panel de Administrador";
 }
 
-<div class="container mt-5">
-    <h2 class="mb-4 text-center">Panel de Control - Administrador</h2>
+<div class="container mt-4">
+    <h2 class="text-primary">Panel de Administrador</h2>
+    <p class="lead">Bienvenido, @User.Identity.Name</p>
 
-    <div class="row g-4">
-        <!-- Tarjeta Asignar Montos -->
-        <div class="col-md-3">
-            <div class="card shadow-lg border-0 h-100">
-                <div class="card-body text-center">
-                    <div class="mb-3">
-                        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135706.png" alt="Montos" width="64" />
-                    </div>
-                    <h5 class="card-title fw-bold">Asignar Montos</h5>
-                    <p class="card-text text-muted">
-                        Configura el monto que cada padre de familia debe pagar mensualmente.
-                    </p>
-                    <a asp-controller="MontosPadres" asp-action="Index" class="btn btn-primary w-100">
-                        Entrar
-                    </a>
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">📍 Mapa en Tiempo Real</h5>
+                    <p class="card-text">Monitoreo en vivo de ubicaciones de buses</p>
+                    <a href="/Geolocalizacion/MapaEnTiempoReal" class="btn btn-primary">Ver Mapa en Vivo</a>
                 </div>
             </div>
         </div>
 
-        <!-- Tarjeta Gestión de Usuarios -->
-        <div class="col-md-3">
-            <div class="card shadow-lg border-0 h-100">
-                <div class="card-body text-center">
-                    <div class="mb-3">
-                        <img src="https://cdn-icons-png.flaticon.com/512/1077/1077114.png" alt="Usuarios" width="64" />
-                    </div>
-                    <h5 class="card-title fw-bold">Gestión de Usuarios</h5>
-                    <p class="card-text text-muted">
-                        Administra padres de familia, cuentas de acceso y roles del sistema.
-                    </p>
-                    <a asp-controller="Admin" asp-action="GestionUsuarios" class="btn btn-success w-100">
-                        Entrar
-                    </a>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">🚌 Gestión de Rutas</h5>
+                    <p class="card-text">Calcular y administrar rutas de transporte</p>
+                    <a href="/Admin/CalcularRutas" class="btn btn-primary">Ir a Rutas</a>
                 </div>
             </div>
         </div>
 
-        <!-- Tarjeta Pagos -->
-        <div class="col-md-3">
-            <div class="card shadow-lg border-0 h-100">
-                <div class="card-body text-center">
-                    <div class="mb-3">
-                        <img src="https://cdn-icons-png.flaticon.com/512/1170/1170576.png" alt="Pagos" width="64" />
-                    </div>
-                    <h5 class="card-title fw-bold">Pagos</h5>
-                    <p class="card-text text-muted">
-                        Revisa y valida los pagos realizados por los padres de familia.
-                    </p>
-                    <a asp-controller="Admin" asp-action="DashboardPagos" class="btn btn-danger w-100">
-                        Entrar
-                    </a>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">🔄 Gestión de Traslados</h5>
+                    <p class="card-text">Administrar solicitudes de traslado</p>
+                    <a href="/Admin/GestionarTraslados" class="btn btn-primary">Ir a Traslados</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NUEVAS FUNCIONALIDADES -->
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card border-success">
+                <div class="card-body">
+                    <h5 class="card-title">📊 Reporte de Rutas</h5>
+                    <p class="card-text">Ver listado completo de rutas registradas</p>
+                    <a href="/Admin/ReporteRutas" class="btn btn-success">Ver Reporte</a>
                 </div>
             </div>
         </div>
 
-        <!-- Tarjeta Calendario -->
-        <div class="col-md-3">
-            <div class="card shadow-lg border-0 h-100">
-                <div class="card-body text-center">
-                    <div class="mb-3">
-                        <img src="https://cdn-icons-png.flaticon.com/512/747/747310.png" alt="Calendario" width="64" />
-                    </div>
-                    <h5 class="card-title fw-bold">Calendario</h5>
-                    <p class="card-text text-muted">
-                        Visualiza los pagos en un calendario interactivo.
-                    </p>
-                    <a asp-controller="Admin" asp-action="Calendario" class="btn btn-info w-100">
-                        Entrar
-                    </a>
+        <div class="col-md-4">
+            <div class="card border-info">
+                <div class="card-body">
+                    <h5 class="card-title">👥 Asignaciones Personal</h5>
+                    <p class="card-text">Ver asignaciones de pilotos y monitores a buses</p>
+                    <a href="/Admin/ReporteAsignaciones" class="btn btn-info">Ver Asignaciones</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-warning">
+                <div class="card-body">
+                    <h5 class="card-title">🗺️ Planificador de Rutas</h5>
+                    <p class="card-text">Herramienta de planificación avanzada</p>
+                    <a href="/Planner" class="btn btn-warning">Abrir Planner</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">📊 Geolocalización</h5>
+                    <p class="card-text">Ver buses y ubicaciones en tiempo real</p>
+                    <a href="/Geolocalizacion/BusesIndex" class="btn btn-primary">Ir a Buses</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">👨‍💼 Gestión de Usuarios</h5>
+                    <p class="card-text">Administrar usuarios del sistema</p>
+                    <a href="/Admin/Usuarios" class="btn btn-success">Gestionar Usuarios</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">🔧 Gestionar Asignaciones</h5>
+                    <p class="card-text">Asignar pilotos y monitores a buses</p>
+                    <a href="/Admin/GestionarAsignaciones" class="btn btn-primary">Gestionar</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-primary">
+                <div class="card-body">
+                    <h5 class="card-title">📍 Gestionar Paradas</h5>
+                    <p class="card-text">Editor interactivo de paradas en el mapa</p>
+                    <a href="/Admin/GestionarParadas" class="btn btn-primary">Abrir Editor</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones rápidas -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <h4 class="text-secondary mb-3">🚨 Acciones Rápidas - Sistema de Alertas</h4>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">🔔 Ver Alertas de Proximidad</h5>
+                    <p class="card-text">Monitorear alertas activas cuando buses se acercan a puntos de recogida</p>
+                    <a href="/Admin/AlertasHistorial" class="btn btn-warning">Ver Alertas de Proximidad</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">⏰ Ver Notificaciones de Retrasos</h5>
+                    <p class="card-text">Revisar notificaciones de retrasos y eventos en rutas</p>
+                    <a href="/Admin/AlertasHistorial" class="btn btn-danger">Ver Notificaciones de Retrasos</a>
+                </div>
+            </div>
+        </div>
+
+        @* Tarjeta Dashboard Principal ocultada temporalmente *@
+        @* <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">📈 Dashboard Principal</h5>
+                    <p class="card-text">Vista general del sistema con estadísticas</p>
+                    <a href="/Dashboard" class="btn btn-info">Ver Dashboard</a>
+                </div>
+            </div>
+        </div> *@
+    </div>
+</div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">📋 Historial de Alertas</h5>
+                    <p class="card-text">Acceder al historial completo de alertas y su gestión</p>
+                    <a href="/Admin/AlertasHistorial" class="btn btn-info">Ver Historial Completo</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">🚪 Cerrar Sesión</h5>
+                    <p class="card-text">Salir del sistema de administración</p>
+                    <a href="/Auth/Logout" class="btn btn-outline-danger">Cerrar Sesión</a>
                 </div>
             </div>
         </div>
