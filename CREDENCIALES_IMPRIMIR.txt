@@ -1,0 +1,69 @@
+===============================================
+  CREDENCIALES DE USUARIOS - DEMO MARTES
+  Sistema TransportesGenesis
+===============================================
+
+USUARIOS PARA LOGIN:
+--------------------
+
+1. ADMINISTRADOR
+   Usuario:    admin@genesis.com
+   Contraseña: Admin123!
+
+2. PILOTO
+   Usuario:    piloto@genesis.com
+   Contraseña: Piloto123!
+
+3. MONITOR
+   Usuario:    monitor@genesis.com
+   Contraseña: Monitor123!
+
+4. PADRE DE FAMILIA
+   Usuario:    padre@genesis.com
+   Contraseña: Padre123!
+
+===============================================
+
+ORDEN DE PRESENTACIÓN SUGERIDO:
+--------------------------------
+
+1° ADMINISTRADOR (2 min)
+   - Dashboard con gráficos
+   - Reportes
+   - Exportar Excel
+   - Gestión de usuarios/buses
+
+2° PILOTO (2 min)
+   - Mi Ruta
+   - Mapa con paradas
+   - Alumnos asignados
+
+3° MONITOR (2 min)
+   - Registro de asistencia
+   - Listado de alumnos
+   - Control presente/ausente
+
+4° PADRE (2 min)
+   - Seguimiento del bus
+   - Asistencias de hijos
+   - Notificaciones
+
+===============================================
+
+PREPARACIÓN:
+------------
+☑ Ejecutar script: SeedData_Usuarios_Demo.sql
+☑ Verificar login de todos los usuarios
+☑ Tener datos de ejemplo en el sistema
+☑ Probar cada pantalla antes
+
+TIPS:
+-----
+☑ Usar copiar/pegar para credenciales
+☑ Tener pestañas preparadas
+☑ Usar modo incógnito para cambiar usuarios
+☑ Tener este documento visible durante demo
+
+===============================================
+¡BUENA SUERTE EN TU PRESENTACIÓN! 🎉
+===============================================

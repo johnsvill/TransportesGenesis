@@ -155,7 +155,7 @@ namespace TransportesGenesis.Controllers
         }
 
         // POST: /Auth/Logout - Para formularios que usen POST
-        [HttpPost]
+        [HttpPost("Logout")]
         [Authorize]
         public async Task<IActionResult> LogoutPost()
         {

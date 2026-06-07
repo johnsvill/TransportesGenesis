@@ -85,6 +85,15 @@
         .badge {
             font-size: 10px;
         }
+
+        .ruta-header .d-flex {
+            gap: 10px;
+        }
+
+        .ruta-header .btn-light {
+            font-size: 0.85rem;
+            padding: 0.375rem 0.75rem;
+        }
     }
 
     /* Audio indicator */
@@ -126,7 +135,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="ruta-header">
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap">
                         <div>
                             <h4 class="mb-1">
                                 <i class="bi bi-geo-alt-fill"></i> Mi Ruta del Día
@@ -135,10 +144,13 @@
                                 @DateTime.Now.ToString("dddd, d 'de' MMMM 'de' yyyy", new System.Globalization.CultureInfo("es-ES"))
                             </p>
                         </div>
-                        <div class="text-end">
+                        <div class="text-end d-flex align-items-center gap-2">
                             <span id="estadoGPS" class="badge bg-secondary badge-gps">
                                 <i class="bi bi-geo-alt"></i> Detectando GPS...
                             </span>
+                            <a href="/Auth/Logout" class="btn btn-light btn-sm">
+                                <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -164,8 +176,11 @@
         </div>
         <div class="col-md-6">
             <div class="card h-100">
-                <div class="card-header bg-info text-white">
-                    <i class="bi bi-geo-alt-fill"></i> Ubicación GPS
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-geo-alt-fill"></i> Ubicación GPS</span>
+                    <button onclick="obtenerUbicacionUsuario()" class="btn btn-light btn-sm" title="Actualizar ubicación">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
                 </div>
                 <div class="card-body">
                     <div id="ubicacionInfo">
@@ -725,16 +740,52 @@
                     function(error) {
                         console.error('Error obteniendo ubicación:', error);
 
+                        let mensajeError = '';
+                        let solucion = '';
+
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                mensajeError = 'Permiso GPS denegado';
+                                solucion = `
+                                    <small>
+                                        <strong>¿Cómo activar GPS?</strong><br>
+                                        1. Haz clic en el <strong>ícono de candado 🔒</strong> en la barra de direcciones<br>
+                                        2. Busca <strong>"Ubicación"</strong><br>
+                                        3. Cambia a <strong>"Permitir"</strong><br>
+                                        4. Recarga la página (F5)
+                                    </small>
+                                `;
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                mensajeError = 'Ubicación no disponible';
+                                solucion = '<small>Verifica que el GPS de tu dispositivo esté activado</small>';
+                                break;
+                            case error.TIMEOUT:
+                                mensajeError = 'Tiempo de espera agotado';
+                                solucion = '<small>Intenta de nuevo en unos segundos</small>';
+                                break;
+                            default:
+                                mensajeError = 'Error desconocido';
+                                solucion = '<small>Verifica la configuración de tu navegador</small>';
+                        }
+
                         // Actualizar estado GPS a error
                         estadoGPS.innerHTML = '<i class="bi bi-geo-alt-slash"></i> GPS No Disponible';
                         estadoGPS.className = 'badge bg-danger';
 
                         if (ubicacionInfo) {
                             ubicacionInfo.innerHTML = `
-                                <p class="text-danger mb-0">
-                                    <i class="bi bi-exclamation-triangle"></i> No se pudo obtener la ubicación
-                                    <br><small>Verifica que el GPS esté habilitado</small>
-                                </p>
+                                <div class="alert alert-warning mb-0 p-2">
+                                    <p class="mb-1">
+                                        <i class="bi bi-exclamation-triangle"></i> 
+                                        <strong>${mensajeError}</strong>
+                                    </p>
+                                    ${solucion}
+                                    <hr class="my-2">
+                                    <button onclick="obtenerUbicacionUsuario()" class="btn btn-warning btn-sm w-100 mt-1">
+                                        <i class="bi bi-arrow-clockwise"></i> Intentar de nuevo
+                                    </button>
+                                </div>
                             `;
                         }
                     },
@@ -750,10 +801,13 @@
 
                 if (ubicacionInfo) {
                     ubicacionInfo.innerHTML = `
-                        <p class="text-warning mb-0">
-                            <i class="bi bi-exclamation-triangle"></i> 
-                            El navegador no soporta geolocalización
-                        </p>
+                        <div class="alert alert-danger mb-0 p-2">
+                            <p class="mb-0">
+                                <i class="bi bi-exclamation-triangle"></i> 
+                                <strong>El navegador no soporta geolocalización</strong>
+                            </p>
+                            <small>Intenta usar Chrome, Firefox o Edge actualizado</small>
+                        </div>
                     `;
                 }
             }
