@@ -7,8 +7,8 @@
     <p class="lead">Bienvenido, @User.Identity.Name</p>
 
     <div class="row mt-4">
-        <div class="col-md-4">
-            <div class="card">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
                 <div class="card-body">
                     <h5 class="card-title">📍 Mapa en Tiempo Real</h5>
                     <p class="card-text">Monitoreo en vivo de ubicaciones de buses</p>
@@ -17,8 +17,8 @@
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
                 <div class="card-body">
                     <h5 class="card-title">🚌 Gestión de Rutas</h5>
                     <p class="card-text">Calcular y administrar rutas de transporte</p>
@@ -27,8 +27,8 @@
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
                 <div class="card-body">
                     <h5 class="card-title">🔄 Gestión de Traslados</h5>
                     <p class="card-text">Administrar solicitudes de traslado</p>
@@ -38,10 +38,9 @@
         </div>
     </div>
 
-    <!-- NUEVAS FUNCIONALIDADES -->
-    <div class="row mt-4">
-        <div class="col-md-4">
-            <div class="card border-success">
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card border-success h-100">
                 <div class="card-body">
                     <h5 class="card-title">📊 Reporte de Rutas</h5>
                     <p class="card-text">Ver listado completo de rutas registradas</p>
@@ -50,8 +49,8 @@
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card border-info">
+        <div class="col-md-4 mb-4">
+            <div class="card border-info h-100">
                 <div class="card-body">
                     <h5 class="card-title">👥 Asignaciones Personal</h5>
                     <p class="card-text">Ver asignaciones de pilotos y monitores a buses</p>
@@ -60,8 +59,8 @@
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card border-warning">
+        <div class="col-md-4 mb-4">
+            <div class="card border-warning h-100">
                 <div class="card-body">
                     <h5 class="card-title">🗺️ Planificador de Rutas</h5>
                     <p class="card-text">Herramienta de planificación avanzada</p>
@@ -71,9 +70,9 @@
         </div>
     </div>
 
-    <div class="row mt-4">
-        <div class="col-md-4">
-            <div class="card">
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
                 <div class="card-body">
                     <h5 class="card-title">📊 Geolocalización</h5>
                     <p class="card-text">Ver buses y ubicaciones en tiempo real</p>
@@ -82,8 +81,8 @@
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
                 <div class="card-body">
                     <h5 class="card-title">👨‍💼 Gestión de Usuarios</h5>
                     <p class="card-text">Administrar usuarios del sistema</p>
@@ -92,8 +91,8 @@
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
                 <div class="card-body">
                     <h5 class="card-title">🔧 Gestionar Asignaciones</h5>
                     <p class="card-text">Asignar pilotos y monitores a buses</p>
@@ -102,8 +101,8 @@
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card border-primary">
+        <div class="col-md-4 mb-4">
+            <div class="card border-primary h-100">
                 <div class="card-body">
                     <h5 class="card-title">📍 Gestionar Paradas</h5>
                     <p class="card-text">Editor interactivo de paradas en el mapa</p>
@@ -113,49 +112,87 @@
         </div>
     </div>
 
-    <!-- Acciones rápidas -->
-    <div class="row mt-4">
+    <hr class="my-4" />
+
+    <div class="row">
+        <div class="col-12">
+            <h4 class="text-secondary mb-3">💰 Control Financiero y Mensualidades</h4>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">💵 Asignar Montos</h5>
+                    <p class="card-text">Configura el monto que cada padre de familia debe pagar mensualmente.</p>
+                    <a asp-controller="MontosPadres" asp-action="Index" class="btn btn-primary">Entrar</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card border-success h-100">
+                <div class="card-body">
+                    <h5 class="card-title">👥 Gestión de Cuentas y Padres</h5>
+                    <p class="card-text">Administra padres de familia, cuentas de acceso y roles del sistema.</p>
+                    <a asp-controller="Admin" asp-action="GestionUsuarios" class="btn btn-success">Entrar</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card border-danger h-100">
+                <div class="card-body">
+                    <h5 class="card-title">💳 Validar Pagos</h5>
+                    <p class="card-text">Revisa y valida los pagos realizados por los padres de familia.</p>
+                    <a asp-controller="Admin" asp-action="DashboardPagos" class="btn btn-danger">Entrar</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card border-info h-100">
+                <div class="card-body">
+                    <h5 class="card-title">📅 Calendario de Pagos</h5>
+                    <p class="card-text">Visualiza los pagos en un calendario interactivo.</p>
+                    <a asp-controller="Admin" asp-action="Calendario" class="btn btn-info">Entrar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-4" />
+
+    <div class="row">
         <div class="col-12">
             <h4 class="text-secondary mb-3">🚨 Acciones Rápidas - Sistema de Alertas</h4>
         </div>
     </div>
 
     <div class="row">
-        <div class="col-md-4">
-            <div class="card">
+        <div class="col-md-4 mb-4">
+            <div class="card border-warning h-100">
                 <div class="card-body">
-                    <h5 class="card-title">🔔 Ver Alertas de Proximidad</h5>
+                    <h5 class="card-title">🔔 Alertas de Proximidad</h5>
                     <p class="card-text">Monitorear alertas activas cuando buses se acercan a puntos de recogida</p>
-                    <a href="/Admin/AlertasHistorial" class="btn btn-warning">Ver Alertas de Proximidad</a>
+                    <a href="/Admin/AlertasHistorial" class="btn btn-warning">Ver Alertas</a>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card">
+        <div class="col-md-4 mb-4">
+            <div class="card border-danger h-100">
                 <div class="card-body">
-                    <h5 class="card-title">⏰ Ver Notificaciones de Retrasos</h5>
+                    <h5 class="card-title">⏰ Notificaciones de Retrasos</h5>
                     <p class="card-text">Revisar notificaciones de retrasos y eventos en rutas</p>
-                    <a href="/Admin/AlertasHistorial" class="btn btn-danger">Ver Notificaciones de Retrasos</a>
+                    <a href="/Admin/AlertasHistorial" class="btn btn-danger">Ver Retrasos</a>
                 </div>
             </div>
         </div>
 
-        @* Tarjeta Dashboard Principal ocultada temporalmente *@
-        @* <div class="col-md-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">📈 Dashboard Principal</h5>
-                    <p class="card-text">Vista general del sistema con estadísticas</p>
-                    <a href="/Dashboard" class="btn btn-info">Ver Dashboard</a>
-                </div>
-            </div>
-        </div> *@
-    </div>
-</div>
-
-        <div class="col-md-4">
-            <div class="card">
+        <div class="col-md-4 mb-4">
+            <div class="card border-info h-100">
                 <div class="card-body">
                     <h5 class="card-title">📋 Historial de Alertas</h5>
                     <p class="card-text">Acceder al historial completo de alertas y su gestión</p>
@@ -165,15 +202,9 @@
         </div>
     </div>
 
-    <div class="row mt-4">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">🚪 Cerrar Sesión</h5>
-                    <p class="card-text">Salir del sistema de administración</p>
-                    <a href="/Auth/Logout" class="btn btn-outline-danger">Cerrar Sesión</a>
-                </div>
-            </div>
+    <div class="row mt-2">
+        <div class="col-md-4 mb-4">
+            <a href="/Auth/Logout" class="btn btn-outline-danger w-100">🚪 Cerrar Sesión</a>
         </div>
     </div>
 </div>

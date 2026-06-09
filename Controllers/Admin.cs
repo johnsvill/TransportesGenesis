@@ -23,6 +23,7 @@ public class AdminController : Controller
         _context = context;
     }
 
+    [HttpGet]
     public IActionResult Index()
     {
         return View();
@@ -111,8 +112,9 @@ public class AdminController : Controller
         return RedirectToAction("DashboardPagos");
     }
 
-    [Authorize(Roles = "Administrador")]
-    public IActionResult DashboardPagos(string usuarioId, string mes, int page = 1)
+    [Authorize(Roles = "Administrador")] 
+    [HttpGet("Admin/DashboardPagos")]
+    public async Task<IActionResult> DashboardPagos(string usuarioId, string mes, int page = 1)
     {
         int pageSize = 10;
         var query = _context.PagosPadresDb.AsQueryable();
@@ -123,33 +125,35 @@ public class AdminController : Controller
         if (!string.IsNullOrEmpty(mes))
             query = query.Where(p => p.Mes == mes);
 
-        var totalRegistros = query.Count();
-        var pagos = query
+        var totalRegistros = await query.CountAsync();
+        var pagos = await query
             .OrderByDescending(p => p.Fecha)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .ToList();
+            .ToListAsync();
 
         ViewBag.TotalPaginas = (int)Math.Ceiling(totalRegistros / (double)pageSize);
         ViewBag.PaginaActual = page;
-        
-        var usuarios = _userManager.Users.ToList();
+       
+        var todosLosUsuarios = _userManager.Users.ToList();
         var usuariosFiltrados = new List<string>();
 
-        foreach (var u in usuarios)
+        foreach (var u in todosLosUsuarios)
         {
-            var roles = _userManager.GetRolesAsync(u).Result;
+            var roles = await _userManager.GetRolesAsync(u);
             if (!roles.Contains("Administrador"))
+            {
                 usuariosFiltrados.Add(u.Email);
+            }
         }
 
         ViewBag.Usuarios = usuariosFiltrados;
 
-        ViewBag.Meses = _context.PagosPadresDb
+        ViewBag.Meses = await _context.PagosPadresDb
             .Select(p => p.Mes)
             .Distinct()
-            .ToList();
-        
+            .ToListAsync();
+
         ViewBag.UsuarioSeleccionado = usuarioId;
         ViewBag.MesSeleccionado = mes;
 
