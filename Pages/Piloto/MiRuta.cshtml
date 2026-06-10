@@ -478,14 +478,14 @@
         const datosSimulacionPiloto = {
             bus: "Bus #001",
             piloto: "Juan Pérez",
-            ruta: "Centro - Yulimay PC",
+            ruta: "Zona 4 - Yulimay PC",
             paradas: [
-                { nombre: "Parada Central - 6ta Avenida", coordenadas: [14.6349, -90.5069], orden: 1 },
-                { nombre: "Plaza Central", coordenadas: [14.6335, -90.5055], orden: 2 },
-                { nombre: "Mercado Municipal", coordenadas: [14.6320, -90.5045], orden: 3 },
-                { nombre: "Terminal de Buses", coordenadas: [14.6305, -90.5030], orden: 4 },
-                { nombre: "Centro Comercial", coordenadas: [14.6290, -90.5015], orden: 5 },
-                { nombre: "Colegio Yulimay PC", coordenadas: [14.6235, -90.4956], orden: 6 }
+                { nombre: "7ma Av. y 2da Calle, Zona 4",       coordenadas: [14.6380, -90.5240], orden: 1 },
+                { nombre: "5ta Av. y 4ta Calle, Zona 4",       coordenadas: [14.6358, -90.5215], orden: 2 },
+                { nombre: "Terminal Central, 3ra Av., Zona 4", coordenadas: [14.6336, -90.5190], orden: 3 },
+                { nombre: "Mercado El Guarda, Zona 4",         coordenadas: [14.6314, -90.5165], orden: 4 },
+                { nombre: "Av. Bolívar y 8va Calle, Zona 4",   coordenadas: [14.6292, -90.5145], orden: 5 },
+                { nombre: "Colegio Yulimay PC, Zona 4",        coordenadas: [14.6270, -90.5125], orden: 6 }
             ]
         };
 
@@ -1269,5 +1269,57 @@
                 }
             }
         }
+    </script>
+    <!-- SignalR: cargado desde _Layout.cshtml (lib/signalr/signalr.min.js + js/signalr-client.js) -->
+    <script>
+        // Conectar cliente SignalR en vista piloto para recibir notificaciones y reportar ubicaciones
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                window.pilotoNot = new NotificacionesCliente();
+                await window.pilotoNot.conectar();
+
+                // Unirse al grupo del bus si IdBus disponible
+                const idBus = @(Model.IdBus.HasValue ? Model.IdBus.Value.ToString() : "null");
+                if (idBus !== null) {
+                    await window.pilotoNot.unirseAGrupo(`Bus_${idBus}`);
+                }
+
+                // Escuchar alertas
+                window.pilotoNot.onAlerta((data) => {
+                    console.log('Piloto recibió alerta:', data);
+                    const cont = document.createElement('div');
+                    cont.className = 'alert alert-info position-fixed';
+                    cont.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 260px;';
+                    cont.innerHTML = `<strong>🔔</strong> ${data.mensaje || data.Mensaje || 'Alerta'} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+                    document.body.appendChild(cont);
+                    setTimeout(()=>{ if (cont.parentNode) cont.remove(); }, 6000);
+                });
+
+                // Reporter automático durante simulación: envía posición del marcador de simulación al hub y al API cada 2s
+                setInterval(() => {
+                    try {
+                        if (typeof simulacionPilotoActiva !== 'undefined' && simulacionPilotoActiva && typeof marcadorBusSimulacion !== 'undefined' && marcadorBusSimulacion) {
+                            const latlng = marcadorBusSimulacion.getLatLng();
+                            if (idBus !== null) {
+                                // 1) Enviar por SignalR (para pilotos/monitores)
+                                try { if (window.pilotoNot && window.pilotoNot.reportarUbicacionBus) window.pilotoNot.reportarUbicacionBus(parseInt(idBus), latlng.lat, latlng.lng); } catch(e){}
+
+                                // 2) Registrar ubicación en el API para que el servidor la persista y notifique a padres (grupos Alumno_{id})
+                                fetch(`/api/ubicaciones`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ idBus: parseInt(idBus), latitud: latlng.lat, longitud: latlng.lng, velocidad: 10.0, direccion: 0 })
+                                }).then(r => {
+                                    if (!r.ok) console.warn('POST ubicacion API falló', r.status);
+                                }).catch(err => console.warn('Error POST ubicacion API', err));
+                            }
+                        }
+                    } catch (e) { console.warn('Error reporter SignalR/API:', e); }
+                }, 2000);
+
+            } catch (e) {
+                console.warn('SignalR piloto no disponible', e);
+            }
+        });
     </script>
 }

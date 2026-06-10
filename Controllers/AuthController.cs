@@ -83,7 +83,7 @@ namespace TransportesGenesis.Controllers
                         return RedirectToPage("/Padre/ConfiguracionInicial");
                     }
 
-                    return RedirectToAction("Index", "PagosPadresFamilia");
+                    return RedirectToPage("/Padres/DashboardRutaBusAsignado");
                 }
                 else if (roles.Contains("Piloto"))
                 {

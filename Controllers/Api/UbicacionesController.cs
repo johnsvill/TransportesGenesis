@@ -51,7 +51,8 @@ namespace TransportesGenesis.Controllers.Api
         {
             try
             {
-                var ubicacion = await _ubicacionService.RegistrarUbicacionAsync(dto);
+                // Usar el método que registra y además notifica via SignalR (proximidad / llegada)
+                var ubicacion = await _ubicacionService.RegistrarUbicacionYNotificarAsync(dto);
                 return CreatedAtAction(nameof(GetUltimaUbicacion), new { idBus = ubicacion.IdBus }, ubicacion);
             }
             catch (KeyNotFoundException ex)

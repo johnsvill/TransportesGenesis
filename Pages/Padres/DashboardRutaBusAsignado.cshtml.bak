@@ -1,0 +1,1260 @@
+@page
+@model TransportesGenesis.Pages.Padres.DashboardRutaBusAsignadoModel
+@{
+    ViewData["Title"] = "Ruta del Bus Asignado";
+}
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<style>
+    .route-header {
+        background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
+        color: white;
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 30px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 8px 25px rgba(0,123,255,0.3);
+    }
+
+    .route-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 200px;
+        height: 200px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+        animation: float 8s ease-in-out infinite;
+    }
+
+    .info-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        height: 100%;
+    }
+
+    .info-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+
+    .bus-info-card .card-header {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        color: white;
+    }
+
+    .schedule-card .card-header {
+        background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+        border: none;
+        color: white;
+    }
+
+    .stop-card .card-header {
+        background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);
+        border: none;
+        color: white;
+    }
+
+    #mapaBusAsignado {
+        height: 70vh;
+        min-height: 500px;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        overflow: hidden;
+    }
+
+    .status-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 8px;
+    }
+
+    .status-active {
+        background: #28a745;
+        animation: pulse 2s infinite;
+    }
+
+    .status-inactive {
+        background: #6c757d;
+    }
+
+    .route-legend {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    .legend-item:last-child {
+        border-bottom: none;
+    }
+
+    .legend-color {
+        width: 20px;
+        height: 4px;
+        margin-right: 10px;
+        border-radius: 2px;
+    }
+
+    .route-morning {
+        background: linear-gradient(135deg, #FF6B35 0%, #FF4500 100%);
+    }
+
+    .route-afternoon {
+        background: linear-gradient(135deg, #228B22 0%, #32CD32 100%);
+    }
+
+    .floating-controls {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .floating-btn {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: none;
+        background: white;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+
+    .floating-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    }
+
+    .custom-marker {
+        background: transparent;
+        border: none;
+    }
+
+    .bus-marker {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        border: 3px solid white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        cursor: pointer;
+        animation: busMovement 3s ease-in-out infinite;
+    }
+
+    .stop-marker {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        border: 3px solid white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+        color: white;
+        cursor: pointer;
+    }
+
+    .school-marker {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 30px;
+        border: 4px solid white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        cursor: pointer;
+        animation: school-pulse 3s ease-in-out infinite;
+    }
+
+    @@keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-10px) rotate(5deg); }
+    }
+
+    @@keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+
+    @@keyframes busMovement {
+        0%, 100% { transform: scale(1) rotate(0deg); }
+        50% { transform: scale(1.1) rotate(5deg); }
+    }
+
+    @@keyframes school-pulse {
+        0%, 100% { transform: scale(1); box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); }
+        50% { transform: scale(1.05); box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6); }
+    }
+
+    @@keyframes simulation-pulse {
+        0%, 100% { transform: scale(1); box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4); }
+        50% { transform: scale(1.1); box-shadow: 0 6px 20px rgba(255, 107, 53, 0.6); }
+    }
+
+    .simulation-marker {
+        animation: simulation-pulse 1.5s ease-in-out infinite;
+    }
+
+    .parada-resaltada {
+        animation: pulse 0.5s ease-in-out 3;
+    }
+
+    @@media (max-width: 768px) {
+        #mapaBusAsignado { height: 60vh; min-height: 400px; }
+        .floating-controls { top: 10px; right: 10px; }
+        .floating-btn { width: 40px; height: 40px; font-size: 16px; }
+        .route-header { padding: 20px; }
+    }
+</style>
+
+<div class="container-fluid px-3 px-md-4">
+    <!-- Header -->
+    <div class="route-header animate__animated animate__fadeInDown">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="mb-2 fw-bold">
+                    <i class="bi bi-geo-alt-fill me-3"></i>
+                    Ruta del Bus Asignado - <small class="text-light">@(!string.IsNullOrEmpty(Model.PadreNombre) ? Model.PadreNombre : User.Identity?.Name)</small>
+                </h1>
+                <p class="mb-0 opacity-75">
+                    <i class="bi bi-person-circle me-2"></i>
+                    Seguimiento en tiempo real de la ruta de <strong>@Model.NombreHijo</strong>
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <div class="d-flex gap-2 justify-content-md-end justify-content-center">
+                    <a href="/Padres/ConfirmarAsistencia" class="btn btn-light btn-lg">
+                        <i class="bi bi-calendar-check me-2"></i>
+                        Calendario
+                    </a>
+                    <a href="/Auth/Logout" class="btn btn-outline-light btn-lg">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span class="d-none d-md-inline ms-2">Cerrar Sesión</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards de información -->
+    <div class="row g-4 mb-4">
+        <!-- Bus Asignado -->
+        <div class="col-12 col-lg-4">
+            <div class="info-card bus-info-card">
+                <div class="card-header">
+                    <h6 class="mb-0 fw-bold">
+                        <i class="bi bi-bus-front-fill me-2"></i>
+                        Bus Asignado
+                    </h6>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-bus-front text-success me-3 fs-2"></i>
+                        <div>
+                            <div class="fw-bold fs-5">@Model.BusAsignado</div>
+                            <div class="text-muted">@Model.RutaNombre</div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center">
+                        <span class="status-indicator @(Model.MostrarRutaMañana || Model.MostrarRutaTarde ? "status-active" : "status-inactive")"></span>
+                        <span class="fw-semibold">
+                            @if (Model.MostrarRutaMañana || Model.MostrarRutaTarde)
+                            {
+                                <span class="text-success">En servicio</span>
+                            }
+                            else if (Model.EsFinDeSemana)
+                            {
+                                <span class="text-muted">Fin de semana</span>
+                            }
+                            else
+                            {
+                                <span class="text-warning">Fuera de horario</span>
+                            }
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Horarios -->
+        <div class="col-12 col-lg-4">
+            <div class="info-card schedule-card">
+                <div class="card-header">
+                    <h6 class="mb-0 fw-bold">
+                        <i class="bi bi-clock-fill me-2"></i>
+                        Horarios de Servicio
+                    </h6>
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-sunrise-fill text-warning me-2"></i>
+                            <strong>Mañana (Recogida)</strong>
+                        </div>
+                        <div class="text-muted">
+                            5:00 AM - 8:00 AM
+                            <br>
+                            <small>Hora estimada: @Model.HorarioMañana</small>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-sunset-fill text-info me-2"></i>
+                            <strong>Tarde (Regreso)</strong>
+                        </div>
+                        <div class="text-muted">
+                            12:00 PM - 3:00 PM
+                            <br>
+                            <small>Hora estimada: @Model.HorarioTarde</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Parada Asignada -->
+        <div class="col-12 col-lg-4">
+            <div class="info-card stop-card">
+                <div class="card-header">
+                    <h6 class="mb-0 fw-bold">
+                        <i class="bi bi-geo-alt-fill me-2"></i>
+                        Parada Asignada
+                    </h6>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-signpost-2 text-primary me-3 fs-2"></i>
+                        <div>
+                            <div class="fw-bold">@Model.ParadaAsignada</div>
+                            <div class="text-muted">Zona Centro</div>
+                        </div>
+                    </div>
+
+                    @if (Model.MostrarRutaMañana || Model.MostrarRutaTarde)
+                    {
+                        <div class="alert alert-info mb-0">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <small>Bus activo - Siga la ruta en el mapa</small>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-secondary mb-0">
+                            <i class="bi bi-clock me-2"></i>
+                            <small>Servicio no disponible en este momento</small>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mapa y Leyenda -->
+    <div class="row">
+        <div class="col-12 col-lg-9">
+            <div class="position-relative">
+                <div id="mapaBusAsignado"></div>
+
+                <!-- Controles flotantes -->
+                <div class="floating-controls">
+                    <button class="floating-btn" onclick="centrarEnBus()" title="Centrar en Bus">
+                        <i class="bi bi-crosshair"></i>
+                    </button>
+                    <button class="floating-btn" onclick="verRutaCompleta()" title="Ver Ruta Completa">
+                        <i class="bi bi-zoom-out"></i>
+                    </button>
+                    <button class="floating-btn" onclick="actualizarUbicacion()" title="Actualizar">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leyenda -->
+        <div class="col-12 col-lg-3">
+            <div class="sticky-top" style="top: 20px;">
+                <div class="route-legend">
+                    <h6 class="fw-bold mb-3">
+                        <i class="bi bi-map me-2"></i>
+                        Leyenda del Mapa
+                    </h6>
+
+                    <div class="legend-item">
+                        <div class="legend-color route-morning"></div>
+                        <div>
+                            <div class="fw-semibold">Ruta Mañana</div>
+                            <small class="text-muted">Recogida (5:00 - 8:00 AM)</small>
+                        </div>
+                    </div>
+
+                    <div class="legend-item">
+                        <div class="legend-color route-afternoon"></div>
+                        <div>
+                            <div class="fw-semibold">Ruta Tarde</div>
+                            <small class="text-muted">Regreso (12:00 - 3:00 PM)</small>
+                        </div>
+                    </div>
+
+                    <div class="legend-item">
+                        <div class="me-3">🚌</div>
+                        <div>
+                            <div class="fw-semibold">Bus Asignado</div>
+                            <small class="text-muted">Ubicación actual</small>
+                        </div>
+                    </div>
+
+                    <div class="legend-item">
+                        <div class="me-3">🚏</div>
+                        <div>
+                            <div class="fw-semibold">Parada</div>
+                            <small class="text-muted">Punto de recogida/dejada</small>
+                        </div>
+                    </div>
+
+                    <div class="legend-item">
+                        <div class="me-3">🏫</div>
+                        <div>
+                            <div class="fw-semibold">Colegio Yulimay PC</div>
+                            <small class="text-muted">Destino final</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botón Simular Ruta -->
+                <div class="mt-4">
+                    <button class="btn btn-primary btn-lg w-100" onclick="simularRuta()" id="btnSimularRuta">
+                        <i class="bi bi-play-circle-fill me-2"></i>
+                        Simular Ruta
+                    </button>
+                    <div class="mt-2 text-center">
+                        <small class="text-muted" id="estadoSimulacion">Ver animación del recorrido completo</small>
+                    </div>
+                </div>
+
+                @if (Model.EsFinDeSemana)
+                {
+                    <div class="alert alert-info">
+                        <i class="bi bi-calendar-x me-2"></i>
+                        <strong>Fin de semana</strong><br>
+                        <small>No hay servicio de transporte los fines de semana</small>
+                    </div>
+                }
+                else if (!Model.MostrarRutaMañana && !Model.MostrarRutaTarde)
+                {
+                    <div class="alert alert-warning">
+                        <i class="bi bi-clock me-2"></i>
+                        <strong>Fuera de horario</strong><br>
+                        <small>El servicio está disponible de 5:00-8:00 AM y 12:00-3:00 PM</small>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
+<!-- Leaflet Routing Machine -->
+<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+<!-- SignalR: cargado desde _Layout.cshtml (lib/signalr/signalr.min.js + js/signalr-client.js) -->
+
+@section Scripts {
+    <script>
+        // Variables globales
+        let mapaBusAsignado;
+        let busMarker;
+        let paradaMarker;
+        let colegioMarker;
+        let rutaMañanaPolyline;
+        let rutaTardePolyline;
+        let simulacionBusMarker;
+        let paradasAdicionales = [];
+        let simulacionActiva = false;
+        let intervaloBusAnimation;
+
+        // Variables para rutas reales
+        let rutaMañanaReal = null;  // Ruta real obtenida de OSRM
+        let rutaTardeReal = null;   // Ruta real obtenida de OSRM
+
+        // Datos de configuración
+        const datosConfiguracion = {
+            mostrarRutaMañana: @(Model.MostrarRutaMañana.ToString().ToLower()),
+            mostrarRutaTarde: @(Model.MostrarRutaTarde.ToString().ToLower()),
+            esFinDeSemana: @(Model.EsFinDeSemana.ToString().ToLower())
+        };
+
+        // Coordenadas importantes (se pueden inyectar desde el servidor)
+        const coordenadas = {
+            colegio: [14.6235, -90.4956],  // Yulimay PC (fallback)
+            paradaAsignada: [14.6349, -90.5069],  // Parada Central (fallback)
+            busUbicacionActual: [14.6298, -90.5023]  // Ubicación simulada del bus (fallback)
+        };
+
+        // Coordenadas de la casa del padre inyectadas desde el servidor si existen
+        const casaServidorLat = @(Model.CasaLatitud.HasValue ? Model.CasaLatitud.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "null");
+        const casaServidorLng = @(Model.CasaLongitud.HasValue ? Model.CasaLongitud.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "null");
+        if (casaServidorLat !== null && casaServidorLng !== null) {
+            coordenadas.casa = [parseFloat(casaServidorLat), parseFloat(casaServidorLng)];
+        }
+
+        // Id del bus asignado desde el servidor (si está disponible)
+        const idBusAsignado = @(Model.IdBusAsignado.HasValue ? Model.IdBusAsignado.Value.ToString() : "null");
+
+        // Rutas predefinidas con paradas adicionales
+        const rutas = {
+            mañana: [
+                [14.6349, -90.5069],  // Parada Central
+                [14.6335, -90.5055],  // Parada 1 - Plaza Central
+                [14.6320, -90.5045],  // Parada 2 - Mercado Municipal
+                [14.6305, -90.5030],  // Parada 3 - Terminal de Buses
+                [14.6290, -90.5015],  // Parada 4 - Centro Comercial
+                [14.6275, -90.5000],  // Punto intermedio 1
+                [14.6260, -90.4985],  // Punto intermedio 2
+                [14.6245, -90.4970],  // Punto intermedio 3
+                [14.6235, -90.4956]   // Colegio Yulimay PC
+            ],
+            tarde: [
+                [14.6235, -90.4956],  // Colegio Yulimay PC
+                [14.6245, -90.4970],  // Punto intermedio 3
+                [14.6260, -90.4985],  // Punto intermedio 2
+                [14.6275, -90.5000],  // Punto intermedio 1
+                [14.6290, -90.5015],  // Parada 4 - Centro Comercial
+                [14.6305, -90.5030],  // Parada 3 - Terminal de Buses
+                [14.6320, -90.5045],  // Parada 2 - Mercado Municipal
+                [14.6335, -90.5055],  // Parada 1 - Plaza Central
+                [14.6349, -90.5069]   // Parada Central
+            ]
+        };
+
+        // Información de las paradas adicionales
+        const infoParadas = [
+            { nombre: "Plaza Central", coordenadas: [14.6335, -90.5055], descripcion: "Parada comercial" },
+            { nombre: "Mercado Municipal", coordenadas: [14.6320, -90.5045], descripcion: "Zona de mercado" },
+            { nombre: "Terminal de Buses", coordenadas: [14.6305, -90.5030], descripcion: "Terminal principal" },
+            { nombre: "Centro Comercial", coordenadas: [14.6290, -90.5015], descripcion: "Plaza comercial" }
+        ];
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            inicializarMapa();
+            cargarMarcadores();
+            await cargarRutas(); // Esperar a que las rutas se carguen con routing real
+
+            // Conectar SignalR y unirse a grupos
+            try {
+                window.notCli = new NotificacionesCliente();
+                await window.notCli.conectar();
+                // Unirse al grupo del bus; si idBusAsignado es null, usar Bus_1 como fallback de demo
+                const grupoBus = idBusAsignado !== null ? `Bus_${idBusAsignado}` : 'Bus_1';
+                await window.notCli.unirseAGrupo(grupoBus);
+                console.log(`✅ [DashboardPadre] Unido a grupo: ${grupoBus}`);
+                // Unirse al grupo del alumno para alertas personales
+                if (@(Model.IdAlumno.HasValue ? Model.IdAlumno.Value.ToString() : "null") !== null) {
+                    await window.notCli.unirseAGrupo(`Alumno_@Model.IdAlumno`);
+                }
+
+                // Registrar escucha de alertas
+                window.notCli.onAlerta((data) => {
+                    mostrarNotificacion(data.mensaje || data.Mensaje || 'Alerta', 'info');
+                });
+
+                window.notCli.onAlertaPersonal((data) => {
+                    mostrarNotificacion(data.mensaje || data.Mensaje || 'Alerta personal', 'info');
+                });
+
+                // Actualizar marcador cuando SignalR envíe ubicaciones en tiempo real
+                window.notCli.onUbicacionActualizada((data) => {
+                    try {
+                        console.log('📍 [DashboardPadre] Ubicación recibida:', data);
+                        const lat = parseFloat(data.latitud ?? data.Latitud ?? data.lat ?? data.Lat);
+                        const lng = parseFloat(data.longitud ?? data.Longitud ?? data.lon ?? data.Lon);
+                        if (!isNaN(lat) && !isNaN(lng)) {
+                            const busIcon = L.divIcon({
+                                className: '',
+                                html: '<div style="font-size:2rem;line-height:1">🚌</div>',
+                                iconSize: [40, 40],
+                                iconAnchor: [20, 20]
+                            });
+                            if (!busMarker) {
+                                busMarker = L.marker([lat, lng], { icon: busIcon }).addTo(mapaBusAsignado);
+                                busMarker.bindPopup('Bus en tiempo real');
+                            } else {
+                                busMarker.setLatLng([lat, lng]);
+                            }
+                            mapaBusAsignado.setView([lat, lng], mapaBusAsignado.getZoom());
+                        }
+                    } catch (e) { console.warn('[DashboardPadre] Error al actualizar marcador:', e); }
+                });
+            }
+            catch (e) {
+                console.warn('SignalR no disponible:', e);
+            }
+
+            // Actualizar cada 30 segundos si hay servicio activo
+            if (datosConfiguracion.mostrarRutaMañana || datosConfiguracion.mostrarRutaTarde) {
+                setInterval(actualizarUbicacionBus, 30000);
+            }
+        });
+
+        function inicializarMapa() {
+            // Inicializar mapa centrado en Guatemala
+            mapaBusAsignado = L.map('mapaBusAsignado').setView([14.6292, -90.5013], 14);
+
+            // Capa base de OpenStreetMap
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(mapaBusAsignado);
+
+            console.log('Mapa inicializado correctamente');
+        }
+
+        function cargarMarcadores() {
+            // Marcador del Colegio Yulimay PC
+            colegioMarker = L.marker(coordenadas.colegio, {
+                icon: L.divIcon({
+                    className: 'custom-marker',
+                    html: '<div class="school-marker">🏫</div>',
+                    iconSize: [50, 50],
+                    iconAnchor: [25, 25],
+                    popupAnchor: [0, -25]
+                })
+            }).addTo(mapaBusAsignado)
+              .bindPopup(`
+                  <div style="min-width: 200px; text-align: center;">
+                      <h6 class="mb-2"><strong>🏫 Colegio Yulimay PC</strong></h6>
+                      <div class="mb-1">📍 Destino del transporte escolar</div>
+                      <div class="text-muted"><small>Punto de llegada y salida</small></div>
+                  </div>
+              `);
+
+            // Marcador de la Parada Asignada
+            paradaMarker = L.marker(coordenadas.paradaAsignada, {
+                icon: L.divIcon({
+                    className: 'custom-marker',
+                    html: '<div class="stop-marker">🚏</div>',
+                    iconSize: [35, 35],
+                    iconAnchor: [17.5, 17.5],
+                    popupAnchor: [0, -17.5]
+                })
+            }).addTo(mapaBusAsignado)
+              .bindPopup(`
+                  <div style="min-width: 200px;">
+                      <h6 class="mb-2"><strong>🚏 @Model.ParadaAsignada</strong></h6>
+                      <div class="mb-1"><strong>Estudiante:</strong> @Model.NombreHijo</div>
+                      <div class="mb-1"><strong>Horario Mañana:</strong> @Model.HorarioMañana</div>
+                      <div class="mb-1"><strong>Horario Tarde:</strong> @Model.HorarioTarde</div>
+                  </div>
+              `);
+
+            // Marcador de la casa (si existe)
+            if (coordenadas.casa) {
+                const casaMarker = L.marker(coordenadas.casa, {
+                    icon: L.divIcon({
+                        className: 'custom-marker',
+                        html: '<div style="width:36px;height:36px;border-radius:50%;background:#0069d9;color:white;display:flex;align-items:center;justify-content:center;border:3px solid white;">🏠</div>',
+                        iconSize: [36,36],
+                        iconAnchor: [18,18],
+                        popupAnchor: [0,-18]
+                    })
+                }).addTo(mapaBusAsignado)
+                  .bindPopup(`<div style="min-width:180px;"><strong>📍 Punto de recogida (Casa)</strong><br><small>@Model.NombreHijo - Dirección registrada</small></div>`);
+            }
+
+            // Marcador del Bus (solo si hay servicio activo)
+            if (datosConfiguracion.mostrarRutaMañana || datosConfiguracion.mostrarRutaTarde) {
+                // Si existe última ubicación del servidor, se actualizará posteriormente
+                busMarker = L.marker(coordenadas.busUbicacionActual, {
+                    icon: L.divIcon({
+                        className: 'custom-marker',
+                        html: '<div class="bus-marker">🚌</div>',
+                        iconSize: [40, 40],
+                        iconAnchor: [20, 20],
+                        popupAnchor: [0, -20]
+                    })
+                }).addTo(mapaBusAsignado)
+                  .bindPopup(`
+                      <div style="min-width: 200px;">
+                          <h6 class="mb-2"><strong>🚌 @Model.BusAsignado</strong></h6>
+                          <div class="mb-1"><strong>Ruta:</strong> @Model.RutaNombre</div>
+                          <div class="mb-1"><strong>Estado:</strong> <span class="badge bg-success">En servicio</span></div>
+                          <div class="mb-1"><strong>Último update:</strong> ${new Date().toLocaleTimeString()}</div>
+                      </div>
+                  `);
+            }
+
+            // Cargar paradas adicionales
+            cargarParadasAdicionales();
+        }
+
+        function cargarParadasAdicionales() {
+            // Agregar marcadores de paradas adicionales
+            infoParadas.forEach((parada, index) => {
+                const marcadorParada = L.marker(parada.coordenadas, {
+                    icon: L.divIcon({
+                        className: 'custom-marker',
+                        html: '<div style="width: 20px; height: 20px; background: #dc3545; border: 2px solid white; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.3);"></div>',
+                        iconSize: [20, 20],
+                        iconAnchor: [10, 10],
+                        popupAnchor: [0, -10]
+                    })
+                }).addTo(mapaBusAsignado)
+                  .bindPopup(`
+                      <div style="min-width: 150px;">
+                          <h6 class="mb-2"><strong>🚏 ${parada.nombre}</strong></h6>
+                          <div class="mb-1">${parada.descripcion}</div>
+                          <div class="text-muted"><small>Parada ${index + 1} del recorrido</small></div>
+                      </div>
+                  `);
+
+                paradasAdicionales.push(marcadorParada);
+            });
+        }
+
+        // Obtener ruta real siguiendo calles usando OSRM
+        async function obtenerRutaRealPadres(puntosRuta) {
+            const rutaCompleta = [];
+
+            // Procesar cada segmento de la ruta
+            for (let i = 0; i < puntosRuta.length - 1; i++) {
+                const inicio = puntosRuta[i];
+                const fin = puntosRuta[i + 1];
+
+                try {
+                    const url = `https://router.project-osrm.org/route/v1/driving/${inicio[1]},${inicio[0]};${fin[1]},${fin[0]}?overview=full&geometries=geojson`;
+
+                    const response = await fetch(url);
+                    const data = await response.json();
+
+                    if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+                        // Convertir coordenadas [lng, lat] a [lat, lng]
+                        const coordenadas = data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
+
+                        // Simplificar ruta (tomar cada 2 puntos para mejor rendimiento)
+                        for (let j = 0; j < coordenadas.length; j += 2) {
+                            rutaCompleta.push(coordenadas[j]);
+                        }
+                    } else {
+                        // Si falla, usar los puntos originales
+                        rutaCompleta.push(inicio);
+                    }
+                } catch (error) {
+                    console.warn('Error obteniendo segmento de ruta:', error);
+                    rutaCompleta.push(inicio);
+                }
+            }
+
+            // Agregar el último punto
+            rutaCompleta.push(puntosRuta[puntosRuta.length - 1]);
+
+            return rutaCompleta;
+        }
+
+        async function cargarRutas() {
+            // Solo cargar rutas si hay servicio activo
+            if (datosConfiguracion.mostrarRutaMañana) {
+                try {
+                    // Obtener ruta real de mañana
+                    rutaMañanaReal = await obtenerRutaRealPadres(rutas.mañana);
+                    console.log(`Ruta mañana real generada con ${rutaMañanaReal.length} puntos`);
+
+                    rutaMañanaPolyline = L.polyline(rutaMañanaReal, {
+                        color: '#FF6B35',
+                        weight: 5,
+                        opacity: 0.8,
+                        dashArray: '10, 5'
+                    }).addTo(mapaBusAsignado)
+                      .bindPopup('<strong>🌅 Ruta Matutina (Recogida)</strong><br>De parada al colegio - Siguiendo calles reales');
+                } catch (error) {
+                    console.warn('Error cargando ruta real de mañana, usando ruta simple:', error);
+                    // Fallback a ruta original
+                    rutaMañanaReal = rutas.mañana;
+                    rutaMañanaPolyline = L.polyline(rutas.mañana, {
+                        color: '#FF6B35',
+                        weight: 5,
+                        opacity: 0.8,
+                        dashArray: '10, 5'
+                    }).addTo(mapaBusAsignado)
+                      .bindPopup('<strong>🌅 Ruta Matutina (Recogida)</strong><br>De parada al colegio');
+                }
+            }
+
+            if (datosConfiguracion.mostrarRutaTarde) {
+                try {
+                    // Obtener ruta real de tarde
+                    rutaTardeReal = await obtenerRutaRealPadres(rutas.tarde);
+                    console.log(`Ruta tarde real generada con ${rutaTardeReal.length} puntos`);
+
+                    rutaTardePolyline = L.polyline(rutaTardeReal, {
+                        color: '#228B22',
+                        weight: 5,
+                        opacity: 0.8,
+                        dashArray: '15, 10'
+                    }).addTo(mapaBusAsignado)
+                      .bindPopup('<strong>🌆 Ruta Vespertina (Regreso)</strong><br>Del colegio a parada - Siguiendo calles reales');
+                } catch (error) {
+                    console.warn('Error cargando ruta real de tarde, usando ruta simple:', error);
+                    // Fallback a ruta original
+                    rutaTardeReal = rutas.tarde;
+                    rutaTardePolyline = L.polyline(rutas.tarde, {
+                        color: '#228B22',
+                        weight: 5,
+                        opacity: 0.8,
+                        dashArray: '15, 10'
+                    }).addTo(mapaBusAsignado)
+                      .bindPopup('<strong>🌆 Ruta Vespertina (Regreso)</strong><br>Del colegio a parada');
+                }
+            }
+
+            // Ajustar vista para mostrar toda la ruta
+            if (rutaMañanaPolyline || rutaTardePolyline) {
+                const elementos = [colegioMarker, paradaMarker, ...(busMarker ? [busMarker] : [])];
+                if (coordenadas.casa) elementos.push(L.marker(coordenadas.casa));
+                if (rutaMañanaPolyline) elementos.push(rutaMañanaPolyline);
+                if (rutaTardePolyline) elementos.push(rutaTardePolyline);
+
+                const group = new L.featureGroup(elementos);
+                mapaBusAsignado.fitBounds(group.getBounds().pad(0.1));
+            }
+
+            // Si hay un bus asignado conocido, iniciar polling de ubicación en tiempo real
+            if (idBusAsignado !== null) {
+                console.log('Iniciando polling de ubicación para bus:', idBusAsignado);
+                // Primera carga inmediata
+                actualizarUbicacionRemota();
+                // Luego cada 10 segundos
+                setInterval(actualizarUbicacionRemota, 10000);
+            }
+        }        function actualizarUbicacionBus() {
+
+        // Flags para evitar notificaciones repetidas
+        let notificadoProximo = false;
+        let notificadoLlegada = false;
+
+        // Calcula distancia Haversine entre dos puntos [lat,lng] en metros
+        function distanciaMetros(p1, p2) {
+            const toRad = v => v * Math.PI / 180;
+            const R = 6371000; // m
+            const dLat = toRad(p2[0] - p1[0]);
+            const dLon = toRad(p2[1] - p1[1]);
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(toRad(p1[0])) * Math.cos(toRad(p2[0])) * Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        async function actualizarUbicacionRemota() {
+            if (idBusAsignado === null) return;
+
+            try {
+                const resp = await fetch(`/api/ubicaciones/${idBusAsignado}/ultima`);
+                if (!resp.ok) return;
+
+                const data = await resp.json();
+                // data contiene { latitud, longitud, fechaHora }
+                const lat = parseFloat(data.latitud || data.latitud ?? data.lat || 0);
+                const lng = parseFloat(data.longitud || data.longitud ?? data.lon || 0);
+
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    if (!busMarker) {
+                        busMarker = L.marker([lat, lng], {
+                            icon: L.divIcon({ className: 'custom-marker', html: '<div class="bus-marker">🚌</div>', iconSize: [40,40], iconAnchor: [20,20] })
+                        }).addTo(mapaBusAsignado);
+                    } else {
+                        busMarker.setLatLng([lat, lng]);
+                    }
+
+                    // Actualizar popup
+                    busMarker.setPopupContent(`
+                        <div style="min-width: 200px;">
+                            <h6 class="mb-2"><strong>🚌 @Model.BusAsignado</strong></h6>
+                            <div class="mb-1"><strong>Ruta:</strong> @Model.RutaNombre</div>
+                            <div class="mb-1"><strong>Último update:</strong> ${new Date().toLocaleTimeString()}</div>
+                        </div>
+                    `);
+
+                    // Verificar proximidad a la casa
+                    if (coordenadas.casa) {
+                        const dCasa = distanciaMetros([lat, lng], coordenadas.casa);
+                        // Si está dentro de 250m y no se ha notificado, avisar que está próximo
+                        if (dCasa <= 250 && !notificadoProximo) {
+                            mostrarNotificacion('El bus está próximo a pasar por su casa para recoger a sus hijos.', 'info');
+                            notificadoProximo = true;
+                            // Enviar confirmación al hub para que el piloto pueda saber
+                            try { if (window.notCli && window.notCli.reportarUbicacionBus) window.notCli.reportarUbicacionBus(parseInt(idBusAsignado), lat, lng); } catch(e){}
+                        }
+                    }
+
+                    // Verificar llegada al colegio (dentro de 80m)
+                    const dColegio = distanciaMetros([lat, lng], coordenadas.colegio);
+                    if (dColegio <= 80 && !notificadoLlegada) {
+                        mostrarNotificacion('El bus ha llegado al colegio.', 'success');
+                        notificadoLlegada = true;
+                    }
+                }
+            } catch (error) {
+                console.warn('Error obteniendo ubicación remota:', error);
+            }
+        }
+
+        function mostrarNotificacion(mensaje, tipo) {
+            const not = document.createElement('div');
+            not.className = `alert alert-${tipo} alert-dismissible fade show position-fixed`;
+            not.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 260px;';
+            not.innerHTML = `
+                <strong>${tipo === 'success' ? '✓' : 'ℹ️'}</strong> ${mensaje}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(not);
+            setTimeout(() => { if (not.parentNode) not.remove(); }, 6000);
+        }
+            if (!busMarker) return;
+
+            // Simular movimiento del bus a lo largo de la ruta
+            const ruta = datosConfiguracion.mostrarRutaMañana ? rutas.mañana : rutas.tarde;
+            const indiceAleatorio = Math.floor(Math.random() * ruta.length);
+            const nuevaPosicion = ruta[indiceAleatorio];
+
+            // Pequeña variación para simular movimiento real
+            const lat = nuevaPosicion[0] + (Math.random() - 0.5) * 0.001;
+            const lng = nuevaPosicion[1] + (Math.random() - 0.5) * 0.001;
+
+            busMarker.setLatLng([lat, lng]);
+
+            // Actualizar popup con hora actual
+            busMarker.setPopupContent(`
+                <div style="min-width: 200px;">
+                    <h6 class="mb-2"><strong>🚌 @Model.BusAsignado</strong></h6>
+                    <div class="mb-1"><strong>Ruta:</strong> @Model.RutaNombre</div>
+                    <div class="mb-1"><strong>Estado:</strong> <span class="badge bg-success">En movimiento</span></div>
+                    <div class="mb-1"><strong>Último update:</strong> ${new Date().toLocaleTimeString()}</div>
+                </div>
+            `);
+
+            console.log('Ubicación del bus actualizada');
+        }
+
+        function centrarEnBus() {
+            if (busMarker) {
+                mapaBusAsignado.setView(busMarker.getLatLng(), 16);
+                busMarker.openPopup();
+            } else {
+                mapaBusAsignado.setView(coordenadas.paradaAsignada, 15);
+                paradaMarker.openPopup();
+            }
+        }
+
+        function verRutaCompleta() {
+            const elementos = [
+                colegioMarker,
+                paradaMarker,
+                ...paradasAdicionales,
+                ...(busMarker ? [busMarker] : []),
+                ...(simulacionBusMarker ? [simulacionBusMarker] : []),
+                ...(rutaMañanaPolyline ? [rutaMañanaPolyline] : []),
+                ...(rutaTardePolyline ? [rutaTardePolyline] : [])
+            ];
+
+            const group = new L.featureGroup(elementos);
+            mapaBusAsignado.fitBounds(group.getBounds().pad(0.1));
+        }
+
+        function actualizarUbicacion() {
+            if (datosConfiguracion.mostrarRutaMañana || datosConfiguracion.mostrarRutaTarde) {
+                actualizarUbicacionBus();
+
+                // Mostrar notificación
+                const notificacion = document.createElement('div');
+                notificacion.className = 'alert alert-success alert-dismissible fade show position-fixed';
+                notificacion.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 250px;';
+                notificacion.innerHTML = `
+                    <strong>✓</strong> Ubicación actualizada
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+
+                document.body.appendChild(notificacion);
+
+                setTimeout(() => {
+                    if (notificacion.parentNode) {
+                        notificacion.remove();
+                    }
+                }, 3000);
+            }
+        }
+
+        // Función principal para simular la ruta completa
+        function simularRuta() {
+            if (simulacionActiva) {
+                detenerSimulacion();
+                return;
+            }
+
+            const btnSimular = document.getElementById('btnSimularRuta');
+            const estadoSimulacion = document.getElementById('estadoSimulacion');
+
+            // Cambiar estado del botón
+            btnSimular.innerHTML = '<i class="bi bi-stop-circle-fill me-2"></i>Detener Simulación';
+            btnSimular.className = 'btn btn-danger btn-lg w-100';
+            estadoSimulacion.textContent = 'Preparando simulación...';
+
+            // Crear marcador especial para simulación
+            crearBusSimulacion();
+
+            // Mostrar ambas rutas para la simulación
+            mostrarRutasSimulacion();
+
+            // Ajustar vista del mapa
+            verRutaCompleta();
+
+            simulacionActiva = true;
+
+            // Usar rutas reales si están disponibles
+            const rutaMañanaParaAnimar = rutaMañanaReal || rutas.mañana;
+            const rutaTardeParaAnimar = rutaTardeReal || rutas.tarde;
+
+            // Iniciar simulación: primero ruta de ida (mañana)
+            setTimeout(() => {
+                estadoSimulacion.innerHTML = '🌅 Simulando ruta matutina (recogida) - Siguiendo calles reales';
+                animarBusEnRuta(rutaMañanaParaAnimar, 'mañana', () => {
+                    // Después de completar ida, simular regreso
+                    setTimeout(() => {
+                        estadoSimulacion.innerHTML = '🌆 Simulando ruta vespertina (regreso) - Siguiendo calles reales';
+                        animarBusEnRuta(rutaTardeParaAnimar, 'tarde', () => {
+                            // Simulación completada
+                            estadoSimulacion.innerHTML = '✅ Simulación completada - Ambas rutas mostradas siguiendo calles reales';
+                            setTimeout(() => {
+                                if (simulacionActiva) {
+                                    detenerSimulacion();
+                                }
+                            }, 3000);
+                        });
+                    }, 2000);
+                });
+            }, 1000);
+        }
+
+        function crearBusSimulacion() {
+            // Remover marcador anterior si existe
+            if (simulacionBusMarker) {
+                mapaBusAsignado.removeLayer(simulacionBusMarker);
+            }
+
+            // Usar ruta real si está disponible, sino usar ruta estática
+            const rutaInicial = rutaMañanaReal || rutas.mañana;
+
+            // Crear nuevo marcador de simulación en el primer punto de la ruta
+            simulacionBusMarker = L.marker(rutaInicial[0], {
+                icon: L.divIcon({
+                    className: 'custom-marker',
+                    html: '<div style="width: 45px; height: 45px; background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%); border: 4px solid white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; color: white; box-shadow: 0 4px 15px rgba(255,107,53,0.4); animation: pulse 2s infinite;">🚌</div>',
+                    iconSize: [45, 45],
+                    iconAnchor: [22.5, 22.5],
+                    popupAnchor: [0, -22.5]
+                })
+            }).addTo(mapaBusAsignado)
+              .bindPopup(`
+                  <div style="min-width: 200px;">
+                      <h6 class="mb-2"><strong>🚌 Bus #001 (Simulación)</strong></h6>
+                      <div class="mb-1"><strong>Conductor:</strong> Juan Pérez</div>
+                      <div class="mb-1"><strong>Ruta:</strong> Centro - Yulimay PC</div>
+                      <div class="mb-1"><strong>Estado:</strong> <span class="badge bg-warning">Simulación activa</span></div>
+                      <div class="mb-1"><small><i class="bi bi-check-circle"></i> Siguiendo calles reales</small></div>
+                  </div>
+              `);
+        }
+
+        function mostrarRutasSimulacion() {
+            // Remover rutas existentes si las hay
+            if (rutaMañanaPolyline) mapaBusAsignado.removeLayer(rutaMañanaPolyline);
+            if (rutaTardePolyline) mapaBusAsignado.removeLayer(rutaTardePolyline);
+
+            // Usar rutas reales si están disponibles, sino usar rutas estáticas
+            const rutaMañanaParaSimulacion = rutaMañanaReal || rutas.mañana;
+            const rutaTardeParaSimulacion = rutaTardeReal || rutas.tarde;
+
+            console.log(`Simulación usando ruta mañana con ${rutaMañanaParaSimulacion.length} puntos`);
+            console.log(`Simulación usando ruta tarde con ${rutaTardeParaSimulacion.length} puntos`);
+
+            // Crear rutas de simulación más visibles usando las rutas reales
+            rutaMañanaPolyline = L.polyline(rutaMañanaParaSimulacion, {
+                color: '#FF6B35',
+                weight: 6,
+                opacity: 1,
+                dashArray: '8, 12'
+            }).addTo(mapaBusAsignado)
+              .bindPopup('<strong>🌅 Ruta Matutina - SIMULACIÓN</strong><br>Recogida: 6:30 AM - Siguiendo calles reales');
+
+            rutaTardePolyline = L.polyline(rutaTardeParaSimulacion, {
+                color: '#228B22',
+                weight: 6,
+                opacity: 1,
+                dashArray: '12, 8'
+            }).addTo(mapaBusAsignado)
+              .bindPopup('<strong>🌆 Ruta Vespertina - SIMULACIÓN</strong><br>Regreso: 2:15 PM - Siguiendo calles reales');
+        }
+
+        function animarBusEnRuta(rutaPuntos, tipoRuta, callback) {
+            let indiceActual = 0;
+            const velocidadAnimacion = 1500; // milisegundos entre puntos
+
+            function moverSiguientePunto() {
+                if (!simulacionActiva || indiceActual >= rutaPuntos.length) {
+                    if (callback) callback();
+                    return;
+                }
+
+                const puntoActual = rutaPuntos[indiceActual];
+
+                // Animar movimiento suave del bus
+                simulacionBusMarker.setLatLng(puntoActual);
+
+                // Verificar si es una parada importante
+                const esParadaImportante = esParadaRelevante(puntoActual);
+
+                if (esParadaImportante) {
+                    // Resaltar parada actual
+                    resaltarParada(puntoActual, indiceActual, tipoRuta);
+
+                    // Hacer que el bus se detenga un poco más en las paradas
+                    setTimeout(() => {
+                        indiceActual++;
+                        moverSiguientePunto();
+                    }, velocidadAnimacion + 1000); // +1 segundo en paradas
+                } else {
+                    setTimeout(() => {
+                        indiceActual++;
+                        moverSiguientePunto();
+                    }, velocidadAnimacion);
+                }
+
+                // Centrar mapa en el bus
+                mapaBusAsignado.setView(puntoActual, 15);
+            }
+
+            moverSiguientePunto();
+        }
+
+        function esParadaRelevante(punto) {
+            // Verificar si el punto corresponde a una parada importante
+            return infoParadas.some(parada => 
+                Math.abs(parada.coordenadas[0] - punto[0]) < 0.0001 &&
+                Math.abs(parada.coordenadas[1] - punto[1]) < 0.0001
+            ) || 
+            // O si es el colegio o parada central
+            (Math.abs(coordenadas.colegio[0] - punto[0]) < 0.0001 && Math.abs(coordenadas.colegio[1] - punto[1]) < 0.0001) ||
+            (Math.abs(coordenadas.paradaAsignada[0] - punto[0]) < 0.0001 && Math.abs(coordenadas.paradaAsignada[1] - punto[1]) < 0.0001);
+        }
+
+        function resaltarParada(punto, indice, tipoRuta) {
+            // Crear círculo temporal para resaltar la parada
+            const circuloResaltado = L.circle(punto, {
+                color: tipoRuta === 'mañana' ? '#FF6B35' : '#228B22',
+                fillColor: tipoRuta === 'mañana' ? '#FF6B35' : '#228B22',
+                fillOpacity: 0.3,
+                radius: 50
+            }).addTo(mapaBusAsignado);
+
+            // Mostrar popup informativo
+            const nombreParada = obtenerNombreParada(punto);
+            simulacionBusMarker.setPopupContent(`
+                <div style="min-width: 200px;">
+                    <h6 class="mb-2"><strong>🚌 Bus #001</strong></h6>
+                    <div class="mb-1"><strong>Parada actual:</strong> ${nombreParada}</div>
+                    <div class="mb-1"><strong>Ruta:</strong> ${tipoRuta === 'mañana' ? 'Recogida matutina' : 'Regreso vespertino'}</div>
+                    <div class="mb-1"><strong>Punto:</strong> ${indice + 1}/${rutas[tipoRuta].length}</div>
+                    <div class="mb-1"><strong>Estado:</strong> <span class="badge bg-warning">Detenido en parada</span></div>
+                </div>
+            `).openPopup();
+
+            // Remover resaltado después de 2 segundos
+            setTimeout(() => {
+                mapaBusAsignado.removeLayer(circuloResaltado);
+            }, 2000);
+        }
+
+        function obtenerNombreParada(punto) {
+            // Buscar el nombre de la parada basado en las coordenadas
+            const parada = infoParadas.find(p => 
+                Math.abs(p.coordenadas[0] - punto[0]) < 0.0001 &&
+                Math.abs(p.coordenadas[1] - punto[1]) < 0.0001
+            );
+
+            if (parada) return parada.nombre;
+
+            if (Math.abs(coordenadas.colegio[0] - punto[0]) < 0.0001) return "Colegio Yulimay PC";
+            if (Math.abs(coordenadas.paradaAsignada[0] - punto[0]) < 0.0001) return "Parada Central - 6ta Avenida";
+
+            return "Punto intermedio";
+        }
+
+        function detenerSimulacion() {
+            simulacionActiva = false;
+
+            // Restaurar botón
+            const btnSimular = document.getElementById('btnSimularRuta');
+            const estadoSimulacion = document.getElementById('estadoSimulacion');
+
+            btnSimular.innerHTML = '<i class="bi bi-play-circle-fill me-2"></i>Simular Ruta';
+            btnSimular.className = 'btn btn-primary btn-lg w-100';
+            estadoSimulacion.textContent = 'Ver animación del recorrido completo';
+
+            // Remover bus de simulación
+            if (simulacionBusMarker) {
+                mapaBusAsignado.removeLayer(simulacionBusMarker);
+                simulacionBusMarker = null;
+            }
+
+            // Restaurar rutas normales
+            cargarRutas();
+
+            // Ajustar vista
+            verRutaCompleta();
+
+            // Limpiar intervalos
+            if (intervaloBusAnimation) {
+                clearInterval(intervaloBusAnimation);
+            }
+        }
+    </script>
+}

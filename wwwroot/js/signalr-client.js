@@ -135,6 +135,18 @@ class NotificacionesCliente {
             this.ejecutarCallback('ubicacionActualizada', data);
         });
 
+        // Alertas de proximidad o llegada
+        this.connection.on('AlertaRecibida', (data) => {
+            console.log('🔔 [SignalR] Alerta recibida (grupo bus):', data);
+            this.ejecutarCallback('alerta', data);
+        });
+
+        // Alertas personales dirigidas a un alumno/padre
+        this.connection.on('AlertaPersonal', (data) => {
+            console.log('🔔 [SignalR] Alerta personal:', data);
+            this.ejecutarCallback('alertaPersonal', data);
+        });
+
         // Echo response (testing)
         this.connection.on('EchoResponse', (data) => {
             console.log('🔊 [SignalR] Echo response:', data);
@@ -344,6 +356,14 @@ class NotificacionesCliente {
 
     onUbicacionActualizada(callback) {
         this.callbacks['ubicacionActualizada'] = callback;
+    }
+
+    onAlerta(callback) {
+        this.callbacks['alerta'] = callback;
+    }
+
+    onAlertaPersonal(callback) {
+        this.callbacks['alertaPersonal'] = callback;
     }
 
     onEstadoConexion(callback) {
