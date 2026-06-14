@@ -1,5 +1,6 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using TransportesGenesis.Data.Context;
 using TransportesGenesis.DTOs.Ruta;
 using TransportesGenesis.Models.DB.Negocio;
 using TransportesGenesis.Repositories.Interfaces;
@@ -15,6 +16,9 @@ namespace TransportesGenesis.Services.Implementations
         private readonly IAsistenciaAlumnoRepository _asistenciaRepository;
         private readonly ISolicitudTrasladoRepository _trasladoRepository;
         private readonly IConfiguracionService _configuracionService;
+        private readonly INotificacionService _notificacionService;
+        private readonly ApplicationDbContext _context;
+        private readonly IAlumnoRepository _alumnoRepository;
         private readonly IMapper _mapper;
 
         public RutaService(
@@ -22,12 +26,18 @@ namespace TransportesGenesis.Services.Implementations
             IAsistenciaAlumnoRepository asistenciaRepository,
             ISolicitudTrasladoRepository trasladoRepository,
             IConfiguracionService configuracionService,
+            INotificacionService notificacionService,
+            ApplicationDbContext context,
+            IAlumnoRepository alumnoRepository,
             IMapper mapper)
         {
             _rutaRepository = rutaRepository;
             _asistenciaRepository = asistenciaRepository;
             _trasladoRepository = trasladoRepository;
             _configuracionService = configuracionService;
+            _notificacionService = notificacionService;
+            _context = context;
+            _alumnoRepository = alumnoRepository;
             _mapper = mapper;
         }
 
@@ -97,53 +107,18 @@ namespace TransportesGenesis.Services.Implementations
 
         public async Task<CalcRutaDto> CalcularRutaOptimizadaAsync(CalcularRutaDto dto)
         {
-            Console.WriteLine($"[RUTA SERVICE] Calculando ruta para Bus {dto.IdBus}, Fecha: {dto.Fecha:dd/MM/yyyy}, Tipo: {dto.TipoRuta}");
+            // [VALIDACIÓN FECHA] Normalizar a fecha calendario (sin hora) para comparar con AsistenciaAlumno.Fecha
+            var fechaRuta = dto.Fecha.Date;
+            Console.WriteLine($"[RUTA SERVICE] Calculando ruta para Bus {dto.IdBus}, Fecha: {fechaRuta:dd/MM/yyyy}, Tipo: {dto.TipoRuta}");
 
-            // 1. Obtener asistencias confirmadas para la fecha y turno
-            var confirmaciones = await _asistenciaRepository.GetConfirmacionesPorFechaAsync(dto.Fecha);
-            Console.WriteLine($"[RUTA SERVICE] Total confirmaciones: {confirmaciones.Count()}");
+            var (alumnosDelBus, mensajeEstado, usoFallback) = await ObtenerAlumnosParaRutaAsync(
+                dto.IdBus, fechaRuta, dto.TipoRuta);
 
-            // 2. Obtener traslados aprobados que afecten esta fecha
-            var traslados = await _trasladoRepository.GetTrasladosActivosPorFechaAsync(dto.Fecha);
-            Console.WriteLine($"[RUTA SERVICE] Total traslados activos: {traslados.Count()}");
-
-            // 3. Filtrar alumnos del bus considerando traslados
-            var alumnosDelBus = new List<Alumnos>();
-
-            foreach (var confirmacion in confirmaciones)
-            {
-                if (confirmacion.Alumno == null) continue;
-
-                // Verificar si hay traslado aprobado para este alumno en esta fecha
-                var trasladoActivo = traslados.FirstOrDefault(t => 
-                    t.IdAlumno == confirmacion.IdAlumno && 
-                    t.FechaTraslado.Date == dto.Fecha.Date);
-
-                int busAsignado = 0;
-                bool debeAsistir = false;
-
-                if (dto.TipoRuta == "Mañana")
-                {
-                    busAsignado = trasladoActivo?.IdBusDestino ?? confirmacion.IdBusTemporalMañana ?? confirmacion.Alumno.IdBusAsignado ?? 0;
-                    debeAsistir = confirmacion.AsisteMañana;
-                }
-                else // Tarde
-                {
-                    busAsignado = trasladoActivo?.IdBusDestino ?? confirmacion.IdBusTemporalTarde ?? confirmacion.Alumno.IdBusAsignado ?? 0;
-                    debeAsistir = confirmacion.AsisteTarde;
-                }
-
-                if (busAsignado == dto.IdBus && debeAsistir && confirmacion.FechaConfirmacion != null)
-                {
-                    alumnosDelBus.Add(confirmacion.Alumno);
-                }
-            }
-
-            Console.WriteLine($"[RUTA SERVICE] Alumnos para este bus: {alumnosDelBus.Count}");
+            Console.WriteLine($"[RUTA SERVICE] Alumnos para este bus: {alumnosDelBus.Count} (fallback={usoFallback})");
 
             if (!alumnosDelBus.Any())
             {
-                Console.WriteLine("[RUTA SERVICE] ⚠️ No hay alumnos confirmados para este bus");
+                Console.WriteLine("[RUTA SERVICE] ⚠️ Sin alumnos elegibles para este bus/fecha/turno");
                 return new CalcRutaDto
                 {
                     IdBus = dto.IdBus,
@@ -151,20 +126,38 @@ namespace TransportesGenesis.Services.Implementations
                     TipoRuta = dto.TipoRuta,
                     HoraInicio = dto.TipoRuta == "Mañana" ? new TimeSpan(6, 0, 0) : new TimeSpan(14, 0, 0),
                     EsActiva = false,
-                    Paradas = new List<ParadaRutaDto>()
+                    Paradas = new List<ParadaRutaDto>(),
+                    MensajeEstado = mensajeEstado
                 };
             }
 
-            // 4. Calcular ruta óptima usando algoritmo del vecino más cercano (Nearest Neighbor)
-            // Incluye el colegio como última parada (mañana) o primera parada (tarde)
-            var paradas = await CalcularParadasOptimasAsync(alumnosDelBus, dto.TipoRuta, dto.LatitudInicio, dto.LongitudInicio);
+            // Filtrar alumnos sin coordenadas GPS (requeridas para calcular paradas)
+            var alumnosConGps = alumnosDelBus
+                .Where(a => a.Latitud.HasValue && a.Longitud.HasValue)
+                .ToList();
+
+            if (!alumnosConGps.Any())
+            {
+                return new CalcRutaDto
+                {
+                    IdBus = dto.IdBus,
+                    Nombre = $"Ruta {dto.TipoRuta} - Sin GPS",
+                    TipoRuta = dto.TipoRuta,
+                    HoraInicio = dto.TipoRuta == "Mañana" ? new TimeSpan(6, 0, 0) : new TimeSpan(14, 0, 0),
+                    EsActiva = false,
+                    Paradas = new List<ParadaRutaDto>(),
+                    MensajeEstado = $"Hay {alumnosDelBus.Count} alumno(s) en el bus {dto.IdBus}, pero ninguno tiene coordenadas GPS. Configure la dirección del alumno primero."
+                };
+            }
+
+            var paradas = await CalcularParadasOptimasAsync(alumnosConGps, dto.TipoRuta, dto.LatitudInicio, dto.LongitudInicio);
 
             // 5. Crear la ruta en la BD
             var nuevaRuta = new Ruta
             {
                 IdBus = dto.IdBus,
-                Nombre = $"Ruta {dto.TipoRuta} - {dto.Fecha:dd/MM/yyyy}",
-                Descripcion = $"Ruta calculada automáticamente para {alumnosDelBus.Count} alumnos",
+                Nombre = $"Ruta {dto.TipoRuta} - {fechaRuta:dd/MM/yyyy}",
+                Descripcion = $"Ruta calculada automáticamente para {alumnosConGps.Count} alumnos",
                 TipoRuta = dto.TipoRuta,
                 HoraInicio = dto.TipoRuta == "Mañana" ? new TimeSpan(6, 0, 0) : new TimeSpan(14, 0, 0),
                 EsActiva = true,
@@ -213,6 +206,10 @@ namespace TransportesGenesis.Services.Implementations
                 })
                 .ToList();
 
+            var mensajeExito = usoFallback
+                ? $"Ruta generada con {alumnosConGps.Count} alumno(s) asignados al bus (sin confirmación de asistencia para {fechaRuta:dd/MM/yyyy}). {mensajeEstado}"
+                : $"Ruta calculada con {alumnosConGps.Count} alumno(s) con asistencia confirmada.";
+
             // 8. Retornar resultado con IdParada correcto
             var resultado = new CalcRutaDto
             {
@@ -225,16 +222,163 @@ namespace TransportesGenesis.Services.Implementations
                 HoraInicio = nuevaRuta.HoraInicio,
                 EsActiva = nuevaRuta.EsActiva,
                 Paradas = paradasGuardadas,
-                FechaCreacion = nuevaRuta.FechaRegistro
+                FechaCreacion = nuevaRuta.FechaRegistro,
+                MensajeEstado = mensajeExito
             };
 
             return resultado;
         }
 
-        public async Task<bool> MarcarParadaCompletadaAsync(MarcarParadaDto dto)
+        /// <summary>
+        /// [CONFIRMACIÓN ASISTENCIA] Obtiene alumnos elegibles para calcular la ruta.
+        /// 1) Prioridad: asistencia confirmada (FechaConfirmacion != null) para la fecha exacta y turno.
+        /// 2) Fallback demo/admin: alumnos asignados al bus (IdBusAsignado) si no hay confirmaciones ese día.
+        /// </summary>
+        private async Task<(List<Alumnos> alumnos, string mensaje, bool usoFallback)> ObtenerAlumnosParaRutaAsync(
+            int idBus, DateTime fechaRuta, string tipoRuta)
+        {
+            var esMañana = tipoRuta.Equals("Mañana", StringComparison.OrdinalIgnoreCase);
+
+            // Paso 1: asistencias confirmadas para la fecha (tabla genesis.AsistenciaAlumno)
+            var confirmaciones = await _asistenciaRepository.GetConfirmacionesPorFechaAsync(fechaRuta);
+            var traslados = await _trasladoRepository.GetTrasladosActivosPorFechaAsync(fechaRuta);
+
+            var alumnosConfirmados = new List<Alumnos>();
+
+            foreach (var confirmacion in confirmaciones)
+            {
+                if (confirmacion.Alumno == null) continue;
+
+                var trasladoActivo = traslados.FirstOrDefault(t =>
+                    t.IdAlumno == confirmacion.IdAlumno &&
+                    t.FechaTraslado.Date == fechaRuta);
+
+                int busAsignado;
+                bool debeAsistir;
+
+                if (esMañana)
+                {
+                    busAsignado = trasladoActivo?.IdBusDestino ?? confirmacion.IdBusTemporalMañana ?? confirmacion.Alumno.IdBusAsignado ?? 0;
+                    debeAsistir = confirmacion.AsisteMañana;
+                }
+                else
+                {
+                    busAsignado = trasladoActivo?.IdBusDestino ?? confirmacion.IdBusTemporalTarde ?? confirmacion.Alumno.IdBusAsignado ?? 0;
+                    debeAsistir = confirmacion.AsisteTarde;
+                }
+
+                if (busAsignado == idBus && debeAsistir && confirmacion.FechaConfirmacion != null)
+                    alumnosConfirmados.Add(confirmacion.Alumno);
+            }
+
+            if (alumnosConfirmados.Any())
+            {
+                return (alumnosConfirmados, string.Empty, false);
+            }
+
+            // Paso 2: fallback — alumnos permanentemente asignados al bus
+            var asignadosAlBus = (await _alumnoRepository.GetAlumnosByBusAsync(idBus))
+                .Where(a => a.Activo == 1)
+                .ToList();
+
+            if (!asignadosAlBus.Any())
+            {
+                return (alumnosConfirmados,
+                    $"No hay alumnos asignados al bus {idBus}. Asigne alumnos al bus o confirme asistencia para el {fechaRuta:dd/MM/yyyy} (turno {tipoRuta}). Puede ejecutar Scripts/Seed_Escenarios_Completos.sql.",
+                    false);
+            }
+
+            // Si hay registro de asistencia sin confirmar, respetar AsisteMañana/AsisteTarde
+            var alumnosFallback = new List<Alumnos>();
+            foreach (var alumno in asignadosAlBus)
+            {
+                var asistencia = await _asistenciaRepository.GetByAlumnoYFechaAsync(alumno.IdAlumno, fechaRuta);
+                if (asistencia == null)
+                {
+                    // Sin registro para esa fecha: incluir en fallback (demo/admin)
+                    alumnosFallback.Add(alumno);
+                }
+                else if (asistencia.FechaConfirmacion == null)
+                {
+                    // Registro existe pero padre no confirmó: incluir igualmente en fallback admin
+                    if ((esMañana && asistencia.AsisteMañana) || (!esMañana && asistencia.AsisteTarde))
+                        alumnosFallback.Add(alumno);
+                }
+                // Si FechaConfirmacion != null pero no entró arriba, el turno o bus no coincidió — no incluir
+            }
+
+            if (alumnosFallback.Any())
+            {
+                return (alumnosFallback,
+                    $"Sin asistencia confirmada para {fechaRuta:dd/MM/yyyy}. Se usaron alumnos asignados al bus.",
+                    true);
+            }
+
+            return (alumnosConfirmados,
+                $"Hay {asignadosAlBus.Count} alumno(s) en el bus {idBus}, pero ninguno confirmó asistencia para el {fechaRuta:dd/MM/yyyy} (turno {tipoRuta}). Confirme desde el portal de padres o ejecute Scripts/Seed_Escenarios_Completos.sql.",
+                false);
+        }
+
+        public async Task<bool> MarcarParadaCompletadaAsync(MarcarParadaDto dto, string? confirmadoPor = null)
         {
             Console.WriteLine($"[RUTA SERVICE] Marcando parada {dto.IdParada} como completada: {dto.Completada}");
-            return await _rutaRepository.MarcarParadaCompletadaAsync(dto.IdParada, dto.Completada);
+
+            var parada = await _rutaRepository.GetParadaByIdAsync(dto.IdParada);
+            if (parada == null)
+                return false;
+
+            var ok = await _rutaRepository.MarcarParadaCompletadaAsync(dto.IdParada, dto.Completada);
+            if (!ok || !dto.Completada)
+                return ok;
+
+            var tipoRuta = parada.Ruta?.TipoRuta ?? "Mañana";
+            var esParadaColegio = !parada.IdAlumno.HasValue;
+
+            // [FASE 0.4] RegistroRecogida + SignalR para paradas con alumno
+            if (parada.IdAlumno.HasValue && parada.Alumno != null)
+            {
+                var registro = new RegistroRecogida
+                {
+                    Parada = parada,
+                    Alumno = parada.Alumno,
+                    FechaHoraRecogida = dto.HoraCompletada ?? DateTime.Now,
+                    ConfirmadoPor = confirmadoPor,
+                    Latitud = parada.Latitud,
+                    Longitud = parada.Longitud,
+                    AlumnoPresente = true,
+                    FechaRegistro = DateTime.Now,
+                    Activo = 1
+                };
+                _context.RegistrosRecogidaDb.Add(registro);
+                await _context.SaveChangesAsync();
+
+                await _notificacionService.NotificarParadaCompletadaAsync(
+                    parada.IdAlumno.Value,
+                    $"{parada.Alumno.Nombre} {parada.Alumno.Apellido}".Trim(),
+                    parada.IdParada,
+                    tipoRuta,
+                    esParadaColegio: false);
+            }
+            else if (esParadaColegio && tipoRuta.Equals("Mañana", StringComparison.OrdinalIgnoreCase))
+            {
+                // Parada del colegio en ruta de mañana: notificar a todos los alumnos de esa ruta
+                var paradasAlumnos = await _context.Set<Parada>()
+                    .Include(p => p.Alumno)
+                    .Where(p => p.IdRuta == parada.IdRuta && p.IdAlumno.HasValue && p.Alumno != null)
+                    .ToListAsync();
+
+                foreach (var pAlumno in paradasAlumnos)
+                {
+                    await _notificacionService.NotificarParadaCompletadaAsync(
+                        pAlumno.IdAlumno!.Value,
+                        $"{pAlumno.Alumno!.Nombre} {pAlumno.Alumno.Apellido}".Trim(),
+                        parada.IdParada,
+                        tipoRuta,
+                        esParadaColegio: true);
+                }
+            }
+
+            return true;
         }
 
         public async Task<CalcRutaDto?> GetRutaActivaDelBusAsync(int idBus, DateTime fecha, string tipoRuta)

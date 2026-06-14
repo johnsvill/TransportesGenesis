@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Text.Json;
 using TransportesGenesis.DTOs.Ruta;
+using TransportesGenesis.Repositories.Interfaces;
 
 namespace TransportesGenesis.Pages.Admin
 {
@@ -10,11 +11,16 @@ namespace TransportesGenesis.Pages.Admin
     public class CalcularRutasModel : PageModel
     {
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IBusRepository _busRepository;
         private readonly ILogger<CalcularRutasModel> _logger;
 
-        public CalcularRutasModel(IHttpClientFactory httpClientFactory, ILogger<CalcularRutasModel> logger)
+        public CalcularRutasModel(
+            IHttpClientFactory httpClientFactory,
+            IBusRepository busRepository,
+            ILogger<CalcularRutasModel> logger)
         {
             _httpClientFactory = httpClientFactory;
+            _busRepository = busRepository;
             _logger = logger;
         }
 
@@ -42,7 +48,7 @@ namespace TransportesGenesis.Pages.Admin
             {
                 _logger.LogInformation($"[ADMIN CALCULAR] Iniciando cálculo masivo para {FechaCalculo:yyyy-MM-dd} - Turno: {TipoRuta}");
 
-                // Validar que no sea fin de semana
+                // [VALIDACIÓN FECHA] No calcular en fin de semana
                 if (FechaCalculo.DayOfWeek == DayOfWeek.Saturday || FechaCalculo.DayOfWeek == DayOfWeek.Sunday)
                 {
                     MensajeError = "No se pueden calcular rutas para sábados o domingos. Por favor seleccione un día hábil (lunes a viernes).";
@@ -50,20 +56,26 @@ namespace TransportesGenesis.Pages.Admin
                     return Page();
                 }
 
-                // Lista de buses a procesar (hardcoded por ahora, TODO: obtener desde BD)
-                var idsBuses = new List<int> { 1, 2, 3, 4 };
+                // Buses activos desde BD (no hardcodeados)
+                var busesActivos = (await _busRepository.GetActivosAsync()).ToList();
+                if (!busesActivos.Any())
+                {
+                    MensajeError = "No hay buses activos en el sistema.";
+                    return Page();
+                }
 
                 ResultadosCalculo = new List<ResultadoCalculoBus>();
 
                 var httpClient = _httpClientFactory.CreateClient();
                 httpClient.BaseAddress = new Uri($"{Request.Scheme}://{Request.Host}");
 
-                foreach (var idBus in idsBuses)
+                foreach (var bus in busesActivos)
                 {
+                    var idBus = bus.IdBus;
                     var resultado = new ResultadoCalculoBus
                     {
                         IdBus = idBus,
-                        PlacaBus = $"Bus {idBus}", // TODO: Obtener placa real desde BD
+                        PlacaBus = bus.Placa ?? $"Bus {idBus}",
                         Exitoso = false
                     };
 
@@ -75,7 +87,7 @@ namespace TransportesGenesis.Pages.Admin
                         var calcularDto = new CalcularRutaDto
                         {
                             IdBus = idBus,
-                            Fecha = FechaCalculo,
+                            Fecha = FechaCalculo.Date, // [VALIDACIÓN FECHA] solo día calendario
                             TipoRuta = TipoRuta
                         };
 
@@ -131,7 +143,7 @@ namespace TransportesGenesis.Pages.Admin
                 }
 
                 CalculoCompletado = true;
-                _logger.LogInformation($"[ADMIN CALCULAR] Proceso completado: {TotalBusesProcesados}/{idsBuses.Count} buses exitosos, {TotalParadasGeneradas} paradas totales");
+                _logger.LogInformation($"[ADMIN CALCULAR] Proceso completado: {TotalBusesProcesados}/{busesActivos.Count} buses exitosos, {TotalParadasGeneradas} paradas totales");
 
                 return Page();
             }

@@ -43,6 +43,13 @@
     .alerta-item.alerta-warning { border-left-color: #ffc107; background: #fffdf0; }
     .alerta-item.alerta-danger  { border-left-color: #dc3545; background: #fff5f5; }
     .alerta-item.alerta-info    { border-left-color: #17a2b8; }
+    .marcador-hijo-pendiente {
+        animation: pulso-hijo 1.8s ease-in-out infinite;
+    }
+    @@keyframes pulso-hijo {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, .6); }
+        50%      { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); }
+    }
 </style>
 
 <div class="container-fluid">
@@ -73,10 +80,27 @@
                             <i class="bi bi-bus-front"></i>
                             Bus #@Model.IdBusAsignado — @Model.PlacaBus
                         </span>
+                        <span class="badge @(Model.TipoRutaActiva == "Mañana" ? "bg-warning text-dark" : "bg-orange fs-6") fs-6" style="@(Model.TipoRutaActiva == "Tarde" ? "background:#fd7e14" : "")">
+                            <i class="bi bi-@(Model.TipoRutaActiva == "Mañana" ? "sunrise" : "sunset")"></i>
+                            Turno @Model.TipoRutaActiva
+                        </span>
                         <span class="badge bg-light text-dark fs-6">
                             <i class="bi bi-person-fill me-1"></i>@Model.NombrePiloto
                         </span>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="alert alert-info py-2 mb-0 small d-flex align-items-start gap-2">
+                <i class="bi bi-info-circle-fill mt-1"></i>
+                <div>
+                    <strong>Turno @Model.TipoRutaActiva activo</strong> (automático según la hora; demo Mañana:
+                    <a href="?turno=Mañana">?turno=Mañana</a> · Tarde: <a href="?turno=Tarde">?turno=Tarde</a>)
+                    <br>@Model.DescripcionTurno
                 </div>
             </div>
         </div>
@@ -89,6 +113,12 @@
             <div class="card h-100">
                 <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
                     <span><i class="bi bi-geo-alt-fill me-1"></i> Mapa del Recorrido — @Model.RutaNombre</span>
+                    <small class="opacity-75 d-none d-md-inline ms-2">
+                        <span style="color:#2563eb">━</span> pendiente &nbsp;
+                        <span style="color:#28a745">━</span> recorrido &nbsp;
+                        <span class="badge bg-warning text-dark">👤</span> tus hijos
+                        · Mañana: verde → colegio · Tarde: verde colegio → tus hijos
+                    </small>
                     <div class="d-flex gap-2">
                         <button onclick="centrarEnBus()" class="btn btn-sm btn-light" title="Centrar en bus">
                             <i class="bi bi-crosshair"></i>
@@ -130,17 +160,17 @@
                 </div>
             </div>
 
-            <!-- Simulación -->
-            <div class="card border-primary">
-                <div class="card-header bg-primary text-white">
-                    <i class="bi bi-play-circle-fill me-1"></i> Simulación de Ruta
+            <!-- [FALLBACK - FASE 0.1] Simulación local — plan B si falla la sincronización en vivo -->
+            <div class="card border-secondary">
+                <div class="card-header bg-secondary text-white">
+                    <i class="bi bi-shield-exclamation me-1"></i> Respaldo — Simulación Local
                 </div>
                 <div class="card-body">
                     <p class="text-muted small mb-2" id="estadoSimulacion">
-                        Pulsa para animar el recorrido del bus
+                        Por defecto verás el bus en vivo. Si no hay señal, usa este botón.
                     </p>
-                    <button id="btnSimular" onclick="simularRuta()" class="btn btn-primary w-100">
-                        <i class="bi bi-play-circle-fill me-2"></i>Iniciar Simulación
+                    <button id="btnSimular" onclick="simularRuta()" class="btn btn-outline-primary w-100">
+                        <i class="bi bi-play-circle-fill me-2"></i>Iniciar Simulación (Plan B)
                     </button>
                 </div>
             </div>
@@ -183,13 +213,27 @@
         const CASA_LNG       = @Html.Raw(casaLngStr);
         const COLEGIO_LAT    = @Html.Raw(coleLatStr);        // última parada o fallback
         const COLEGIO_LNG    = @Html.Raw(coleLngStr);
-        // Paradas reales del bus en BD; si la BD no tiene paradas se usa fallback demo
-        const PARADAS_BD = @Html.Raw(Model.ParadasJson);    // [{nombre,lat,lng,orden,idAlumno}]
+        const TIPO_RUTA      = '@Model.TipoRutaActiva';
+        // [FASE 0.2] Segmento Plan B (fallback) y ruta completa del bus (en vivo)
+        const PARADAS_BD     = @Html.Raw(Model.ParadasJson);
+        const RUTA_COMPLETA  = @Html.Raw(Model.RutaCompletaJson);
+        const PARADAS_HIJOS  = @Html.Raw(Model.ParadasHijosJson);
+
+        // ── [EN VIVO - FASE 0.1] Modo principal: sincronización piloto → servidor → padre ──
+        let modoVisualizacion   = 'vivo';   // 'vivo' | 'fallback'
+        let signalRConectado    = false;
+        let ultimaUbicacionVivo = null;
+        const TIMEOUT_SIN_DATOS_MS = 30000;
 
         // ── Variables del mapa ────────────────────────────────────────────────
         let mapa;
-        let busMarker      = null;
-        let routePolyline  = null;
+        let busMarker           = null;   // [EN VIVO] marcador verde
+        let routeSegmentosVivo  = [];     // segmentos azul/verde (ruta completa en vivo)
+        let routePolylineFallback = null; // línea naranja punteada (solo Plan B)
+        let marcadoresHijos     = {};     // idAlumno|idParada → L.marker
+        const paradasVisitadas  = new Set(); // idParada visitados
+
+        // ── [FALLBACK - FASE 0.1] Simulación local del padre (plan B) ─────────
         let simMarker      = null;
         let simActiva      = false;
         let simPuntos      = [];
@@ -205,7 +249,7 @@
         document.addEventListener('DOMContentLoaded', async () => {
             inicializarMapa();
             dibujarMarcadoresFijos();
-            await dibujarRutaOSRM();
+            await dibujarRutaVivoCompleta();
             await conectarSignalR();
         });
 
@@ -227,33 +271,195 @@
         }
 
         function dibujarMarcadoresFijos() {
-            // Colegio (última parada / coordenadas de servidor)
+            // Colegio
             L.marker([COLEGIO_LAT, COLEGIO_LNG], { icon: iconoCirculo('🏫','#6f42c1', 46) })
              .addTo(mapa)
-             .bindPopup('<strong>🏫 Colegio — Destino final</strong>');
+             .bindPopup('<strong>🏫 Colegio</strong>');
 
-            // Casa del padre/alumno
-            if (CASA_LAT !== null && CASA_LNG !== null) {
-                L.marker([CASA_LAT, CASA_LNG], { icon: iconoCirculo('🏠','#0069d9', 38) })
-                 .addTo(mapa)
-                 .bindPopup(`<strong>🏠 Punto de recogida</strong><br>@Html.Raw(Model.NombreHijo.Replace("'", "\\'"))`);
-            }
+            // Solo paradas/casas de los hijos de este padre (Diego, Sofía, etc.)
+            PARADAS_HIJOS.forEach((p) => {
+                const key = p.idParada ?? `casa_${p.idAlumno}`;
+                const esCasa = p.esCasa === true;
+                const visitado = p.idParada && paradasVisitadas.has(p.idParada);
+                const color = visitado ? '#28a745' : (esCasa ? '#0069d9' : '#ffc107');
+                const emoji = visitado ? '✓' : (esCasa ? '🏠' : '👤');
+                const sz = esCasa ? 38 : 42;
 
-            // Paradas del recorrido
-            PARADAS_BD.forEach((p, i) => {
-                const esUltima = i === PARADAS_BD.length - 1;
-                if (esUltima) return; // el colegio ya se dibujó
-                L.marker([p.lat, p.lng], {
-                    icon: L.divIcon({
-                        className: '',
-                        html: `<div style="width:24px;height:24px;border-radius:50%;background:#fd7e14;border:2px solid white;display:flex;align-items:center;justify-content:center;color:white;font-size:10px;font-weight:bold;box-shadow:0 2px 6px rgba(0,0,0,.3)">${p.orden}</div>`,
-                        iconSize:[24,24], iconAnchor:[12,12], popupAnchor:[0,-12]
-                    })
-                }).addTo(mapa).bindPopup(`<strong>🚏 ${p.nombre}</strong>`);
+                const html = visitado
+                    ? `<div style="width:${sz}px;height:${sz}px;border-radius:50%;background:${color};border:3px solid white;display:flex;align-items:center;justify-content:center;color:white;font-size:${Math.round(sz*.45)}px;font-weight:bold;box-shadow:0 2px 8px rgba(0,0,0,.3)">${emoji}</div>`
+                    : `<div class="${visitado ? '' : 'marcador-hijo-pendiente'}" style="width:${sz}px;height:${sz}px;border-radius:50%;background:${color};border:3px solid white;display:flex;align-items:center;justify-content:center;color:${esCasa ? 'white' : '#333'};font-size:${Math.round(sz*.4)}px;font-weight:bold;box-shadow:0 2px 8px rgba(0,0,0,.3)">${emoji}</div>`;
+
+                const m = L.marker([p.lat, p.lng], {
+                    icon: L.divIcon({ className: '', html, iconSize: [sz, sz], iconAnchor: [sz/2, sz/2], popupAnchor: [0, -sz/2] })
+                }).addTo(mapa).bindPopup(`<strong>${esCasa ? '🏠' : '🚏'} ${p.nombre}</strong>${visitado ? '<br><span class="badge bg-success">Recogido / visitado</span>' : '<br><span class="badge bg-warning text-dark">Pendiente</span>'}`);
+
+                marcadoresHijos[key] = { marker: m, parada: p };
             });
         }
 
-        // ── Ruta OSRM ─────────────────────────────────────────────────────────
+        function actualizarMarcadorHijo(key, visitado) {
+            const item = marcadoresHijos[key];
+            if (!item) return;
+            const p = item.parada;
+            const esCasa = p.esCasa === true;
+            const color = visitado ? '#28a745' : (esCasa ? '#0069d9' : '#ffc107');
+            const emoji = visitado ? '✓' : (esCasa ? '🏠' : '👤');
+            const sz = esCasa ? 38 : 42;
+            item.marker.setIcon(L.divIcon({
+                className: '',
+                html: `<div style="width:${sz}px;height:${sz}px;border-radius:50%;background:${color};border:3px solid white;display:flex;align-items:center;justify-content:center;color:white;font-size:${Math.round(sz*.45)}px;font-weight:bold;box-shadow:0 2px 8px rgba(0,0,0,.3)">${emoji}</div>`,
+                iconSize: [sz, sz], iconAnchor: [sz/2, sz/2], popupAnchor: [0, -sz/2]
+            }));
+            item.marker.setPopupContent(`<strong>${esCasa ? '🏠' : '🚏'} ${p.nombre}</strong><br><span class="badge bg-success">Recogido / visitado</span>`);
+        }
+
+        async function dibujarRutaVivoCompleta() {
+            if (!RUTA_COMPLETA.length || modoVisualizacion !== 'vivo') return;
+
+            limpiarSegmentosVivo();
+            const puntosRuta = [];
+
+            for (let i = 0; i < RUTA_COMPLETA.length - 1; i++) {
+                const desde = RUTA_COMPLETA[i];
+                const hasta = RUTA_COMPLETA[i + 1];
+                const coords = await segmentoOSRM([desde.lat, desde.lng], [hasta.lat, hasta.lng]);
+                puntosRuta.push(...coords);
+
+                const idParadaDestino = hasta.idParada ?? null;
+                const visitado = idParadaDestino && paradasVisitadas.has(idParadaDestino);
+                const poly = L.polyline(coords, {
+                    color: visitado ? '#28a745' : '#2563eb',
+                    weight: visitado ? 6 : 5,
+                    opacity: .9,
+                    lineJoin: 'round',
+                    lineCap: 'round'
+                }).addTo(mapa);
+
+                routeSegmentosVivo.push({
+                    poly, idParadaDestino, indice: i + 1,
+                    ordenDestino: hasta.orden ?? (i + 2),
+                    esColegioDestino: hasta.esColegio === true
+                });
+            }
+
+            if (puntosRuta.length) {
+                mapa.fitBounds(L.latLngBounds(puntosRuta).pad(.1));
+                console.log(`[PadreDashboard] Ruta en vivo: ${routeSegmentosVivo.length} segmentos, ${puntosRuta.length} pts`);
+            }
+        }
+
+        function limpiarSegmentosVivo() {
+            routeSegmentosVivo.forEach(s => mapa.removeLayer(s.poly));
+            routeSegmentosVivo = [];
+        }
+
+        function ocultarRutaVivo() {
+            routeSegmentosVivo.forEach(s => mapa.removeLayer(s.poly));
+        }
+
+        function mostrarRutaVivo() {
+            routeSegmentosVivo.forEach(s => mapa.addLayer(s.poly));
+        }
+
+        function getOrdenColegio() {
+            const c = RUTA_COMPLETA.find(p => p.esColegio);
+            return c?.orden ?? Math.max(...RUTA_COMPLETA.map(p => p.orden ?? 0), 0);
+        }
+
+        function getOrdenesHijosEnRuta() {
+            return PARADAS_HIJOS
+                .filter(p => p.idParada)
+                .map(p => RUTA_COMPLETA.find(r => r.idParada === p.idParada)?.orden ?? 0)
+                .filter(o => o > 0);
+        }
+
+        function getMaxOrdenVisitado() {
+            let maxO = 0;
+            RUTA_COMPLETA.forEach(p => {
+                if (p.idParada && paradasVisitadas.has(p.idParada))
+                    maxO = Math.max(maxO, p.orden ?? 0);
+            });
+            return maxO;
+        }
+
+        /** Progreso del bus sobre la ruta (por cercanía GPS) */
+        function getOrdenProgresoBus(lat, lng) {
+            let maxO = 0;
+            RUTA_COMPLETA.forEach(p => {
+                if (distM([lat, lng], [p.lat, p.lng]) <= 220)
+                    maxO = Math.max(maxO, p.orden ?? 0);
+            });
+            return maxO;
+        }
+
+        /**
+         * Mañana: verde desde inicio → colegio (según avance del bus).
+         * Tarde: verde desde colegio → última parada de los hijos de este padre.
+         */
+        function actualizarColoresSegmentos(lat, lng) {
+            const ordenColegio   = getOrdenColegio();
+            const ordenesHijos   = getOrdenesHijosEnRuta();
+            const maxOrdenHijo   = ordenesHijos.length ? Math.max(...ordenesHijos) : ordenColegio;
+            const visitado       = getMaxOrdenVisitado();
+            const progresoBus    = (lat != null && lng != null) ? getOrdenProgresoBus(lat, lng) : 0;
+            const progreso       = Math.max(visitado, progresoBus);
+
+            const esMañana = TIPO_RUTA === 'Mañana' || TIPO_RUTA.toLowerCase().includes('mañana') || TIPO_RUTA.toLowerCase().includes('manana');
+
+            routeSegmentosVivo.forEach(seg => {
+                const ord = seg.ordenDestino ?? 0;
+                let verde = false;
+
+                if (esMañana) {
+                    // Hasta el colegio, según avance real del bus
+                    verde = ord <= ordenColegio && ord <= progreso;
+                } else {
+                    // Desde colegio (parada 1) hasta dejar a los hijos de este padre
+                    verde = ord <= maxOrdenHijo && ord <= progreso;
+                }
+
+                seg.poly.setStyle({
+                    color: verde ? '#28a745' : '#2563eb',
+                    weight: verde ? 6 : 5
+                });
+            });
+        }
+
+        function marcarParadaVisitada(idParada, idAlumno) {
+            if (idParada) {
+                if (paradasVisitadas.has(idParada)) return;
+                paradasVisitadas.add(idParada);
+                if (marcadoresHijos[idParada])
+                    actualizarMarcadorHijo(idParada, true);
+            }
+            if (idAlumno) {
+                Object.entries(marcadoresHijos).forEach(([key, item]) => {
+                    if (item.parada.idAlumno === idAlumno)
+                        actualizarMarcadorHijo(key, true);
+                });
+            }
+            actualizarColoresSegmentos(
+                ultimaUbicacionVivo?.[0] ?? null,
+                ultimaUbicacionVivo?.[1] ?? null
+            );
+        }
+
+        function detectarParadasCercanas(lat, lng) {
+            const UMBRAL_M = 180;
+            PARADAS_HIJOS.forEach(p => {
+                if (!p.idParada || paradasVisitadas.has(p.idParada)) return;
+                if (distM([lat, lng], [p.lat, p.lng]) <= UMBRAL_M)
+                    marcarParadaVisitada(p.idParada, p.idAlumno);
+            });
+            // Colegio al final de la ruta
+            RUTA_COMPLETA.filter(p => p.esColegio).forEach(p => {
+                if (!p.idParada || paradasVisitadas.has(p.idParada)) return;
+                if (distM([lat, lng], [p.lat, p.lng]) <= 100)
+                    marcarParadaVisitada(p.idParada, null);
+            });
+        }
+
+        // ── Ruta OSRM (solo Plan B) ───────────────────────────────────────────
         async function segmentoOSRM(desde, hasta) {
             try {
                 const r = await fetch(`https://router.project-osrm.org/route/v1/driving/${desde[1]},${desde[0]};${hasta[1]},${hasta[0]}?overview=full&geometries=geojson`);
@@ -264,8 +470,10 @@
             return [desde, hasta];
         }
 
-        async function dibujarRutaOSRM() {
+        async function dibujarRutaFallback() {
             if (!PARADAS_BD.length) return;
+            if (routePolylineFallback) mapa.removeLayer(routePolylineFallback);
+
             const todos = [];
             for (let i = 0; i < PARADAS_BD.length - 1; i++) {
                 const seg = await segmentoOSRM(
@@ -274,92 +482,129 @@
                 );
                 todos.push(...seg);
             }
-            if (routePolyline) mapa.removeLayer(routePolyline);
-            routePolyline = L.polyline(todos, {
+            routePolylineFallback = L.polyline(todos, {
                 color: '#FF6B35', weight: 5, opacity: .85, dashArray: '10,5'
-            }).addTo(mapa).bindPopup('<strong>🚌 Ruta del Bus</strong><br>Siguiendo calles reales');
+            }).addTo(mapa).bindPopup('<strong>🚌 Simulación local (Plan B)</strong>');
             mapa.fitBounds(L.latLngBounds(todos).pad(.1));
-            console.log(`[PadreDashboard] Ruta dibujada: ${todos.length} pts`);
             return todos;
         }
 
-        // ── SignalR ───────────────────────────────────────────────────────────
+        // ── [EN VIVO - FASE 0.1/0.5] SignalR ─────────────────────────────────
         async function conectarSignalR() {
             try {
                 window.padreNot = new NotificacionesCliente();
                 await window.padreNot.conectar();
 
-                // Unirse al grupo del bus del padre
                 await window.padreNot.unirseAGrupo(`Bus_${ID_BUS}`);
                 console.log(`✅ [PadreDashboard] Unido a Bus_${ID_BUS}`);
 
-                // Unirse al grupo de CADA alumno del padre (para alertas personales)
                 for (const idAlumno of IDS_ALUMNOS) {
                     await window.padreNot.unirseAGrupo(`Alumno_${idAlumno}`);
                     console.log(`✅ [PadreDashboard] Unido a Alumno_${idAlumno}`);
                 }
 
+                signalRConectado = true;
                 actualizarBadge(true);
 
-                // ── Ubicación en tiempo real → mover marcador del bus ──────────
+                // [EN VIVO] Ubicación desde servidor (canal principal vía POST /api/ubicaciones)
                 window.padreNot.onUbicacionActualizada((data) => {
-                    const lat = parseFloat(data.latitud ?? data.Latitud);
-                    const lng = parseFloat(data.longitud ?? data.Longitud);
-                    if (isNaN(lat) || isNaN(lng)) return;
-
-                    if (!busMarker) {
-                        busMarker = L.marker([lat, lng], { icon: iconoCirculo('🚌','#28a745', 44) })
-                                     .addTo(mapa)
-                                     .bindPopup(`<strong>🚌 Bus #${ID_BUS} en vivo</strong>`);
-                    } else {
-                        busMarker.setLatLng([lat, lng]);
-                    }
-                    mapa.setView([lat, lng], mapa.getZoom());
-
-                    // ALERTA 1: Bus próximo a la casa para recoger al alumno
-                    if (CASA_LAT !== null && CASA_LNG !== null) {
-                        const dCasa = distM([lat, lng], [CASA_LAT, CASA_LNG]);
-                        if (dCasa <= 300 && !notifProximo) {
-                            notifProximo = true;
-                            const msg = `⚠️ El bus está a menos de 300 m de la casa — viene a recoger a <strong>@Html.Raw(Model.NombreHijo.Replace("'","\\'"  ))</strong>`;
-                            agregarAlerta(msg, 'warning');
-                            toast(msg, 'warning');
-                        }
-                    }
-
-                    // ALERTA 2: Bus llega al colegio
-                    if (distM([lat, lng], [COLEGIO_LAT, COLEGIO_LNG]) <= 100 && !notifColegio) {
-                        notifColegio = true;
-                        const msg = `✅ El bus ha llegado al colegio. <strong>@Html.Raw(Model.NombreHijo.Replace("'","\\'"  ))</strong> ya está en el colegio.`;
-                        agregarAlerta(msg, 'success');
-                        toast(msg, 'success');
-                    }
+                    if (modoVisualizacion === 'fallback') return;
+                    actualizarMarcadorVivo(data);
                 });
 
-                // ── Alertas enviadas desde el servidor ────────────────────────
+                // [EN VIVO - FASE 0.5] Parada completada por el piloto
+                window.padreNot.onParadaCompletada(mostrarAlertaParadaCompletada);
+
                 window.padreNot.onAlerta((data) => {
+                    if (modoVisualizacion === 'fallback') return;
                     const msg  = data.mensaje ?? data.Mensaje ?? 'Alerta del sistema';
                     const tipo = data.tipoAlerta ?? data.TipoAlerta ?? '';
                     const cls  = tipo === 'llegada_colegio' ? 'success'
                                : tipo === 'proximidad'      ? 'warning'
                                : 'info';
-                    console.log(`🔔 [PadreDashboard] onAlerta: ${msg}`);
                     agregarAlerta(msg, cls);
                     toast(msg, cls);
                 });
 
-                // ── Alertas personales (dirigidas al alumno/padre específico) ─
                 window.padreNot.onAlertaPersonal((data) => {
+                    if (modoVisualizacion === 'fallback') return;
                     const msg = data.mensaje ?? data.Mensaje ?? 'Alerta personal';
-                    console.log(`🔔 [PadreDashboard] onAlertaPersonal: ${msg}`);
                     agregarAlerta(msg, 'warning');
                     toast(msg, 'warning');
                 });
 
+                // Si no llegan datos en vivo, sugerir plan B
+                setTimeout(() => {
+                    if (!ultimaUbicacionVivo && modoVisualizacion === 'vivo') {
+                        document.getElementById('estadoSimulacion').innerHTML =
+                            '<span class="text-warning">⚠️ Sin datos en vivo. Usa la simulación como respaldo.</span>';
+                    }
+                }, TIMEOUT_SIN_DATOS_MS);
+
             } catch (e) {
                 console.warn('[PadreDashboard] SignalR no disponible:', e);
+                signalRConectado = false;
                 actualizarBadge(false);
+                document.getElementById('estadoSimulacion').innerHTML =
+                    '<span class="text-danger">Sin conexión en vivo. Usa el botón de simulación.</span>';
             }
+        }
+
+        // [EN VIVO] Mover marcador verde con ubicación del piloto
+        function actualizarMarcadorVivo(data) {
+            const lat = parseFloat(data.latitud ?? data.Latitud);
+            const lng = parseFloat(data.longitud ?? data.Longitud);
+            if (isNaN(lat) || isNaN(lng)) return;
+
+            ultimaUbicacionVivo = [lat, lng];
+
+            if (simMarker) { mapa.removeLayer(simMarker); simMarker = null; }
+
+            if (!busMarker) {
+                busMarker = L.marker([lat, lng], { icon: iconoCirculo('🚌','#28a745', 44) })
+                             .addTo(mapa)
+                             .bindPopup(`<strong>🚌 Bus #${ID_BUS} en vivo</strong>`);
+            } else {
+                busMarker.setLatLng([lat, lng]);
+            }
+            mapa.panTo([lat, lng], { animate: true, duration: 0.4 });
+
+            detectarParadasCercanas(lat, lng);
+            actualizarColoresSegmentos(lat, lng);
+
+            if (CASA_LAT !== null && CASA_LNG !== null) {
+                const dCasa = distM([lat, lng], [CASA_LAT, CASA_LNG]);
+                if (dCasa <= 300 && !notifProximo) {
+                    notifProximo = true;
+                    const msg = `⚠️ El bus está a menos de 300 m de la casa — viene a recoger a <strong>@Html.Raw(Model.NombreHijo.Replace("'","\\'"  ))</strong>`;
+                    agregarAlerta(msg, 'warning');
+                    toast(msg, 'warning');
+                }
+            }
+
+            if (distM([lat, lng], [COLEGIO_LAT, COLEGIO_LNG]) <= 100 && !notifColegio) {
+                notifColegio = true;
+                const msg = `✅ El bus ha llegado al colegio. <strong>@Html.Raw(Model.NombreHijo.Replace("'","\\'"  ))</strong> ya está en el colegio.`;
+                agregarAlerta(msg, 'success');
+                toast(msg, 'success');
+            }
+        }
+
+        // [EN VIVO - FASE 0.5] Alerta cuando el piloto completa una parada
+        function mostrarAlertaParadaCompletada(data) {
+            const idParada = data.idParada ?? data.IdParada;
+            const idAlumno = data.idAlumno ?? data.IdAlumno;
+            if (idParada) marcarParadaVisitada(idParada, idAlumno);
+
+            const msg = data.mensaje ?? data.Mensaje ?? (
+                (data.tipoRuta ?? data.TipoRuta ?? TIPO_RUTA) === 'Tarde'
+                    ? `✅ @Html.Raw(Model.NombreHijo.Replace("'","\\'"  )) ha sido dejado en casa.`
+                    : (data.esParadaColegio ?? data.EsParadaColegio)
+                        ? `✅ @Html.Raw(Model.NombreHijo.Replace("'","\\'"  )) ha llegado al colegio.`
+                        : `✅ @Html.Raw(Model.NombreHijo.Replace("'","\\'"  )) ha sido recogido.`
+            );
+            agregarAlerta(msg, 'success');
+            toast(msg, 'success');
         }
 
         function actualizarBadge(ok) {
@@ -407,19 +652,32 @@
         }
 
         function verRutaCompleta() {
-            if (routePolyline) mapa.fitBounds(routePolyline.getBounds().pad(.1));
+            if (modoVisualizacion === 'fallback' && routePolylineFallback)
+                mapa.fitBounds(routePolylineFallback.getBounds().pad(.1));
+            else if (routeSegmentosVivo.length) {
+                const grupo = L.featureGroup(routeSegmentosVivo.map(s => s.poly));
+                mapa.fitBounds(grupo.getBounds().pad(.1));
+            }
         }
 
-        // ── Simulación (demo visual) ───────────────────────────────────────────
+        // ── [FALLBACK - FASE 0.1] Simulación local del padre (plan B) ─────────
         async function simularRuta() {
             if (simActiva) { detenerSimulacion(); return; }
+
+            modoVisualizacion = 'fallback';
+
+            // Ocultar ruta en vivo; mostrar solo línea Plan B
+            ocultarRutaVivo();
+            if (busMarker) { mapa.removeLayer(busMarker); busMarker = null; }
 
             const btn    = document.getElementById('btnSimular');
             const estado = document.getElementById('estadoSimulacion');
             btn.innerHTML = '<i class="bi bi-stop-circle-fill me-2"></i>Detener';
             btn.className = 'btn btn-danger w-100';
-            estado.textContent = 'Generando ruta con calles reales...';
+            estado.textContent = 'Simulación local activa (plan B)...';
             simActiva = true;
+
+            await dibujarRutaFallback();
 
             if (simPuntos.length === 0) {
                 for (let i = 0; i < PARADAS_BD.length - 1; i++) {
@@ -440,7 +698,7 @@
             if (simMarker) mapa.removeLayer(simMarker);
             simMarker = L.marker(simPuntos[0].coord, { icon: iconoCirculo('🚌','#ff6b35', 44) })
                          .addTo(mapa)
-                         .bindPopup(`<strong>🚌 Bus #${ID_BUS} (Simulación)</strong>`);
+                         .bindPopup(`<strong>🚌 Bus #${ID_BUS} (Simulación local)</strong>`);
 
             let i = 0;
             const vel = 700;
@@ -466,10 +724,20 @@
 
         function detenerSimulacion() {
             simActiva = false;
-            document.getElementById('btnSimular').innerHTML = '<i class="bi bi-play-circle-fill me-2"></i>Iniciar Simulación';
-            document.getElementById('btnSimular').className = 'btn btn-primary w-100';
-            document.getElementById('estadoSimulacion').textContent = 'Pulsa para animar el recorrido del bus';
+            modoVisualizacion = 'vivo';
+            document.getElementById('btnSimular').innerHTML = '<i class="bi bi-play-circle-fill me-2"></i>Iniciar Simulación (Plan B)';
+            document.getElementById('btnSimular').className = 'btn btn-outline-primary w-100';
+            document.getElementById('estadoSimulacion').textContent =
+                signalRConectado
+                    ? 'Por defecto verás el bus en vivo. Si no hay señal, usa este botón.'
+                    : 'Sin conexión en vivo. Usa el botón de simulación.';
             if (simMarker) { mapa.removeLayer(simMarker); simMarker = null; }
+            if (routePolylineFallback) { mapa.removeLayer(routePolylineFallback); routePolylineFallback = null; }
+            mostrarRutaVivo();
+            // Restaurar última posición en vivo si la había
+            if (ultimaUbicacionVivo) {
+                actualizarMarcadorVivo({ latitud: ultimaUbicacionVivo[0], longitud: ultimaUbicacionVivo[1] });
+            }
         }
 
         // ── Haversine ────────────────────────────────────────────────────────

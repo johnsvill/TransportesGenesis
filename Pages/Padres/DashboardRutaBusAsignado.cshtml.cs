@@ -1,9 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 using System.Text.Json;
-using TransportesGenesis.Models.DB.Usuarios;
 using TransportesGenesis.Repositories.Interfaces;
 using TransportesGenesis.Services.Interfaces;
 using TransportesGenesis.Data.Context;
@@ -14,72 +12,78 @@ namespace TransportesGenesis.Pages.Padres
     [Authorize(Roles = "PadreDeFamilia")]
     public class DashboardRutaBusAsignadoModel : PageModel
     {
-        // ── Datos del padre y alumno ───────────────────────────────────────────
         public string PadreNombre     { get; set; } = string.Empty;
         public string NombreHijo      { get; set; } = "—";
 
-        // ── Datos del bus asignado ─────────────────────────────────────────────
-        public int    IdBusAsignado   { get; set; } = 1;   // fallback demo = Bus 1
+        public int    IdBusAsignado   { get; set; } = 1;
         public string PlacaBus        { get; set; } = "—";
         public string NombrePiloto    { get; set; } = "—";
         public string RutaNombre      { get; set; } = "—";
         public string HorarioMañana   { get; set; } = "—";
         public string HorarioTarde    { get; set; } = "—";
+        public string TipoRutaActiva  { get; set; } = "Mañana";
+        public string DescripcionTurno { get; set; } = string.Empty;
 
-        // ── Coordenadas de la casa del alumno ──────────────────────────────────
         public decimal? CasaLatitud   { get; set; }
         public decimal? CasaLongitud  { get; set; }
 
-        // ── IDs para SignalR ───────────────────────────────────────────────────
-        public List<int> IdsAlumnos   { get; set; } = new();
+        public List<int> IdsAlumnos      { get; set; } = new();
+        public string ParadasJson        { get; set; } = "[]";   // segmento Plan B
+        public string RutaCompletaJson   { get; set; } = "[]"; // ruta completa del bus (en vivo)
+        public string ParadasHijosJson   { get; set; } = "[]"; // paradas/casas de los hijos del padre
 
-        // ── Paradas reales del bus (serializado a JSON para el JS) ─────────────
-        // Cada elemento: { nombre, lat, lng, orden, idAlumno }
-        public string ParadasJson     { get; set; } = "[]";
-
-        // ── Coordenadas del colegio (del bus / última parada) ──────────────────
         public decimal ColegioLatitud  { get; set; } = 14.6270m;
         public decimal ColegioLongitud { get; set; } = -90.5125m;
 
-        // ── Dependencias ──────────────────────────────────────────────────────
-        private readonly IAlumnoRepository  _alumnoRepo;
-        private readonly IBusService        _busService;
-        private readonly IRutaRepository    _rutaRepo;
+        private readonly IAlumnoRepository    _alumnoRepo;
+        private readonly IBusService          _busService;
+        private readonly IRutaRepository      _rutaRepo;
+        private readonly IConfiguracionService _configService;
         private readonly ApplicationDbContext _db;
 
         public DashboardRutaBusAsignadoModel(
             IAlumnoRepository alumnoRepository,
             IBusService busService,
             IRutaRepository rutaRepository,
+            IConfiguracionService configService,
             ApplicationDbContext db)
         {
-            _alumnoRepo = alumnoRepository;
-            _busService  = busService;
-            _rutaRepo    = rutaRepository;
-            _db          = db;
+            _alumnoRepo   = alumnoRepository;
+            _busService   = busService;
+            _rutaRepo     = rutaRepository;
+            _configService = configService;
+            _db           = db;
         }
 
-        public async Task OnGetAsync()
+        public async Task OnGetAsync(string? turno = null)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId)) return;
 
             try
             {
-                // 1. Cargar todos los hijos del padre autenticado
+                // Turno: query ?turno=Mañana|Tarde para demo, o automático por hora
+                if (!string.IsNullOrEmpty(turno) &&
+                    (turno.Equals("Mañana", StringComparison.OrdinalIgnoreCase) ||
+                     turno.Equals("Tarde", StringComparison.OrdinalIgnoreCase)))
+                    TipoRutaActiva = turno.Equals("Mañana", StringComparison.OrdinalIgnoreCase) ? "Mañana" : "Tarde";
+                else
+                    TipoRutaActiva = DateTime.Now.Hour < 12 ? "Mañana" : "Tarde";
+
+                DescripcionTurno = TipoRutaActiva == "Mañana"
+                    ? "Mañana: recoge en casas → el colegio es la última parada (destino final)."
+                    : "Tarde: sale del colegio (parada 1) → deja alumnos en casa. No regresa al colegio.";
                 var hijos = await _alumnoRepo.GetAlumnosByPadreUserIdAsync(userId);
                 if (hijos == null || !hijos.Any()) return;
 
-                // 2. Nombre del padre
                 var primerHijo = hijos.First();
                 if (primerHijo.Padres != null)
                     PadreNombre = $"{primerHijo.Padres.Nombre} {primerHijo.Padres.Apellido}".Trim();
 
-                // 3. Nombre del primer hijo (y todos los ids para SignalR)
                 NombreHijo = string.Join(", ", hijos.Select(h => $"{h.Nombre} {h.Apellido}"));
                 IdsAlumnos = hijos.Select(h => h.IdAlumno).ToList();
+                var idsHijos = IdsAlumnos.ToHashSet();
 
-                // 4. Coordenadas de la casa (primer hijo que las tenga)
                 var hijoCoordenadas = hijos.FirstOrDefault(h => h.Latitud.HasValue && h.Longitud.HasValue);
                 if (hijoCoordenadas != null)
                 {
@@ -87,13 +91,11 @@ namespace TransportesGenesis.Pages.Padres
                     CasaLongitud = hijoCoordenadas.Longitud;
                 }
 
-                // 5. Bus asignado (tomar el del primer hijo que lo tenga)
                 var hijoConBus = hijos.FirstOrDefault(h => h.IdBusAsignado.HasValue);
                 if (hijoConBus?.IdBusAsignado == null) return;
 
                 IdBusAsignado = hijoConBus.IdBusAsignado.Value;
 
-                // 6. Info del bus
                 var bus = await _busService.GetBusByIdAsync(IdBusAsignado);
                 if (bus != null)
                 {
@@ -102,7 +104,6 @@ namespace TransportesGenesis.Pages.Padres
                         NombrePiloto = bus.PilotoAsignado;
                 }
 
-                // Si PilotoAsignado no vino en el DTO, buscarlo directamente
                 if (NombrePiloto == "—")
                 {
                     var asignacion = await _db.AsignacionesPilotoBusDb
@@ -117,7 +118,11 @@ namespace TransportesGenesis.Pages.Padres
                         NombrePiloto = asignacion.UserName ?? asignacion.Email ?? "—";
                 }
 
-                // 7. Rutas activas del bus
+                // [FASE 0.6] Colegio desde configuración del sistema
+                var (latCole, lonCole) = await _configService.ObtenerCoordenadasColegioAsync();
+                ColegioLatitud  = latCole;
+                ColegioLongitud = lonCole;
+
                 var rutas = (await _rutaRepo.GetActivasByBusAsync(IdBusAsignado)).ToList();
 
                 var rutaMañana = rutas.FirstOrDefault(r =>
@@ -128,7 +133,9 @@ namespace TransportesGenesis.Pages.Padres
                     r.TipoRuta.Contains("Tarde",  StringComparison.OrdinalIgnoreCase) ||
                     r.TipoRuta.Contains("Vuelta", StringComparison.OrdinalIgnoreCase));
 
-                var rutaPrincipal = rutaMañana ?? rutaTarde ?? rutas.FirstOrDefault();
+                // Turno activo según hora o parámetro ?turno=
+                var rutaPrincipal = (TipoRutaActiva == "Mañana" ? rutaMañana : rutaTarde)
+                                    ?? rutaMañana ?? rutaTarde ?? rutas.FirstOrDefault();
 
                 if (rutaPrincipal != null)
                     RutaNombre = rutaPrincipal.Nombre;
@@ -139,59 +146,175 @@ namespace TransportesGenesis.Pages.Padres
                 if (rutaTarde != null)
                     HorarioTarde = rutaTarde.HoraInicio.ToString(@"hh\:mm") + " PM";
 
-                // 8. Cargar paradas de la ruta principal
-                var paradas = new List<object>();
+                // [FASE 0.2] Segmento filtrado (Plan B) + ruta completa del bus (en vivo)
+                var paradasFiltradas = new List<object>();
+                var rutaCompleta     = new List<object>();
+                var paradasHijos     = new List<object>();
 
                 if (rutaPrincipal != null)
                 {
                     var rutaConParadas = await _rutaRepo.GetConParadasAsync(rutaPrincipal.IdRuta);
                     if (rutaConParadas?.ParadasLink != null && rutaConParadas.ParadasLink.Any())
-                        {
-                            foreach (var p in rutaConParadas.ParadasLink.OrderBy(p => p.Orden))
+                    {
+                        // Ruta completa del monitor (todas las paradas, sin filtrar)
+                        rutaCompleta = rutaConParadas.ParadasLink
+                            .OrderBy(p => p.Orden)
+                            .Select(p => (object)new
                             {
-                                // Filtrar coordenadas fuera de Guatemala (lat 13.7-17.9, lon -92.3 a -88.2)
-                                if (p.Latitud < 13.7m || p.Latitud > 17.9m ||
-                                    p.Longitud < -92.3m || p.Longitud > -88.2m)
-                                    continue;
+                                nombre    = p.IdAlumno.HasValue
+                                    ? $"{p.Alumno?.Nombre} {p.Alumno?.Apellido}".Trim()
+                                    : "Colegio Genesis",
+                                lat       = (double)p.Latitud,
+                                lng       = (double)p.Longitud,
+                                orden     = p.Orden,
+                                idAlumno  = p.IdAlumno,
+                                idParada  = p.IdParada,
+                                esColegio = !p.IdAlumno.HasValue
+                            })
+                            .ToList();
 
-                                paradas.Add(new
+                        // Paradas en ruta + casas de todos los hijos de este padre
+                        foreach (var hijo in hijos.Where(h => h.IdBusAsignado == IdBusAsignado))
+                        {
+                            if (hijo.Latitud.HasValue && hijo.Longitud.HasValue)
+                            {
+                                paradasHijos.Add(new
                                 {
-                                    nombre   = p.Alumno != null
-                                        ? $"Parada {p.Orden} - {p.Alumno.Nombre} {p.Alumno.Apellido}"
-                                        : (p.Direccion ?? $"Parada {p.Orden}"),
-                                    lat      = (double)p.Latitud,
-                                    lng      = (double)p.Longitud,
-                                    orden    = p.Orden,
-                                    idAlumno = p.IdAlumno
+                                    nombre   = $"Casa — {hijo.Nombre} {hijo.Apellido}",
+                                    lat      = (double)hijo.Latitud.Value,
+                                    lng      = (double)hijo.Longitud.Value,
+                                    idAlumno = hijo.IdAlumno,
+                                    idParada = (int?)null,
+                                    esCasa   = true
                                 });
                             }
 
-                        // Coordenadas del colegio = última parada sin alumno (o última)
+                            var paradaEnRuta = rutaConParadas.ParadasLink
+                                .FirstOrDefault(p => p.IdAlumno == hijo.IdAlumno);
+                            if (paradaEnRuta != null)
+                            {
+                                paradasHijos.Add(new
+                                {
+                                    nombre   = $"{hijo.Nombre} {hijo.Apellido}",
+                                    lat      = (double)paradaEnRuta.Latitud,
+                                    lng      = (double)paradaEnRuta.Longitud,
+                                    idAlumno = hijo.IdAlumno,
+                                    idParada = paradaEnRuta.IdParada,
+                                    esCasa   = false
+                                });
+                            }
+                        }
+
+                        var paradaHijo = rutaConParadas.ParadasLink
+                            .FirstOrDefault(p => p.IdAlumno.HasValue && idsHijos.Contains(p.IdAlumno.Value));
+
                         var paradaColegio = rutaConParadas.ParadasLink
-                            .OrderByDescending(p => p.Orden)
                             .FirstOrDefault(p => p.IdAlumno == null)
                             ?? rutaConParadas.ParadasLink.OrderByDescending(p => p.Orden).First();
 
                         ColegioLatitud  = paradaColegio.Latitud;
                         ColegioLongitud = paradaColegio.Longitud;
+
+                        if (TipoRutaActiva == "Mañana")
+                        {
+                            // Mañana: casa → parada hijo → colegio
+                            if (CasaLatitud.HasValue && CasaLongitud.HasValue)
+                            {
+                                paradasFiltradas.Add(new
+                                {
+                                    nombre   = $"Casa — {NombreHijo}",
+                                    lat      = (double)CasaLatitud.Value,
+                                    lng      = (double)CasaLongitud.Value,
+                                    orden    = 1,
+                                    idAlumno = (int?)IdsAlumnos.FirstOrDefault(),
+                                    esCasa   = true
+                                });
+                            }
+
+                            if (paradaHijo != null)
+                            {
+                                paradasFiltradas.Add(new
+                                {
+                                    nombre   = $"Parada — {paradaHijo.Alumno?.Nombre} {paradaHijo.Alumno?.Apellido}",
+                                    lat      = (double)paradaHijo.Latitud,
+                                    lng      = (double)paradaHijo.Longitud,
+                                    orden    = 2,
+                                    idAlumno = paradaHijo.IdAlumno,
+                                    idParada = paradaHijo.IdParada,
+                                    esCasa   = false
+                                });
+                            }
+
+                            paradasFiltradas.Add(new
+                            {
+                                nombre   = "Colegio Genesis",
+                                lat      = (double)ColegioLatitud,
+                                lng      = (double)ColegioLongitud,
+                                orden    = 3,
+                                idAlumno = (int?)null,
+                                esColegio = true
+                            });
+                        }
+                        else
+                        {
+                            // Tarde: colegio → parada hijo → casa
+                            paradasFiltradas.Add(new
+                            {
+                                nombre   = "Colegio Genesis",
+                                lat      = (double)ColegioLatitud,
+                                lng      = (double)ColegioLongitud,
+                                orden    = 1,
+                                idAlumno = (int?)null,
+                                esColegio = true
+                            });
+
+                            if (paradaHijo != null)
+                            {
+                                paradasFiltradas.Add(new
+                                {
+                                    nombre   = $"Parada — {paradaHijo.Alumno?.Nombre} {paradaHijo.Alumno?.Apellido}",
+                                    lat      = (double)paradaHijo.Latitud,
+                                    lng      = (double)paradaHijo.Longitud,
+                                    orden    = 2,
+                                    idAlumno = paradaHijo.IdAlumno,
+                                    idParada = paradaHijo.IdParada,
+                                    esCasa   = false
+                                });
+                            }
+
+                            if (CasaLatitud.HasValue && CasaLongitud.HasValue)
+                            {
+                                paradasFiltradas.Add(new
+                                {
+                                    nombre   = $"Casa — {NombreHijo}",
+                                    lat      = (double)CasaLatitud.Value,
+                                    lng      = (double)CasaLongitud.Value,
+                                    orden    = 3,
+                                    idAlumno = (int?)IdsAlumnos.FirstOrDefault(),
+                                    esCasa   = true
+                                });
+                            }
+                        }
                     }
                 }
 
-                // Fallback: si no hay paradas en BD usar coordenadas demo
-                if (!paradas.Any())
+                // Fallback demo si no hay datos reales
+                if (!paradasFiltradas.Any())
                 {
-                    paradas = new List<object>
+                    paradasFiltradas = new List<object>
                     {
-                        new { nombre = "7ma Av. y 2da Calle, Zona 4",        lat = 14.6380, lng = -90.5240, orden = 1, idAlumno = (int?)null },
-                        new { nombre = "5ta Av. y 4ta Calle, Zona 4",        lat = 14.6358, lng = -90.5215, orden = 2, idAlumno = (int?)null },
-                        new { nombre = "Terminal Central, 3ra Av., Zona 4",  lat = 14.6336, lng = -90.5190, orden = 3, idAlumno = (int?)null },
-                        new { nombre = "Mercado El Guarda, Zona 4",          lat = 14.6314, lng = -90.5165, orden = 4, idAlumno = (int?)null },
-                        new { nombre = "Av. Bolívar y 8va Calle, Zona 4",    lat = 14.6292, lng = -90.5145, orden = 5, idAlumno = (int?)null },
-                        new { nombre = "Colegio Yulimay PC, Zona 4",         lat = 14.6270, lng = -90.5125, orden = 6, idAlumno = (int?)null }
+                        new { nombre = "Casa (demo)",   lat = 14.6380, lng = -90.5240, orden = 1, idAlumno = (int?)null, esCasa = true },
+                        new { nombre = "Parada (demo)", lat = 14.6358, lng = -90.5215, orden = 2, idAlumno = (int?)null },
+                        new { nombre = "Colegio (demo)", lat = 14.6270, lng = -90.5125, orden = 3, idAlumno = (int?)null, esColegio = true }
                     };
                 }
 
-                ParadasJson = JsonSerializer.Serialize(paradas);
+                if (!rutaCompleta.Any() && paradasFiltradas.Any())
+                    rutaCompleta = paradasFiltradas;
+
+                ParadasJson      = JsonSerializer.Serialize(paradasFiltradas);
+                RutaCompletaJson = JsonSerializer.Serialize(rutaCompleta);
+                ParadasHijosJson = JsonSerializer.Serialize(paradasHijos);
             }
             catch (Exception ex)
             {

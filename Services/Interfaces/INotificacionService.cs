@@ -15,7 +15,7 @@ namespace TransportesGenesis.Services.Interfaces
         /// <summary>
         /// Notificar a padre cuando parada es completada
         /// </summary>
-        Task NotificarParadaCompletadaAsync(int idAlumno, string nombreAlumno, int idParada);
+        Task NotificarParadaCompletadaAsync(int idAlumno, string nombreAlumno, int idParada, string tipoRuta = "Mañana", bool esParadaColegio = false);
 
         /// <summary>
         /// Notificar retraso en ruta a todos los padres del bus

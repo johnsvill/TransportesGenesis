@@ -14,6 +14,9 @@ namespace TransportesGenesis.DTOs.Ruta
         public bool EsActiva { get; set; }
         public List<ParadaRutaDto> Paradas { get; set; } = new List<ParadaRutaDto>();
         public DateTime FechaCreacion { get; set; }
+
+        /// <summary>Mensaje informativo (éxito parcial, fallback, o motivo de fallo).</summary>
+        public string? MensajeEstado { get; set; }
     }
 
     public class ParadaRutaDto

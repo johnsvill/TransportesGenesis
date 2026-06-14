@@ -15,19 +15,22 @@ namespace TransportesGenesis.Services.Implementations
         private readonly IMapper _mapper;
         private readonly IHubContext<NotificacionesHub> _hubContext;
         private readonly IAlumnoRepository _alumnoRepository;
+        private readonly IConfiguracionService _configuracionService;
 
         public UbicacionBusService(
             IUbicacionBusRepository ubicacionRepository,
             IBusRepository busRepository,
             IMapper mapper,
             IHubContext<NotificacionesHub> hubContext,
-            IAlumnoRepository alumnoRepository)
+            IAlumnoRepository alumnoRepository,
+            IConfiguracionService configuracionService)
         {
             _ubicacionRepository = ubicacionRepository;
             _busRepository = busRepository;
             _mapper = mapper;
             _hubContext = hubContext;
             _alumnoRepository = alumnoRepository;
+            _configuracionService = configuracionService;
         }
 
         public async Task<UbicacionBusDto?> GetUltimaUbicacionAsync(int idBus)
@@ -106,9 +109,10 @@ namespace TransportesGenesis.Services.Implementations
                 var umbralProxima = 250.0;
                 var umbralLlegadaColegio = 80.0;
 
-                // Coordenadas de colegio (fallback demo)
-                var colegioLat = 14.6235;
-                var colegioLon = -90.4956;
+                // [FASE 0.6] Coordenadas del colegio desde ConfiguracionService (BD)
+                var (colegioLatDec, colegioLonDec) = await _configuracionService.ObtenerCoordenadasColegioAsync();
+                var colegioLat = (double)colegioLatDec;
+                var colegioLon = (double)colegioLonDec;
 
                 // Verificar proximidad por alumno
                 if (alumnos != null && alumnos.Any())

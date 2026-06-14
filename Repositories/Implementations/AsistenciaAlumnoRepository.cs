@@ -75,11 +75,16 @@ namespace TransportesGenesis.Repositories.Implementations
             return await query.CountAsync();
         }
 
+        /// <summary>
+        /// [CONFIRMACIÓN ASISTENCIA] Asistencias con FechaConfirmacion != null para la fecha exacta (solo día, sin hora).
+        /// Usado por RutaService.CalcularRutaOptimizadaAsync al filtrar por turno Mañana/Tarde.
+        /// </summary>
         public async Task<IEnumerable<AsistenciaAlumno>> GetConfirmacionesPorFechaAsync(DateTime fecha)
         {
+            var fechaCalendario = fecha.Date;
             return await _dbSet
                 .Include(a => a.Alumno)
-                .Where(a => a.Fecha.Date == fecha.Date && a.FechaConfirmacion != null)
+                .Where(a => a.Fecha.Date == fechaCalendario && a.FechaConfirmacion != null && a.Activo == 1)
                 .ToListAsync();
         }
     }

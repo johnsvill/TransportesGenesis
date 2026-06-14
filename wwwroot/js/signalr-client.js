@@ -1,14 +1,14 @@
 /**
  * Cliente SignalR para Notificaciones en Tiempo Real
- * FASE 7 - TransportesGenesis
- * 
- * Uso:
- * <script src="~/js/signalr-client.js"></script>
- * <script>
- *   const cliente = new NotificacionesCliente();
- *   cliente.conectar();
- *   cliente.onBusCerca((data) => { console.log(data); });
- * </script>
+ * FASE 7 / FASE 0 — TransportesGenesis
+ *
+ * [EN VIVO] Eventos principales del padre:
+ *   - UbicacionBusActualizada  ← origen: POST /api/ubicaciones → UbicacionBusService
+ *   - ParadaCompletada         ← origen: PUT /api/rutas/.../completar → RutaService
+ *   - AlertaRecibida / AlertaPersonal
+ *
+ * [FALLBACK] La simulación local del padre NO usa este cliente;
+ *            solo anima marcador naranja sin tocar el servidor.
  */
 
 class NotificacionesCliente {

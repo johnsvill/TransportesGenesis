@@ -8,7 +8,8 @@ using System.Text.Json;
 
 namespace TransportesGenesis.Pages.Piloto
 {
-    [Authorize(Roles = "Piloto")]
+    // Piloto y Monitor pueden simular (monitor1 está asignado al Bus 4 de demo)
+    [Authorize(Roles = "Piloto,Monitor")]
     public class MiRutaModel : PageModel
     {
         private readonly IHttpClientFactory _httpClientFactory;
@@ -22,6 +23,7 @@ namespace TransportesGenesis.Pages.Piloto
 
         public RutaDto? RutaActiva { get; set; }
         public int? IdBus { get; set; }
+        public string PlacaBus { get; set; } = string.Empty;
         public string TipoRuta { get; set; } = "Mañana";
         public string MensajeError { get; set; } = string.Empty;
         public string MensajeExito { get; set; } = string.Empty;
@@ -29,7 +31,7 @@ namespace TransportesGenesis.Pages.Piloto
         public DateTime FechaRuta { get; set; }
         public bool EsFinDeSemana { get; set; }
 
-        public async Task OnGetAsync()
+        public async Task OnGetAsync(string? turno = null)
         {
             try
             {
@@ -44,8 +46,10 @@ namespace TransportesGenesis.Pages.Piloto
                 // Obtener nombre del piloto
                 NombrePiloto = User.Identity?.Name ?? "Piloto";
 
-                // Obtener IdBus asignado al piloto desde la base de datos
-                IdBus = await _pilotoService.GetIdBusAsignadoAsync(userId);
+                // Obtener IdBus asignado al piloto/monitor desde la base de datos
+                var asignacion = await _pilotoService.GetAsignacionActualAsync(userId);
+                IdBus = asignacion?.IdBus;
+                PlacaBus = asignacion?.Bus?.Placa ?? string.Empty;
 
                 if (!IdBus.HasValue)
                 {
@@ -57,9 +61,13 @@ namespace TransportesGenesis.Pages.Piloto
                 FechaRuta = ObtenerProximaFechaHabil();
                 EsFinDeSemana = DateTime.Now.DayOfWeek == DayOfWeek.Saturday || DateTime.Now.DayOfWeek == DayOfWeek.Sunday;
 
-                // Determinar turno según hora actual
-                var horaActual = DateTime.Now.Hour;
-                TipoRuta = horaActual < 12 ? "Mañana" : "Tarde";
+                // Determinar turno según hora o ?turno=Mañana|Tarde (demo)
+                if (!string.IsNullOrEmpty(turno) &&
+                    (turno.Equals("Mañana", StringComparison.OrdinalIgnoreCase) ||
+                     turno.Equals("Tarde", StringComparison.OrdinalIgnoreCase)))
+                    TipoRuta = turno.Equals("Mañana", StringComparison.OrdinalIgnoreCase) ? "Mañana" : "Tarde";
+                else
+                    TipoRuta = DateTime.Now.Hour < 12 ? "Mañana" : "Tarde";
 
                 // Si es día hábil (lunes-viernes), buscar ruta de HOY
                 // Si es fin de semana, buscar ruta del próximo lunes

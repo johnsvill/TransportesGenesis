@@ -19,7 +19,7 @@ namespace TransportesGenesis.Services.Interfaces
 
         // Nuevos métodos para FASE 5: Cálculo Dinámico (usando DTOs de Ruta)
         Task<CalcRutaDto> CalcularRutaOptimizadaAsync(CalcularRutaDto dto);
-        Task<bool> MarcarParadaCompletadaAsync(MarcarParadaDto dto);
+        Task<bool> MarcarParadaCompletadaAsync(MarcarParadaDto dto, string? confirmadoPor = null);
         Task<CalcRutaDto?> GetRutaActivaDelBusAsync(int idBus, DateTime fecha, string tipoRuta);
     }
 }
