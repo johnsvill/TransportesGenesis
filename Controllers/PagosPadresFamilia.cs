@@ -36,7 +36,7 @@ namespace TransportesGenesis.Controllers
             var mesActual = DateTime.Now.Month;
             var diaActual = DateTime.Now.Day;
 
-            var mesesDisponibles = new[] { "Enero","Febrero","Marzo","Abril","Mayo","Junio",
+            var mesesDisponibles = new[] { "Febrero","Marzo","Abril","Mayo","Junio",
                                                 "Julio","Agosto","Septiembre","Octubre" };
 
             var pagosUsuario = _context.PagosPadresDb
@@ -53,7 +53,7 @@ namespace TransportesGenesis.Controllers
                 if (pago == null)
                 {
                     if (i + 1 == mesActual && diaActual <= 5)
-                        mesesPendientes.Add(mesNombre); // mes actual antes del día 5
+                        mesesPendientes.Add(mesNombre);
                     else
                         mesesPendientes.Add(mesNombre + " (vencido)");
                 }
@@ -62,8 +62,7 @@ namespace TransportesGenesis.Controllers
                     if (pago.EstadoAdmin == "Pendiente")
                         mesesPendientes.Add(mesNombre + " (pendiente de validar)");
                     else if (pago.EstadoAdmin == "Rechazado")
-                        mesesPendientes.Add(mesNombre + " (vencido)");
-                    // Validado → no se agrega
+                        mesesPendientes.Add(mesNombre + " (vencido)");                    
                 }
             }
 
@@ -85,16 +84,13 @@ namespace TransportesGenesis.Controllers
             return View();
         }
 
-
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RegistrarPago(string Mes)
         {
             var usuarioId = User.Identity.Name;
             var anioActual = DateTime.Now.Year;
-
-            // 🔥 Guardar solo el nombre limpio del mes
+         
             var mesLimpio = Mes.Split(' ')[0];
 
             var existePago = _context.PagosPadresDb.Any(p => p.UsuarioId == usuarioId && p.Mes == mesLimpio && p.Anio == anioActual);
@@ -130,8 +126,6 @@ namespace TransportesGenesis.Controllers
             return RedirectToAction("Historial");
         }
 
-
-
         public IActionResult Historial()
         {
             var usuarioId = User.Identity.Name;
@@ -161,8 +155,7 @@ namespace TransportesGenesis.Controllers
         {
             StripeConfiguration.ApiKey = _config["Stripe:SecretKey"];
             var usuarioId = User.Identity.Name;
-
-            // 🔥 limpiar sufijo
+           
             var mesSeleccionado = request.Mes.Split(' ')[0];
             var anioActual = DateTime.Now.Year;
 
@@ -186,11 +179,11 @@ namespace TransportesGenesis.Controllers
                 Amount = (long)(montoAsignado * 100),
                 Currency = "gtq",
                 Metadata = new Dictionary<string, string>
-        {
-            { "UsuarioId", usuarioId },
-            { "Mes", mesSeleccionado },
-            { "Anio", anioActual.ToString() }
-        }
+                {
+                    { "UsuarioId", usuarioId },
+                    { "Mes", mesSeleccionado },
+                    { "Anio", anioActual.ToString() }
+                }
             };
 
             var service = new PaymentIntentService();
