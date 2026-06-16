@@ -1,14 +1,14 @@
 /**
  * Cliente SignalR para Notificaciones en Tiempo Real
- * FASE 7 - TransportesGenesis
- * 
- * Uso:
- * <script src="~/js/signalr-client.js"></script>
- * <script>
- *   const cliente = new NotificacionesCliente();
- *   cliente.conectar();
- *   cliente.onBusCerca((data) => { console.log(data); });
- * </script>
+ * FASE 7 / FASE 0 — TransportesGenesis
+ *
+ * [EN VIVO] Eventos principales del padre:
+ *   - UbicacionBusActualizada  ← origen: POST /api/ubicaciones → UbicacionBusService
+ *   - ParadaCompletada         ← origen: PUT /api/rutas/.../completar → RutaService
+ *   - AlertaRecibida / AlertaPersonal
+ *
+ * [FALLBACK] La simulación local del padre NO usa este cliente;
+ *            solo anima marcador naranja sin tocar el servidor.
  */
 
 class NotificacionesCliente {
@@ -133,6 +133,18 @@ class NotificacionesCliente {
         this.connection.on('UbicacionBusActualizada', (data) => {
             console.log('📍 [SignalR] Ubicación actualizada:', data);
             this.ejecutarCallback('ubicacionActualizada', data);
+        });
+
+        // Alertas de proximidad o llegada
+        this.connection.on('AlertaRecibida', (data) => {
+            console.log('🔔 [SignalR] Alerta recibida (grupo bus):', data);
+            this.ejecutarCallback('alerta', data);
+        });
+
+        // Alertas personales dirigidas a un alumno/padre
+        this.connection.on('AlertaPersonal', (data) => {
+            console.log('🔔 [SignalR] Alerta personal:', data);
+            this.ejecutarCallback('alertaPersonal', data);
         });
 
         // Echo response (testing)
@@ -344,6 +356,14 @@ class NotificacionesCliente {
 
     onUbicacionActualizada(callback) {
         this.callbacks['ubicacionActualizada'] = callback;
+    }
+
+    onAlerta(callback) {
+        this.callbacks['alerta'] = callback;
+    }
+
+    onAlertaPersonal(callback) {
+        this.callbacks['alertaPersonal'] = callback;
     }
 
     onEstadoConexion(callback) {

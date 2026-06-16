@@ -1,0 +1,371 @@
+@startuml
+title Modelo de Dominio - Transportes Genesis (BD real)
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+' ========== ASP.NET Identity (schema dbo) ==========
+
+class AspNetUsers {
+    Id : nvarchar(450) PK
+    UserName : nvarchar(256)
+    NormalizedUserName : nvarchar(256)
+    Email : nvarchar(256)
+    NormalizedEmail : nvarchar(256)
+    EmailConfirmed : bit
+    PasswordHash : nvarchar(max)
+    SecurityStamp : nvarchar(max)
+    ConcurrencyStamp : nvarchar(max)
+    PhoneNumber : nvarchar(max)
+    PhoneNumberConfirmed : bit
+    TwoFactorEnabled : bit
+    LockoutEnd : datetimeoffset
+    LockoutEnabled : bit
+    AccessFailedCount : int
+    IsFirstLogin : bit
+    LastLoginDate : datetime2
+}
+
+class AspNetRoles {
+    Id : nvarchar(450) PK
+    Name : nvarchar(256)
+    NormalizedName : nvarchar(256)
+    ConcurrencyStamp : nvarchar(max)
+}
+
+class AspNetUserRoles {
+    UserId : nvarchar(450) PK,FK
+    RoleId : nvarchar(450) PK,FK
+}
+
+class AspNetUserClaims {
+    Id : int PK
+    UserId : nvarchar(450) FK
+    ClaimType : nvarchar(max)
+    ClaimValue : nvarchar(max)
+}
+
+class AspNetUserLogins {
+    LoginProvider : nvarchar(450) PK
+    ProviderKey : nvarchar(450) PK
+    ProviderDisplayName : nvarchar(max)
+    UserId : nvarchar(450) FK
+}
+
+class AspNetUserTokens {
+    UserId : nvarchar(450) PK,FK
+    LoginProvider : nvarchar(450) PK
+    Name : nvarchar(450) PK
+    Value : nvarchar(max)
+}
+
+class AspNetRoleClaims {
+    Id : int PK
+    RoleId : nvarchar(450) FK
+    ClaimType : nvarchar(max)
+    ClaimValue : nvarchar(max)
+}
+
+' ========== Pagos (schema genesis + dbo) ==========
+
+class PagosPadres <<dbo>> {
+    Id : int PK
+    UsuarioId : nvarchar(max) FK
+    Mes : nvarchar(max)
+    Anio : int
+    Monto : decimal(18,2)
+    TipoPago : nvarchar(max)
+    ComprobanteUrl : nvarchar(max)
+    Fecha : datetime2
+}
+
+class Bancos <<genesis>> {
+    IdBanco : int PK
+    Nombre : nvarchar(50)
+    Activo : int
+    FechaRegistro : datetime2
+}
+
+class Padres <<genesis>> {
+    IdPadre : int PK
+    Nombre : nvarchar(50)
+    Apellido : nvarchar(50)
+    Activo : int
+    FechaRegistro : datetime2
+}
+
+class Alumnos <<genesis>> {
+    IdAlumno : int PK
+    IdPadre : int FK
+    Nombre : nvarchar(max)
+    Apellido : nvarchar(max)
+    IdBusAsignado : int FK
+    Latitud : decimal(10,7)
+    Longitud : decimal(10,7)
+    Direccion : nvarchar(250)
+    Activo : int
+    FechaRegistro : datetime2
+}
+
+class TipoRecorridoPago <<genesis>> {
+    IdTipoRecorrido : int PK
+    TipoRecorrido : int
+    Precio : decimal(18,2)
+    DiaMaximoPago : int
+    Activo : int
+    FechaRegistro : datetime2
+}
+
+class TipoCuenta <<genesis>> {
+    IdTipoCuenta : int PK
+    IdPadre : int FK
+    IdBanco : int FK
+    Nombre : nvarchar(50)
+    Activo : int
+    FechaRegistro : datetime2
+}
+
+class Pagos <<genesis>> {
+    IdPago : int PK
+    IdAlumno : int FK
+    IdPadre : int FK
+    IdTipoCuenta : int FK
+    IdTipoRecorrido : int FK
+    MesPagado : int
+    Anio : int
+    MontoParcial : decimal(18,2)
+    PagoCompleto : bit
+    Imagen : nvarchar(250)
+    Ubicacion : nvarchar(500)
+    FechaModif : datetime2
+    Activo : int
+    FechaRegistro : datetime2
+}
+
+' ========== Geolocalizacion y operaciones (schema genesis) ==========
+
+class Buses <<genesis>> {
+    IdBus : int PK
+    Placa : nvarchar(20)
+    Modelo : nvarchar(50)
+    Capacidad : int
+    Estado : bit
+    Activo : int
+    FechaRegistro : datetime2
+}
+
+class Rutas <<genesis>> {
+    IdRuta : int PK
+    IdBus : int FK
+    Nombre : nvarchar(100)
+    Descripcion : nvarchar(250)
+    TipoRuta : nvarchar(10)
+    HoraInicio : time
+    EsActiva : bit
+    Activo : int
+    FechaRegistro : datetime2
+}
+
+class Paradas <<genesis>> {
+    IdParada : int PK
+    IdRuta : int FK
+    IdAlumno : int FK
+    Latitud : decimal(10,7)
+    Longitud : decimal(10,7)
+    Direccion : nvarchar(250)
+    Orden : int
+    HoraEstimada : time
+    Completada : bit
+    Activo : int
+    FechaRegistro : datetime2
+}
+
+class AsignacionPilotoBus <<genesis>> {
+    IdAsignacion : int PK
+    IdBus : int FK
+    IdUsuarioPiloto : nvarchar(450) FK
+    FechaAsignacion : datetime2
+    FechaFinAsignacion : datetime2
+    EsActual : bit
+    Activo : int
+    FechaRegistro : datetime2
+}
+
+class AsistenciaAlumno <<genesis>> {
+    IdAsistencia : int PK
+    IdAlumno : int FK
+    Fecha : datetime2
+    AsisteMañana : bit
+    AsisteTarde : bit
+    IdBusTemporalMañana : int FK
+    IdBusTemporalTarde : int FK
+    FechaConfirmacion : datetime2
+    Activo : int
+    FechaRegistro : datetime2
+}
+
+class UbicacionBusEnTiempoReal <<genesis>> {
+    IdUbicacion : int PK
+    IdBus : int FK
+    Latitud : decimal(10,7)
+    Longitud : decimal(10,7)
+    FechaHora : datetime2
+    Velocidad : decimal(5,2)
+    Direccion : decimal(5,2)
+}
+
+class RegistroRecogida <<genesis>> {
+    IdRegistro : int PK
+    IdAlumno : int FK
+    IdParada : int FK
+    FechaHoraRecogida : datetime2
+    AlumnoPresente : bit
+    Latitud : decimal(10,7)
+    Longitud : decimal(10,7)
+    ConfirmadoPor : nvarchar(450) FK
+    Activo : int
+    FechaRegistro : datetime2
+}
+
+class SolicitudTraslado <<genesis>> {
+    IdSolicitud : int PK
+    IdAlumno : int FK
+    IdBusOrigen : int FK
+    IdBusDestino : int FK
+    Turno : nvarchar(10)
+    FechaTraslado : datetime2
+    Motivo : nvarchar(250)
+    Estado : nvarchar(20)
+    AprobadoPor : nvarchar(450) FK
+    ComentarioAdmin : nvarchar(250)
+    FechaRespuesta : datetime2
+    Activo : int
+    FechaRegistro : datetime2
+}
+
+class Alertas <<genesis>> {
+    IdAlerta : int PK
+    TipoAlerta : nvarchar(50)
+    Mensaje : nvarchar(500)
+    IdRemitente : nvarchar(450) FK
+    IdDestinatario : nvarchar(450) FK
+    FechaEnvio : datetime2
+    Leida : bit
+    FechaLectura : datetime2
+    Activo : int
+    FechaRegistro : datetime2
+}
+
+class AlertasProximidad <<genesis>> {
+    Id : int PK
+    IdBus : int FK
+    IdAlumno : int FK
+    IdPadre : nvarchar(450) FK
+    TipoAlerta : varchar(20)
+    Mensaje : nvarchar(500)
+    ParadaActual : nvarchar(200)
+    ParadaDestino : nvarchar(200)
+    ParadasRestantes : int
+    Estado : varchar(15)
+    ConfirmacionPadre : bit
+    FechaConfirmacionPadre : datetime2
+    FechaResolucion : datetime2
+    FechaHora : datetime2
+    Activo : int
+    FechaRegistro : datetime2
+}
+
+class NotificacionProximidad <<genesis>> {
+    IdNotificacion : int PK
+    IdPadre : int FK
+    IdParada : int FK
+    TipoNotificacion : nvarchar(50)
+    Enviada : bit
+    FechaHoraEnvio : datetime2
+    Activo : int
+    FechaRegistro : datetime2
+}
+
+class NotificacionRetraso <<genesis>> {
+    IdNotificacion : int PK
+    IdRuta : int FK
+    Motivo : nvarchar(100)
+    TiempoRetrasoMinutos : int
+    FechaHora : datetime2
+    NotificadoAPadres : bit
+    FechaNotificacionPadres : datetime2
+    Activo : int
+    FechaRegistro : datetime2
+}
+
+class ConfiguracionSistema <<genesis>> {
+    IdConfiguracion : int PK
+    Clave : nvarchar(100)
+    Valor : nvarchar(max)
+    Descripcion : nvarchar(500)
+    Categoria : nvarchar(50)
+    Tipo : nvarchar(50)
+    Activo : bit
+    UltimaModificacion : datetime2
+    ModificadoPor : nvarchar(100)
+    FechaRegistro : datetime2
+}
+
+' ========== Relaciones Identity ==========
+
+AspNetUsers "1" -- "N" AspNetUserRoles
+AspNetRoles "1" -- "N" AspNetUserRoles
+AspNetUsers "1" -- "N" AspNetUserClaims
+AspNetUsers "1" -- "N" AspNetUserLogins
+AspNetUsers "1" -- "N" AspNetUserTokens
+AspNetRoles "1" -- "N" AspNetRoleClaims
+AspNetUsers "1" -- "N" PagosPadres
+
+' ========== Relaciones Pagos ==========
+
+Padres "1" -- "N" Alumnos
+Padres "1" -- "N" TipoCuenta
+Padres "1" -- "N" Pagos
+
+Bancos "1" -- "N" TipoCuenta
+
+Alumnos "N" -- "1" Buses : IdBusAsignado
+Alumnos "1" -- "N" Pagos
+Alumnos "1" -- "N" AsistenciaAlumno
+Alumnos "1" -- "N" Paradas
+Alumnos "1" -- "N" RegistroRecogida
+Alumnos "1" -- "N" SolicitudTraslado
+Alumnos "1" -- "0..1" TipoRecorridoPago
+
+TipoCuenta "1" -- "N" Pagos
+TipoRecorridoPago "1" -- "N" Pagos
+
+' ========== Relaciones Geolocalizacion ==========
+
+Buses "1" -- "N" Rutas
+Buses "1" -- "0..1" AsignacionPilotoBus
+Buses "1" -- "N" UbicacionBusEnTiempoReal
+Buses "1" -- "N" AlertasProximidad
+Buses "1" -- "N" AsistenciaAlumno : BusTemporalMañana
+Buses "1" -- "N" AsistenciaAlumno : BusTemporalTarde
+Buses "1" -- "N" SolicitudTraslado : BusOrigen
+Buses "1" -- "N" SolicitudTraslado : BusDestino
+
+Rutas "1" -- "N" Paradas
+Rutas "1" -- "N" NotificacionRetraso
+
+Paradas "1" -- "N" RegistroRecogida
+Paradas "1" -- "N" NotificacionProximidad
+
+AspNetUsers "1" -- "N" AsignacionPilotoBus : IdUsuarioPiloto
+AspNetUsers "1" -- "N" RegistroRecogida : ConfirmadoPor
+AspNetUsers "1" -- "N" SolicitudTraslado : AprobadoPor
+AspNetUsers "1" -- "N" Alertas : IdRemitente
+AspNetUsers "1" -- "N" Alertas : IdDestinatario
+AspNetUsers "1" -- "N" AlertasProximidad : IdPadre
+
+Padres "1" -- "N" NotificacionProximidad
+
+Alumnos "1" -- "N" AlertasProximidad
+
+@enduml

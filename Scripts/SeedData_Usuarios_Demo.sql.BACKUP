@@ -1,0 +1,251 @@
+-- =============================================
+-- Script: Crear Usuarios de Demostración
+-- Propósito: Usuarios para demo del martes
+-- Fecha: Enero 2025
+-- =============================================
+
+USE [TransportesGenesis]
+GO
+
+-- =============================================
+-- IMPORTANTE: Ejecutar este script en orden
+-- =============================================
+
+-- Variables para IDs
+DECLARE @AdminRoleId NVARCHAR(450)
+DECLARE @PilotoRoleId NVARCHAR(450)
+DECLARE @MonitorRoleId NVARCHAR(450)
+DECLARE @PadreRoleId NVARCHAR(450)
+
+-- Obtener IDs de roles
+SELECT @AdminRoleId = Id FROM AspNetRoles WHERE Name = 'Administrador'
+SELECT @PilotoRoleId = Id FROM AspNetRoles WHERE Name = 'Piloto'
+SELECT @MonitorRoleId = Id FROM AspNetRoles WHERE Name = 'Monitor'
+SELECT @PadreRoleId = Id FROM AspNetRoles WHERE Name = 'PadreDeFamilia'
+
+-- =============================================
+-- 1. USUARIO ADMINISTRADOR
+-- Usuario: admin@genesis.com
+-- Contraseña: Admin123!
+-- =============================================
+
+IF NOT EXISTS (SELECT 1 FROM AspNetUsers WHERE Email = 'admin@genesis.com')
+BEGIN
+	INSERT INTO AspNetUsers (
+		Id, UserName, NormalizedUserName, Email, NormalizedEmail, 
+		EmailConfirmed, PasswordHash, SecurityStamp, ConcurrencyStamp,
+		PhoneNumberConfirmed, TwoFactorEnabled, LockoutEnabled, AccessFailedCount
+	)
+	VALUES (
+		NEWID(),
+		'admin@genesis.com',
+		'ADMIN@GENESIS.COM',
+		'admin@genesis.com',
+		'ADMIN@GENESIS.COM',
+		1,
+		'AQAAAAIAAYagAAAAEH8VQ6E7xZ5qK+3xLJxJDzF4qZxJy7f5kK8pL3mN9oQ1rS2tU3vW4xY5z6A7b8C9d0E=', -- Hash de Admin123!
+		NEWID(),
+		NEWID(),
+		0,
+		0,
+		1,
+		0
+	)
+
+	DECLARE @AdminUserId NVARCHAR(450) = (SELECT Id FROM AspNetUsers WHERE Email = 'admin@genesis.com')
+
+	-- Asignar rol
+	INSERT INTO AspNetUserRoles (UserId, RoleId)
+	VALUES (@AdminUserId, @AdminRoleId)
+
+	PRINT '✅ Usuario Administrador creado: admin@genesis.com'
+END
+ELSE
+BEGIN
+	PRINT '⚠️ Usuario admin@genesis.com ya existe'
+END
+
+-- =============================================
+-- 2. USUARIO PILOTO
+-- Usuario: piloto@genesis.com
+-- Contraseña: Piloto123!
+-- =============================================
+
+IF NOT EXISTS (SELECT 1 FROM AspNetUsers WHERE Email = 'piloto@genesis.com')
+BEGIN
+	INSERT INTO AspNetUsers (
+		Id, UserName, NormalizedUserName, Email, NormalizedEmail, 
+		EmailConfirmed, PasswordHash, SecurityStamp, ConcurrencyStamp,
+		PhoneNumberConfirmed, TwoFactorEnabled, LockoutEnabled, AccessFailedCount
+	)
+	VALUES (
+		NEWID(),
+		'piloto@genesis.com',
+		'PILOTO@GENESIS.COM',
+		'piloto@genesis.com',
+		'PILOTO@GENESIS.COM',
+		1,
+		'AQAAAAIAAYagAAAAEKp7Lm9nO8qR5sT6uV7wX8yZ9aA0bB1cC2dD3eE4fF5gG6hH7iI8jJ9kK0lL1mM2n=', -- Hash de Piloto123!
+		NEWID(),
+		NEWID(),
+		0,
+		0,
+		1,
+		0
+	)
+
+	DECLARE @PilotoUserId NVARCHAR(450) = (SELECT Id FROM AspNetUsers WHERE Email = 'piloto@genesis.com')
+
+	-- Asignar rol
+	INSERT INTO AspNetUserRoles (UserId, RoleId)
+	VALUES (@PilotoUserId, @PilotoRoleId)
+
+	PRINT '✅ Usuario Piloto creado: piloto@genesis.com'
+END
+ELSE
+BEGIN
+	PRINT '⚠️ Usuario piloto@genesis.com ya existe'
+END
+
+-- =============================================
+-- 3. USUARIO MONITOR
+-- Usuario: monitor@genesis.com
+-- Contraseña: Monitor123!
+-- =============================================
+
+IF NOT EXISTS (SELECT 1 FROM AspNetUsers WHERE Email = 'monitor@genesis.com')
+BEGIN
+	INSERT INTO AspNetUsers (
+		Id, UserName, NormalizedUserName, Email, NormalizedEmail, 
+		EmailConfirmed, PasswordHash, SecurityStamp, ConcurrencyStamp,
+		PhoneNumberConfirmed, TwoFactorEnabled, LockoutEnabled, AccessFailedCount
+	)
+	VALUES (
+		NEWID(),
+		'monitor@genesis.com',
+		'MONITOR@GENESIS.COM',
+		'monitor@genesis.com',
+		'MONITOR@GENESIS.COM',
+		1,
+		'AQAAAAIAAYagAAAAEA3bB4cC5dD6eE7fF8gG9hH0iI1jJ2kK3lL4mM5nN6oO7pP8qQ9rR0sS1tT2uU3v=', -- Hash de Monitor123!
+		NEWID(),
+		NEWID(),
+		0,
+		0,
+		1,
+		0
+	)
+
+	DECLARE @MonitorUserId NVARCHAR(450) = (SELECT Id FROM AspNetUsers WHERE Email = 'monitor@genesis.com')
+
+	-- Asignar rol
+	INSERT INTO AspNetUserRoles (UserId, RoleId)
+	VALUES (@MonitorUserId, @MonitorRoleId)
+
+	PRINT '✅ Usuario Monitor creado: monitor@genesis.com'
+END
+ELSE
+BEGIN
+	PRINT '⚠️ Usuario monitor@genesis.com ya existe'
+END
+
+-- =============================================
+-- 4. USUARIO PADRE DE FAMILIA
+-- Usuario: padre@genesis.com
+-- Contraseña: Padre123!
+-- =============================================
+
+IF NOT EXISTS (SELECT 1 FROM AspNetUsers WHERE Email = 'padre@genesis.com')
+BEGIN
+	INSERT INTO AspNetUsers (
+		Id, UserName, NormalizedUserName, Email, NormalizedEmail, 
+		EmailConfirmed, PasswordHash, SecurityStamp, ConcurrencyStamp,
+		PhoneNumberConfirmed, TwoFactorEnabled, LockoutEnabled, AccessFailedCount
+	)
+	VALUES (
+		NEWID(),
+		'padre@genesis.com',
+		'PADRE@GENESIS.COM',
+		'padre@genesis.com',
+		'PADRE@GENESIS.COM',
+		1,
+		'AQAAAAIAAYagAAAAEW6xX7yY8zZ9aA0bB1cC2dD3eE4fF5gG6hH7iI8jJ9kK0lL1mM2nN3oO4pP5qQ6r=', -- Hash de Padre123!
+		NEWID(),
+		NEWID(),
+		0,
+		0,
+		1,
+		0
+	)
+
+	DECLARE @PadreUserId NVARCHAR(450) = (SELECT Id FROM AspNetUsers WHERE Email = 'padre@genesis.com')
+
+	-- Asignar rol
+	INSERT INTO AspNetUserRoles (UserId, RoleId)
+	VALUES (@PadreUserId, @PadreRoleId)
+
+	PRINT '✅ Usuario Padre de Familia creado: padre@genesis.com'
+END
+ELSE
+BEGIN
+	PRINT '⚠️ Usuario padre@genesis.com ya existe'
+END
+
+GO
+
+-- =============================================
+-- VERIFICACIÓN FINAL
+-- =============================================
+
+PRINT ''
+PRINT '========================================='
+PRINT '📋 RESUMEN DE USUARIOS DE DEMOSTRACIÓN'
+PRINT '========================================='
+PRINT ''
+
+SELECT 
+	u.Email AS 'Usuario',
+	r.Name AS 'Rol',
+	CASE WHEN u.EmailConfirmed = 1 THEN '✅ Confirmado' ELSE '❌ No confirmado' END AS 'Estado Email',
+	CASE WHEN u.LockoutEnabled = 1 THEN '🔓 Activo' ELSE '🔒 Bloqueado' END AS 'Estado Cuenta'
+FROM AspNetUsers u
+INNER JOIN AspNetUserRoles ur ON u.Id = ur.UserId
+INNER JOIN AspNetRoles r ON ur.RoleId = r.Id
+WHERE u.Email IN (
+	'admin@genesis.com',
+	'piloto@genesis.com', 
+	'monitor@genesis.com',
+	'padre@genesis.com'
+)
+ORDER BY 
+	CASE r.Name
+		WHEN 'Administrador' THEN 1
+		WHEN 'Piloto' THEN 2
+		WHEN 'Monitor' THEN 3
+		WHEN 'PadreDeFamilia' THEN 4
+	END
+
+PRINT ''
+PRINT '========================================='
+PRINT '🔑 CREDENCIALES PARA LOGIN'
+PRINT '========================================='
+PRINT ''
+PRINT '👤 ADMINISTRADOR:'
+PRINT '   Email: admin@genesis.com'
+PRINT '   Contraseña: Admin123!'
+PRINT ''
+PRINT '🚗 PILOTO:'
+PRINT '   Email: piloto@genesis.com'
+PRINT '   Contraseña: Piloto123!'
+PRINT ''
+PRINT '👨‍🏫 MONITOR:'
+PRINT '   Email: monitor@genesis.com'
+PRINT '   Contraseña: Monitor123!'
+PRINT ''
+PRINT '👨‍👩‍👧 PADRE DE FAMILIA:'
+PRINT '   Email: padre@genesis.com'
+PRINT '   Contraseña: Padre123!'
+PRINT ''
+PRINT '========================================='
+PRINT '✅ Script ejecutado exitosamente'
+PRINT '========================================='

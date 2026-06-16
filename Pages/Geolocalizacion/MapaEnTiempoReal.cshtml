@@ -337,6 +337,7 @@
                 <h1 class="mb-2 fw-bold">
                     <i class="bi bi-geo-alt-fill me-3"></i>
                     Mapa en Tiempo Real
+                    <small class="text-light ms-3" id="padreNombreHeader">@Model.PadreNombre</small>
                 </h1>
                 <p class="mb-0 opacity-75">
                     <i class="bi bi-bus-front me-2"></i>
@@ -571,13 +572,97 @@
         };
 
         // Inicialización cuando el DOM esté listo
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             console.log('Iniciando sistema de tiempo real...');
             inicializarMapaRealTime();
             cargarDatosBusesSimulados();
 
             // Configurar actualización automática cada 5 segundos
             actualizacionInterval = setInterval(cargarDatosBusesSimulados, 5000);
+
+            // ─── SignalR: recibir ubicaciones en tiempo real del piloto ───
+            try {
+                window.mapaSignalR = new NotificacionesCliente();
+                await window.mapaSignalR.conectar();
+                console.log('✅ [MapaTiempoReal] SignalR conectado');
+
+                // Unirse a los grupos de todos los buses de la simulación (Bus_1 … Bus_4)
+                // y también a grupos que el servidor pueda usar en el futuro
+                const gruposBuses = [1, 2, 3, 4];
+                for (const id of gruposBuses) {
+                    await window.mapaSignalR.unirseAGrupo(`Bus_${id}`);
+                }
+
+                // Escuchar actualización de ubicación emitida por el servidor tras el POST del piloto
+                window.mapaSignalR.onUbicacionActualizada((data) => {
+                    const idBusRaw = data.idBus ?? data.IdBus;
+                    const idBus = Number(idBusRaw);
+                    const lat   = parseFloat(data.latitud  ?? data.Latitud);
+                    const lng   = parseFloat(data.longitud ?? data.Longitud);
+                    if (!idBus || isNaN(lat) || isNaN(lng)) return;
+
+                    console.log(`📍 [MapaTiempoReal] Bus ${idBus} → ${lat}, ${lng}`);
+
+                    // Actualizar en el array de buses (para que el popup también se actualice)
+                    const bus = busesData.find(b => b.idBus === idBus);
+                    if (bus) {
+                        bus.latitud = lat;
+                        bus.longitud = lng;
+                        bus.ultimaActualizacion = new Date().toISOString();
+                        bus.estado = 'Movimiento';
+                    } else {
+                        // Bus no estaba en la lista simulada → agregarlo
+                        busesData.push({
+                            idBus: idBus,
+                            placa: `Bus #${idBus}`,
+                            rutaId: idBus,
+                            rutaNombre: 'Ruta en vivo',
+                            capacidadTotal: 45,
+                            estudiantesAbordo: 0,
+                            estado: 'Movimiento',
+                            velocidad: 10,
+                            latitud: lat,
+                            longitud: lng,
+                            ultimaActualizacion: new Date().toISOString()
+                        });
+                    }
+
+                    // Mover/crear marcador inmediatamente
+                    const marcadorId = `bus_${idBus}`;
+                    if (marcadores[marcadorId]) {
+                        marcadores[marcadorId].setLatLng([lat, lng]);
+                    } else {
+                        const icono = crearIconoBus('Movimiento');
+                        marcadores[marcadorId] = L.marker([lat, lng], { icon: icono })
+                            .addTo(mapaRealTime)
+                            .bindPopup(`<strong>🚌 Bus #${idBus}</strong><br>En vivo`);
+                    }
+
+                    // Actualizar panel lateral
+                    cargarListaBuses();
+                    actualizarEstadisticas();
+
+                    // Si seguimiento activo, centrar en el bus seleccionado
+                    if (seguimientoActivo && busSeleccionado === idBus) {
+                        mapaRealTime.setView([lat, lng], 16);
+                    }
+                });
+
+                // Escuchar alertas (proximidad / llegada colegio)
+                window.mapaSignalR.onAlerta((data) => {
+                    const msg = data.mensaje || data.Mensaje || 'Alerta';
+                    console.log('🔔 [MapaTiempoReal] Alerta:', msg);
+                    const el = document.createElement('div');
+                    el.className = 'alert alert-warning alert-dismissible fade show position-fixed';
+                    el.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 260px;';
+                    el.innerHTML = `<strong>🔔</strong> ${msg} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+                    document.body.appendChild(el);
+                    setTimeout(() => { if (el.parentNode) el.remove(); }, 6000);
+                });
+
+            } catch (e) {
+                console.warn('[MapaTiempoReal] SignalR no disponible:', e);
+            }
 
             console.log('Sistema de tiempo real iniciado');
         });

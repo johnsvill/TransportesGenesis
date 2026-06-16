@@ -85,6 +85,15 @@
         .badge {
             font-size: 10px;
         }
+
+        .ruta-header .d-flex {
+            gap: 10px;
+        }
+
+        .ruta-header .btn-light {
+            font-size: 0.85rem;
+            padding: 0.375rem 0.75rem;
+        }
     }
 
     /* Audio indicator */
@@ -126,7 +135,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="ruta-header">
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap">
                         <div>
                             <h4 class="mb-1">
                                 <i class="bi bi-geo-alt-fill"></i> Mi Ruta del Día
@@ -135,16 +144,51 @@
                                 @DateTime.Now.ToString("dddd, d 'de' MMMM 'de' yyyy", new System.Globalization.CultureInfo("es-ES"))
                             </p>
                         </div>
-                        <div class="text-end">
+                        <div class="text-end d-flex align-items-center gap-2">
                             <span id="estadoGPS" class="badge bg-secondary badge-gps">
                                 <i class="bi bi-geo-alt"></i> Detectando GPS...
                             </span>
+                            <a href="/Auth/Logout" class="btn btn-light btn-sm">
+                                <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    @if (Model.IdBus.HasValue)
+    {
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="alert alert-info mb-0 py-2 small">
+                    <i class="bi bi-@(Model.TipoRuta == "Mañana" ? "sunrise" : "sunset")"></i>
+                    <strong>Turno @Model.TipoRuta</strong>
+                    @if (Model.TipoRuta == "Mañana")
+                    {
+                        <span>— Recoge en casas → <strong>colegio al final</strong> (parada @Model.RutaActiva?.Paradas?.Count).</span>
+                    }
+                    else
+                    {
+                        <span>— <strong>Colegio primero</strong> (parada 1) → deja alumnos en casa. No vuelve al colegio.</span>
+                    }
+                    <span class="text-muted"> Demo: <a href="?turno=Mañana">Mañana</a> · <a href="?turno=Tarde">Tarde</a></span>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="alert alert-warning mb-0 d-flex align-items-start gap-2">
+                    <i class="bi bi-broadcast fs-5"></i>
+                    <div>
+                        <strong>Transmisión en vivo:</strong> Bus #@Model.IdBus (@Model.PlacaBus) → grupo <code>Bus_@Model.IdBus</code>.
+                        Al pulsar <strong>Simular Ruta</strong>, los padres verán el bus moverse en su mapa.
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 
     <!-- Información del Piloto y Estado GPS -->
     <div class="row mb-4">
@@ -156,7 +200,7 @@
                 <div class="card-body">
                     <h6 class="card-title">@Model.NombreMonitor</h6>
                     <p class="card-text">
-                        <strong>ID:</strong> @Model.IdMonitor<br>
+                        <strong>Bus Asignado:</strong> @(Model.IdBus.HasValue ? $"Bus #{Model.IdBus} — {Model.PlacaBus}" : "Sin asignar")<br>
                         <strong>Estado:</strong> <span class="badge bg-success">Activo</span>
                     </p>
                 </div>
@@ -164,8 +208,11 @@
         </div>
         <div class="col-md-6">
             <div class="card h-100">
-                <div class="card-header bg-info text-white">
-                    <i class="bi bi-geo-alt-fill"></i> Ubicación GPS
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-geo-alt-fill"></i> Ubicación GPS</span>
+                    <button onclick="obtenerUbicacionUsuario()" class="btn btn-light btn-sm" title="Actualizar ubicación">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
                 </div>
                 <div class="card-body">
                     <div id="ubicacionInfo">
@@ -223,6 +270,40 @@
                             </p>
                             <div id="estadoSimulacionPiloto" class="text-muted">
                                 Reproduce la animación del bus con sonidos de alerta al llegar a cada parada
+                            </div>
+                            <!-- Demo ingeniería: rutas aleatorias en vivo -->
+                            <div class="card bg-light border mt-3 mb-2">
+                                <div class="card-body py-2 px-3">
+                                    <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
+                                        <span class="badge bg-dark"><i class="bi bi-shuffle"></i> Demo aleatoria</span>
+                                        <div class="form-check form-switch mb-0">
+                                            <input class="form-check-input" type="checkbox" id="chkRutaAleatoria" checked>
+                                            <label class="form-check-label small" for="chkRutaAleatoria">Generar ruta aleatoria al simular</label>
+                                        </div>
+                                    </div>
+                                    <div class="row g-2 align-items-end">
+                                        <div class="col-md-7">
+                                            <label class="form-label small mb-1" for="selEscenarioDemo">Escenario demo</label>
+                                            <select id="selEscenarioDemo" class="form-select form-select-sm">
+                                                <option value="orden_aleatorio">Orden aleatorio de paradas</option>
+                                                <option value="con_ausencias">Algunos alumnos no asisten (ausencias)</option>
+                                                <option value="casa_amigo">Un alumno en casa de amigo (GPS distinto)</option>
+                                                <option value="mixto">Mixto: ausencias + casa amigo + orden aleatorio</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-5 d-flex gap-1">
+                                            <button type="button" class="btn btn-sm btn-warning flex-grow-1" onclick="prepararRutaAleatoria()" id="btnGenAleatoria">
+                                                <i class="bi bi-dice-5"></i> Generar
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="restaurarRutaBD()" title="Volver a ruta calculada en Admin">
+                                                <i class="bi bi-arrow-counterclockwise"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div id="lblEscenarioActivo" class="small text-muted mt-2">
+                                        Turno @Model.TipoRuta — usa paradas de BD; pulsa Generar para mezclar.
+                                    </div>
+                                </div>
                             </div>
                             <div class="mt-2">
                                 <span class="badge bg-info me-2">
@@ -458,21 +539,233 @@
         let rutaSimulacionPiloto = [];
         let rutaPolyline = null; // Línea que muestra la ruta del bus
         let indiceParadaActual = 0;
+        const paradasCompletadasSim = new Set();
+        let paradasOriginalesBD = [];   // respaldo para restaurar ruta Admin
+        let modoRutaAleatoriaActiva = false;
 
-        // Datos de simulación de prueba
+        function esParadaColegio(p) {
+            if (!p) return false;
+            if (p.esColegio) return true;
+            if (p.idAlumno != null) return false;
+            const n = (p.nombre || '').toLowerCase();
+            return n.includes('colegio') || n.includes('yulimay');
+        }
+
+        function shuffleArray(arr) {
+            const a = arr.slice();
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        function clonarParadas(lista) {
+            return lista.map(p => ({
+                nombre: p.nombre,
+                coordenadas: [p.coordenadas[0], p.coordenadas[1]],
+                orden: p.orden,
+                idParada: p.idParada ?? null,
+                idAlumno: p.idAlumno ?? null,
+                esColegio: esParadaColegio(p)
+            }));
+        }
+
+        function getColegioDefault() {
+            const c = (paradasOriginalesBD.length ? paradasOriginalesBD : datosSimulacionPiloto.paradas).find(esParadaColegio);
+            if (c) return clonarParadas([c])[0];
+            return {
+                nombre: 'Colegio Genesis',
+                coordenadas: [14.6270, -90.5125],
+                orden: 0,
+                idParada: null,
+                idAlumno: null,
+                esColegio: true
+            };
+        }
+
+        /**
+         * Demo ingeniería: genera orden/escenario aleatorio respetando Mañana (→ colegio) o Tarde (colegio →).
+         */
+        function generarEscenarioAleatorio(escenario) {
+            const fuente = paradasOriginalesBD.length ? paradasOriginalesBD : datosSimulacionPiloto.paradas;
+            const colegio = getColegioDefault();
+            let alumnos = fuente.filter(p => !esParadaColegio(p)).map(p => clonarParadas([p])[0]);
+
+            if (!alumnos.length) {
+                console.warn('[Monitor] Sin paradas de alumnos en BD; usando puntos demo Guatemala');
+                alumnos = [
+                    { nombre: 'Diego Martínez', coordenadas: [14.6292, -90.5145], idParada: null, idAlumno: 9 },
+                    { nombre: 'Sofía Martínez', coordenadas: [14.6314, -90.5165], idParada: null, idAlumno: 10 },
+                    { nombre: 'Alumno demo A', coordenadas: [14.6336, -90.5190], idParada: null, idAlumno: null },
+                    { nombre: 'Alumno demo B', coordenadas: [14.6358, -90.5215], idParada: null, idAlumno: null }
+                ];
+            }
+
+            alumnos = shuffleArray(alumnos);
+
+            if (escenario === 'con_ausencias' || escenario === 'mixto') {
+                const pct = 0.55 + Math.random() * 0.35;
+                const cantidad = Math.max(2, Math.ceil(alumnos.length * pct));
+                alumnos = alumnos.slice(0, cantidad);
+                alumnos = shuffleArray(alumnos);
+            }
+
+            if (escenario === 'casa_amigo' || escenario === 'mixto') {
+                if (alumnos.length > 0) {
+                    const idx = Math.floor(Math.random() * alumnos.length);
+                    const p = alumnos[idx];
+                    alumnos[idx] = {
+                        ...p,
+                        nombre: `${p.nombre} (casa amigo)`,
+                        coordenadas: [
+                            p.coordenadas[0] + (Math.random() - 0.5) * 0.025,
+                            p.coordenadas[1] + (Math.random() - 0.5) * 0.025
+                        ]
+                    };
+                }
+            }
+
+            if (escenario === 'orden_aleatorio' || escenario === 'mixto' || escenario === 'con_ausencias' || escenario === 'casa_amigo') {
+                alumnos = shuffleArray(alumnos);
+            }
+
+            const esMañana = (datosSimulacionPiloto.tipoRuta || '@Model.TipoRuta') === 'Mañana';
+            const ordenadas = esMañana ? [...alumnos, colegio] : [colegio, ...alumnos];
+
+            datosSimulacionPiloto.paradas = ordenadas.map((p, i) => ({ ...p, orden: i + 1 }));
+            datosSimulacionPiloto.ruta = `Demo aleatoria ${datosSimulacionPiloto.tipoRuta} — ${ordenadas.length} paradas`;
+            modoRutaAleatoriaActiva = true;
+
+            const nombresEscenario = {
+                orden_aleatorio: 'Orden aleatorio',
+                con_ausencias: 'Con ausencias simuladas',
+                casa_amigo: 'Recogida en casa de amigo',
+                mixto: 'Mixto (ausencias + amigo + orden)'
+            };
+            return `${nombresEscenario[escenario] || escenario} · ${ordenadas.length} paradas · ${esMañana ? 'termina en colegio' : 'sale del colegio'}`;
+        }
+
+        async function prepararRutaAleatoria() {
+            if (simulacionPilotoActiva) {
+                alert('Detén la simulación antes de generar otra ruta.');
+                return;
+            }
+            const escenario = document.getElementById('selEscenarioDemo')?.value || 'orden_aleatorio';
+            const lbl = generarEscenarioAleatorio(escenario);
+            paradasCompletadasSim.clear();
+
+            limpiarMarcadoresSimulacionMapa();
+            await generarRutaCompleta();
+
+            if (mapa && rutaSimulacionPiloto.length) {
+                mostrarParadasSimulacionPreview();
+            }
+
+            const el = document.getElementById('lblEscenarioActivo');
+            if (el) el.innerHTML = `<i class="bi bi-dice-5 text-warning"></i> <strong>${lbl}</strong> — listo para Simular Ruta (transmite en vivo al padre).`;
+            console.log('[Monitor] Ruta aleatoria:', datosSimulacionPiloto.paradas);
+        }
+
+        async function restaurarRutaBD() {
+            if (simulacionPilotoActiva) {
+                alert('Detén la simulación primero.');
+                return;
+            }
+            if (!paradasOriginalesBD.length) {
+                initDatosSimulacionFromRutaData();
+            } else {
+                datosSimulacionPiloto.paradas = clonarParadas(paradasOriginalesBD);
+            }
+            modoRutaAleatoriaActiva = false;
+            paradasCompletadasSim.clear();
+            limpiarMarcadoresSimulacionMapa();
+            await generarRutaCompleta();
+            const el = document.getElementById('lblEscenarioActivo');
+            if (el) el.textContent = 'Ruta restaurada desde Admin/Calcular Rutas.';
+        }
+
+        function limpiarMarcadoresSimulacionMapa() {
+            marcadores.forEach(m => { if (mapa && mapa.hasLayer(m)) mapa.removeLayer(m); });
+            marcadores = [];
+            if (rutaPolyline && mapa) { mapa.removeLayer(rutaPolyline); rutaPolyline = null; }
+        }
+
+        function mostrarParadasSimulacionPreview() {
+            if (!mapa || !datosSimulacionPiloto.paradas.length) return;
+            const coordenadasRuta = rutaSimulacionPiloto.length
+                ? rutaSimulacionPiloto.map(p => p.coordenadas)
+                : datosSimulacionPiloto.paradas.map(p => p.coordenadas);
+            if (rutaPolyline) mapa.removeLayer(rutaPolyline);
+            rutaPolyline = L.polyline(coordenadasRuta, {
+                color: modoRutaAleatoriaActiva ? '#9333ea' : '#FF6B35',
+                weight: 4, opacity: 0.75, dashArray: modoRutaAleatoriaActiva ? '6,4' : '10,5'
+            }).addTo(mapa);
+            mapa.fitBounds(L.latLngBounds(coordenadasRuta).pad(0.1));
+        }
+
+        function getParadas(data) {
+            return data?.paradas ?? data?.Paradas ?? null;
+        }
+
+        // Datos de simulación — se inicializan desde rutaData (BD) si existe
         const datosSimulacionPiloto = {
-            bus: "Bus #001",
-            piloto: "Juan Pérez",
-            ruta: "Centro - Yulimay PC",
+            bus: '@(Model.IdBus.HasValue ? $"Bus #{Model.IdBus}" : "Bus")',
+            piloto: '@Html.Raw(Model.NombreMonitor.Replace("'", "\\'"))',
+            ruta: '@Html.Raw((Model.RutaActiva?.Nombre ?? "Ruta").Replace("'", "\\'"))',
+            tipoRuta: '@Model.TipoRuta',
+            idRuta: @(Model.RutaActiva?.IdRuta ?? 0),
             paradas: [
-                { nombre: "Parada Central - 6ta Avenida", coordenadas: [14.6349, -90.5069], orden: 1 },
-                { nombre: "Plaza Central", coordenadas: [14.6335, -90.5055], orden: 2 },
-                { nombre: "Mercado Municipal", coordenadas: [14.6320, -90.5045], orden: 3 },
-                { nombre: "Terminal de Buses", coordenadas: [14.6305, -90.5030], orden: 4 },
-                { nombre: "Centro Comercial", coordenadas: [14.6290, -90.5015], orden: 5 },
-                { nombre: "Colegio Yulimay PC", coordenadas: [14.6235, -90.4956], orden: 6 }
+                { nombre: "7ma Av. y 2da Calle, Zona 4",       coordenadas: [14.6380, -90.5240], orden: 1, idParada: null, idAlumno: null },
+                { nombre: "5ta Av. y 4ta Calle, Zona 4",       coordenadas: [14.6358, -90.5215], orden: 2, idParada: null, idAlumno: null },
+                { nombre: "Terminal Central, 3ra Av., Zona 4", coordenadas: [14.6336, -90.5190], orden: 3, idParada: null, idAlumno: null },
+                { nombre: "Mercado El Guarda, Zona 4",         coordenadas: [14.6314, -90.5165], orden: 4, idParada: null, idAlumno: null },
+                { nombre: "Av. Bolívar y 8va Calle, Zona 4",   coordenadas: [14.6292, -90.5145], orden: 5, idParada: null, idAlumno: null },
+                { nombre: "Colegio Yulimay PC, Zona 4",        coordenadas: [14.6270, -90.5125], orden: 6, idParada: null, idAlumno: null }
             ]
         };
+
+        function initDatosSimulacionFromRutaData() {
+            const paradas = getParadas(rutaData);
+            if (!paradas || !paradas.length) return;
+
+            datosSimulacionPiloto.paradas = paradas.map(p => {
+                const nom = (p.nombreAlumno ?? p.NombreAlumno ?? p.direccion ?? p.Direccion ?? '').toLowerCase();
+                const idAl = p.idAlumno ?? p.IdAlumno ?? null;
+                return {
+                    nombre: p.nombreAlumno ?? p.NombreAlumno ?? p.direccion ?? p.Direccion ?? `Parada ${p.orden ?? p.Orden}`,
+                    coordenadas: [parseFloat(p.latitud ?? p.Latitud), parseFloat(p.longitud ?? p.Longitud)],
+                    orden: p.orden ?? p.Orden,
+                    idParada: p.idParada ?? p.IdParada ?? null,
+                    idAlumno: idAl,
+                    esColegio: idAl == null && (nom.includes('colegio') || nom.includes('yulimay'))
+                };
+            });
+            datosSimulacionPiloto.idRuta = rutaData.idRuta ?? rutaData.IdRuta ?? datosSimulacionPiloto.idRuta;
+            datosSimulacionPiloto.tipoRuta = rutaData.tipoRuta ?? rutaData.TipoRuta ?? datosSimulacionPiloto.tipoRuta;
+            datosSimulacionPiloto.ruta = rutaData.nombre ?? rutaData.Nombre ?? datosSimulacionPiloto.ruta;
+            paradasOriginalesBD = clonarParadas(datosSimulacionPiloto.paradas);
+            console.log('[Monitor] Simulación inicializada desde BD:', datosSimulacionPiloto.paradas.length, 'paradas');
+        }
+
+        // [EN VIVO] Enviar ubicación al padre vía API → SignalR
+        function reportarUbicacionBus(lat, lng) {
+            const idBus = @(Model.IdBus.HasValue ? Model.IdBus.Value.ToString() : "null");
+            if (idBus === null) return;
+
+            fetch('/api/ubicaciones', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ idBus: parseInt(idBus), latitud: lat, longitud: lng, velocidad: 10.0, direccion: 0 })
+            }).then(r => {
+                if (!r.ok) throw new Error('API ' + r.status);
+            }).catch(() => {
+                try {
+                    if (window.monitorNot?.reportarUbicacionBus)
+                        window.monitorNot.reportarUbicacionBus(parseInt(idBus), lat, lng);
+                } catch (e) { console.warn('[Monitor] Fallback hub falló:', e); }
+            });
+        }
 
         // Generar ruta completa usando servicio de routing real (OSRM)
         async function generarRutaCompleta() {
@@ -490,7 +783,8 @@
                     coordenadas: inicio.coordenadas,
                     esParada: true,
                     nombreParada: inicio.nombre,
-                    orden: inicio.orden
+                    orden: inicio.orden,
+                    idParada: inicio.idParada ?? null
                 });
 
                 // Obtener ruta real usando OSRM
@@ -523,7 +817,8 @@
                 coordenadas: ultimaParada.coordenadas,
                 esParada: true,
                 nombreParada: ultimaParada.nombre,
-                orden: ultimaParada.orden
+                orden: ultimaParada.orden,
+                idParada: ultimaParada.idParada ?? null
             });
 
             console.log(`Ruta generada con ${rutaSimulacionPiloto.length} puntos siguiendo calles reales`);
@@ -642,7 +937,7 @@
             obtenerUbicacionUsuario();
 
             // Solo si hay ruta activa, mostrar paradas y ruta
-            if (rutaData && rutaData.paradas) {
+            if (rutaData && getParadas(rutaData)) {
                 mostrarRutaEnMapa();
             } else {
                 console.log('No hay ruta activa, mostrando solo ubicación del usuario');
@@ -725,16 +1020,52 @@
                     function(error) {
                         console.error('Error obteniendo ubicación:', error);
 
+                        let mensajeError = '';
+                        let solucion = '';
+
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                mensajeError = 'Permiso GPS denegado';
+                                solucion = `
+                                    <small>
+                                        <strong>¿Cómo activar GPS?</strong><br>
+                                        1. Haz clic en el <strong>ícono de candado 🔒</strong> en la barra de direcciones<br>
+                                        2. Busca <strong>"Ubicación"</strong><br>
+                                        3. Cambia a <strong>"Permitir"</strong><br>
+                                        4. Recarga la página (F5)
+                                    </small>
+                                `;
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                mensajeError = 'Ubicación no disponible';
+                                solucion = '<small>Verifica que el GPS de tu dispositivo esté activado</small>';
+                                break;
+                            case error.TIMEOUT:
+                                mensajeError = 'Tiempo de espera agotado';
+                                solucion = '<small>Intenta de nuevo en unos segundos</small>';
+                                break;
+                            default:
+                                mensajeError = 'Error desconocido';
+                                solucion = '<small>Verifica la configuración de tu navegador</small>';
+                        }
+
                         // Actualizar estado GPS a error
                         estadoGPS.innerHTML = '<i class="bi bi-geo-alt-slash"></i> GPS No Disponible';
                         estadoGPS.className = 'badge bg-danger';
 
                         if (ubicacionInfo) {
                             ubicacionInfo.innerHTML = `
-                                <p class="text-danger mb-0">
-                                    <i class="bi bi-exclamation-triangle"></i> No se pudo obtener la ubicación
-                                    <br><small>Verifica que el GPS esté habilitado</small>
-                                </p>
+                                <div class="alert alert-warning mb-0 p-2">
+                                    <p class="mb-1">
+                                        <i class="bi bi-exclamation-triangle"></i> 
+                                        <strong>${mensajeError}</strong>
+                                    </p>
+                                    ${solucion}
+                                    <hr class="my-2">
+                                    <button onclick="obtenerUbicacionUsuario()" class="btn btn-warning btn-sm w-100 mt-1">
+                                        <i class="bi bi-arrow-clockwise"></i> Intentar de nuevo
+                                    </button>
+                                </div>
                             `;
                         }
                     },
@@ -750,10 +1081,13 @@
 
                 if (ubicacionInfo) {
                     ubicacionInfo.innerHTML = `
-                        <p class="text-warning mb-0">
-                            <i class="bi bi-exclamation-triangle"></i> 
-                            El navegador no soporta geolocalización
-                        </p>
+                        <div class="alert alert-danger mb-0 p-2">
+                            <p class="mb-0">
+                                <i class="bi bi-exclamation-triangle"></i> 
+                                <strong>El navegador no soporta geolocalización</strong>
+                            </p>
+                            <small>Intenta usar Chrome, Firefox o Edge actualizado</small>
+                        </div>
                     `;
                 }
             }
@@ -772,7 +1106,8 @@
 
         // Mostrar ruta en el mapa
         function mostrarRutaEnMapa() {
-            if (!rutaData || !rutaData.paradas) return;
+            const paradas = getParadas(rutaData);
+            if (!rutaData || !paradas) return;
 
             console.log('Mostrando ruta en mapa:', rutaData);
 
@@ -780,20 +1115,23 @@
             marcadores.forEach(marker => mapa.removeLayer(marker));
             marcadores = [];
 
-            // Array para ajustar la vista del mapa
             let coordenadas = [];
 
-            // Agregar marcadores para cada parada
-            rutaData.paradas.forEach(function(parada, index) {
-                if (parada.latitud && parada.longitud) {
-                    coordenadas.push([parada.latitud, parada.longitud]);
+            paradas.forEach(function(parada) {
+                const lat = parseFloat(parada.latitud ?? parada.Latitud);
+                const lng = parseFloat(parada.longitud ?? parada.Longitud);
+                const orden = parada.orden ?? parada.Orden;
+                const completada = parada.completada ?? parada.Completada;
+                const nombreAlumno = parada.nombreAlumno ?? parada.NombreAlumno ?? '';
+                const direccion = parada.direccion ?? parada.Direccion ?? '';
 
-                    // Color del marcador según estado
-                    const color = parada.completada ? '#28a745' : '#ffc107';
-                    const iconClass = parada.completada ? 'bi-check-circle-fill' : 'bi-clock';
+                if (lat && lng) {
+                    coordenadas.push([lat, lng]);
 
-                    // Crear marcador
-                    const marcador = L.marker([parada.latitud, parada.longitud], {
+                    const color = completada ? '#28a745' : '#ffc107';
+                    const iconClass = completada ? 'bi-check-circle-fill' : 'bi-clock';
+
+                    const marcador = L.marker([lat, lng], {
                         icon: L.divIcon({
                             className: 'custom-div-icon',
                             html: `
@@ -801,7 +1139,7 @@
                                             width: 30px; height: 30px; text-align: center; line-height: 30px; 
                                             border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); 
                                             font-weight: bold; font-size: 12px;">
-                                    ${parada.orden}
+                                    ${orden}
                                 </div>
                             `,
                             iconSize: [30, 30],
@@ -809,15 +1147,13 @@
                         })
                     }).addTo(mapa);
 
-                    // Popup con información de la parada
                     marcador.bindPopup(`
                         <div>
-                            <strong>Parada ${parada.orden}</strong><br>
-                            <strong>${parada.nombreAlumno}</strong><br>
-                            <small>${parada.direccion}</small><br>
-                            ${parada.horaEstimada ? `<small><i class="bi bi-clock"></i> ${parada.horaEstimada}</small><br>` : ''}
-                            <span class="badge ${parada.completada ? 'bg-success' : 'bg-warning'}">
-                                <i class="${iconClass}"></i> ${parada.completada ? 'Completada' : 'Pendiente'}
+                            <strong>Parada ${orden}</strong><br>
+                            <strong>${nombreAlumno}</strong><br>
+                            <small>${direccion}</small><br>
+                            <span class="badge ${completada ? 'bg-success' : 'bg-warning'}">
+                                <i class="${iconClass}"></i> ${completada ? 'Completada' : 'Pendiente'}
                             </span>
                         </div>
                     `);
@@ -842,25 +1178,39 @@
         }
 
         // Marcar parada como completada/no completada
+        async function completarParadaEnServidor(idParada) {
+            if (!idParada || paradasCompletadasSim.has(idParada)) return;
+            const idRuta = datosSimulacionPiloto.idRuta;
+            if (!idRuta) return;
+
+            paradasCompletadasSim.add(idParada);
+            try {
+                const r = await fetch(`/api/rutas/${idRuta}/parada/${idParada}/completar`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ idParada, completada: true, horaCompletada: new Date().toISOString() })
+                });
+                if (!r.ok) console.warn('[Monitor] Error completando parada', idParada, r.status);
+                else console.log('[Monitor] Parada completada en servidor:', idParada);
+            } catch (e) {
+                console.warn('[Monitor] Fallo al completar parada:', e);
+                paradasCompletadasSim.delete(idParada);
+            }
+        }
+
         function marcarCompletada(idParada, completada) {
-            fetch('/Piloto/MiRuta?handler=MarcarCompletada', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
-                },
-                body: JSON.stringify({
-                    idParada: idParada,
-                    completada: completada
-                })
+            const idRuta = datosSimulacionPiloto.idRuta || (rutaData?.idRuta ?? rutaData?.IdRuta);
+            if (!idRuta) { alert('No hay ruta activa'); return; }
+
+            fetch(`/api/rutas/${idRuta}/parada/${idParada}/completar`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ idParada, completada, horaCompletada: new Date().toISOString() })
             })
-            .then(response => response.json())
+            .then(r => r.json())
             .then(data => {
-                if (data.success) {
-                    location.reload();
-                } else {
-                    alert('Error: ' + data.message);
-                }
+                if (data.success) location.reload();
+                else alert('Error: ' + (data.message || 'No se pudo actualizar'));
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -880,8 +1230,9 @@
 
         // Inicializar mapa cuando la página carga
         document.addEventListener('DOMContentLoaded', async function() {
+            initDatosSimulacionFromRutaData();
             inicializarMapa();
-            await generarRutaCompleta(); // Esperar a que se genere la ruta
+            await generarRutaCompleta();
             inicializarAudio();
         });
 
@@ -895,7 +1246,7 @@
         }
 
         // Función principal para simular la ruta del piloto
-        function simularRutaPiloto() {
+        async function simularRutaPiloto() {
             if (simulacionPilotoActiva) {
                 detenerSimulacionPiloto();
                 return;
@@ -905,10 +1256,25 @@
             const estado = document.getElementById('estadoSimulacionPiloto');
             const tiempo = document.getElementById('tiempoSimulacion');
 
-            // Cambiar estado del botón
+            btn.disabled = true;
+            estado.innerHTML = '🎲 Preparando ruta...';
+
+            try {
+                if (document.getElementById('chkRutaAleatoria')?.checked) {
+                    await prepararRutaAleatoria();
+                } else if (!rutaSimulacionPiloto.length) {
+                    await generarRutaCompleta();
+                }
+            } catch (e) {
+                console.warn('[Monitor] Error preparando ruta:', e);
+            }
+
+            btn.disabled = false;
             btn.innerHTML = '<i class="bi bi-stop-circle-fill me-2"></i>Detener Simulación';
             btn.className = 'btn btn-danger btn-lg w-100';
-            estado.innerHTML = '🚌 Preparando simulación de ruta...';
+            estado.innerHTML = modoRutaAleatoriaActiva
+                ? '🚌 Simulación DEMO aleatoria — bus en movimiento (en vivo)'
+                : '🚌 Preparando simulación de ruta...';
             tiempo.textContent = 'Simulación en progreso...';
 
             simulacionPilotoActiva = true;
@@ -928,7 +1294,9 @@
 
             // Iniciar animación después de 2 segundos
             setTimeout(() => {
-                estado.innerHTML = '🚌 Simulación iniciada - Bus en movimiento';
+                estado.innerHTML = modoRutaAleatoriaActiva
+                    ? '🚌 Demo aleatoria en vivo — bus en movimiento'
+                    : '🚌 Simulación iniciada - Bus en movimiento';
                 animarBusSimulacion();
             }, 2000);
         }
@@ -1043,6 +1411,9 @@
                 // Mover bus al punto actual con transición suave
                 marcadorBusSimulacion.setLatLng(puntoActual.coordenadas);
 
+                // [EN VIVO] Transmitir ubicación a padres
+                reportarUbicacionBus(puntoActual.coordenadas[0], puntoActual.coordenadas[1]);
+
                 // Centrar mapa en el bus con transición suave
                 mapa.panTo(puntoActual.coordenadas, {
                     animate: true,
@@ -1061,6 +1432,11 @@
 
                     // Mostrar alerta visual
                     mostrarAlertaParada(puntoActual);
+
+                    // [EN VIVO] Notificar parada completada al padre vía SignalR
+                    if (puntoActual.idParada) {
+                        completarParadaEnServidor(puntoActual.idParada);
+                    }
 
                     // Actualizar estado
                     document.getElementById('estadoSimulacionPiloto').innerHTML = 
@@ -1215,5 +1591,42 @@
                 }
             }
         }
+    </script>
+    <script>
+        // [EN VIVO] SignalR: unirse al grupo del bus y retransmitir ubicación si falla el API
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                window.monitorNot = new NotificacionesCliente();
+                await window.monitorNot.conectar();
+
+                const idBus = @(Model.IdBus.HasValue ? Model.IdBus.Value.ToString() : "null");
+                if (idBus !== null) {
+                    await window.monitorNot.unirseAGrupo(`Bus_${idBus}`);
+                    console.log(`✅ [Monitor] Unido a Bus_${idBus}`);
+                }
+
+                window.monitorNot.onAlerta((data) => {
+                    const cont = document.createElement('div');
+                    cont.className = 'alert alert-info position-fixed';
+                    cont.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 260px;';
+                    cont.innerHTML = `<strong>🔔</strong> ${data.mensaje || data.Mensaje || 'Alerta'} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+                    document.body.appendChild(cont);
+                    setTimeout(() => { if (cont.parentNode) cont.remove(); }, 6000);
+                });
+
+                // Respaldo: enviar ubicación cada 2s durante simulación
+                setInterval(() => {
+                    try {
+                        if (simulacionPilotoActiva && marcadorBusSimulacion && idBus !== null) {
+                            const latlng = marcadorBusSimulacion.getLatLng();
+                            reportarUbicacionBus(latlng.lat, latlng.lng);
+                        }
+                    } catch (e) { console.warn('[Monitor] Error reportando ubicación:', e); }
+                }, 2000);
+
+            } catch (e) {
+                console.warn('[Monitor] SignalR no disponible', e);
+            }
+        });
     </script>
 }

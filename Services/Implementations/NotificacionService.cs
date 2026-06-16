@@ -48,22 +48,31 @@ namespace TransportesGenesis.Services.Implementations
             }
         }
 
-        public async Task NotificarParadaCompletadaAsync(int idAlumno, string nombreAlumno, int idParada)
+        public async Task NotificarParadaCompletadaAsync(int idAlumno, string nombreAlumno, int idParada, string tipoRuta = "Mañana", bool esParadaColegio = false)
         {
             try
             {
                 _logger.LogInformation($"[NOTIFICACION] Parada {idParada} completada - Alumno {idAlumno}: {nombreAlumno}");
+
+                // [FASE 0.5] Mensaje según turno y tipo de parada
+                var textoMensaje = esParadaColegio
+                    ? $"✅ {nombreAlumno} ha llegado al colegio."
+                    : tipoRuta.Equals("Tarde", StringComparison.OrdinalIgnoreCase)
+                        ? $"✅ {nombreAlumno} ha sido dejado en casa."
+                        : $"✅ {nombreAlumno} ha sido recogido.";
 
                 var mensaje = new
                 {
                     IdAlumno = idAlumno,
                     IdParada = idParada,
                     NombreAlumno = nombreAlumno,
-                    Mensaje = $"✅ {nombreAlumno} ha sido recogido/dejado en la parada.",
+                    TipoRuta = tipoRuta,
+                    EsParadaColegio = esParadaColegio,
+                    Mensaje = textoMensaje,
                     FechaHora = DateTime.Now
                 };
 
-                // Enviar a grupo específico del alumno (sus padres)
+                // [EN VIVO] Enviar a grupo específico del alumno (sus padres)
                 await _hubContext.Clients.Group($"Alumno_{idAlumno}")
                     .SendAsync("ParadaCompletada", mensaje);
 

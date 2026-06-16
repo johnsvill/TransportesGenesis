@@ -314,10 +314,20 @@
                             </li>
                         }
                         <li class="nav-item">
-                            <a class="nav-link" href="/Geolocalizacion/MapaEnTiempoReal">
-                                <i class="bi bi-geo-alt-fill me-1"></i>
-                                <span>Mapa</span>
-                            </a>
+                            @if (User.IsInRole("PadreDeFamilia"))
+                            {
+                                <a class="nav-link" href="/Padres/DashboardRutaBusAsignado">
+                                    <i class="bi bi-map-fill me-1"></i>
+                                    <span>Mi Ruta</span>
+                                </a>
+                            }
+                            else
+                            {
+                                <a class="nav-link" href="/Geolocalizacion/MapaEnTiempoReal">
+                                    <i class="bi bi-geo-alt-fill me-1"></i>
+                                    <span>Mapa</span>
+                                </a>
+                            }
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="/Padres/ConfirmarAsistencia">
@@ -392,6 +402,10 @@
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
+    <!-- SignalR (local, sin CDN para evitar Tracking Prevention) -->
+    <script src="/lib/signalr/signalr.min.js"></script>
+    <script src="/js/signalr-client.js"></script>
 
     <!-- Script para mejorar la experiencia móvil -->
     <script>

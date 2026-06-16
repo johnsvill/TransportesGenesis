@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credenciales Demo - TransportesGenesis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .user-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .user-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+        }
+
+        .user-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+
+        .user-card.admin { border-color: #dc3545; }
+        .user-card.piloto { border-color: #0dcaf0; }
+        .user-card.monitor { border-color: #198754; }
+        .user-card.padre { border-color: #ffc107; }
+
+        .user-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-card .icon {
+            font-size: 2rem;
+        }
+
+        .credential-item {
+            margin: 12px 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .credential-label {
+            font-weight: 600;
+            color: #666;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .credential-value {
+            font-size: 1.1rem;
+            font-family: 'Courier New', monospace;
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: #5568d3;
+        }
+
+        .copy-btn:active {
+            background: #4456bd;
+        }
+
+        .access-list {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .access-list h4 {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .access-list ul {
+            list-style: none;
+            font-size: 0.85rem;
+            color: #555;
+        }
+
+        .access-list li {
+            padding: 3px 0;
+        }
+
+        .access-list li:before {
+            content: "✓ ";
+            color: #198754;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .instructions {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+        }
+
+        .instructions h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .instructions ol {
+            padding-left: 25px;
+        }
+
+        .instructions li {
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .warning strong {
+            color: #856404;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+
+            .container {
+                box-shadow: none;
+            }
+
+            .copy-btn {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .user-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔑 Encuentra tus Credenciales</h1>
+            <p>Sistema TransportesGenesis - Presentación Martes</p>
+            <p style="font-size: 1rem; margin-top: 15px; padding: 15px; background: rgba(255,255,255,0.2); border-radius: 10px;">
+                ⚠️ <strong>IMPORTANTE:</strong> Primero ejecuta el script <code>BUSCAR_MIS_USUARIOS.sql</code> 
+                y anota aquí los emails que encuentres. Todos usan la contraseña: <strong>Admin123!</strong>
+            </p>
+        </div>
+
+        <div class="content">
+            <div class="user-grid">
+                <!-- Administrador -->
+                <div class="user-card admin">
+                    <h3>
+                        <span class="icon">👤</span>
+                        ADMINISTRADOR
+                    </h3>
+                    <div class="credential-item">
+                        <span class="credential-label">Usuario</span>
+                        <div class="credential-value">
+                            <span>admin@genesis.com</span>
+                            <button class="copy-btn" onclick="copyToClipboard('admin@genesis.com')">Copiar</button>
+                        </div>
+                    </div>
+                    <div class="credential-item">
+                        <span class="credential-label">Contraseña</span>
+                        <div class="credential-value">
+                            <span>Admin123!</span>
+                            <button class="copy-btn" onclick="copyToClipboard('Admin123!')">Copiar</button>
+                        </div>
+                    </div>
+                    <div class="access-list">
+                        <h4>Acceso a:</h4>
+                        <ul>
+                            <li>Panel completo</li>
+                            <li>Dashboard analítico</li>
+                            <li>Reportes y Excel</li>
+                            <li>Gestión de usuarios</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Piloto -->
+                <div class="user-card piloto">
+                    <h3>
+                        <span class="icon">🚗</span>
+                        PILOTO
+                    </h3>
+                    <div class="credential-item">
+                        <span class="credential-label">Usuario</span>
+                        <div class="credential-value">
+                            <span>piloto@genesis.com</span>
+                            <button class="copy-btn" onclick="copyToClipboard('piloto@genesis.com')">Copiar</button>
+                        </div>
+                    </div>
+                    <div class="credential-item">
+                        <span class="credential-label">Contraseña</span>
+                        <div class="credential-value">
+                            <span>Piloto123!</span>
+                            <button class="copy-btn" onclick="copyToClipboard('Piloto123!')">Copiar</button>
+                        </div>
+                    </div>
+                    <div class="access-list">
+                        <h4>Acceso a:</h4>
+                        <ul>
+                            <li>Mi Ruta</li>
+                            <li>Mapa con paradas</li>
+                            <li>Alumnos asignados</li>
+                            <li>Tracking tiempo real</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Monitor -->
+                <div class="user-card monitor">
+                    <h3>
+                        <span class="icon">👨‍🏫</span>
+                        MONITOR
+                    </h3>
+                    <div class="credential-item">
+                        <span class="credential-label">Usuario</span>
+                        <div class="credential-value">
+                            <span>monitor@genesis.com</span>
+                            <button class="copy-btn" onclick="copyToClipboard('monitor@genesis.com')">Copiar</button>
+                        </div>
+                    </div>
+                    <div class="credential-item">
+                        <span class="credential-label">Contraseña</span>
+                        <div class="credential-value">
+                            <span>Monitor123!</span>
+                            <button class="copy-btn" onclick="copyToClipboard('Monitor123!')">Copiar</button>
+                        </div>
+                    </div>
+                    <div class="access-list">
+                        <h4>Acceso a:</h4>
+                        <ul>
+                            <li>Registro asistencia</li>
+                            <li>Listado alumnos</li>
+                            <li>Mapa de ruta</li>
+                            <li>Control presente/ausente</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Padre -->
+                <div class="user-card padre">
+                    <h3>
+                        <span class="icon">👨‍👩‍👧</span>
+                        PADRE DE FAMILIA
+                    </h3>
+                    <div class="credential-item">
+                        <span class="credential-label">Usuario</span>
+                        <div class="credential-value">
+                            <span>padre@genesis.com</span>
+                            <button class="copy-btn" onclick="copyToClipboard('padre@genesis.com')">Copiar</button>
+                        </div>
+                    </div>
+                    <div class="credential-item">
+                        <span class="credential-label">Contraseña</span>
+                        <div class="credential-value">
+                            <span>Padre123!</span>
+                            <button class="copy-btn" onclick="copyToClipboard('Padre123!')">Copiar</button>
+                        </div>
+                    </div>
+                    <div class="access-list">
+                        <h4>Acceso a:</h4>
+                        <ul>
+                            <li>Seguimiento del bus</li>
+                            <li>Asistencias hijos</li>
+                            <li>Notificaciones</li>
+                            <li>Config. punto recogida</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="instructions">
+                <h2>📋 Orden de Presentación Sugerido</h2>
+                <ol>
+                    <li><strong>Administrador (2 min):</strong> Dashboard con gráficos → Reportes → Exportar Excel → Gestión</li>
+                    <li><strong>Piloto (2 min):</strong> Mi Ruta → Mapa con paradas → Alumnos asignados</li>
+                    <li><strong>Monitor (2 min):</strong> Registro de asistencia → Toggle presente/ausente</li>
+                    <li><strong>Padre (2 min):</strong> Seguimiento en tiempo real → Asistencias → Notificaciones</li>
+                </ol>
+
+                <div class="warning">
+                    <strong>⚠️ Importante antes de la presentación:</strong>
+                    <ul style="margin-top: 10px; padding-left: 20px;">
+                        <li>Ejecutar el script SQL: <code>SeedData_Usuarios_Demo.sql</code></li>
+                        <li>Verificar que todos los usuarios pueden loguearse</li>
+                        <li>Tener datos de ejemplo en el sistema (buses, rutas, alumnos)</li>
+                        <li>Probar cada pantalla al menos una vez</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                // Crear notificación temporal
+                const notification = document.createElement('div');
+                notification.textContent = '✓ Copiado al portapapeles';
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: #198754;
+                    color: white;
+                    padding: 15px 25px;
+                    border-radius: 10px;
+                    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                    z-index: 10000;
+                    animation: slideIn 0.3s ease;
+                `;
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => notification.remove(), 300);
+                }, 2000);
+            }, function(err) {
+                alert('Error al copiar: ' + err);
+            });
+        }
+
+        // Animaciones
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

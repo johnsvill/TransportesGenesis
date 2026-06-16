@@ -1,0 +1,71 @@
+===============================================
+	 CREDENCIALES DEMO - MARTES
+	 Contraseña para TODOS: Admin123!
+===============================================
+
+PASO 1: Ejecutar script SQL
+----------------------------
+Archivo: Scripts/BUSCAR_MIS_USUARIOS.sql
+
+El script te mostrará los emails.
+
+
+PASO 2: Anotar aquí los emails
+-------------------------------
+
+ADMINISTRADOR:
+Email: _________________________________
+Contraseña: Admin123!
+
+
+PILOTO:
+Email: _________________________________
+Contraseña: Admin123!
+
+
+MONITOR:
+Email: _________________________________
+Contraseña: Admin123!
+
+
+PADRE DE FAMILIA:
+Email: _________________________________
+Contraseña: Admin123!
+
+
+===============================================
+
+ORDEN DE PRESENTACIÓN (8 minutos total):
+-----------------------------------------
+
+1. ADMIN (2 min)
+   - Dashboard con gráficos
+   - Reporte de Rutas
+   - Exportar Excel
+
+2. PILOTO (2 min)
+   - Mi Ruta
+   - Mapa con paradas
+
+3. MONITOR (2 min)
+   - Registro de asistencia
+   - Toggle presente/ausente
+
+4. PADRE (2 min)
+   - Seguimiento del bus
+   - Asistencias de hijos
+
+
+===============================================
+
+TIPS:
+-----
+☑ Usar pestañas de incógnito
+☑ Tener esta hoja impresa
+☑ Probar todos los logins HOY
+☑ Respirar profundo antes de empezar
+
+
+===============================================
+		¡ÉXITO EN TU PRESENTACIÓN! 🎉
+===============================================

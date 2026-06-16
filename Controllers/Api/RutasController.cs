@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using TransportesGenesis.DTOs.Ruta;
 using TransportesGenesis.Services.Interfaces;
 
@@ -41,21 +42,24 @@ namespace TransportesGenesis.Controllers.Api
 
                 if (ruta == null || !ruta.Paradas.Any())
                 {
-                    Console.WriteLine("[API RUTAS] ⚠️ No se encontraron alumnos para generar ruta");
+                    var detalle = ruta?.MensajeEstado
+                        ?? "No hay alumnos elegibles para este bus en la fecha y turno indicados.";
+                    Console.WriteLine($"[API RUTAS] ⚠️ {detalle}");
                     return Ok(new
                     {
                         success = false,
-                        message = "No hay alumnos confirmados para este bus en la fecha indicada",
-                        data = (object)null
+                        message = detalle,
+                        data = (object?)null
                     });
                 }
 
-                Console.WriteLine($"[API RUTAS] ✅ Ruta calculada exitosamente - ID: {ruta.IdRuta}, Paradas: {ruta.Paradas.Count}");
+                var msg = ruta.MensajeEstado ?? $"Ruta calculada exitosamente con {ruta.Paradas.Count} paradas";
+                Console.WriteLine($"[API RUTAS] ✅ Ruta calculada - ID: {ruta.IdRuta}, Paradas: {ruta.Paradas.Count}");
 
                 return Ok(new
                 {
                     success = true,
-                    message = $"Ruta calculada exitosamente con {ruta.Paradas.Count} paradas",
+                    message = msg,
                     data = ruta
                 });
             }
@@ -187,7 +191,8 @@ namespace TransportesGenesis.Controllers.Api
                     });
                 }
 
-                var resultado = await _rutaService.MarcarParadaCompletadaAsync(dto);
+                var confirmadoPor = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var resultado = await _rutaService.MarcarParadaCompletadaAsync(dto, confirmadoPor);
 
                 if (!resultado)
                 {

@@ -1,0 +1,271 @@
+@page
+@model TransportesGenesis.Pages.Admin.ReporteAsistenciasModel
+@{
+    ViewData["Title"] = "Reporte de Asistencias";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-primary">
+            <i class="bi bi-calendar-check"></i> Reporte de Asistencias
+        </h2>
+        <div>
+            <a href="?handler=ExportarExcel&Mes=@Model.Mes&Año=@Model.Año&FiltroAlumno=@Model.FiltroAlumno&FechaDesde=@Model.FechaDesde&FechaHasta=@Model.FechaHasta" class="btn btn-success me-2">
+                <i class="bi bi-file-earmark-excel-fill"></i> Exportar a Excel
+            </a>
+            <a href="/Admin/Index" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Volver al Panel
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="bi bi-funnel"></i> Filtros</h5>
+        </div>
+        <div class="card-body">
+            <form method="get">
+                <div class="row">
+                    <!-- Filtro por Alumno -->
+                    <div class="col-md-3 mb-3">
+                        <label for="FiltroAlumno" class="form-label">Alumno:</label>
+                        <select asp-for="FiltroAlumno" class="form-select">
+                            <option value="">Todos los alumnos</option>
+                            @foreach (var alumno in Model.AlumnosDisponibles)
+                            {
+                                <option value="@alumno.IdAlumno">@alumno.Nombre @alumno.Apellido</option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Filtro por Mes -->
+                    <div class="col-md-2 mb-3">
+                        <label for="Mes" class="form-label">Mes:</label>
+                        <select asp-for="Mes" class="form-select">
+                            <option value="1">Enero</option>
+                            <option value="2">Febrero</option>
+                            <option value="3">Marzo</option>
+                            <option value="4">Abril</option>
+                            <option value="5">Mayo</option>
+                            <option value="6">Junio</option>
+                            <option value="7">Julio</option>
+                            <option value="8">Agosto</option>
+                            <option value="9">Septiembre</option>
+                            <option value="10">Octubre</option>
+                            <option value="11">Noviembre</option>
+                            <option value="12">Diciembre</option>
+                        </select>
+                    </div>
+
+                    <!-- Filtro por Año -->
+                    <div class="col-md-2 mb-3">
+                        <label for="Año" class="form-label">Año:</label>
+                        <input type="number" asp-for="Año" class="form-control" min="2020" max="2030" />
+                    </div>
+
+                    <!-- Fecha Desde (Opcional) -->
+                    <div class="col-md-2 mb-3">
+                        <label for="FechaDesde" class="form-label">Desde:</label>
+                        <input type="date" asp-for="FechaDesde" class="form-control" />
+                        <small class="text-muted">Opcional</small>
+                    </div>
+
+                    <!-- Fecha Hasta (Opcional) -->
+                    <div class="col-md-2 mb-3">
+                        <label for="FechaHasta" class="form-label">Hasta:</label>
+                        <input type="date" asp-for="FechaHasta" class="form-control" />
+                        <small class="text-muted">Opcional</small>
+                    </div>
+
+                    <!-- Botón Filtrar -->
+                    <div class="col-md-1 mb-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search"></i> Filtrar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h3>@Model.TotalAsistenciasMañana</h3>
+                    <p class="mb-0">Asistencias Mañana</p>
+                    <small>@Model.PorcentajeAsistenciaMañana.ToString("F1")%</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h3>@Model.TotalAsistenciasTarde</h3>
+                    <p class="mb-0">Asistencias Tarde</p>
+                    <small>@Model.PorcentajeAsistenciaTarde.ToString("F1")%</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body text-center">
+                    <h3>@Model.TotalAusenciasMañana</h3>
+                    <p class="mb-0">Ausencias Mañana</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body text-center">
+                    <h3>@Model.TotalAusenciasTarde</h3>
+                    <p class="mb-0">Ausencias Tarde</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de Asistencias -->
+    @if (!Model.Asistencias.Any())
+    {
+        <div class="alert alert-warning" role="alert">
+            <i class="bi bi-exclamation-triangle"></i> No hay asistencias registradas para los filtros seleccionados.
+        </div>
+    }
+    else
+    {
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-list-ul"></i> Total de Registros: @Model.Asistencias.Count
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Alumno</th>
+                                <th>Fecha</th>
+                                <th>Asiste Mañana</th>
+                                <th>Asiste Tarde</th>
+                                <th>Bus Asignado</th>
+                                <th>Bus Temporal Mañana</th>
+                                <th>Bus Temporal Tarde</th>
+                                <th>Fecha Confirmación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var asistencia in Model.Asistencias)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@asistencia.Alumno.Nombre @asistencia.Alumno.Apellido</strong>
+                                    </td>
+                                    <td>@asistencia.Fecha.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        @if (asistencia.AsisteMañana)
+                                        {
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-check-circle-fill"></i> Sí
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">
+                                                <i class="bi bi-x-circle-fill"></i> No
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (asistencia.AsisteTarde)
+                                        {
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-check-circle-fill"></i> Sí
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">
+                                                <i class="bi bi-x-circle-fill"></i> No
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (asistencia.Alumno.BusAsignado != null)
+                                        {
+                                            <span class="badge bg-primary">
+                                                <i class="bi bi-bus-front"></i> @asistencia.Alumno.BusAsignado.Placa
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Sin bus</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (asistencia.BusTemporalMañana != null)
+                                        {
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="bi bi-bus-front"></i> @asistencia.BusTemporalMañana.Placa
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (asistencia.BusTemporalTarde != null)
+                                        {
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="bi bi-bus-front"></i> @asistencia.BusTemporalTarde.Placa
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (asistencia.FechaConfirmacion.HasValue)
+                                        {
+                                            <small>@asistencia.FechaConfirmacion.Value.ToString("dd/MM/yyyy HH:mm")</small>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">No confirmada</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top 5 Alumnos con Más Asistencias -->
+        @if (Model.AsistenciasPorAlumno.Any())
+        {
+            <div class="card mt-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-trophy-fill"></i> Top 5 Alumnos con Más Asistencias</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        @foreach (var item in Model.AsistenciasPorAlumno.OrderByDescending(x => x.Value).Take(5))
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                @item.Key
+                                <span class="badge bg-primary rounded-pill">@item.Value asistencias</span>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        }
+    }
+</div>

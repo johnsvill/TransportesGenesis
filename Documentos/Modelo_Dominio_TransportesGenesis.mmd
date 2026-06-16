@@ -1,0 +1,341 @@
+erDiagram
+    AspNetUsers {
+        string Id PK
+        string UserName
+        string NormalizedUserName
+        string Email
+        string NormalizedEmail
+        bool EmailConfirmed
+        string PasswordHash
+        string SecurityStamp
+        string ConcurrencyStamp
+        string PhoneNumber
+        bool PhoneNumberConfirmed
+        bool TwoFactorEnabled
+        datetime LockoutEnd
+        bool LockoutEnabled
+        int AccessFailedCount
+        bool IsFirstLogin
+        datetime LastLoginDate
+    }
+
+    AspNetRoles {
+        string Id PK
+        string Name
+        string NormalizedName
+        string ConcurrencyStamp
+    }
+
+    AspNetUserRoles {
+        string UserId FK
+        string RoleId FK
+    }
+
+    AspNetUserClaims {
+        int Id PK
+        string UserId FK
+        string ClaimType
+        string ClaimValue
+    }
+
+    AspNetUserLogins {
+        string LoginProvider
+        string ProviderKey
+        string ProviderDisplayName
+        string UserId FK
+    }
+
+    AspNetUserTokens {
+        string UserId FK
+        string LoginProvider
+        string Name
+        string Value
+    }
+
+    AspNetRoleClaims {
+        int Id PK
+        string RoleId FK
+        string ClaimType
+        string ClaimValue
+    }
+
+    PagosPadres {
+        int Id PK
+        string UsuarioId FK
+        string Mes
+        int Anio
+        decimal Monto
+        string TipoPago
+        string ComprobanteUrl
+        datetime Fecha
+    }
+
+    Bancos {
+        int IdBanco PK
+        string Nombre
+        int Activo
+        datetime FechaRegistro
+    }
+
+    Padres {
+        int IdPadre PK
+        string Nombre
+        string Apellido
+        int Activo
+        datetime FechaRegistro
+    }
+
+    Alumnos {
+        int IdAlumno PK
+        int IdPadre FK
+        string Nombre
+        string Apellido
+        int IdBusAsignado FK
+        decimal Latitud
+        decimal Longitud
+        string Direccion
+        int Activo
+        datetime FechaRegistro
+    }
+
+    TipoRecorridoPago {
+        int IdTipoRecorrido PK
+        int TipoRecorrido
+        decimal Precio
+        int DiaMaximoPago
+        int Activo
+        datetime FechaRegistro
+    }
+
+    TipoCuenta {
+        int IdTipoCuenta PK
+        int IdPadre FK
+        int IdBanco FK
+        string Nombre
+        int Activo
+        datetime FechaRegistro
+    }
+
+    Pagos {
+        int IdPago PK
+        int IdAlumno FK
+        int IdPadre FK
+        int IdTipoCuenta FK
+        int IdTipoRecorrido FK
+        int MesPagado
+        int Anio
+        decimal MontoParcial
+        bool PagoCompleto
+        string Imagen
+        string Ubicacion
+        datetime FechaModif
+        int Activo
+        datetime FechaRegistro
+    }
+
+    Buses {
+        int IdBus PK
+        string Placa
+        string Modelo
+        int Capacidad
+        bool Estado
+        int Activo
+        datetime FechaRegistro
+    }
+
+    Rutas {
+        int IdRuta PK
+        int IdBus FK
+        string Nombre
+        string Descripcion
+        string TipoRuta
+        string HoraInicio
+        bool EsActiva
+        int Activo
+        datetime FechaRegistro
+    }
+
+    Paradas {
+        int IdParada PK
+        int IdRuta FK
+        int IdAlumno FK
+        decimal Latitud
+        decimal Longitud
+        string Direccion
+        int Orden
+        string HoraEstimada
+        bool Completada
+        int Activo
+        datetime FechaRegistro
+    }
+
+    AsignacionPilotoBus {
+        int IdAsignacion PK
+        int IdBus FK
+        string IdUsuarioPiloto FK
+        datetime FechaAsignacion
+        datetime FechaFinAsignacion
+        bool EsActual
+        int Activo
+        datetime FechaRegistro
+    }
+
+    AsistenciaAlumno {
+        int IdAsistencia PK
+        int IdAlumno FK
+        datetime Fecha
+        bool AsisteManana
+        bool AsisteTarde
+        int IdBusTemporalManana FK
+        int IdBusTemporalTarde FK
+        datetime FechaConfirmacion
+        int Activo
+        datetime FechaRegistro
+    }
+
+    UbicacionBusEnTiempoReal {
+        int IdUbicacion PK
+        int IdBus FK
+        decimal Latitud
+        decimal Longitud
+        datetime FechaHora
+        decimal Velocidad
+        decimal DireccionGrados
+    }
+
+    RegistroRecogida {
+        int IdRegistro PK
+        int IdAlumno FK
+        int IdParada FK
+        datetime FechaHoraRecogida
+        bool AlumnoPresente
+        decimal Latitud
+        decimal Longitud
+        string ConfirmadoPor FK
+        int Activo
+        datetime FechaRegistro
+    }
+
+    SolicitudTraslado {
+        int IdSolicitud PK
+        int IdAlumno FK
+        int IdBusOrigen FK
+        int IdBusDestino FK
+        string Turno
+        datetime FechaTraslado
+        string Motivo
+        string Estado
+        string AprobadoPor FK
+        string ComentarioAdmin
+        datetime FechaRespuesta
+        int Activo
+        datetime FechaRegistro
+    }
+
+    Alertas {
+        int IdAlerta PK
+        string TipoAlerta
+        string Mensaje
+        string IdRemitente FK
+        string IdDestinatario FK
+        datetime FechaEnvio
+        bool Leida
+        datetime FechaLectura
+        int Activo
+        datetime FechaRegistro
+    }
+
+    AlertasProximidad {
+        int Id PK
+        int IdBus FK
+        int IdAlumno FK
+        string IdPadreUsuario FK
+        string TipoAlerta
+        string Mensaje
+        string ParadaActual
+        string ParadaDestino
+        int ParadasRestantes
+        string Estado
+        bool ConfirmacionPadre
+        datetime FechaConfirmacionPadre
+        datetime FechaResolucion
+        datetime FechaHora
+        int Activo
+        datetime FechaRegistro
+    }
+
+    NotificacionProximidad {
+        int IdNotificacion PK
+        int IdPadre FK
+        int IdParada FK
+        string TipoNotificacion
+        bool Enviada
+        datetime FechaHoraEnvio
+        int Activo
+        datetime FechaRegistro
+    }
+
+    NotificacionRetraso {
+        int IdNotificacion PK
+        int IdRuta FK
+        string Motivo
+        int TiempoRetrasoMinutos
+        datetime FechaHora
+        bool NotificadoAPadres
+        datetime FechaNotificacionPadres
+        int Activo
+        datetime FechaRegistro
+    }
+
+    ConfiguracionSistema {
+        int IdConfiguracion PK
+        string Clave
+        string Valor
+        string Descripcion
+        string Categoria
+        string Tipo
+        bool Activo
+        datetime UltimaModificacion
+        string ModificadoPor
+        datetime FechaRegistro
+    }
+
+    AspNetUsers ||--o{ AspNetUserRoles : tiene
+    AspNetRoles ||--o{ AspNetUserRoles : tiene
+    AspNetUsers ||--o{ AspNetUserClaims : tiene
+    AspNetUsers ||--o{ AspNetUserLogins : tiene
+    AspNetUsers ||--o{ AspNetUserTokens : tiene
+    AspNetRoles ||--o{ AspNetRoleClaims : tiene
+    AspNetUsers ||--o{ PagosPadres : registra
+
+    Padres ||--o{ Alumnos : tutor
+    Padres ||--o{ TipoCuenta : cuenta
+    Padres ||--o{ Pagos : paga
+    Bancos ||--o{ TipoCuenta : banco
+    Buses ||--o{ Alumnos : bus_asignado
+    Alumnos ||--o{ Pagos : pago_alumno
+    Alumnos ||--o{ AsistenciaAlumno : asistencia
+    Alumnos ||--o{ Paradas : parada_alumno
+    Alumnos ||--o{ RegistroRecogida : recogida
+    Alumnos ||--o{ SolicitudTraslado : traslado
+    Alumnos ||--o| TipoRecorridoPago : plan_pago
+    TipoCuenta ||--o{ Pagos : medio_pago
+    TipoRecorridoPago ||--o{ Pagos : tarifa
+
+    Buses ||--o{ Rutas : ruta
+    Buses ||--o| AsignacionPilotoBus : piloto
+    Buses ||--o{ UbicacionBusEnTiempoReal : gps
+    Buses ||--o{ AlertasProximidad : alerta_bus
+    Buses ||--o{ AsistenciaAlumno : buses_temporales
+    Buses ||--o{ SolicitudTraslado : buses_traslado
+    Rutas ||--o{ Paradas : parada
+    Rutas ||--o{ NotificacionRetraso : retraso
+    Paradas ||--o{ RegistroRecogida : registro
+    Paradas ||--o{ NotificacionProximidad : proximidad
+    AspNetUsers ||--o{ AsignacionPilotoBus : usuario_piloto
+    AspNetUsers ||--o{ RegistroRecogida : confirmado_por
+    AspNetUsers ||--o{ SolicitudTraslado : aprobado_por
+    AspNetUsers ||--o{ Alertas : usuarios_alerta
+    AspNetUsers ||--o{ AlertasProximidad : padre_usuario
+    Padres ||--o{ NotificacionProximidad : notifica
+    Alumnos ||--o{ AlertasProximidad : alerta_alumno
