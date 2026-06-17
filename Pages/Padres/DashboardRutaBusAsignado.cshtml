@@ -43,6 +43,7 @@
     .alerta-item.alerta-warning { border-left-color: #ffc107; background: #fffdf0; }
     .alerta-item.alerta-danger  { border-left-color: #dc3545; background: #fff5f5; }
     .alerta-item.alerta-info    { border-left-color: #17a2b8; }
+    .alerta-item.alerta-hijo    { border-left-color: #0dcaf0; background: #e3f7fc; color: #055160; }
     .marcador-hijo-pendiente {
         animation: pulso-hijo 1.8s ease-in-out infinite;
     }
@@ -80,7 +81,7 @@
                             <i class="bi bi-bus-front"></i>
                             Bus #@Model.IdBusAsignado — @Model.PlacaBus
                         </span>
-                        <span class="badge @(Model.TipoRutaActiva == "Mañana" ? "bg-warning text-dark" : "bg-orange fs-6") fs-6" style="@(Model.TipoRutaActiva == "Tarde" ? "background:#fd7e14" : "")">
+                        <span id="badgeTurnoActivo" class="badge @(Model.TipoRutaActiva == "Mañana" ? "bg-warning text-dark" : "bg-orange fs-6") fs-6" style="@(Model.TipoRutaActiva == "Tarde" ? "background:#fd7e14" : "")">
                             <i class="bi bi-@(Model.TipoRutaActiva == "Mañana" ? "sunrise" : "sunset")"></i>
                             Turno @Model.TipoRutaActiva
                         </span>
@@ -97,10 +98,14 @@
         <div class="col-12">
             <div class="alert alert-info py-2 mb-0 small d-flex align-items-start gap-2">
                 <i class="bi bi-info-circle-fill mt-1"></i>
-                <div>
+                <div id="infoTurnoActivo">
                     <strong>Turno @Model.TipoRutaActiva activo</strong> (automático según la hora; demo Mañana:
                     <a href="?turno=Mañana">?turno=Mañana</a> · Tarde: <a href="?turno=Tarde">?turno=Tarde</a>)
-                    <br>@Model.DescripcionTurno
+                    <br>@if (Model.TipoRutaActiva == "Mañana") {
+                        <text>Mañana: inicia en casas de Diego/Sofía → termina en el colegio.</text>
+                    } else {
+                        <text>Tarde: inicia en el colegio → termina en casas de Diego/Sofía.</text>
+                    }
                 </div>
             </div>
         </div>
@@ -112,7 +117,7 @@
         <div class="col-12 col-xl-8">
             <div class="card h-100">
                 <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-                    <span><i class="bi bi-geo-alt-fill me-1"></i> Mapa del Recorrido — @Model.RutaNombre</span>
+                    <span><i class="bi bi-geo-alt-fill me-1"></i> Mapa del Recorrido — <span id="lblRutaNombre">@Model.RutaNombre</span></span>
                     <small class="opacity-75 d-none d-md-inline ms-2">
                         <span style="color:#2563eb">━</span> pendiente &nbsp;
                         <span style="color:#28a745">━</span> recorrido &nbsp;
@@ -216,8 +221,13 @@
         const TIPO_RUTA      = '@Model.TipoRutaActiva';
         // [FASE 0.2] Segmento Plan B (fallback) y ruta completa del bus (en vivo)
         const PARADAS_BD     = @Html.Raw(Model.ParadasJson);
-        const RUTA_COMPLETA  = @Html.Raw(Model.RutaCompletaJson);
         const PARADAS_HIJOS  = @Html.Raw(Model.ParadasHijosJson);
+
+        // Estado mutable: se actualiza vía SignalR cuando el monitor genera ruta demo
+        let tipoRutaActivo     = TIPO_RUTA;
+        let rutaCompletaActiva = @Html.Raw(Model.RutaCompletaJson);
+        let colegioLat         = COLEGIO_LAT;
+        let colegioLng         = COLEGIO_LNG;
 
         // ── [EN VIVO - FASE 0.1] Modo principal: sincronización piloto → servidor → padre ──
         let modoVisualizacion   = 'vivo';   // 'vivo' | 'fallback'
@@ -241,6 +251,7 @@
         // ── Flags de notificación (evitar duplicados por sesión) ──────────────
         let notifProximo   = false;
         let notifColegio   = false;
+        let notifEntregaHijos = false;
         let contadorAlertas = 0;
 
         // ════════════════════════════════════════════════════════════════════
@@ -255,7 +266,7 @@
 
         // ── Mapa ──────────────────────────────────────────────────────────────
         function inicializarMapa() {
-            mapa = L.map('mapa').setView([COLEGIO_LAT, COLEGIO_LNG], 13);
+            mapa = L.map('mapa').setView([colegioLat, colegioLng], 13);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap contributors', maxZoom: 19
             }).addTo(mapa);
@@ -272,7 +283,7 @@
 
         function dibujarMarcadoresFijos() {
             // Colegio
-            L.marker([COLEGIO_LAT, COLEGIO_LNG], { icon: iconoCirculo('🏫','#6f42c1', 46) })
+            L.marker([colegioLat, colegioLng], { icon: iconoCirculo('🏫','#6f42c1', 46) })
              .addTo(mapa)
              .bindPopup('<strong>🏫 Colegio</strong>');
 
@@ -314,14 +325,14 @@
         }
 
         async function dibujarRutaVivoCompleta() {
-            if (!RUTA_COMPLETA.length || modoVisualizacion !== 'vivo') return;
+            if (!rutaCompletaActiva.length || modoVisualizacion !== 'vivo') return;
 
             limpiarSegmentosVivo();
             const puntosRuta = [];
 
-            for (let i = 0; i < RUTA_COMPLETA.length - 1; i++) {
-                const desde = RUTA_COMPLETA[i];
-                const hasta = RUTA_COMPLETA[i + 1];
+            for (let i = 0; i < rutaCompletaActiva.length - 1; i++) {
+                const desde = rutaCompletaActiva[i];
+                const hasta = rutaCompletaActiva[i + 1];
                 const coords = await segmentoOSRM([desde.lat, desde.lng], [hasta.lat, hasta.lng]);
                 puntosRuta.push(...coords);
 
@@ -362,20 +373,20 @@
         }
 
         function getOrdenColegio() {
-            const c = RUTA_COMPLETA.find(p => p.esColegio);
-            return c?.orden ?? Math.max(...RUTA_COMPLETA.map(p => p.orden ?? 0), 0);
+            const c = rutaCompletaActiva.find(p => p.esColegio);
+            return c?.orden ?? Math.max(...rutaCompletaActiva.map(p => p.orden ?? 0), 0);
         }
 
         function getOrdenesHijosEnRuta() {
             return PARADAS_HIJOS
                 .filter(p => p.idParada)
-                .map(p => RUTA_COMPLETA.find(r => r.idParada === p.idParada)?.orden ?? 0)
+                .map(p => rutaCompletaActiva.find(r => r.idParada === p.idParada)?.orden ?? 0)
                 .filter(o => o > 0);
         }
 
         function getMaxOrdenVisitado() {
             let maxO = 0;
-            RUTA_COMPLETA.forEach(p => {
+            rutaCompletaActiva.forEach(p => {
                 if (p.idParada && paradasVisitadas.has(p.idParada))
                     maxO = Math.max(maxO, p.orden ?? 0);
             });
@@ -385,7 +396,7 @@
         /** Progreso del bus sobre la ruta (por cercanía GPS) */
         function getOrdenProgresoBus(lat, lng) {
             let maxO = 0;
-            RUTA_COMPLETA.forEach(p => {
+            rutaCompletaActiva.forEach(p => {
                 if (distM([lat, lng], [p.lat, p.lng]) <= 220)
                     maxO = Math.max(maxO, p.orden ?? 0);
             });
@@ -404,7 +415,7 @@
             const progresoBus    = (lat != null && lng != null) ? getOrdenProgresoBus(lat, lng) : 0;
             const progreso       = Math.max(visitado, progresoBus);
 
-            const esMañana = TIPO_RUTA === 'Mañana' || TIPO_RUTA.toLowerCase().includes('mañana') || TIPO_RUTA.toLowerCase().includes('manana');
+            const esMañana = tipoRutaActivo === 'Mañana' || tipoRutaActivo.toLowerCase().includes('mañana') || tipoRutaActivo.toLowerCase().includes('manana');
 
             routeSegmentosVivo.forEach(seg => {
                 const ord = seg.ordenDestino ?? 0;
@@ -444,19 +455,77 @@
             );
         }
 
+        function esTurnoMañanaPadre() {
+            return tipoRutaActivo === 'Mañana'
+                || tipoRutaActivo.toLowerCase().includes('mañana')
+                || tipoRutaActivo.toLowerCase().includes('manana');
+        }
+
+        /** Sincroniza posición de marcadores Diego/Sofía con la ruta recibida del monitor */
+        function actualizarMarcadoresHijosDesdeRuta() {
+            rutaCompletaActiva.forEach(p => {
+                if (p.esColegio) return;
+                const esHijo = (p.idAlumno && IDS_ALUMNOS.includes(parseInt(p.idAlumno)))
+                    || /diego|sof[ií]a/i.test(p.nombre || '');
+                if (!esHijo) return;
+
+                let actualizado = false;
+                Object.entries(marcadoresHijos).forEach(([key, item]) => {
+                    const matchId = p.idAlumno && item.parada.idAlumno === parseInt(p.idAlumno);
+                    const matchNombre = !p.idAlumno && item.parada.nombre
+                        && (p.nombre || '').toLowerCase().includes(
+                            item.parada.nombre.replace(/^Casa — |^Parada — /, '').split(' ')[0].toLowerCase()
+                        );
+                    if (!matchId && !matchNombre) return;
+
+                    item.parada.lat = p.lat;
+                    item.parada.lng = p.lng;
+                    item.parada.nombre = p.nombre;
+                    item.marker.setLatLng([p.lat, p.lng]);
+                    const visitado = p.idParada && paradasVisitadas.has(p.idParada);
+                    item.marker.setPopupContent(
+                        `<strong>🚏 ${p.nombre}</strong>${visitado
+                            ? '<br><span class="badge bg-success">Recogido / visitado</span>'
+                            : '<br><span class="badge bg-warning text-dark">Pendiente</span>'}`
+                    );
+                    actualizado = true;
+                });
+                if (!actualizado && p.idAlumno) {
+                    const key = p.idParada ?? `sync_${p.idAlumno}`;
+                    if (!marcadoresHijos[key]) {
+                        const m = L.marker([p.lat, p.lng], { icon: iconoCirculo('👤', '#ffc107', 42) })
+                            .addTo(mapa)
+                            .bindPopup(`<strong>🚏 ${p.nombre}</strong>`);
+                        marcadoresHijos[key] = { marker: m, parada: { ...p, esCasa: false } };
+                    }
+                }
+            });
+        }
+
         function detectarParadasCercanas(lat, lng) {
             const UMBRAL_M = 180;
+            // Usar coordenadas de la ruta sincronizada (incluye Sofía en tía Z9)
+            rutaCompletaActiva.forEach(p => {
+                if (p.esColegio) return;
+                const esMiHijo = (p.idAlumno && IDS_ALUMNOS.includes(parseInt(p.idAlumno)))
+                    || /diego mart|sof[ií]a mart/i.test(p.nombre || '');
+                if (!esMiHijo) return;
+                if (p.idParada && paradasVisitadas.has(p.idParada)) return;
+                if (distM([lat, lng], [p.lat, p.lng]) <= UMBRAL_M)
+                    marcarParadaVisitada(p.idParada, p.idAlumno);
+            });
+
             PARADAS_HIJOS.forEach(p => {
                 if (!p.idParada || paradasVisitadas.has(p.idParada)) return;
                 if (distM([lat, lng], [p.lat, p.lng]) <= UMBRAL_M)
                     marcarParadaVisitada(p.idParada, p.idAlumno);
             });
-            // Colegio al final de la ruta
-            RUTA_COMPLETA.filter(p => p.esColegio).forEach(p => {
-                if (!p.idParada || paradasVisitadas.has(p.idParada)) return;
-                if (distM([lat, lng], [p.lat, p.lng]) <= 100)
-                    marcarParadaVisitada(p.idParada, null);
-            });
+
+            if (esTurnoMañanaPadre()) {
+                const colegioFin = rutaCompletaActiva.filter(p => p.esColegio).pop();
+                if (colegioFin && distM([lat, lng], [colegioFin.lat, colegioFin.lng]) <= 100)
+                    marcarParadaVisitada(colegioFin.idParada, null);
+            }
         }
 
         // ── Ruta OSRM (solo Plan B) ───────────────────────────────────────────
@@ -512,6 +581,17 @@
                     actualizarMarcadorVivo(data);
                 });
 
+                // Ruta demo aleatoria sincronizada desde el monitor
+                const handlerRutaDemo = (data) => {
+                    if (modoVisualizacion === 'fallback') return;
+                    aplicarRutaDemoDesdeMonitor(data);
+                };
+                if (typeof window.padreNot.onRutaDemoActualizada === 'function') {
+                    window.padreNot.onRutaDemoActualizada(handlerRutaDemo);
+                } else if (window.padreNot.connection) {
+                    window.padreNot.connection.on('RutaDemoActualizada', handlerRutaDemo);
+                }
+
                 // [EN VIVO - FASE 0.5] Parada completada por el piloto
                 window.padreNot.onParadaCompletada(mostrarAlertaParadaCompletada);
 
@@ -519,7 +599,11 @@
                     if (modoVisualizacion === 'fallback') return;
                     const msg  = data.mensaje ?? data.Mensaje ?? 'Alerta del sistema';
                     const tipo = data.tipoAlerta ?? data.TipoAlerta ?? '';
-                    const cls  = tipo === 'llegada_colegio' ? 'success'
+                    const idAlumno = data.idAlumno ?? data.IdAlumno;
+                    const esMiHijo = esAlertaDeMisHijos(idAlumno);
+                    const cls  = (esMiHijo && (tipo === 'proximidad' || tipo === 'recogida' || tipo === 'dejada'))
+                               ? 'hijo'
+                               : tipo === 'llegada_colegio' ? (esMiHijo ? 'hijo' : 'success')
                                : tipo === 'proximidad'      ? 'warning'
                                : 'info';
                     agregarAlerta(msg, cls);
@@ -529,8 +613,8 @@
                 window.padreNot.onAlertaPersonal((data) => {
                     if (modoVisualizacion === 'fallback') return;
                     const msg = data.mensaje ?? data.Mensaje ?? 'Alerta personal';
-                    agregarAlerta(msg, 'warning');
-                    toast(msg, 'warning');
+                    agregarAlerta(msg, 'hijo');
+                    toast(msg, 'hijo');
                 });
 
                 // Si no llegan datos en vivo, sugerir plan B
@@ -552,6 +636,9 @@
 
         // [EN VIVO] Mover marcador verde con ubicación del piloto
         function actualizarMarcadorVivo(data) {
+            const idBusEvt = parseInt(data.idBus ?? data.IdBus ?? ID_BUS);
+            if (idBusEvt !== ID_BUS) return;
+
             const lat = parseFloat(data.latitud ?? data.Latitud);
             const lng = parseFloat(data.longitud ?? data.Longitud);
             if (isNaN(lat) || isNaN(lng)) return;
@@ -572,21 +659,120 @@
             detectarParadasCercanas(lat, lng);
             actualizarColoresSegmentos(lat, lng);
 
-            if (CASA_LAT !== null && CASA_LNG !== null) {
+            document.getElementById('estadoSimulacion').innerHTML =
+                '<span class="text-success"><i class="bi bi-broadcast"></i> Bus en movimiento — datos en vivo</span>';
+
+            if (CASA_LAT !== null && CASA_LNG !== null && esTurnoMañanaPadre()) {
                 const dCasa = distM([lat, lng], [CASA_LAT, CASA_LNG]);
                 if (dCasa <= 300 && !notifProximo) {
                     notifProximo = true;
                     const msg = `⚠️ El bus está a menos de 300 m de la casa — viene a recoger a <strong>@Html.Raw(Model.NombreHijo.Replace("'","\\'"  ))</strong>`;
-                    agregarAlerta(msg, 'warning');
-                    toast(msg, 'warning');
+                    agregarAlerta(msg, 'hijo');
+                    toast(msg, 'hijo');
                 }
             }
 
-            if (distM([lat, lng], [COLEGIO_LAT, COLEGIO_LNG]) <= 100 && !notifColegio) {
-                notifColegio = true;
-                const msg = `✅ El bus ha llegado al colegio. <strong>@Html.Raw(Model.NombreHijo.Replace("'","\\'"  ))</strong> ya está en el colegio.`;
-                agregarAlerta(msg, 'success');
-                toast(msg, 'success');
+            // Mañana: alerta al llegar al colegio (destino final). Tarde: no finaliza en colegio.
+            if (esTurnoMañanaPadre()) {
+                const colegioFin = rutaCompletaActiva.filter(p => p.esColegio).pop();
+                const refCole = colegioFin ?? { lat: colegioLat, lng: colegioLng };
+                if (distM([lat, lng], [refCole.lat, refCole.lng]) <= 100 && !notifColegio) {
+                    notifColegio = true;
+                    const msg = `✅ El bus ha llegado al colegio. <strong>@Html.Raw(Model.NombreHijo.Replace("'","\\'"  ))</strong> ya está en el colegio.`;
+                    agregarAlerta(msg, 'hijo');
+                    toast(msg, 'hijo');
+                }
+            } else {
+                const paradasHijosRuta = rutaCompletaActiva.filter(p =>
+                    p.idAlumno && IDS_ALUMNOS.includes(parseInt(p.idAlumno))
+                );
+                if (paradasHijosRuta.length && !notifEntregaHijos) {
+                    const ultima = paradasHijosRuta.reduce((a, b) => (a.orden ?? 0) >= (b.orden ?? 0) ? a : b);
+                    if (distM([lat, lng], [ultima.lat, ultima.lng]) <= 120) {
+                        notifEntregaHijos = true;
+                        const msg = `✅ El bus ha dejado a <strong>@Html.Raw(Model.NombreHijo.Replace("'","\\'"  ))</strong> en casa (fin del recorrido tarde).`;
+                        agregarAlerta(msg, 'hijo');
+                        toast(msg, 'hijo');
+                    }
+                }
+            }
+        }
+
+        /** Redibujar mapa cuando el monitor publica ruta demo (aleatoria o restaurada) */
+        async function aplicarRutaDemoDesdeMonitor(data) {
+            const idBusEvt = parseInt(data.idBus ?? data.IdBus ?? 0);
+            if (idBusEvt && idBusEvt !== ID_BUS) return;
+
+            let paradas = [];
+            try {
+                const json = data.paradasJson ?? data.ParadasJson ?? '[]';
+                paradas = typeof json === 'string' ? JSON.parse(json) : json;
+            } catch (e) {
+                console.warn('[PadreDashboard] Error parseando paradas demo:', e);
+                return;
+            }
+            if (!paradas.length) return;
+
+            const tipo = data.tipoRuta ?? data.TipoRuta ?? tipoRutaActivo;
+            tipoRutaActivo = tipo;
+            rutaCompletaActiva = paradas.map(p => ({
+                nombre: p.nombre,
+                lat: parseFloat(p.lat),
+                lng: parseFloat(p.lng),
+                orden: p.orden,
+                idParada: p.idParada ?? null,
+                idAlumno: p.idAlumno ?? null,
+                esColegio: p.esColegio === true
+                    || (p.nombre && /colegio|yulimay/i.test(p.nombre))
+            }));
+
+            const cole = rutaCompletaActiva.find(p => p.esColegio);
+            if (cole) {
+                colegioLat = cole.lat;
+                colegioLng = cole.lng;
+            }
+
+            paradasVisitadas.clear();
+            notifProximo = false;
+            notifColegio = false;
+            notifEntregaHijos = false;
+
+            actualizarMarcadoresHijosDesdeRuta();
+
+            const desc = data.descripcion ?? data.Descripcion ?? '';
+            actualizarUiTurno(tipo, desc);
+
+            if (modoVisualizacion === 'vivo') {
+                await dibujarRutaVivoCompleta();
+            }
+
+            const esAleatoria = data.esAleatoria ?? data.EsAleatoria;
+            const msg = esAleatoria
+                ? `🎲 Ruta demo aleatoria sincronizada (${tipo})`
+                : `🗺️ Ruta actualizada desde el monitor (${tipo})`;
+            agregarAlerta(msg, 'info');
+            toast(msg, 'info');
+            console.log('[PadreDashboard] Ruta demo aplicada:', rutaCompletaActiva.length, 'paradas, turno', tipo);
+        }
+
+        function actualizarUiTurno(tipo, nombreRuta) {
+            const esMañana = tipo === 'Mañana' || tipo.toLowerCase().includes('mañana');
+            const badge = document.getElementById('badgeTurnoActivo');
+            if (badge) {
+                badge.className = `badge fs-6 ${esMañana ? 'bg-warning text-dark' : ''}`;
+                badge.style.background = esMañana ? '' : '#fd7e14';
+                badge.innerHTML = `<i class="bi bi-${esMañana ? 'sunrise' : 'sunset'}"></i> Turno ${tipo}`;
+            }
+            const info = document.getElementById('infoTurnoActivo');
+            if (info) {
+                const desc = esMañana
+                    ? 'Mañana: inicia en casas de Diego/Sofía → termina en el colegio (nunca al revés).'
+                    : 'Tarde: inicia en el colegio → termina en casas de Diego/Sofía (no regresa al colegio).';
+                info.innerHTML = `<strong>Turno ${tipo} activo</strong> (sincronizado con monitor)<br>${desc}`;
+            }
+            if (nombreRuta) {
+                const lbl = document.getElementById('lblRutaNombre');
+                if (lbl) lbl.textContent = nombreRuta;
             }
         }
 
@@ -596,15 +782,37 @@
             const idAlumno = data.idAlumno ?? data.IdAlumno;
             if (idParada) marcarParadaVisitada(idParada, idAlumno);
 
+            const esMiHijo = esAlertaDeMisHijos(idAlumno);
+            const nombreHijo = nombreHijoPorId(idAlumno);
             const msg = data.mensaje ?? data.Mensaje ?? (
-                (data.tipoRuta ?? data.TipoRuta ?? TIPO_RUTA) === 'Tarde'
-                    ? `✅ @Html.Raw(Model.NombreHijo.Replace("'","\\'"  )) ha sido dejado en casa.`
-                    : (data.esParadaColegio ?? data.EsParadaColegio)
-                        ? `✅ @Html.Raw(Model.NombreHijo.Replace("'","\\'"  )) ha llegado al colegio.`
-                        : `✅ @Html.Raw(Model.NombreHijo.Replace("'","\\'"  )) ha sido recogido.`
+                esMiHijo && nombreHijo
+                    ? ((data.tipoRuta ?? data.TipoRuta ?? tipoRutaActivo) === 'Tarde'
+                        ? `✅ ${nombreHijo} ha sido dejado en casa.`
+                        : (data.esParadaColegio ?? data.EsParadaColegio)
+                            ? `✅ ${nombreHijo} ha llegado al colegio.`
+                            : `✅ ${nombreHijo} ha sido recogido.`)
+                    : ((data.tipoRuta ?? data.TipoRuta ?? tipoRutaActivo) === 'Tarde'
+                        ? `✅ @Html.Raw(Model.NombreHijo.Replace("'","\\'"  )) ha sido dejado en casa.`
+                        : (data.esParadaColegio ?? data.EsParadaColegio)
+                            ? `✅ @Html.Raw(Model.NombreHijo.Replace("'","\\'"  )) ha llegado al colegio.`
+                            : `✅ @Html.Raw(Model.NombreHijo.Replace("'","\\'"  )) ha sido recogido.`)
             );
-            agregarAlerta(msg, 'success');
-            toast(msg, 'success');
+            const cls = esMiHijo ? 'hijo' : 'success';
+            agregarAlerta(msg, cls);
+            toast(msg, cls);
+        }
+
+        function esAlertaDeMisHijos(idAlumno) {
+            if (idAlumno == null) return false;
+            return IDS_ALUMNOS.includes(parseInt(idAlumno));
+        }
+
+        function nombreHijoPorId(idAlumno) {
+            if (idAlumno == null) return null;
+            const id = parseInt(idAlumno);
+            const item = PARADAS_HIJOS.find(p => p.idAlumno === id);
+            if (item?.nombre) return item.nombre.replace(/^Casa — /, '').replace(/^Parada — /, '');
+            return null;
         }
 
         function actualizarBadge(ok) {
@@ -638,8 +846,13 @@
 
         function toast(msg, tipo) {
             const el = document.createElement('div');
-            el.className = `alert alert-${tipo} alert-dismissible fade show position-fixed shadow`;
-            el.style.cssText = 'top:80px;right:20px;z-index:9999;min-width:280px;max-width:420px';
+            el.className = 'alert alert-dismissible fade show position-fixed shadow';
+            if (tipo === 'hijo') {
+                el.style.cssText = 'top:80px;right:20px;z-index:9999;min-width:280px;max-width:420px;background:#e3f7fc;border:1px solid #0dcaf0;color:#055160';
+            } else {
+                el.classList.add(`alert-${tipo}`);
+                el.style.cssText = 'top:80px;right:20px;z-index:9999;min-width:280px;max-width:420px';
+            }
             el.innerHTML = `${msg} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
             document.body.appendChild(el);
             setTimeout(() => { if (el.parentNode) el.remove(); }, 8000);

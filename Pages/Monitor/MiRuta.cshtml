@@ -287,8 +287,8 @@
                                             <select id="selEscenarioDemo" class="form-select form-select-sm">
                                                 <option value="orden_aleatorio">Orden aleatorio de paradas</option>
                                                 <option value="con_ausencias">Algunos alumnos no asisten (ausencias)</option>
-                                                <option value="casa_amigo">Un alumno en casa de amigo (GPS distinto)</option>
-                                                <option value="mixto">Mixto: ausencias + casa amigo + orden aleatorio</option>
+                                                <option value="casa_amigo">Sofía en casa de la tía (Zona 9)</option>
+                                                <option value="mixto">Mixto: ausencias + Sofía en tía + orden aleatorio</option>
                                             </select>
                                         </div>
                                         <div class="col-md-5 d-flex gap-1">
@@ -542,6 +542,7 @@
         const paradasCompletadasSim = new Set();
         let paradasOriginalesBD = [];   // respaldo para restaurar ruta Admin
         let modoRutaAleatoriaActiva = false;
+        let idsAlumnosDemoPrioritarios = []; // ids BD de Diego/Sofía cuando existen
 
         function esParadaColegio(p) {
             if (!p) return false;
@@ -558,6 +559,106 @@
                 [a[i], a[j]] = [a[j], a[i]];
             }
             return a;
+        }
+
+        /** Normaliza nombre para comparar (sin acentos ni sufijos demo) */
+        function normalizarNombreAlumno(n) {
+            return (n || '').toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .replace(/\s*\(casa amigo\)\s*/gi, '')
+                .replace(/\s*\(casa t[ií]a[^)]*\)\s*/gi, '')
+                .trim();
+        }
+
+        /** Hijos padre1 (demo): coordenadas fijas según escenario */
+        const GEO_PADRE1 = {
+            diego: { nombre: 'Diego Martínez', coords: [14.6449, -90.5069] },
+            sofiaCasa: { nombre: 'Sofía Martínez', coords: [14.6455, -90.5075] },
+            sofiaTia: { nombre: 'Sofía Martínez (casa tía Zona 9)', coords: [14.6180, -90.5290] }
+        };
+
+        function esDiegoMartinez(p) {
+            const n = normalizarNombreAlumno(p?.nombre);
+            return n.includes('diego') && n.includes('martinez');
+        }
+
+        function esSofiaMartinez(p) {
+            const n = normalizarNombreAlumno(p?.nombre);
+            return n.includes('sofia') && n.includes('martinez');
+        }
+
+        function esAlumnoPrioritarioDemo(p) {
+            if (p.idAlumno != null && idsAlumnosDemoPrioritarios.includes(p.idAlumno)) return true;
+            return esDiegoMartinez(p) || esSofiaMartinez(p);
+        }
+
+        function esTurnoMañana() {
+            return (datosSimulacionPiloto.tipoRuta || '@Model.TipoRuta') === 'Mañana';
+        }
+
+        function obtenerParadaDiego(fuente) {
+            const found = fuente.filter(p => !esParadaColegio(p)).find(esDiegoMartinez);
+            const parada = found ? clonarParadas([found])[0] : {
+                nombre: GEO_PADRE1.diego.nombre,
+                coordenadas: [...GEO_PADRE1.diego.coords],
+                idParada: null,
+                idAlumno: null
+            };
+            parada.nombre = GEO_PADRE1.diego.nombre;
+            parada.coordenadas = [...GEO_PADRE1.diego.coords];
+            parada.esPrioritarioPadre1 = true;
+            parada.esColegio = false;
+            return parada;
+        }
+
+        function obtenerParadaSofia(fuente, escenario) {
+            const usaTia = escenario === 'casa_amigo' || escenario === 'mixto';
+            const found = fuente.filter(p => !esParadaColegio(p)).find(esSofiaMartinez);
+            const parada = found ? clonarParadas([found])[0] : {
+                nombre: GEO_PADRE1.sofiaCasa.nombre,
+                coordenadas: [...GEO_PADRE1.sofiaCasa.coords],
+                idParada: null,
+                idAlumno: null
+            };
+            if (usaTia) {
+                parada.nombre = GEO_PADRE1.sofiaTia.nombre;
+                parada.coordenadas = [...GEO_PADRE1.sofiaTia.coords];
+                parada.escenarioRecogida = 'casa_tia';
+            } else {
+                parada.nombre = GEO_PADRE1.sofiaCasa.nombre;
+                parada.coordenadas = [...GEO_PADRE1.sofiaCasa.coords];
+                parada.escenarioRecogida = 'casa_padre';
+            }
+            parada.esPrioritarioPadre1 = true;
+            parada.esColegio = false;
+            return parada;
+        }
+
+        /**
+         * Mañana: casas padre1 (inicio) → otros → colegio (fin).
+         * Tarde: colegio (inicio) → otros → casas padre1 (fin).
+         */
+        function ensamblarRutaPorTurno(prioritarios, otros, colegio, esMañana) {
+            const hijos = shuffleArray(prioritarios.filter(Boolean));
+            const resto = shuffleArray(otros);
+            const colegioParada = { ...colegio, esColegio: true };
+            if (esMañana) {
+                return [...hijos, ...resto, colegioParada];
+            }
+            return [colegioParada, ...resto, ...hijos];
+        }
+
+        function reordenarParadasPorTurno(paradas, escenario) {
+            if (!paradas?.length) return paradas;
+            const colegio = paradas.find(esParadaColegio) || getColegioDefault();
+            const esMañana = esTurnoMañana();
+            const diego = obtenerParadaDiego(paradas);
+            const sofia = obtenerParadaSofia(paradas, escenario || 'orden_aleatorio');
+            const otros = paradas
+                .filter(p => !esParadaColegio(p) && !esDiegoMartinez(p) && !esSofiaMartinez(p))
+                .map(p => clonarParadas([p])[0]);
+            return ensamblarRutaPorTurno([diego, sofia], otros, colegio, esMañana)
+                .map((p, i) => ({ ...p, orden: i + 1 }));
         }
 
         function clonarParadas(lista) {
@@ -585,65 +686,64 @@
         }
 
         /**
-         * Demo ingeniería: genera orden/escenario aleatorio respetando Mañana (→ colegio) o Tarde (colegio →).
+         * Demo: orden/escenario aleatorio respetando turno Mañana/Tarde y puntos fijos Diego/Sofía.
          */
         function generarEscenarioAleatorio(escenario) {
             const fuente = paradasOriginalesBD.length ? paradasOriginalesBD : datosSimulacionPiloto.paradas;
             const colegio = getColegioDefault();
-            let alumnos = fuente.filter(p => !esParadaColegio(p)).map(p => clonarParadas([p])[0]);
+            const esMañana = esTurnoMañana();
 
-            if (!alumnos.length) {
-                console.warn('[Monitor] Sin paradas de alumnos en BD; usando puntos demo Guatemala');
-                alumnos = [
-                    { nombre: 'Diego Martínez', coordenadas: [14.6292, -90.5145], idParada: null, idAlumno: 9 },
-                    { nombre: 'Sofía Martínez', coordenadas: [14.6314, -90.5165], idParada: null, idAlumno: 10 },
+            const diego = obtenerParadaDiego(fuente);
+            const sofia = obtenerParadaSofia(fuente, escenario);
+            const prioritarios = [diego, sofia];
+
+            let otros = fuente
+                .filter(p => !esParadaColegio(p) && !esDiegoMartinez(p) && !esSofiaMartinez(p))
+                .map(p => clonarParadas([p])[0]);
+
+            if (!otros.length) {
+                console.warn('[Monitor] Sin otros alumnos en BD; usando puntos demo Guatemala');
+                otros = [
                     { nombre: 'Alumno demo A', coordenadas: [14.6336, -90.5190], idParada: null, idAlumno: null },
-                    { nombre: 'Alumno demo B', coordenadas: [14.6358, -90.5215], idParada: null, idAlumno: null }
+                    { nombre: 'Alumno demo B', coordenadas: [14.6358, -90.5215], idParada: null, idAlumno: null },
+                    { nombre: 'Alumno demo C', coordenadas: [14.6314, -90.5165], idParada: null, idAlumno: null }
                 ];
             }
 
-            alumnos = shuffleArray(alumnos);
-
             if (escenario === 'con_ausencias' || escenario === 'mixto') {
                 const pct = 0.55 + Math.random() * 0.35;
-                const cantidad = Math.max(2, Math.ceil(alumnos.length * pct));
-                alumnos = alumnos.slice(0, cantidad);
-                alumnos = shuffleArray(alumnos);
+                const totalObjetivo = Math.max(prioritarios.length + 1, Math.ceil((prioritarios.length + otros.length) * pct));
+                const cupoOtros = Math.max(0, totalObjetivo - prioritarios.length);
+                otros = shuffleArray(otros).slice(0, cupoOtros);
             }
 
-            if (escenario === 'casa_amigo' || escenario === 'mixto') {
-                if (alumnos.length > 0) {
-                    const idx = Math.floor(Math.random() * alumnos.length);
-                    const p = alumnos[idx];
-                    alumnos[idx] = {
-                        ...p,
-                        nombre: `${p.nombre} (casa amigo)`,
-                        coordenadas: [
-                            p.coordenadas[0] + (Math.random() - 0.5) * 0.025,
-                            p.coordenadas[1] + (Math.random() - 0.5) * 0.025
-                        ]
-                    };
-                }
+            const ordenadas = ensamblarRutaPorTurno(prioritarios, otros, colegio, esMañana);
+            const primera = ordenadas[0];
+            const ultima = ordenadas[ordenadas.length - 1];
+            if (esMañana && esParadaColegio(primera)) {
+                console.warn('[Monitor] Corregido: Mañana no debe iniciar en colegio');
             }
-
-            if (escenario === 'orden_aleatorio' || escenario === 'mixto' || escenario === 'con_ausencias' || escenario === 'casa_amigo') {
-                alumnos = shuffleArray(alumnos);
+            if (!esMañana && esParadaColegio(ultima)) {
+                console.warn('[Monitor] Corregido: Tarde no debe terminar en colegio');
             }
-
-            const esMañana = (datosSimulacionPiloto.tipoRuta || '@Model.TipoRuta') === 'Mañana';
-            const ordenadas = esMañana ? [...alumnos, colegio] : [colegio, ...alumnos];
+            console.log('[Monitor] Ruta', esMañana ? 'Mañana' : 'Tarde',
+                '→ inicio:', primera?.nombre, '| fin:', ultima?.nombre);
 
             datosSimulacionPiloto.paradas = ordenadas.map((p, i) => ({ ...p, orden: i + 1 }));
-            datosSimulacionPiloto.ruta = `Demo aleatoria ${datosSimulacionPiloto.tipoRuta} — ${ordenadas.length} paradas`;
+            const escSofia = sofia.escenarioRecogida === 'casa_tia' ? ' · Sofía en tía Z9' : '';
+            datosSimulacionPiloto.ruta = `Demo ${datosSimulacionPiloto.tipoRuta} — ${ordenadas.length} paradas${escSofia}`;
             modoRutaAleatoriaActiva = true;
 
             const nombresEscenario = {
                 orden_aleatorio: 'Orden aleatorio',
-                con_ausencias: 'Con ausencias simuladas',
-                casa_amigo: 'Recogida en casa de amigo',
-                mixto: 'Mixto (ausencias + amigo + orden)'
+                con_ausencias: 'Con ausencias (Diego/Sofía siempre)',
+                casa_amigo: 'Sofía en casa tía Zona 9',
+                mixto: 'Mixto (ausencias + Sofía tía + orden)'
             };
-            return `${nombresEscenario[escenario] || escenario} · ${ordenadas.length} paradas · ${esMañana ? 'termina en colegio' : 'sale del colegio'}`;
+            const reglaTurno = esMañana
+                ? 'inicia casas padre1 → termina colegio'
+                : 'inicia colegio → termina casas padre1';
+            return `${nombresEscenario[escenario] || escenario} · ${ordenadas.length} paradas · ${reglaTurno}${escSofia}`;
         }
 
         async function prepararRutaAleatoria() {
@@ -665,6 +765,7 @@
             const el = document.getElementById('lblEscenarioActivo');
             if (el) el.innerHTML = `<i class="bi bi-dice-5 text-warning"></i> <strong>${lbl}</strong> — listo para Simular Ruta (transmite en vivo al padre).`;
             console.log('[Monitor] Ruta aleatoria:', datosSimulacionPiloto.paradas);
+            await broadcastRutaDemoAlPadre();
         }
 
         async function restaurarRutaBD() {
@@ -675,7 +776,9 @@
             if (!paradasOriginalesBD.length) {
                 initDatosSimulacionFromRutaData();
             } else {
-                datosSimulacionPiloto.paradas = clonarParadas(paradasOriginalesBD);
+                datosSimulacionPiloto.paradas = reordenarParadasPorTurno(
+                    clonarParadas(paradasOriginalesBD), 'orden_aleatorio'
+                );
             }
             modoRutaAleatoriaActiva = false;
             paradasCompletadasSim.clear();
@@ -683,6 +786,7 @@
             await generarRutaCompleta();
             const el = document.getElementById('lblEscenarioActivo');
             if (el) el.textContent = 'Ruta restaurada desde Admin/Calcular Rutas.';
+            await broadcastRutaDemoAlPadre();
         }
 
         function limpiarMarcadoresSimulacionMapa() {
@@ -745,7 +849,56 @@
             datosSimulacionPiloto.tipoRuta = rutaData.tipoRuta ?? rutaData.TipoRuta ?? datosSimulacionPiloto.tipoRuta;
             datosSimulacionPiloto.ruta = rutaData.nombre ?? rutaData.Nombre ?? datosSimulacionPiloto.ruta;
             paradasOriginalesBD = clonarParadas(datosSimulacionPiloto.paradas);
-            console.log('[Monitor] Simulación inicializada desde BD:', datosSimulacionPiloto.paradas.length, 'paradas');
+            idsAlumnosDemoPrioritarios = datosSimulacionPiloto.paradas
+                .filter(esAlumnoPrioritarioDemo)
+                .map(p => p.idAlumno)
+                .filter(id => id != null);
+            // Aplicar reglas Mañana/Tarde y puntos fijos Diego/Sofía desde el inicio
+            datosSimulacionPiloto.paradas = reordenarParadasPorTurno(
+                clonarParadas(paradasOriginalesBD), 'orden_aleatorio'
+            );
+            console.log('[Monitor] Simulación inicializada desde BD:', datosSimulacionPiloto.paradas.length, 'paradas',
+                '| turno:', datosSimulacionPiloto.tipoRuta,
+                '| prioritarios:', idsAlumnosDemoPrioritarios);
+        }
+
+        // Publicar ruta demo al padre vía SignalR (orden aleatorio / turno)
+        async function broadcastRutaDemoAlPadre() {
+            const idBus = @(Model.IdBus.HasValue ? Model.IdBus.Value.ToString() : "null");
+            if (idBus === null || !window.monitorNot?.estaConectado) {
+                console.warn('[Monitor] SignalR no listo para broadcast de ruta');
+                return false;
+            }
+            const paradas = datosSimulacionPiloto.paradas.map(p => ({
+                nombre: p.nombre,
+                lat: p.coordenadas[0],
+                lng: p.coordenadas[1],
+                orden: p.orden,
+                idParada: p.idParada ?? null,
+                idAlumno: p.idAlumno ?? null,
+                esColegio: p.esColegio === true || (p.nombre && p.nombre.toLowerCase().includes('colegio'))
+            }));
+            const tipoRuta = datosSimulacionPiloto.tipoRuta || '@Model.TipoRuta';
+            const paradasJson = JSON.stringify(paradas);
+            const descripcion = datosSimulacionPiloto.ruta || '';
+
+            try {
+                if (typeof window.monitorNot.notificarRutaDemoActualizada === 'function') {
+                    return await window.monitorNot.notificarRutaDemoActualizada(
+                        parseInt(idBus), tipoRuta, paradasJson, modoRutaAleatoriaActiva, descripcion
+                    );
+                }
+                // Fallback si el navegador tiene signalr-client.js en caché (versión anterior)
+                await window.monitorNot.connection.invoke(
+                    'NotificarRutaDemoActualizada',
+                    parseInt(idBus), tipoRuta, paradasJson, modoRutaAleatoriaActiva, descripcion
+                );
+                console.log(`🗺️ [Monitor] Ruta demo enviada (invoke directo) al Bus_${idBus}`);
+                return true;
+            } catch (e) {
+                console.error('[Monitor] Error broadcast ruta demo:', e);
+                return false;
+            }
         }
 
         // [EN VIVO] Enviar ubicación al padre vía API → SignalR
@@ -1265,11 +1418,13 @@
                 } else if (!rutaSimulacionPiloto.length) {
                     await generarRutaCompleta();
                 }
+                await broadcastRutaDemoAlPadre();
             } catch (e) {
                 console.warn('[Monitor] Error preparando ruta:', e);
+            } finally {
+                btn.disabled = false;
             }
 
-            btn.disabled = false;
             btn.innerHTML = '<i class="bi bi-stop-circle-fill me-2"></i>Detener Simulación';
             btn.className = 'btn btn-danger btn-lg w-100';
             estado.innerHTML = modoRutaAleatoriaActiva

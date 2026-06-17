@@ -99,6 +99,24 @@ namespace TransportesGenesis.Hubs
         }
 
         /// <summary>
+        /// Monitor/piloto publica ruta demo (orden aleatorio) para que el padre redibuje el mapa.
+        /// </summary>
+        public async Task NotificarRutaDemoActualizada(int idBus, string tipoRuta, string paradasJson, bool esAleatoria, string descripcion)
+        {
+            _logger.LogInformation($"[SIGNALR] Ruta demo bus {idBus} turno {tipoRuta} (aleatoria={esAleatoria})");
+
+            await Clients.Group($"Bus_{idBus}").SendAsync("RutaDemoActualizada", new
+            {
+                IdBus = idBus,
+                TipoRuta = tipoRuta,
+                ParadasJson = paradasJson,
+                EsAleatoria = esAleatoria,
+                Descripcion = descripcion,
+                FechaHora = DateTime.Now
+            });
+        }
+
+        /// <summary>
         /// Piloto reporta retraso en la ruta
         /// </summary>
         public async Task ReportarRetraso(int idBus, int minutosRetraso, string motivo)

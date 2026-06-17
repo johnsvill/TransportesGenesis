@@ -91,10 +91,16 @@ namespace TransportesGenesis.Pages.Padres
                     CasaLongitud = hijoCoordenadas.Longitud;
                 }
 
-                var hijoConBus = hijos.FirstOrDefault(h => h.IdBusAsignado.HasValue);
-                if (hijoConBus?.IdBusAsignado == null) return;
+                var grupoBus = hijos
+                    .Where(h => h.IdBusAsignado.HasValue)
+                    .GroupBy(h => h.IdBusAsignado!.Value)
+                    .OrderByDescending(g => g.Count())
+                    .ThenBy(g => g.Key)
+                    .FirstOrDefault();
 
-                IdBusAsignado = hijoConBus.IdBusAsignado.Value;
+                if (grupoBus == null) return;
+
+                IdBusAsignado = grupoBus.Key;
 
                 var bus = await _busService.GetBusByIdAsync(IdBusAsignado);
                 if (bus != null)

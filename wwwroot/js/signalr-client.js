@@ -135,6 +135,12 @@ class NotificacionesCliente {
             this.ejecutarCallback('ubicacionActualizada', data);
         });
 
+        // Ruta demo sincronizada monitor → padre
+        this.connection.on('RutaDemoActualizada', (data) => {
+            console.log('🗺️ [SignalR] Ruta demo actualizada:', data);
+            this.ejecutarCallback('rutaDemoActualizada', data);
+        });
+
         // Alertas de proximidad o llegada
         this.connection.on('AlertaRecibida', (data) => {
             console.log('🔔 [SignalR] Alerta recibida (grupo bus):', data);
@@ -234,6 +240,29 @@ class NotificacionesCliente {
             return true;
         } catch (error) {
             console.error('❌ [SignalR] Error al reportar ubicación:', error);
+            return false;
+        }
+    }
+
+    /**
+     * Monitor publica ruta demo (orden aleatorio / turno) al grupo del bus
+     */
+    async notificarRutaDemoActualizada(idBus, tipoRuta, paradasJson, esAleatoria, descripcion) {
+        if (!this.estaConectado) return false;
+
+        try {
+            await this.connection.invoke(
+                'NotificarRutaDemoActualizada',
+                idBus,
+                tipoRuta,
+                paradasJson,
+                esAleatoria,
+                descripcion || ''
+            );
+            console.log(`🗺️ [SignalR] Ruta demo enviada al Bus_${idBus}`);
+            return true;
+        } catch (error) {
+            console.error('❌ [SignalR] Error al notificar ruta demo:', error);
             return false;
         }
     }
@@ -356,6 +385,10 @@ class NotificacionesCliente {
 
     onUbicacionActualizada(callback) {
         this.callbacks['ubicacionActualizada'] = callback;
+    }
+
+    onRutaDemoActualizada(callback) {
+        this.callbacks['rutaDemoActualizada'] = callback;
     }
 
     onAlerta(callback) {
