@@ -1,161 +1,151 @@
 ﻿@{
-    ViewData["Title"] = "Opciones de Pago";
+    ViewData["Title"] = "Pagos";
+    var mesesPendientes = ViewBag.MesesPendientes as List<string>;
+    var bancos = ViewBag.Bancos as List<TransportesGenesis.Models.DB.Negocio.Banco>;
+    var cuentas = ViewBag.Cuentas as List<TransportesGenesis.Models.DB.Negocio.CuentaUsuario>;
 }
 
 <div class="container mt-5">
-    <h2>Opciones de Pago</h2>
+    <h2 class="mb-4 text-center">Flujo de Pagos</h2>
 
-    <!-- Badge azul -->
-    <span class="badge bg-primary mb-3 fs-6">
-        Se tiene hasta el 5 de cada mes para hacer el pago
-    </span>
-
-    <!-- Toaster rojo si hay meses pendientes -->
-    @if (ViewBag.MesesPendientes != null && (ViewBag.MesesPendientes as List<string>).Any())
+    @if (TempData["Error"] != null)
     {
-        <div class="alert alert-danger">
-            <strong>Atención:</strong> Tiene pendiente el pago de
-            @string.Join(", ", ViewBag.MesesPendientes as List<string>).
-        </div>
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+    @if (TempData["Mensaje"] != null)
+    {
+        <div class="alert alert-success">@TempData["Mensaje"]</div>
     }
 
-    <!-- Si el mes actual ya está pagado -->
-    @if (ViewBag.MesActualPagado == true)
+    @if (ViewBag.EstaAlDia == true)
     {
-        <div class="alert alert-success text-center p-4 fs-4">
-            ✅ El pago del mes actual está al día
+        <div class="alert alert-success text-center fw-bold p-4 rounded shadow-lg">
+            ✅ ¡Su cuenta está al día! No tiene pagos pendientes.
         </div>
     }
     else
     {
-        <!-- Subida de boleta -->
-        <form asp-action="SubirBoleta" method="post" enctype="multipart/form-data" class="mb-4">
+        <!-- Bloque 1: Mes y monto -->
+        <div class="card shadow-lg p-4 mb-4">
+            <h5 class="mb-3">Seleccionar período</h5>
             <div class="mb-3">
-                <label for="mes" class="form-label">Mes a pagar</label>
-                <select name="mes" class="form-select" required>
-                    @foreach (var mes in ViewBag.MesesDisponibles as List<string>)
+                <label class="form-label">Mes pendiente</label>
+                <select name="mes" id="MesSelect" class="form-select" required>
+                    <option value="">-- Seleccione un mes --</option>
+                    @foreach (var mes in mesesPendientes)
                     {
-                        if ((ViewBag.MesesPendientes as List<string>).Contains(mes))
-                        {
-                            <option value="@mes">@mes (Vencido)</option>
-                        }
-                        else
-                        {
-                            <option value="@mes">@mes</option>
-                        }
+                        <option value="@mes">@mes</option>
+                    }
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Monto</label>
+                <input type="text" id="MontoInput" class="form-control" value="@ViewBag.MontoMensual" readonly />
+            </div>
+        </div>
+
+        <!-- Bloque 2: Pago manual -->
+        <form asp-action="SubirBoleta" method="post" enctype="multipart/form-data" class="card shadow-lg p-4 mb-4">
+            <h5 class="mb-3">Pago manual con boleta</h5>
+
+            <input type="hidden" name="mes" id="MesHidden" />
+            <input type="hidden" name="monto" id="MontoHidden" />
+
+            <div class="mb-3">
+                <label class="form-label">Banco</label>
+                <select id="BancoSelect" class="form-select" required>
+                    <option value="">-- Seleccione un banco --</option>
+                    @foreach (var banco in bancos)
+                    {
+                        <option value="@banco.IdBanco">@banco.Nombre</option>
                     }
                 </select>
             </div>
 
             <div class="mb-3">
-                <label for="boleta" class="form-label">Subir boleta de pago</label>
-                <input type="file" name="boleta" id="boleta" class="form-control" required />
-                <img id="preview" src="#" alt="Preview" class="mt-3 img-thumbnail" style="max-height:200px; display:none;" />
+                <label class="form-label">Cuenta</label>
+                <select id="CuentaSelect" name="cuentaId" class="form-select" required>
+                    <option value="">-- Seleccione una cuenta --</option>
+                    @foreach (var cuenta in cuentas)
+                    {
+                        <option value="@cuenta.IdCuentaUsuario" data-banco="@cuenta.IdBanco" style="display:none;">
+                            @cuenta.NumeroCuenta (@cuenta.Alias)
+                        </option>
+                    }
+                </select>
             </div>
 
             <div class="mb-3">
-                <label for="monto" class="form-label">Monto</label>
-                <input type="number" name="monto" class="form-control" step="0.01" required />
+                <label class="form-label">Boleta de pago</label>
+                <input type="file" name="boleta" class="form-control" required />
             </div>
 
-            <button type="submit" class="btn btn-primary w-100">Guardar Boleta</button>
+            <button type="submit" class="btn btn-primary w-100">Registrar Pago Manual</button>
         </form>
 
-        <!-- Pago en línea con Stripe -->
-        <h3>Pagar en línea</h3>
-        <div class="card shadow-lg p-4 mb-4">
-            <form id="payment-form">
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Datos de la tarjeta</label>
-                    <div id="card-element" class="form-control p-2"><!-- Stripe Elements --></div>
-                </div>
-                <button id="submit" class="btn btn-success w-100 fs-5">💳 Pagar</button>
-            </form>
-            <div id="payment-message" class="mt-3 text-center fw-bold"></div>
+        <!-- Bloque 3: Stripe -->
+        <div class="card shadow-lg p-4">
+            <h5 class="mb-3">Pago en Línea con Stripe</h5>
+            <div id="card-element" class="form-control mb-3"></div>
+            <button id="submit" class="btn btn-warning w-100">💳 Pagar en Línea</button>
+            <div id="payment-message" class="mt-3"></div>
         </div>
     }
 </div>
 
-<!-- Scripts al final para evitar errores de carga -->
-<script src="https://js.stripe.com/v3/"></script>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        // Preview de imagen
-        const boletaInput = document.getElementById("boleta");
-        if (boletaInput) {
-            boletaInput.addEventListener("change", function (event) {
-                const file = event.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function () {
-                        const preview = document.getElementById("preview");
-                        preview.src = reader.result;
-                        preview.style.display = "block";
-                    };
-                    reader.readAsDataURL(file);
-                }
+@section Scripts {
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        const stripe = Stripe("@ViewData["StripeKey"]");
+        const elements = stripe.elements();
+        const cardElement = elements.create("card");
+        cardElement.mount("#card-element");
+
+        document.getElementById("submit").addEventListener("click", async (e) => {
+            e.preventDefault();
+            const mesSeleccionado = document.getElementById("MesSelect").value;
+            const monto = document.getElementById("MontoInput").value;
+
+            const response = await fetch("/PagosPadresFamilia/PagarEnLinea", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ Mes: mesSeleccionado, Monto: monto })
             });
-        }
 
-        // Stripe Elements
-        if (document.getElementById("card-element")) {
-            const stripe = Stripe("@ViewData["StripeKey"]");
-            const elements = stripe.elements();
-            const cardElement = elements.create("card", {
-                style: {
-                    base: {
-                        fontSize: "16px",
-                        color: "#32325d",
-                        "::placeholder": { color: "#a0aec0" }
-                    }
-                }
-            });
-            cardElement.mount("#card-element");
-
-            // Manejo del formulario de Stripe
-            const form = document.getElementById("payment-form");
-            if (form) {
-                form.addEventListener("submit", async (e) => {
-                    e.preventDefault();
-
-                    const mesSelect = document.querySelector("select[name='mes']");
-                    const mesSeleccionado = mesSelect ? mesSelect.value : "";
-
-                    const montoInput = document.querySelector("input[name='monto']");
-                    const montoSeleccionado = montoInput ? parseFloat(montoInput.value) : 0;
-
-                    try {
-                        const response = await fetch("/PagosPadresFamilia/PagarEnLinea", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ monto: montoSeleccionado, mes: mesSeleccionado })
-                        });
-
-                        const { clientSecret } = await response.json();
-
-                        const result = await stripe.confirmCardPayment(clientSecret, {
-                            payment_method: { card: cardElement }
-                        });
-
-                        const messageDiv = document.getElementById("payment-message");
-
-                        if (result.error) {
-                            messageDiv.textContent = result.error.message;
-                            messageDiv.classList.add("text-danger");
-                        } else {
-                            if (result.paymentIntent.status === "succeeded") {
-                                messageDiv.textContent = "✅ Pago realizado con éxito.";
-                                messageDiv.classList.add("text-success");
-                                window.location.href = "/PagosPadresFamilia/Historial";
-                            }
-                        }
-                    } catch (err) {
-                        const messageDiv = document.getElementById("payment-message");
-                        messageDiv.textContent = "❌ Error al procesar el pago.";
-                        messageDiv.classList.add("text-danger");
-                    }
-                });
+            if (!response.ok) {
+                const error = await response.json();
+                document.getElementById("payment-message").textContent = error.error;
+                return;
             }
-        }
-    });
-</script>
+
+            const data = await response.json();
+            const result = await stripe.confirmCardPayment(data.clientSecret, {
+                payment_method: { card: cardElement }
+            });
+            if (result.error) {
+                document.getElementById("payment-message").textContent = result.error.message;
+            } else {
+                if (result.paymentIntent.status === "succeeded") {
+                    document.getElementById("payment-message").textContent = "✅ Pago realizado con éxito.";
+                    window.location.href = "/PagosPadresFamilia/Historial";
+                }
+            }
+        });
+
+        document.getElementById("BancoSelect").addEventListener("change", function () {
+            var bancoId = this.value;
+            var cuentaSelect = document.getElementById("CuentaSelect");
+            for (var i = 0; i < cuentaSelect.options.length; i++) {
+                var opt = cuentaSelect.options[i];
+                if (opt.value === "") continue;
+                opt.style.display = (opt.getAttribute("data-banco") === bancoId) ? "block" : "none";
+            }
+            cuentaSelect.value = "";
+        });
+
+        document.getElementById("MesSelect").addEventListener("change", function () {
+            document.getElementById("MesHidden").value = this.value;
+            document.getElementById("MontoHidden").value = document.getElementById("MontoInput").value;
+        });
+    </script>
+}

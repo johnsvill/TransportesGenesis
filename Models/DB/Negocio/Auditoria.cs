@@ -2,8 +2,7 @@
 {
     public class Auditoria
     {
-        public int Activo { get; set; }
-
-        public DateTime FechaRegistro { get; set; } 
+        public int Activo { get; set; } = 1;
+        public DateTime FechaRegistro { get; set; } = DateTime.Now;
     }
 }

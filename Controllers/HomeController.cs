@@ -11,13 +11,11 @@ namespace TransportesGenesis.Controllers
             if (User.Identity.IsAuthenticated)
             {
                 if (User.IsInRole("PadreDeFamilia"))
-                {
-                    // Redirige al panel de pagos del padre de familia
+                {                    
                     return RedirectToAction("Index", "PagosPadresFamilia");
                 }
                 else if (User.IsInRole("Administrador"))
-                {
-                    // Placeholder para administrador
+                {                    
                     return RedirectToAction("Index", "Admin");
                 }
                 else if (User.IsInRole("Piloto"))
@@ -30,10 +28,8 @@ namespace TransportesGenesis.Controllers
                     // Redirigir al dashboard de Monitor (Razor Page)
                     return RedirectToPage("/Monitor/MiRuta");
                 }
-            }
-
-            // Si no está logueado → Index público
-            return View(); // aquí se carga Views/Home/Index.cshtml
+            }         
+            return View(); 
         }
     }
 }

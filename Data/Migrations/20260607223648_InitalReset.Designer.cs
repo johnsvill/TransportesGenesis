@@ -3,17 +3,20 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TransportesGenesis.Data.Context;
 
 #nullable disable
 
-namespace TransportesGenesis.Migrations
+namespace TransportesGenesis.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260607223648_InitalReset")]
+    partial class InitalReset
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -550,6 +553,66 @@ namespace TransportesGenesis.Migrations
                     b.ToTable("ConfiguracionSistema", "genesis");
                 });
 
+            modelBuilder.Entity("TransportesGenesis.Models.DB.Negocio.CuentaUsuario", b =>
+                {
+                    b.Property<int>("IdCuentaUsuario")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdCuentaUsuario"));
+
+                    b.Property<int>("Activo")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Alias")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("FechaRegistro")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("IdBanco")
+                        .HasColumnType("int");
+
+                    b.Property<string>("NumeroCuenta")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UsuarioId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("IdCuentaUsuario");
+
+                    b.ToTable("CuentasUsuarios", "genesis");
+                });
+
+            modelBuilder.Entity("TransportesGenesis.Models.DB.Negocio.MontoPadre", b =>
+                {
+                    b.Property<int>("IdMontoPadre")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdMontoPadre"));
+
+                    b.Property<int>("Activo")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("FechaRegistro")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("MontoAsignado")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("UsuarioId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("IdMontoPadre");
+
+                    b.ToTable("MontosPadres", "genesis");
+                });
+
             modelBuilder.Entity("TransportesGenesis.Models.DB.Negocio.NotificacionProximidad", b =>
                 {
                     b.Property<int>("IdNotificacion")
@@ -752,8 +815,25 @@ namespace TransportesGenesis.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("EstadoAdmin")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EstadoStripe")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("Fecha")
                         .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("FechaPago")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("IdBanco")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("IdCuentaUsuario")
+                        .HasColumnType("int");
 
                     b.Property<string>("Mes")
                         .IsRequired()
@@ -761,6 +841,10 @@ namespace TransportesGenesis.Migrations
 
                     b.Property<decimal>("Monto")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("NumeroComprobante")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TipoPago")
                         .IsRequired()
@@ -772,7 +856,7 @@ namespace TransportesGenesis.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PagosPadres");
+                    b.ToTable("PagosPadresDb");
                 });
 
             modelBuilder.Entity("TransportesGenesis.Models.DB.Negocio.Parada", b =>
@@ -1112,6 +1196,11 @@ namespace TransportesGenesis.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("nvarchar(8)");
+
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -1169,6 +1258,23 @@ namespace TransportesGenesis.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+
+                    b.HasDiscriminator().HasValue("AppUser");
+                });
+
+            modelBuilder.Entity("TransportesGenesis.Models.ViewModels.MontoPadreViewModel", b =>
+                {
+                    b.Property<string>("Correo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("IdMontoPadre")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("MontoAsignado")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.ToTable("MontosPadresView");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

@@ -1,0 +1,29 @@
+﻿@model TransportesGenesis.Models.DB.Negocio.MontoPadre
+
+@{
+    ViewData["Title"] = "Editar Monto";
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">Editar Monto</h2>
+
+    <form asp-action="Edit" method="post" class="card shadow-lg p-4">
+        <input type="hidden" asp-for="IdMontoPadre" />
+        <input type="hidden" asp-for="UsuarioId" />
+
+        <div class="mb-3">
+            <label class="form-label">Correo</label>
+            <input type="text" class="form-control" value="@ViewBag.Correo" readonly />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="MontoAsignado" class="form-label"></label>
+            <input asp-for="MontoAsignado" class="form-control" step="0.01" required />
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <button type="submit" class="btn btn-success">Actualizar</button>
+            <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>

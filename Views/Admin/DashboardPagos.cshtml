@@ -1,0 +1,203 @@
+﻿@model IEnumerable<TransportesGenesis.Models.DB.Negocio.PagoPadre>
+
+@{
+    ViewData["Title"] = "Dashboard de Pagos";
+    var usuarios = ViewBag.Usuarios as List<string>;
+    var meses = ViewBag.Meses as List<string>;
+    int paginaActual = ViewBag.PaginaActual;
+    int totalPaginas = ViewBag.TotalPaginas;
+    string usuarioSeleccionado = ViewBag.UsuarioSeleccionado as string;
+    string mesSeleccionado = ViewBag.MesSeleccionado as string;
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">Dashboard de Pagos</h2>
+
+    <!-- Filtros -->
+    <form method="get" asp-action="DashboardPagos" class="row mb-4">
+        <div class="col-md-5">
+            <span class="badge bg-primary mb-2">Filtrar por Usuario</span>
+            <select name="usuarioId" class="form-select">
+                <option value="">-- Todos --</option>
+                @foreach (var u in usuarios)
+                {
+                    if (usuarioSeleccionado == u)
+                    {
+                        <option value="@u" selected>@u</option>
+                    }
+                    else
+                    {
+                        <option value="@u">@u</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="col-md-5">
+            <span class="badge bg-primary mb-2">Filtrar por Mes Pagado</span>
+            <select name="mes" class="form-select">
+                <option value="">-- Todos --</option>
+                @foreach (var m in meses)
+                {
+                    if (mesSeleccionado == m)
+                    {
+                        <option value="@m" selected>@m</option>
+                    }
+                    else
+                    {
+                        <option value="@m">@m</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+        </div>
+    </form>
+
+    <!-- Tabla de pagos -->
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center p-4 shadow-lg rounded">
+            <h4 class="mb-2">📭 No se encontraron pagos</h4>
+            <p>
+                El criterio de búsqueda aplicado no devolvió resultados.
+                Intente con otro usuario o mes.
+            </p>
+        </div>
+    }
+    else
+    {
+        <table class="table table-hover table-bordered shadow-lg align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Usuario</th>
+                    <th>Mes</th>
+                    <th>Año</th>
+                    <th>Monto</th>
+                    <th>Tipo Pago</th>
+                    <th>Comprobante</th>
+                    <th>Estado Admin</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var pago in Model)
+                {
+                    <tr>
+                        <td>@pago.UsuarioId</td>
+                        <td>@pago.Mes</td>
+                        <td>@pago.Anio</td>
+                        <td>Q @pago.Monto</td>
+                        <td>@pago.TipoPago</td>
+                        <td>
+                            @if (pago.TipoPago == "Boleta")
+                            {
+                                <a href="@pago.ComprobanteUrl" target="_blank" class="btn btn-sm btn-outline-primary">Ver Boleta</a>
+                            }
+                            else
+                            {
+                                <span class="badge bg-info">@pago.ComprobanteUrl</span>
+                            }
+                        </td>
+                        <td>
+                            @if (pago.EstadoAdmin == "Pendiente")
+                            {
+                                <span class="badge bg-warning text-dark">Pendiente</span>
+                            }
+                            else if (pago.EstadoAdmin == "Validado")
+                            {
+                                <span class="badge bg-success">Validado</span>
+                            }
+                            else if (pago.EstadoAdmin == "Rechazado")
+                            {
+                                <span class="badge bg-danger">Rechazado</span>
+                            }
+                        </td>
+                        <td>
+                            @if (pago.EstadoAdmin == "Pendiente")
+                            {
+                                <button class="btn btn-primary btn-sm"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modalAccion"
+                                        data-id="@pago.Id"
+                                        data-mes="@pago.Mes"
+                                        data-usuario="@pago.UsuarioId">
+                                    Revisar
+                                </button>
+                            }
+                            else
+                            {
+                                <form asp-action="DeshacerPago" method="post" class="d-inline">
+                                    <input type="hidden" name="id" value="@pago.Id" />
+                                    <button type="submit" class="btn btn-secondary btn-sm">↩ Deshacer</button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <!-- Paginación -->
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                @for (int i = 1; i <= totalPaginas; i++)
+                {
+                    <li class="page-item @(i == paginaActual ? "active" : "")">
+                        <a class="page-link" asp-action="DashboardPagos"
+                           asp-route-page="@i"
+                           asp-route-usuarioId="@usuarioSeleccionado"
+                           asp-route-mes="@mesSeleccionado">
+                            @i
+                        </a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+
+</div>
+
+<!-- Modal de revisión -->
+<div class="modal fade" id="modalAccion" tabindex="-1" aria-labelledby="modalAccionLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="modalAccionLabel">Revisión de Pago</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Usuario:</strong> <span id="usuarioModal"></span></p>
+                <p><strong>Mes:</strong> <span id="mesModal"></span></p>
+                <p>¿Desea aprobar o rechazar este pago?</p>
+            </div>
+            <div class="modal-footer">
+                <form asp-action="AprobarPago" method="post" class="d-inline">
+                    <input type="hidden" name="id" id="idPagoAprobar" />
+                    <button type="submit" class="btn btn-success">✔ Aprobar</button>
+                </form>
+                <form asp-action="RechazarPago" method="post" class="d-inline">
+                    <input type="hidden" name="id" id="idPagoRechazar" />
+                    <button type="submit" class="btn btn-danger">✘ Rechazar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var modalAccion = document.getElementById('modalAccion');
+        modalAccion.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var id = button.getAttribute('data-id');
+            var mes = button.getAttribute('data-mes');
+            var usuario = button.getAttribute('data-usuario');
+
+            document.getElementById('usuarioModal').textContent = usuario;
+            document.getElementById('mesModal').textContent = mes;
+            document.getElementById('idPagoAprobar').value = id;
+            document.getElementById('idPagoRechazar').value = id;
+        });
+    </script>
+}

@@ -1,0 +1,40 @@
+﻿@model IEnumerable<TransportesGenesis.Models.ViewModels.MontoPadreViewModel>
+
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">Montos Asignados</h2>
+
+    @if (TempData["Mensaje"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show text-center fw-bold" role="alert">
+            @TempData["Mensaje"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+    }
+
+    <p>
+        <a asp-action="Create" class="btn btn-primary">Asignar nuevo monto</a>
+    </p>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Correo</th>
+                <th>Monto</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Correo</td>
+                    <td>@item.MontoAsignado</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.IdMontoPadre" class="btn btn-warning">Editar</a>
+                        <a asp-action="Delete" asp-route-id="@item.IdMontoPadre" class="btn btn-danger">Eliminar</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

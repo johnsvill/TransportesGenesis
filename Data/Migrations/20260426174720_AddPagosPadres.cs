@@ -3,29 +3,29 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace TransportesGenesis.Migrations
+namespace TransportesGenesis.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class CreateMontoPadre : Migration
+    public partial class AddPagosPadres : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "MontosPadres",
-                schema: "genesis",
+                name: "PagosPadres",
                 columns: table => new
                 {
-                    IdMontoPadre = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UsuarioId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    MontoAsignado = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Activo = table.Column<int>(type: "int", nullable: false),
-                    FechaRegistro = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Monto = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Fecha = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    TipoPago = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ComprobanteUrl = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MontosPadres", x => x.IdMontoPadre);
+                    table.PrimaryKey("PK_PagosPadres", x => x.Id);
                 });
         }
 
@@ -33,8 +33,7 @@ namespace TransportesGenesis.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "MontosPadres",
-                schema: "genesis");
+                name: "PagosPadres");
         }
     }
 }
