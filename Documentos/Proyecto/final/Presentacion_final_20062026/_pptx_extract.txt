@@ -1,0 +1,142 @@
+=== SLIDE 1 ===
+Gestión de Pagos — Transportes Génesis
+Sistema integral de administración de transporte escolar, geolocalización SignalR y conciliación financiera.
+UNIVERSIDAD GALILEO
+PROPUESTA DE INGENIERÍA V4.0
+TARIFA DE CONSULTORÍA INTEGRADA
+
+=== SLIDE 2 ===
+Problemática y Objetivos
+Desafíos Actuales
+Planificación de rutas «a ojo» sin optimización. Falta de trazabilidad de los alumnos en ruta.
+Desorganización en el control de cobros vía WhatsApp.
+Solución Génesis
+Digitalizar operaciones en plataforma web centralizada. Garantizar visibilidad 24/7 de la ubicación del bus.
+Automatizar el registro y validación de cobros.
+
+=== SLIDE 3 ===
+Alcance Integral v1.0
+Seguridad
+Gestión de roles con ASP.NET Identity: Admin, Piloto, Monitor y Padre de Familia.
+Geolocalización
+Tracking en tiempo real vía SignalR con transmisión de coordenadas cada 10 segundos.
+Finanzas
+Portal de pagos con carga de comprobantes digitales y estados de cuenta automáticos.
+
+=== SLIDE 4 ===
+Diagramas principales del sistema
+Diagrama 1: Arquitectura general del sistema
+
+=== SLIDE 5 ===
+Diagramas principales del sistema
+Diagrama 2: Flujos de pagos y conciliación
+
+=== SLIDE 6 ===
+Diagramas principales del sistema
+Diagrama 3: Geolocalización en tiempo real
+
+=== SLIDE 7 ===
+Diagramas principales del sistema
+Diagrama 4: entidad relación
+
+=== SLIDE 8 ===
+Monitoreo en Tiempo Real
+Comunicación SignalR
+Utilizamos WebSockets para una conexión dúplex permanente entre el bus y el tutor.
+Reducción de Latencia
+Visualización en tiempo real de la posición del bus.
+Haversibe (radio circular)
+Cálculo de cercanía a 250 metros a la casa del alumno con alertas automáticas por zona.
+Cliente Signal R:
+Reconeciónautomática ante pérdida momentánea de cobertura.
+
+=== SLIDE 9 ===
+Conciliación de Cobros
+Digitalización del Recaudo
+El sistema elimina la fricción administrativa al centralizar todos los reportes de pago en una sola base de datos auditable.
+
+Carga de boletas de depósito (Imagen/PDF).
+Historial inmutable de estados (Pendiente/Aprobado). Notificaciones automáticas de saldo pendiente.
+Carga Digital
+Boletas de depósito en imagen o PDF directamente al sistema.
+Historial Inmutable
+Estados Pendiente / Aprobado con trazabilidad completa.
+Notificaciones Automáticas
+Alertas de saldo pendiente enviadas sin intervención manual.
+
+=== SLIDE 10 ===
+Arquitectura de Software
+PaaS Azure
+SQL Server, Blob Storage, BD gestionada
+Servidor .NET 8
+Identity Core, Hub SignalR, Capas de lógica
+Cliente Web
+Razor UI, SignalR JS, Diseño responsivo
+Diseño estructurado bajo la Tercera Forma Normal (3FN) con esquemas de negocio genesis y administración dbo.
+
+=== SLIDE 11 ===
+Entorno Cloud Azure PaaS
+Eficiencia de Costos Cloud
+Despliegue 100% sobre Microsoft Azure para garantizar escalabilidad y cero mantenimiento de hardware local.
+Servicio Azure
+Costo Est. / Mes
+Total Infraestructura Cloud
+Q 210.00
+
+=== SLIDE 12 ===
+Comparación de Aplicaciones de Transporte Escolar
+
+=== SLIDE 13 ===
+Especificación Económica
+Tarifa de Consultoría TI
+Facturación profesional basada en costos de mercado con margen de utilidad del 30% integrado.
+Costo Hora
+Costo Base: $15.00 + Profit: $6.45
+USD $21.45 / hora
+Total Esfuerzo: 275 Horas de Ingeniería
+Presupuesto de Desarrollo
+Ingeniería y QA (275 hrs): Q.46,000.00 Implantación y Capacitación: Q.1,450.00 Soporte Preventivo (6 meses): Q.1,500.00
+Total Inversión Inicial: Q.48,950.00
+
+=== SLIDE 14 ===
+Plan de Suscripción y ROI
+Suscripción por Alumno
+Modelo SaaS diseñado para ser absorbido de forma transparente por el servicio de bus.
+
+
+Q.68.00 POR ALUMNO / MENSUAL
+
+Cero mantenimiento técnico para el colegio. Cubre infraestructura de Azure y actualizaciones.
+Cálculo de Retorno (ROI)
+16 meses
+Para recuperación total. Base: 75 alumnos activos. E ir agregando 2 colegios al año
+Q.4,890.00
+Ingreso neto mensual: Q.5,100 (bruto) − Q.210
+(Azure).
+(Inversión Inicial Q.48,950 / Flujo Neto Q.4,890)
+
+=== SLIDE 15 ===
+Grafica de recuperación de la inversión según la suscripción
+
+=== SLIDE 16 ===
+Análisis de Riesgos
+Conectividad
+Riesgo: Pérdida de señal 4G en ruta.
+Mitigación: Local Storage en App de Monitor para envío asincrónico al recuperar señal.
+Adopción
+Riesgo: Resistencia al uso del sistema.
+Mitigación: UX simplificada con botones de gran formato y capacitación guiada.
+Integridad
+Riesgo: Falsificación de boletas de pago.
+Mitigación: Verificación de ID único de transacción bancaria en BD (Unique Key).
+
+=== SLIDE 17 ===
+Experiencia con la IA
+Reducción de esfuerzo inicial:
+Las tareas repetitivas (como creación de módulos, plantillas y documentación técnica) se aceleraron gracias al apoyo de la IA.
+Mayor tiempo en pruebas y validación:
+Aunque el desarrollo fue más rápido, descubrimos que se requiere invertir más tiempo en pruebas, integración y validación para asegurar que el código generado cumpla con los estándares de calidad y se integre bien con el trabajo del equipo.
+Colaboración humano‑IA: 
+La IA no reemplaza al desarrollador, sino que se convierte en un asistente que potencia la productividad. El equipo mantiene el control de las decisiones críticas y la validación final
+Lección aprendida:
+La clave está en el equilibrio: usar IA para acelerar la construcción, pero reforzar la fase de pruebas para garantizar confiabilidad
