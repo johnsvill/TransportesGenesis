@@ -1,0 +1,2 @@
+P744: • Mapas: Google Maps → OpenStreetMap + Leaflet + OSRM + Nominatim
+T23R4C3: No se usa Google Maps API en v1.0 (decisión de costo cero en mapas)

@@ -1,8 +1,8 @@
 # Alineación: Word v3 ↔ Presentación Gestión de Pagos
 
-**Word generado:** `Proyecto_Transportes_Genesis_v3_ACTUALIZADO.docx`  
-**Presentación v3 (nueva):** `Transportes_Genesis_Presentacion_v3_20062026.pptx`  
-**Presentación anterior:** `Presentacion_16-06-2026/Gestion-de-Pagos-Transportes-Genesis.pptx`
+**Word v4 (actual):** `Proyecto_Transportes_Genesis_v4.docx`  
+**Presentación v3:** `Transportes_Genesis_Presentacion_v3_20062026.pptx`  
+**Word v3:** eliminado (era resumen corto; reemplazado por v4 basada en v2)
 
 ---
 

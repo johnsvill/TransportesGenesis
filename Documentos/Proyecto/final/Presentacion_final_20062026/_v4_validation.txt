@@ -1,0 +1,12 @@
+TSP lines:
+• Rutas: heurística vecino más cercano (no TSP óptimo exhaustivo)
+
+Eco:
+Payback estimado: 16 meses (presentación); base 75 alumnos × Q 68.00 = Q 5,100 bruto/mes; neto Q 4,890/mes (menos Azure Q 210). Escenario base: ~10 meses.
+• Economía: inversión Q 48,950; suscripción Q 68/alumno; neto Q 4,890/mes; payback ~16 meses
+Q750
+Q750
+Q750
+Q750.00
+Q750.00
+Q48,950.00
