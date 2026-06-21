@@ -11,6 +11,14 @@ namespace TransportesGenesis.Repositories.Implementations
         {
         }
 
+        public async Task<IEnumerable<Bus>> GetAllConRutasAsync()
+        {
+            return await _dbSet
+                .Include(b => b.RutasLink)
+                .OrderBy(b => b.Placa)
+                .ToListAsync();
+        }
+
         public async Task<IEnumerable<Bus>> GetActivosAsync()
         {
             return await _dbSet

@@ -6,7 +6,7 @@
 
 <div class="container-fluid">
     <h2 class="text-primary mb-4">📍 Gestionar Paradas</h2>
-    <p class="text-muted">Editor interactivo de paradas en el mapa. Haz clic en "Agregar Parada" y luego en el mapa para colocar una nueva parada.</p>
+    <p class="text-muted">Seleccione un bus y una ruta, luego haga clic en "Agregar Parada" y en el mapa para colocar una nueva parada.</p>
 
     @if (!string.IsNullOrEmpty(Model.Mensaje))
     {
@@ -15,6 +15,31 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
+
+    <!-- Filtros de Bus y Ruta -->
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="row align-items-end g-3">
+                <div class="col-md-4">
+                    <label for="filtro-bus" class="form-label">Bus</label>
+                    <select id="filtro-bus" class="form-select">
+                        <option value="">-- Seleccione un bus --</option>
+                    </select>
+                </div>
+                <div class="col-md-5">
+                    <label for="filtro-ruta" class="form-label">Ruta activa</label>
+                    <select id="filtro-ruta" class="form-select" disabled>
+                        <option value="">-- Seleccione una ruta --</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <span id="badge-ruta-seleccionada" class="badge bg-secondary fs-6 w-100 py-2">
+                        Sin ruta seleccionada
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Mapa Interactivo -->
     <div id="mapa-paradas" style="height: 500px; border: 2px solid #dee2e6; border-radius: 8px;" class="mb-3"></div>
@@ -45,13 +70,14 @@
                             <th>Longitud</th>
                             <th>Orden</th>
                             <th>Ruta</th>
+                            <th>Alumno</th>
                             <th>Activo</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="paradas-table-body">
                         <tr>
-                            <td colspan="8" class="text-center">
+                            <td colspan="9" class="text-center">
                                 <div class="spinner-border text-primary" role="status">
                                     <span class="visually-hidden">Cargando...</span>
                                 </div>
@@ -76,9 +102,30 @@
                 <form id="form-parada">
                     <input type="hidden" id="parada-id" />
                     <div class="mb-3">
-                        <label for="parada-nombre" class="form-label">Dirección de la Parada *</label>
+                        <label for="parada-bus" class="form-label">Bus *</label>
+                        <select class="form-select" id="parada-bus">
+                            <option value="">-- Seleccione un bus --</option>
+                        </select>
+                        <small class="text-muted">Solo buses con cupo disponible (sin exceder capacidad).</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="parada-ruta-modal" class="form-label">Ruta activa *</label>
+                        <select class="form-select" id="parada-ruta-modal" disabled>
+                            <option value="">-- Seleccione una ruta --</option>
+                        </select>
+                        <input type="hidden" id="parada-ruta-id" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="parada-alumno" class="form-label">Alumno</label>
+                        <select class="form-select" id="parada-alumno">
+                            <option value="">Parada del colegio (sin alumno)</option>
+                        </select>
+                        <small class="text-muted">Solo alumnos sin bus ni parada asignados.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="parada-nombre" class="form-label" id="label-parada-direccion">Dirección de la Parada *</label>
                         <div class="input-group">
-                            <input type="text" class="form-control" id="parada-nombre" required placeholder="Ej: 5ta Avenida 12-34 Zona 10, Guatemala" />
+                            <input type="text" class="form-control" id="parada-nombre" placeholder="Ej: 5ta Avenida 12-34 Zona 10, Guatemala" />
                             <button class="btn btn-outline-primary" type="button" id="btn-geocodificar" 
                                     onclick="geocodificarDireccion()" 
                                     title="Buscar dirección en el mapa">
@@ -153,6 +200,7 @@
 }
 
 @section Scripts {
+    <script type="application/json" id="config-paradas-data">@Html.Raw(Model.ConfigJson)</script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="~/js/gestionarParadas.js"></script>
+    <script src="~/js/gestionarParadas.js?v=6"></script>
 }

@@ -10,7 +10,8 @@ namespace TransportesGenesis.Mappings
         {
             // Bus
             CreateMap<Bus, BusDto>()
-                .ForMember(dest => dest.RutasActivas, opt => opt.MapFrom(src => src.RutasLink != null ? src.RutasLink.Count(r => r.EsActiva) : 0))
+                .ForMember(dest => dest.RutasAsignadas, opt => opt.Ignore())
+                .ForMember(dest => dest.RutasActivas, opt => opt.Ignore())
                 .ForMember(dest => dest.PilotoAsignado, opt => opt.Ignore());
 
             CreateMap<BusCreateDto, Bus>();

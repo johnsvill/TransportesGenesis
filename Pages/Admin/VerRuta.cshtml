@@ -1,0 +1,346 @@
+@page
+@model TransportesGenesis.Pages.Admin.VerRutaModel
+@using System.Text.Json
+@{
+    ViewData["Title"] = "Detalle de Ruta";
+    var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+    var paradasJson = Model.ParadasMapa.Any()
+        ? JsonSerializer.Serialize(Model.ParadasMapa, jsonOptions)
+        : "[]";
+}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<style>
+    #mapa-ver-ruta {
+        height: 520px;
+        border-radius: 8px;
+    }
+
+    .parada-marker {
+        background: #C1121F;
+        color: #fff;
+        border: 2px solid #fff;
+        border-radius: 50%;
+        width: 26px;
+        height: 26px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 700;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+    }
+
+    .ruta-header {
+        background: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%);
+        color: white;
+        border-radius: 10px 10px 0 0;
+        padding: 15px;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="text-primary mb-1"><i class="bi bi-map"></i> Detalle de Ruta</h2>
+            <p class="text-muted mb-0">Vista administrativa de la ruta calculada</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="/Admin/CalcularRutas" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Volver a Calcular Rutas
+            </a>
+            @if (Model.Ruta != null)
+            {
+                <a href="/Admin/GestionarParadas?idRuta=@Model.Ruta.IdRuta" class="btn btn-primary">
+                    <i class="bi bi-pencil-square"></i> Editar Paradas
+                </a>
+            }
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.MensajeError))
+    {
+        <div class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle"></i> @Model.MensajeError
+        </div>
+    }
+    else if (Model.Ruta != null)
+    {
+        <div class="card mb-4">
+            <div class="ruta-header">
+                <h4 class="mb-1">@Model.Ruta.Nombre</h4>
+                <p class="mb-0 opacity-75">
+                    Turno: <strong>@Model.Ruta.TipoRuta</strong> |
+                    Hora inicio: <strong>@Model.Ruta.HoraInicio.ToString(@"hh\:mm")</strong> |
+                    Paradas: <strong>@Model.Ruta.Paradas.Count</strong>
+                </p>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-header bg-warning text-dark">
+                        <i class="bi bi-bus-front"></i> Bus Asignado
+                    </div>
+                    <div class="card-body">
+                        @if (Model.Bus != null)
+                        {
+                            <p class="mb-1"><strong>Placa:</strong> @Model.Bus.Placa</p>
+                            <p class="mb-1"><strong>Modelo:</strong> @(Model.Bus.Modelo ?? "N/A")</p>
+                            <p class="mb-1"><strong>Capacidad:</strong> @Model.Bus.Capacidad</p>
+                            <p class="mb-0">
+                                <strong>Estado:</strong>
+                                <span class="badge @(Model.Bus.Estado ? "bg-success" : "bg-secondary")">
+                                    @(Model.Bus.Estado ? "Activo" : "Inactivo")
+                                </span>
+                            </p>
+                        }
+                        else
+                        {
+                            <p class="text-muted mb-0">Bus #@Model.Ruta.IdBus (@Model.Ruta.PlacaBus)</p>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-header bg-primary text-white">
+                        <i class="bi bi-person-badge"></i> Piloto Asignado
+                    </div>
+                    <div class="card-body">
+                        @if (!string.IsNullOrEmpty(Model.NombrePiloto))
+                        {
+                            <p class="mb-1"><strong>Nombre:</strong> @Model.NombrePiloto</p>
+                            <p class="mb-0"><strong>Email:</strong> @(Model.EmailPiloto ?? "N/A")</p>
+                        }
+                        else
+                        {
+                            <p class="text-muted mb-0">Sin piloto asignado a este bus.</p>
+                            <a href="/Admin/GestionarAsignaciones" class="btn btn-sm btn-outline-primary mt-2">Gestionar Asignaciones</a>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-header bg-success text-white">
+                        <i class="bi bi-people"></i> Alumnos
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-1"><strong>Con parada en ruta:</strong> @Model.AlumnosEnRuta.Count(a => a.IdAlumno > 0)</p>
+                        <p class="mb-0"><strong>Sin parada asignada:</strong> @Model.AlumnosSinParada.Count</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <i class="bi bi-map"></i> Mapa de la Ruta
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="mapa-ver-ruta"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-list-ol"></i> Paradas de la Ruta
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-striped mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Orden</th>
+                                        <th>Dirección</th>
+                                        <th>Alumno</th>
+                                        <th>Hora Est.</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var parada in Model.Ruta.Paradas.OrderBy(p => p.Orden))
+                                    {
+                                        <tr>
+                                            <td>@parada.Orden</td>
+                                            <td>@(parada.Direccion ?? "Sin dirección")</td>
+                                            <td>
+                                                @if (parada.IdAlumno > 0)
+                                                {
+                                                    @(parada.NombreAlumno ?? $"Alumno #{parada.IdAlumno}")
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-info">Colegio</span>
+                                                }
+                                            </td>
+                                            <td>@(parada.HoraEstimada?.ToString(@"hh\:mm") ?? "-")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-4">
+                @if (Model.AlumnosSinParada.Any())
+                {
+                    <div class="card mb-3">
+                        <div class="card-header bg-warning text-dark">
+                            Alumnos sin parada
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            @foreach (var alumno in Model.AlumnosSinParada)
+                            {
+                                <li class="list-group-item">
+                                    <strong>@alumno.NombreCompleto</strong>
+                                    @if (!string.IsNullOrEmpty(alumno.Direccion))
+                                    {
+                                        <br><small class="text-muted">@alumno.Direccion</small>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    @if (Model.Ruta != null)
+    {
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const paradas = @Html.Raw(paradasJson);
+                const mapa = L.map('mapa-ver-ruta', { zoomControl: true }).setView([14.6349, -90.5069], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(mapa);
+
+                function escapeHtml(text) {
+                    if (!text) return '';
+                    return String(text)
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(/"/g, '&quot;');
+                }
+
+                function iconoColegio() {
+                    const sz = 46;
+                    return L.divIcon({
+                        className: '',
+                        html: '<div style="width:' + sz + 'px;height:' + sz + 'px;border-radius:50%;background:#6f42c1;border:3px solid white;display:flex;align-items:center;justify-content:center;font-size:' + Math.round(sz * 0.55) + 'px;box-shadow:0 2px 8px rgba(0,0,0,.3)">🏫</div>',
+                        iconSize: [sz, sz],
+                        iconAnchor: [sz / 2, sz / 2],
+                        popupAnchor: [0, -sz / 2]
+                    });
+                }
+
+                function iconoParadaNumero(orden) {
+                    return L.divIcon({
+                        className: '',
+                        html: '<div class="parada-marker">' + orden + '</div>',
+                        iconSize: [26, 26],
+                        iconAnchor: [13, 13],
+                        popupAnchor: [0, -14]
+                    });
+                }
+
+                function buildPopup(p) {
+                    let html = '<div style="min-width:180px;"><b>Parada #' + (p.orden ?? p.Orden) + '</b><br>';
+
+                    if (p.esColegio) {
+                        html += '<strong>🏫 Colegio</strong>';
+                        if (p.direccion) {
+                            html += '<br><small>' + escapeHtml(p.direccion) + '</small>';
+                        }
+                        html += '</div>';
+                        return html;
+                    }
+
+                    if (p.nombrePadre) {
+                        html += '<strong>Padre:</strong> ' + escapeHtml(p.nombrePadre) + '<br>';
+                    }
+                    if (p.hijos && p.hijos.length > 0) {
+                        if (p.hijos.length === 1) {
+                            html += '<strong>Hijo:</strong> ' + escapeHtml(p.hijos[0]) + '<br>';
+                        } else {
+                            html += '<strong>Hijos:</strong><ul style="margin:4px 0 0;padding-left:16px;">';
+                            p.hijos.forEach(function (hijo) {
+                                html += '<li>' + escapeHtml(hijo) + '</li>';
+                            });
+                            html += '</ul>';
+                        }
+                    }
+                    if (p.direccion) {
+                        html += '<small class="text-muted">' + escapeHtml(p.direccion) + '</small>';
+                    }
+                    html += '</div>';
+                    return html;
+                }
+
+                const coords = [];
+                paradas.forEach(function (p) {
+                    const lat = parseFloat(p.latitud ?? p.Latitud);
+                    const lng = parseFloat(p.longitud ?? p.Longitud);
+                    if (isNaN(lat) || isNaN(lng) || lat === 0 || lng === 0) return;
+
+                    coords.push([lat, lng]);
+                    const orden = p.orden ?? p.Orden;
+                    const icono = p.esColegio ? iconoColegio() : iconoParadaNumero(orden);
+
+                    L.marker([lat, lng], { icon: icono })
+                        .addTo(mapa)
+                        .bindPopup(buildPopup(p));
+                });
+
+                if (coords.length > 1) {
+                    // Borde claro para contraste sobre el mapa
+                    L.polyline(coords, {
+                        color: '#FFFFFF',
+                        weight: 9,
+                        opacity: 0.95,
+                        lineJoin: 'round',
+                        lineCap: 'round'
+                    }).addTo(mapa);
+
+                    // Ruta principal resaltada
+                    L.polyline(coords, {
+                        color: '#C1121F',
+                        weight: 5,
+                        opacity: 0.95,
+                        lineJoin: 'round',
+                        lineCap: 'round'
+                    }).addTo(mapa);
+
+                    mapa.fitBounds(coords, {
+                        padding: [50, 50],
+                        maxZoom: 16
+                    });
+                } else if (coords.length === 1) {
+                    mapa.setView(coords[0], 16);
+                }
+
+                setTimeout(function () {
+                    mapa.invalidateSize();
+                    if (coords.length > 1) {
+                        mapa.fitBounds(coords, { padding: [50, 50], maxZoom: 16 });
+                    }
+                }, 250);
+            });
+        </script>
+    }
+}

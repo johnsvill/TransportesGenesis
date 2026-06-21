@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Security.Claims;
+using System.Text.Json;
+using TransportesGenesis.Data.Context;
+using TransportesGenesis.Helpers;
 using TransportesGenesis.Repositories.Interfaces;
-using System.Threading.Tasks;
 
 namespace TransportesGenesis.Pages.Geolocalizacion
 {
@@ -10,15 +12,33 @@ namespace TransportesGenesis.Pages.Geolocalizacion
     public class MapaEnTiempoRealModel : PageModel
     {
         private readonly IAlumnoRepository _alumnoRepository;
+        private readonly ApplicationDbContext _context;
 
         public string? PadreNombre { get; set; }
+        public string ConfigJson { get; set; } = "{}";
 
-        public MapaEnTiempoRealModel(IAlumnoRepository alumnoRepository)
+        public MapaEnTiempoRealModel(IAlumnoRepository alumnoRepository, ApplicationDbContext context)
         {
             _alumnoRepository = alumnoRepository;
+            _context = context;
         }
 
-        public async Task OnGetAsync()
+        public async Task OnGetAsync(int? idBus, int? idRuta)
+        {
+            await CargarNombrePadreAsync();
+
+            var busesElegibles = await MapaTiempoRealQueries.GetBusesElegiblesAsync(_context);
+
+            ConfigJson = JsonSerializer.Serialize(new
+            {
+                modoSelector = true,
+                idBusPreseleccionado = idBus,
+                idRutaPreseleccionada = idRuta,
+                busesElegibles
+            }, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+        }
+
+        private async Task CargarNombrePadreAsync()
         {
             try
             {
@@ -35,7 +55,7 @@ namespace TransportesGenesis.Pages.Geolocalizacion
                         }
                     }
                 }
-                // Fallback al nombre del usuario si no se obtuvo desde la relación Padres
+
                 if (string.IsNullOrEmpty(PadreNombre))
                 {
                     PadreNombre = User.Identity?.Name;

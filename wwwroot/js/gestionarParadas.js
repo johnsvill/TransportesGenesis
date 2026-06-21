@@ -1,39 +1,431 @@
 // Gestión de Paradas con Mapa Interactivo
 let mapa;
 let marcadores = [];
-let paradaEnEdicion = null;
+let capasRuta = [];
 let modoAgregar = false;
+let todasLasParadas = [];
+let rutaSeleccionadaId = null;
+let geocodificacionExitosa = false;
+let configParadas = { buses: [], rutas: [], alumnosSinAsignar: [] };
 
-// Inicializar cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
+    cargarConfigParadas();
+    inicializarFiltros();
     inicializarMapa();
     configurarEventos();
     cargarParadas();
 });
 
-// Inicializar mapa con Leaflet
-function inicializarMapa() {
-    // Coordenadas de Guatemala (centro)
-    mapa = L.map('mapa-paradas').setView([14.6349, -90.5069], 13);
+function cargarConfigParadas() {
+    const dataEl = document.getElementById('config-paradas-data');
+    let raw = null;
 
-    // Capa de OpenStreetMap
+    if (dataEl && dataEl.textContent.trim()) {
+        try {
+            raw = JSON.parse(dataEl.textContent);
+        } catch (error) {
+            console.error('Error al parsear config-paradas-data:', error);
+        }
+    }
+
+    if (!raw && window.configParadas) {
+        raw = window.configParadas;
+    }
+
+    if (!raw) {
+        console.warn('GestionarParadas: no se encontró configuración de buses/rutas.');
+        return;
+    }
+
+    configParadas = {
+        buses: normalizarLista(raw.buses || raw.Buses, normalizarBus),
+        rutas: normalizarLista(raw.rutas || raw.Rutas, normalizarRuta),
+        alumnosSinAsignar: normalizarLista(raw.alumnosSinAsignar || raw.AlumnosSinAsignar, normalizarAlumno),
+        idRutaPreseleccionada: raw.idRutaPreseleccionada ?? raw.IdRutaPreseleccionada ?? null,
+        idBusPreseleccionado: raw.idBusPreseleccionado ?? raw.IdBusPreseleccionado ?? null
+    };
+}
+
+function normalizarLista(lista, fn) {
+    if (!Array.isArray(lista)) return [];
+    return lista.map(fn);
+}
+
+function normalizarBus(bus) {
+    const capacidad = bus.capacidad ?? bus.Capacidad ?? 0;
+    const alumnosAsignados = bus.alumnosAsignados ?? bus.AlumnosAsignados ?? 0;
+    const cuposDisponibles = bus.cuposDisponibles ?? bus.CuposDisponibles ?? (capacidad - alumnosAsignados);
+
+    return {
+        idBus: bus.idBus ?? bus.IdBus,
+        placa: bus.placa ?? bus.Placa ?? 'Sin placa',
+        capacidad,
+        alumnosAsignados,
+        cuposDisponibles
+    };
+}
+
+function normalizarRuta(ruta) {
+    return {
+        idRuta: ruta.idRuta ?? ruta.IdRuta,
+        idBus: ruta.idBus ?? ruta.IdBus,
+        nombre: ruta.nombre ?? ruta.Nombre ?? 'Ruta',
+        tipoRuta: ruta.tipoRuta ?? ruta.TipoRuta ?? '',
+        fecha: ruta.fecha ?? ruta.Fecha ?? ''
+    };
+}
+
+function normalizarAlumno(alumno) {
+    return {
+        idAlumno: alumno.idAlumno ?? alumno.IdAlumno,
+        nombreCompleto: alumno.nombreCompleto ?? alumno.NombreCompleto ?? `Alumno #${alumno.idAlumno ?? alumno.IdAlumno}`
+    };
+}
+
+function obtenerRutas() {
+    return configParadas.rutas || [];
+}
+
+function obtenerBusesFiltro() {
+    return configParadas.buses || [];
+}
+
+function obtenerBusesConCupo() {
+    return obtenerBusesFiltro().filter(bus => (bus.cuposDisponibles ?? 0) > 0);
+}
+
+function textoOpcionBus(bus, incluirCupos) {
+    if (incluirCupos) {
+        const libres = bus.cuposDisponibles ?? (bus.capacidad - (bus.alumnosAsignados || 0));
+        return `${bus.placa} — ${libres} cupo(s) libre(s) de ${bus.capacidad}`;
+    }
+    return bus.placa;
+}
+
+function inicializarFiltros() {
+    const selectBus = document.getElementById('filtro-bus');
+    const selectRuta = document.getElementById('filtro-ruta');
+
+    selectBus.innerHTML = '<option value="">-- Seleccione un bus --</option>';
+    obtenerBusesFiltro().forEach(bus => {
+        const opt = document.createElement('option');
+        opt.value = bus.idBus;
+        opt.textContent = textoOpcionBus(bus, true);
+        selectBus.appendChild(opt);
+    });
+
+    selectBus.addEventListener('change', function () {
+        actualizarRutasPorBus(this.value, selectRuta);
+        rutaSeleccionadaId = null;
+        actualizarBadgeRuta();
+        refrescarVistaParadas();
+    });
+
+    selectRuta.addEventListener('change', function () {
+        rutaSeleccionadaId = this.value ? parseInt(this.value) : null;
+        actualizarBadgeRuta();
+        refrescarVistaParadas();
+    });
+
+    if (configParadas.idBusPreseleccionado) {
+        selectBus.value = configParadas.idBusPreseleccionado;
+        actualizarRutasPorBus(configParadas.idBusPreseleccionado, selectRuta);
+    }
+
+    if (configParadas.idRutaPreseleccionada) {
+        selectRuta.value = configParadas.idRutaPreseleccionada;
+        rutaSeleccionadaId = parseInt(configParadas.idRutaPreseleccionada);
+        actualizarBadgeRuta();
+    }
+}
+
+function actualizarRutasPorBus(idBus, selectElement) {
+    const selectRuta = selectElement || document.getElementById('filtro-ruta');
+    selectRuta.innerHTML = '<option value="">-- Seleccione una ruta --</option>';
+
+    if (!idBus) {
+        selectRuta.disabled = true;
+        return;
+    }
+
+    const rutasDelBus = obtenerRutas().filter(r => r.idBus == idBus);
+    rutasDelBus.forEach(ruta => {
+        const opt = document.createElement('option');
+        opt.value = ruta.idRuta;
+        opt.textContent = `${ruta.nombre} (${ruta.tipoRuta}) - ${ruta.fecha}`;
+        selectRuta.appendChild(opt);
+    });
+
+    selectRuta.disabled = rutasDelBus.length === 0;
+}
+
+function actualizarBadgeRuta() {
+    const badge = document.getElementById('badge-ruta-seleccionada');
+    if (!rutaSeleccionadaId) {
+        badge.className = 'badge bg-secondary fs-6 w-100 py-2';
+        badge.textContent = 'Sin ruta seleccionada';
+        return;
+    }
+
+    const ruta = obtenerRutas().find(r => r.idRuta == rutaSeleccionadaId);
+    if (ruta) {
+        badge.className = 'badge bg-primary fs-6 w-100 py-2';
+        badge.textContent = `Ruta: ${ruta.nombre} (${ruta.tipoRuta})`;
+    }
+}
+
+function obtenerParadasFiltradas() {
+    if (!rutaSeleccionadaId) return todasLasParadas;
+    return todasLasParadas.filter(p => p.idRuta == rutaSeleccionadaId);
+}
+
+function calcularSiguienteOrden() {
+    const idRuta = parseInt(document.getElementById('parada-ruta-id').value) || rutaSeleccionadaId;
+    const paradasRuta = idRuta
+        ? todasLasParadas.filter(p => p.idRuta == idRuta)
+        : obtenerParadasFiltradas();
+    if (paradasRuta.length === 0) return 1;
+    return Math.max(...paradasRuta.map(p => p.orden || 0)) + 1;
+}
+
+function coordenadasValidas(latitud, longitud) {
+    return !isNaN(latitud) && !isNaN(longitud) && latitud !== 0 && longitud !== 0;
+}
+
+function obtenerCoordenadasFormulario() {
+    return {
+        latitud: parseFloat(document.getElementById('parada-lat').value),
+        longitud: parseFloat(document.getElementById('parada-lng').value)
+    };
+}
+
+function actualizarRequerimientoDireccion() {
+    const { latitud, longitud } = obtenerCoordenadasFormulario();
+    const tieneCoords = coordenadasValidas(latitud, longitud);
+    const label = document.getElementById('label-parada-direccion');
+    if (label) {
+        label.textContent = tieneCoords
+            ? 'Dirección de la Parada (opcional)'
+            : 'Dirección de la Parada *';
+    }
+}
+
+function poblarBusesModal(idBusSeleccionado) {
+    const selectBus = document.getElementById('parada-bus');
+    selectBus.innerHTML = '<option value="">-- Seleccione un bus --</option>';
+
+    obtenerBusesConCupo().forEach(bus => {
+        const opt = document.createElement('option');
+        opt.value = bus.idBus;
+        opt.textContent = textoOpcionBus(bus, true);
+        selectBus.appendChild(opt);
+    });
+
+    if (idBusSeleccionado) {
+        selectBus.value = idBusSeleccionado;
+    }
+}
+
+function poblarRutasModal(idBus, idRutaSeleccionada) {
+    const selectRuta = document.getElementById('parada-ruta-modal');
+    const hiddenRuta = document.getElementById('parada-ruta-id');
+
+    selectRuta.innerHTML = '<option value="">-- Seleccione una ruta --</option>';
+    hiddenRuta.value = '';
+
+    if (!idBus) {
+        selectRuta.disabled = true;
+        return;
+    }
+
+    const rutasDelBus = obtenerRutas().filter(r => r.idBus == idBus);
+    rutasDelBus.forEach(ruta => {
+        const opt = document.createElement('option');
+        opt.value = ruta.idRuta;
+        opt.textContent = `${ruta.nombre} (${ruta.tipoRuta}) - ${ruta.fecha}`;
+        selectRuta.appendChild(opt);
+    });
+
+    selectRuta.disabled = rutasDelBus.length === 0;
+
+    if (idRutaSeleccionada && rutasDelBus.some(r => r.idRuta == idRutaSeleccionada)) {
+        selectRuta.value = idRutaSeleccionada;
+        hiddenRuta.value = idRutaSeleccionada;
+    } else if (rutasDelBus.length === 1) {
+        selectRuta.value = rutasDelBus[0].idRuta;
+        hiddenRuta.value = rutasDelBus[0].idRuta;
+    }
+}
+
+function poblarAlumnosModal(idAlumnoActual) {
+    const selectAlumno = document.getElementById('parada-alumno');
+    selectAlumno.innerHTML = '<option value="">Parada del colegio (sin alumno)</option>';
+
+    (configParadas.alumnosSinAsignar || []).forEach(alumno => {
+        const opt = document.createElement('option');
+        opt.value = alumno.idAlumno;
+        opt.textContent = alumno.nombreCompleto;
+        selectAlumno.appendChild(opt);
+    });
+
+    if (idAlumnoActual) {
+        const yaListado = (configParadas.alumnosSinAsignar || []).some(a => a.idAlumno == idAlumnoActual);
+        if (!yaListado) {
+            const paradaActual = todasLasParadas.find(p => p.idAlumno == idAlumnoActual);
+            const opt = document.createElement('option');
+            opt.value = idAlumnoActual;
+            opt.textContent = paradaActual?.nombreAlumno || `Alumno #${idAlumnoActual}`;
+            selectAlumno.appendChild(opt);
+        }
+        selectAlumno.value = idAlumnoActual;
+    }
+}
+
+function sincronizarModalBusRuta(idBus, idRuta) {
+    poblarBusesModal(idBus);
+    poblarRutasModal(idBus, idRuta);
+}
+
+function limpiarRutaEnMapa() {
+    capasRuta.forEach(capa => mapa.removeLayer(capa));
+    capasRuta = [];
+}
+
+function obtenerCoordsOrdenadas(paradas) {
+    return paradas
+        .filter(p => {
+            const lat = parseFloat(p.latitud);
+            const lng = parseFloat(p.longitud);
+            return !isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0;
+        })
+        .sort((a, b) => (a.orden || 0) - (b.orden || 0))
+        .map(p => [parseFloat(p.latitud), parseFloat(p.longitud)]);
+}
+
+function agregarPolylineRuta(coords) {
+    if (coords.length < 2) return;
+
+    const borde = L.polyline(coords, {
+        color: '#FFFFFF',
+        weight: 9,
+        opacity: 0.95,
+        lineJoin: 'round',
+        lineCap: 'round'
+    }).addTo(mapa);
+
+    const linea = L.polyline(coords, {
+        color: '#C1121F',
+        weight: 5,
+        opacity: 0.95,
+        lineJoin: 'round',
+        lineCap: 'round'
+    }).addTo(mapa);
+
+    capasRuta.push(borde, linea);
+}
+
+function dibujarRutaEnMapa(paradas) {
+    limpiarRutaEnMapa();
+
+    // Solo dibujar la línea cuando hay una ruta seleccionada
+    if (!rutaSeleccionadaId) return;
+
+    agregarPolylineRuta(obtenerCoordsOrdenadas(paradas));
+}
+
+function obtenerExtensionKm(coords) {
+    if (coords.length < 2) return 0;
+    const bounds = L.latLngBounds(coords);
+    return bounds.getNorthEast().distanceTo(bounds.getSouthWest()) / 1000;
+}
+
+function calcularZoomObjetivo(cantidad, extensionKm, rutaFiltrada) {
+    let maxZoom = 17;
+
+    if (extensionKm > 10) maxZoom = 11;
+    else if (extensionKm > 6) maxZoom = 12;
+    else if (extensionKm > 4) maxZoom = 13;
+    else if (extensionKm > 2.5) maxZoom = 14;
+    else if (extensionKm > 1.5) maxZoom = 15;
+    else if (extensionKm > 0.8) maxZoom = 16;
+
+    if (!rutaFiltrada) {
+        maxZoom = Math.min(maxZoom, 13);
+    }
+
+    if (cantidad <= 3 && extensionKm < 2 && rutaFiltrada) {
+        maxZoom = Math.max(maxZoom, 16);
+    }
+
+    return maxZoom;
+}
+
+function calcularPadding(cantidad, extensionKm) {
+    if (cantidad <= 2) return [80, 80];
+    if (cantidad <= 4) return [65, 65];
+    if (cantidad <= 8) return [55, 55];
+    if (extensionKm > 6) return [35, 35];
+    return [45, 45];
+}
+
+function ajustarVistaMapa(paradas) {
+    const coords = obtenerCoordsOrdenadas(paradas);
+    const centroCiudad = [14.6349, -90.5069];
+
+    if (coords.length === 0) {
+        mapa.setView(centroCiudad, 15);
+        return;
+    }
+
+    if (coords.length === 1) {
+        mapa.setView(coords[0], 16);
+        return;
+    }
+
+    const extensionKm = obtenerExtensionKm(coords);
+    const cantidad = coords.length;
+    const rutaFiltrada = Boolean(rutaSeleccionadaId);
+    const maxZoom = calcularZoomObjetivo(cantidad, extensionKm, rutaFiltrada);
+    const padding = calcularPadding(cantidad, extensionKm);
+    const bounds = L.latLngBounds(coords);
+
+    mapa.fitBounds(bounds, { padding, maxZoom });
+
+    // Rutas compactas: acercar lo suficiente para leer la línea
+    if (rutaFiltrada && extensionKm < 2 && mapa.getZoom() < 14) {
+        mapa.setZoom(14);
+    }
+
+    // Sin filtro y paradas muy dispersas: no alejar más de lo necesario
+    if (!rutaFiltrada && mapa.getZoom() < 11) {
+        mapa.setZoom(11);
+    }
+
+    setTimeout(() => mapa.invalidateSize(), 100);
+}
+
+function inicializarMapa() {
+    mapa = L.map('mapa-paradas').setView([14.6349, -90.5069], 15);
+
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '© OpenStreetMap contributors'
     }).addTo(mapa);
 
-    // Evento click en el mapa (cuando está en modo agregar)
-    mapa.on('click', function(e) {
+    mapa.on('click', function (e) {
         if (modoAgregar) {
             agregarParadaTemporal(e.latlng);
         }
     });
 }
 
-// Configurar eventos de botones
 function configurarEventos() {
-    // Botón Agregar Parada
-    document.getElementById('btn-agregar-parada').addEventListener('click', function() {
+    document.getElementById('btn-agregar-parada').addEventListener('click', function () {
+        if (!rutaSeleccionadaId) {
+            mostrarNotificacion('Seleccione un bus y una ruta antes de agregar paradas', 'warning');
+            return;
+        }
+
         modoAgregar = !modoAgregar;
         this.classList.toggle('active');
 
@@ -46,101 +438,73 @@ function configurarEventos() {
         }
     });
 
-    // Botón Refrescar
-    document.getElementById('btn-refrescar').addEventListener('click', function() {
-        cargarParadas();
+    document.getElementById('btn-refrescar').addEventListener('click', cargarParadas);
+    document.getElementById('btn-guardar-parada').addEventListener('click', guardarParada);
+
+    document.getElementById('parada-bus').addEventListener('change', function () {
+        poblarRutasModal(this.value, null);
     });
 
-    // Botón Guardar en el modal
-    document.getElementById('btn-guardar-parada').addEventListener('click', function() {
-        guardarParada();
+    document.getElementById('parada-ruta-modal').addEventListener('change', function () {
+        document.getElementById('parada-ruta-id').value = this.value || '';
+        document.getElementById('parada-orden').value = calcularSiguienteOrden();
     });
 
-    // Botón Geocodificar - Usar delegación de eventos
-    // Escuchamos clicks en todo el body y filtramos por el ID
-    document.body.addEventListener('click', function(e) {
-        // Verificar si el click fue en el botón o en un hijo del botón (icono)
+    document.getElementById('parada-lat').addEventListener('input', actualizarRequerimientoDireccion);
+    document.getElementById('parada-lng').addEventListener('input', actualizarRequerimientoDireccion);
+
+    document.body.addEventListener('click', function (e) {
         const target = e.target.closest('#btn-geocodificar');
         if (target) {
             e.preventDefault();
             e.stopPropagation();
-            console.log('✅ Click detectado en btn-geocodificar');
             geocodificarDireccion();
         }
     });
-
-    console.log('✅ Eventos configurados correctamente');
 }
 
-// Cargar paradas desde la API
 async function cargarParadas() {
     try {
         const response = await fetch('/api/paradas');
-        if (!response.ok) {
-            throw new Error('Error al cargar paradas');
-        }
+        if (!response.ok) throw new Error('Error al cargar paradas');
 
-        const paradas = await response.json();
-
-        console.log('Paradas recibidas:', paradas);
-
-        // Limpiar marcadores existentes
-        marcadores.forEach(marcador => mapa.removeLayer(marcador));
-        marcadores = [];
-
-        // Agregar marcadores al mapa
-        paradas.forEach(parada => {
-            // Validar que las coordenadas sean válidas
-            const lat = parseFloat(parada.latitud);
-            const lng = parseFloat(parada.longitud);
-
-            if (isNaN(lat) || isNaN(lng)) {
-                console.error(`Parada ${parada.idParada} tiene coordenadas inválidas:`, parada);
-                return; // Saltar esta parada
-            }
-
-            agregarMarcador(parada);
-        });
-
-        // Actualizar tabla
-        actualizarTablaParadas(paradas);
-
-        mostrarNotificacion(`${paradas.length} paradas cargadas correctamente`, 'success');
+        todasLasParadas = await response.json();
+        refrescarVistaParadas();
+        mostrarNotificacion(`${todasLasParadas.length} paradas cargadas`, 'success');
     } catch (error) {
         console.error('Error al cargar paradas:', error);
         mostrarNotificacion('Error al cargar las paradas', 'danger');
     }
 }
 
-// Agregar marcador al mapa
+function refrescarVistaParadas() {
+    marcadores.forEach(marcador => mapa.removeLayer(marcador));
+    marcadores = [];
+
+    const paradas = obtenerParadasFiltradas();
+    paradas.forEach(parada => agregarMarcador(parada));
+    dibujarRutaEnMapa(paradas);
+    actualizarTablaParadas(paradas);
+    ajustarVistaMapa(paradas);
+}
+
 function agregarMarcador(parada) {
-    // Validar y convertir coordenadas
     const lat = Number(parada.latitud);
     const lng = Number(parada.longitud);
 
-    console.log(`Agregando parada ${parada.idParada}:`, { lat, lng, original: { latitud: parada.latitud, longitud: parada.longitud } });
+    if (isNaN(lat) || isNaN(lng) || lat === 0 || lng === 0) return;
 
-    // Verificar que las coordenadas sean válidas
-    if (isNaN(lat) || isNaN(lng) || lat === 0 || lng === 0) {
-        console.error(`Coordenadas inválidas para parada ${parada.idParada}:`, parada);
-        return;
-    }
-
-    const marcador = L.marker([lat, lng], {
-        draggable: true
-    }).addTo(mapa);
-
+    const marcador = L.marker([lat, lng], { draggable: true }).addTo(mapa);
     marcador.paradaId = parada.idParada;
 
-    // Determinar el nombre a mostrar
     const nombre = parada.direccion || `Parada #${parada.idParada}`;
     const nombreRuta = parada.nombreRuta || 'Sin ruta';
+    const nombreAlumno = parada.nombreAlumno || (parada.idAlumno ? `Alumno #${parada.idAlumno}` : 'Colegio');
 
-    // Popup con información y acciones
     const popupContent = `
         <div>
             <b>${nombre}</b><br>
-            <small><i class="bi bi-geo-alt"></i> Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}</small><br>
+            <small><i class="bi bi-person"></i> ${nombreAlumno}</small><br>
             <small><i class="bi bi-arrow-down-up"></i> Orden: ${parada.orden || 'N/A'}</small><br>
             <small><i class="bi bi-bus-front"></i> Ruta: <span class="badge bg-info">${nombreRuta}</span></small><br>
             <small>Estado: ${parada.activo === 1 ? '✅ Activo' : '❌ Inactivo'}</small>
@@ -148,7 +512,7 @@ function agregarMarcador(parada) {
                 <button class="btn btn-sm btn-primary" onclick="editarParada(${parada.idParada})">
                     <i class="bi bi-pencil"></i> Editar
                 </button>
-                <button class="btn btn-sm btn-danger" onclick="eliminarParada(${parada.idParada}, '${nombre}')">
+                <button class="btn btn-sm btn-danger" onclick="eliminarParada(${parada.idParada}, '${nombre.replace(/'/g, "\\'")}')">
                     <i class="bi bi-trash"></i> Eliminar
                 </button>
             </div>
@@ -156,8 +520,7 @@ function agregarMarcador(parada) {
     `;
     marcador.bindPopup(popupContent);
 
-    // Evento drag para actualizar coordenadas
-    marcador.on('dragend', function(e) {
+    marcador.on('dragend', function (e) {
         const nuevaPos = e.target.getLatLng();
         actualizarCoordenadas(parada.idParada, nuevaPos.lat, nuevaPos.lng);
     });
@@ -165,83 +528,144 @@ function agregarMarcador(parada) {
     marcadores.push(marcador);
 }
 
-// Agregar parada temporal (nueva)
-function agregarParadaTemporal(latlng) {
-    document.getElementById('modal-title').textContent = 'Crear Nueva Parada';
-    document.getElementById('parada-id').value = '';
-    document.getElementById('parada-nombre').value = '';
-    document.getElementById('parada-lat').value = latlng.lat.toFixed(6);
-    document.getElementById('parada-lng').value = latlng.lng.toFixed(6);
-    document.getElementById('parada-orden').value = marcadores.length + 1;
-    document.getElementById('parada-activo').checked = true;
+function abrirModalParada(opciones) {
+    const {
+        titulo,
+        idParada = '',
+        idBus = '',
+        idRuta = '',
+        direccion = '',
+        latitud = '',
+        longitud = '',
+        orden = null,
+        activo = true,
+        idAlumno = null,
+        coordsDesdeMapa = false
+    } = opciones;
 
-    // Limpiar info de geocodificación
+    document.getElementById('modal-title').textContent = titulo;
+    document.getElementById('parada-id').value = idParada;
+    document.getElementById('parada-nombre').value = direccion;
+    document.getElementById('parada-lat').value = latitud;
+    document.getElementById('parada-lng').value = longitud;
+    document.getElementById('parada-orden').value = orden ?? calcularSiguienteOrden();
+    document.getElementById('parada-activo').checked = activo;
+
+    geocodificacionExitosa = coordsDesdeMapa && coordenadasValidas(parseFloat(latitud), parseFloat(longitud));
+
+    sincronizarModalBusRuta(idBus, idRuta);
+    poblarAlumnosModal(idAlumno);
+
     document.getElementById('geocoding-info').style.display = 'none';
     document.getElementById('geocoding-info-text').textContent = '';
+    actualizarRequerimientoDireccion();
 
-    // Cerrar modo agregar
-    modoAgregar = false;
-    document.getElementById('btn-agregar-parada').classList.remove('active');
-    mapa.getContainer().classList.remove('crosshair');
-
-    // Mostrar modal
     const modal = new bootstrap.Modal(document.getElementById('modal-editar-parada'));
     modal.show();
 }
 
-// Editar parada existente
-window.editarParada = async function(idParada) {
+function agregarParadaTemporal(latlng) {
+    const ruta = obtenerRutas().find(r => r.idRuta == rutaSeleccionadaId);
+    if (!ruta) {
+        mostrarNotificacion('Seleccione una ruta primero', 'warning');
+        return;
+    }
+
+    modoAgregar = false;
+    document.getElementById('btn-agregar-parada').classList.remove('active');
+    mapa.getContainer().classList.remove('crosshair');
+
+    abrirModalParada({
+        titulo: 'Crear Nueva Parada',
+        idBus: ruta.idBus,
+        idRuta: rutaSeleccionadaId,
+        latitud: latlng.lat.toFixed(6),
+        longitud: latlng.lng.toFixed(6),
+        coordsDesdeMapa: true
+    });
+}
+
+window.editarParada = async function (idParada) {
     try {
         const response = await fetch(`/api/paradas/${idParada}`);
-        if (!response.ok) {
-            throw new Error('Error al obtener parada');
-        }
+        if (!response.ok) throw new Error('Error al obtener parada');
 
         const parada = await response.json();
+        const ruta = obtenerRutas().find(r => r.idRuta == parada.idRuta);
 
-        document.getElementById('modal-title').textContent = 'Editar Parada';
-        document.getElementById('parada-id').value = parada.idParada;
-        document.getElementById('parada-nombre').value = parada.direccion || '';
-        document.getElementById('parada-lat').value = parada.latitud;
-        document.getElementById('parada-lng').value = parada.longitud;
-        document.getElementById('parada-orden').value = parada.orden || '';
-        document.getElementById('parada-activo').checked = parada.activo === 1;
-
-        // Limpiar info de geocodificación
-        document.getElementById('geocoding-info').style.display = 'none';
-        document.getElementById('geocoding-info-text').textContent = '';
-
-        const modal = new bootstrap.Modal(document.getElementById('modal-editar-parada'));
-        modal.show();
+        abrirModalParada({
+            titulo: 'Editar Parada',
+            idParada: parada.idParada,
+            idBus: ruta?.idBus || '',
+            idRuta: parada.idRuta,
+            direccion: parada.direccion || '',
+            latitud: parada.latitud,
+            longitud: parada.longitud,
+            orden: parada.orden || '',
+            activo: parada.activo === 1,
+            idAlumno: parada.idAlumno || null,
+            coordsDesdeMapa: true
+        });
     } catch (error) {
         console.error('Error al editar parada:', error);
         mostrarNotificacion('Error al cargar datos de la parada', 'danger');
     }
-}
+};
 
-// Guardar parada (crear o actualizar)
-async function guardarParada() {
-    const idParada = document.getElementById('parada-id').value;
+function validarFormularioParada() {
+    const idRuta = parseInt(document.getElementById('parada-ruta-id').value);
+    const idBus = document.getElementById('parada-bus').value;
     const direccion = document.getElementById('parada-nombre').value.trim();
-    const latitud = parseFloat(document.getElementById('parada-lat').value);
-    const longitud = parseFloat(document.getElementById('parada-lng').value);
-    const orden = parseInt(document.getElementById('parada-orden').value) || 1;
-    const activo = document.getElementById('parada-activo').checked ? 1 : 0;
+    const { latitud, longitud } = obtenerCoordenadasFormulario();
+    const tieneCoords = coordenadasValidas(latitud, longitud);
 
-    if (!direccion) {
-        mostrarNotificacion('La dirección es obligatoria', 'warning');
-        return;
+    if (!idBus) {
+        mostrarNotificacion('Seleccione un bus con cupo disponible', 'warning');
+        return false;
+    }
+
+    if (!idRuta) {
+        mostrarNotificacion('Seleccione una ruta activa para la parada', 'warning');
+        return false;
+    }
+
+    if (!tieneCoords) {
+        if (!direccion) {
+            mostrarNotificacion('Ingrese la dirección de la parada', 'warning');
+            return false;
+        }
+        if (!geocodificacionExitosa) {
+            mostrarNotificacion('Debe buscar la dirección en el mapa antes de guardar', 'warning');
+            return false;
+        }
     }
 
     if (isNaN(latitud) || isNaN(longitud)) {
-        mostrarNotificacion('Las coordenadas son inválidas. Usa "Buscar en Mapa" o haz clic en el mapa.', 'warning');
-        return;
+        mostrarNotificacion('Las coordenadas son inválidas', 'warning');
+        return false;
     }
+
+    return true;
+}
+
+async function guardarParada() {
+    if (!validarFormularioParada()) return;
+
+    const idParada = document.getElementById('parada-id').value;
+    const idRuta = parseInt(document.getElementById('parada-ruta-id').value);
+    const direccion = document.getElementById('parada-nombre').value.trim();
+    const latitud = parseFloat(document.getElementById('parada-lat').value);
+    const longitud = parseFloat(document.getElementById('parada-lng').value);
+    const orden = parseInt(document.getElementById('parada-orden').value) || calcularSiguienteOrden();
+    const activo = document.getElementById('parada-activo').checked ? 1 : 0;
+    const alumnoVal = document.getElementById('parada-alumno').value;
+    const idAlumno = alumnoVal ? parseInt(alumnoVal) : null;
 
     const parada = {
         idParada: idParada ? parseInt(idParada) : 0,
-        idRuta: 1, // Valor temporal - ajustar según lógica de negocio
-        direccion: direccion,
+        idRuta: idRuta,
+        idAlumno: idAlumno,
+        direccion: direccion || null,
         latitud: latitud,
         longitud: longitud,
         orden: orden,
@@ -254,9 +678,7 @@ async function guardarParada() {
 
         const response = await fetch(url, {
             method: method,
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(parada)
         });
 
@@ -264,7 +686,6 @@ async function guardarParada() {
             const modal = bootstrap.Modal.getInstance(document.getElementById('modal-editar-parada'));
             modal.hide();
 
-            // Limpiar marcador temporal si existe
             if (window.marcadorTemporal) {
                 mapa.removeLayer(window.marcadorTemporal);
                 window.marcadorTemporal = null;
@@ -275,11 +696,15 @@ async function guardarParada() {
                 'success'
             );
 
-            // Recargar paradas
-            setTimeout(() => cargarParadas(), 500);
+            setTimeout(() => location.reload(), 600);
         } else {
-            const error = await response.text();
-            throw new Error(error);
+            const errorText = await response.text();
+            let mensaje = errorText;
+            try {
+                const errJson = JSON.parse(errorText);
+                mensaje = errJson.message || errJson.title || errorText;
+            } catch (_) { /* usar texto plano */ }
+            throw new Error(mensaje);
         }
     } catch (error) {
         console.error('Error al guardar parada:', error);
@@ -287,16 +712,11 @@ async function guardarParada() {
     }
 }
 
-// Eliminar parada
-window.eliminarParada = async function(idParada, nombre) {
-    if (!confirm(`¿Estás seguro de eliminar la parada "${nombre}"?`)) {
-        return;
-    }
+window.eliminarParada = async function (idParada, nombre) {
+    if (!confirm(`¿Estás seguro de eliminar la parada "${nombre}"?`)) return;
 
     try {
-        const response = await fetch(`/api/paradas/${idParada}`, {
-            method: 'DELETE'
-        });
+        const response = await fetch(`/api/paradas/${idParada}`, { method: 'DELETE' });
 
         if (response.ok) {
             mostrarNotificacion('Parada eliminada correctamente', 'success');
@@ -309,18 +729,12 @@ window.eliminarParada = async function(idParada, nombre) {
         console.error('Error al eliminar parada:', error);
         mostrarNotificacion('Error al eliminar la parada: ' + error.message, 'danger');
     }
-}
+};
 
-// Actualizar coordenadas después de arrastrar
 async function actualizarCoordenadas(idParada, lat, lng) {
     try {
-        const response = await fetch(`/api/paradas/${idParada}`, {
-            method: 'GET'
-        });
-
-        if (!response.ok) {
-            throw new Error('Error al obtener parada');
-        }
+        const response = await fetch(`/api/paradas/${idParada}`);
+        if (!response.ok) throw new Error('Error al obtener parada');
 
         const parada = await response.json();
         parada.latitud = lat;
@@ -328,9 +742,7 @@ async function actualizarCoordenadas(idParada, lat, lng) {
 
         const updateResponse = await fetch(`/api/paradas/${idParada}`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(parada)
         });
 
@@ -345,7 +757,6 @@ async function actualizarCoordenadas(idParada, lat, lng) {
     }
 }
 
-// Actualizar tabla de paradas
 function actualizarTablaParadas(paradas) {
     const tbody = document.getElementById('paradas-table-body');
     tbody.innerHTML = '';
@@ -353,7 +764,9 @@ function actualizarTablaParadas(paradas) {
     if (paradas.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="8" class="text-center text-muted">No hay paradas registradas</td>
+                <td colspan="9" class="text-center text-muted">
+                    ${rutaSeleccionadaId ? 'No hay paradas para la ruta seleccionada' : 'Seleccione una ruta o no hay paradas registradas'}
+                </td>
             </tr>
         `;
         return;
@@ -362,6 +775,7 @@ function actualizarTablaParadas(paradas) {
     paradas.forEach(parada => {
         const nombre = parada.direccion || `Parada #${parada.idParada}`;
         const nombreRuta = parada.nombreRuta || 'Sin ruta';
+        const nombreAlumno = parada.nombreAlumno || (parada.idAlumno ? `Alumno #${parada.idAlumno}` : 'Colegio');
         const row = `
             <tr>
                 <td>${parada.idParada}</td>
@@ -370,12 +784,13 @@ function actualizarTablaParadas(paradas) {
                 <td>${parseFloat(parada.longitud).toFixed(6)}</td>
                 <td>${parada.orden || 'N/A'}</td>
                 <td><span class="badge bg-info">${nombreRuta}</span></td>
+                <td>${nombreAlumno}</td>
                 <td>${parada.activo === 1 ? '<span class="badge bg-success">Activo</span>' : '<span class="badge bg-secondary">Inactivo</span>'}</td>
                 <td>
                     <button class="btn btn-sm btn-primary" onclick="editarParada(${parada.idParada})">
                         <i class="bi bi-pencil"></i>
                     </button>
-                    <button class="btn btn-sm btn-danger" onclick="eliminarParada(${parada.idParada}, '${nombre}')">
+                    <button class="btn btn-sm btn-danger" onclick="eliminarParada(${parada.idParada}, '${nombre.replace(/'/g, "\\'")}')">
                         <i class="bi bi-trash"></i>
                     </button>
                 </td>
@@ -385,39 +800,26 @@ function actualizarTablaParadas(paradas) {
     });
 }
 
-// Mostrar notificación temporal
 function mostrarNotificacion(mensaje, tipo) {
     console.log(`[${tipo.toUpperCase()}] ${mensaje}`);
-    // Aquí podrías implementar un toast de Bootstrap si lo deseas
+    if (typeof showToast === 'function') {
+        showToast(mensaje, tipo);
+    } else {
+        alert(mensaje);
+    }
 }
 
-// ===========================
-// GEOCODIFICACIÓN DE DIRECCIÓN
-// ===========================
-window.geocodificarDireccion = async function() {
-    console.log('===================================');
-    console.log('🚀 FUNCIÓN GEOCODIFICAR EJECUTADA');
-    console.log('===================================');
-
+window.geocodificarDireccion = async function () {
     const inputDireccion = document.getElementById('parada-nombre');
-    console.log('Elemento parada-nombre:', inputDireccion);
-
-    if (!inputDireccion) {
-        alert('❌ ERROR: No se encontró el campo de dirección. Asegúrate de que el modal esté abierto.');
-        console.error('ERROR: Elemento parada-nombre no existe en el DOM');
-        return;
-    }
+    if (!inputDireccion) return;
 
     const direccion = inputDireccion.value.trim();
-
-    console.log('=== INICIO GEOCODIFICACIÓN ===');
-    console.log('Dirección ingresada:', direccion);
-
     if (!direccion) {
         alert('Por favor ingresa una dirección');
-        console.log('ERROR: Dirección vacía');
         return;
     }
+
+    geocodificacionExitosa = false;
 
     const btn = document.getElementById('btn-geocodificar');
     const btnOriginalText = btn.innerHTML;
@@ -425,76 +827,39 @@ window.geocodificarDireccion = async function() {
     btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Buscando...';
 
     try {
-        // Agregar "Guatemala" a la búsqueda si no está presente
-        const queryDireccion = direccion.toLowerCase().includes('guatemala') 
-            ? direccion 
+        const queryDireccion = direccion.toLowerCase().includes('guatemala')
+            ? direccion
             : `${direccion}, Guatemala`;
 
-        console.log('Dirección a buscar:', queryDireccion);
-
         const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryDireccion)}&limit=3`;
-
-        console.log('URL de la API:', url);
-        console.log('Realizando petición fetch...');
-
         const response = await fetch(url, {
-            headers: {
-                'User-Agent': 'TransportesGenesis/1.0'
-            }
+            headers: { 'User-Agent': 'TransportesGenesis/1.0' }
         });
 
-        console.log('Respuesta recibida. Status:', response.status);
-        console.log('Response OK:', response.ok);
-
-        if (!response.ok) {
-            throw new Error(`Error HTTP: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
 
         const resultados = await response.json();
-        console.log('Resultados recibidos:', resultados);
-        console.log('Número de resultados:', resultados.length);
-
         if (resultados.length === 0) {
-            const mensaje = '❌ No se encontró la dirección. Intenta:\n- Agregar más detalles (Zona, Ciudad)\n- Usar un lugar conocido\n- Ejemplo: "6ta Avenida 9-50 Zona 9, Guatemala"';
-            alert(mensaje);
             document.getElementById('geocoding-info').style.display = 'block';
-            document.getElementById('geocoding-info-text').textContent = 
-                '❌ Dirección no encontrada. Intenta agregar más detalles (Zona, Ciudad, Guatemala).';
-            console.log('ERROR: No se encontraron resultados');
+            document.getElementById('geocoding-info-text').textContent =
+                '❌ Dirección no encontrada. Intente agregar Zona o Ciudad.';
             return;
         }
 
-        // Mostrar los 3 primeros resultados en consola
-        resultados.forEach((r, i) => {
-            console.log(`Resultado ${i + 1}:`, r.display_name);
-            console.log(`  - Lat: ${r.lat}, Lon: ${r.lon}`);
-        });
-
-        // Usar el primer resultado
         const ubicacion = resultados[0];
         const lat = parseFloat(ubicacion.lat);
         const lng = parseFloat(ubicacion.lon);
 
-        console.log('Ubicación seleccionada:', ubicacion.display_name);
-        console.log('Coordenadas - Lat:', lat, 'Lng:', lng);
-
-        // Actualizar campos
         document.getElementById('parada-lat').value = lat.toFixed(6);
         document.getElementById('parada-lng').value = lng.toFixed(6);
+        geocodificacionExitosa = true;
+        actualizarRequerimientoDireccion();
 
-        console.log('Campos actualizados en el formulario');
-
-        // Mostrar información
         document.getElementById('geocoding-info').style.display = 'block';
-        document.getElementById('geocoding-info-text').textContent = 
+        document.getElementById('geocoding-info-text').textContent =
             `✅ Ubicación encontrada: ${ubicacion.display_name}`;
 
-        alert(`✅ Ubicación encontrada!\n\n${ubicacion.display_name}\n\nLat: ${lat.toFixed(6)}\nLng: ${lng.toFixed(6)}`);
-
-        // Agregar marcador temporal en el mapa
-        if (window.marcadorTemporal) {
-            mapa.removeLayer(window.marcadorTemporal);
-        }
+        if (window.marcadorTemporal) mapa.removeLayer(window.marcadorTemporal);
 
         window.marcadorTemporal = L.marker([lat, lng], {
             icon: L.icon({
@@ -508,29 +873,12 @@ window.geocodificarDireccion = async function() {
         }).addTo(mapa);
 
         window.marcadorTemporal.bindPopup(`<b>Nueva Ubicación</b><br>${direccion}`).openPopup();
-
-        // Centrar mapa en la nueva ubicación
         mapa.setView([lat, lng], 15);
-
-        console.log('Marcador agregado y mapa centrado');
-        console.log('=== FIN GEOCODIFICACIÓN EXITOSA ===');
-
     } catch (error) {
-        console.error('=== ERROR EN GEOCODIFICACIÓN ===');
-        console.error('Tipo de error:', error.name);
-        console.error('Mensaje:', error.message);
-        console.error('Stack:', error.stack);
-
-        const mensajeError = `❌ Error al buscar la dirección:\n${error.message}\n\nPosibles causas:\n- Sin conexión a internet\n- Problema con el servicio de mapas\n- Intenta con el método de "Click en el Mapa"`;
-        alert(mensajeError);
-
         document.getElementById('geocoding-info').style.display = 'block';
-        document.getElementById('geocoding-info-text').textContent = 
-            `❌ Error: ${error.message}. Intenta nuevamente o usa el método de "Click en el Mapa".`;
+        document.getElementById('geocoding-info-text').textContent = `❌ Error: ${error.message}`;
     } finally {
         btn.disabled = false;
         btn.innerHTML = btnOriginalText;
-        console.log('Botón restaurado');
     }
-}
-
+};

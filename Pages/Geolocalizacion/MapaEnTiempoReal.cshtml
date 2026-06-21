@@ -342,7 +342,7 @@
                 <p class="mb-0 opacity-75">
                     <i class="bi bi-bus-front me-2"></i>
                     Monitoreo y ubicación de la flota de transporte escolar
-                    <span class="live-indicator">
+                    <span class="live-indicator d-none" id="live-indicator-badge">
                         <span class="live-dot"></span>
                         EN VIVO
                     </span>
@@ -366,15 +366,45 @@
     <div class="row g-4">
         <!-- Panel de información -->
         <div class="col-12 col-lg-4 col-info">
-            <!-- Buses Activos -->
+            <!-- Selector de bus y ruta -->
             <div class="info-panel buses-panel animate__animated animate__fadeInLeft">
                 <div class="card-header text-white">
                     <h6 class="mb-0 fw-bold">
                         <i class="bi bi-bus-front-fill me-2"></i>
-                        Buses Activos
+                        Monitoreo por Bus
                     </h6>
                 </div>
-                <div class="card-body p-0" style="max-height: 300px; overflow-y: auto;">
+                <div class="card-body p-3">
+                    <div class="mb-3">
+                        <label for="select-bus-monitor" class="form-label fw-semibold">Bus</label>
+                        <select id="select-bus-monitor" class="form-select">
+                            <option value="">-- Seleccione un bus --</option>
+                        </select>
+                        <small class="text-muted">Solo buses con rutas, paradas y alumnos asignados.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="select-ruta-monitor" class="form-label fw-semibold">Ruta (turno)</label>
+                        <select id="select-ruta-monitor" class="form-select" disabled>
+                            <option value="">-- Seleccione una ruta --</option>
+                        </select>
+                    </div>
+                    <button type="button" class="btn btn-success w-100 mb-3" onclick="cargarVistaBusSeleccionada()">
+                        <i class="bi bi-map"></i> Ver ruta en mapa
+                    </button>
+                    <div id="alerta-horario-bus" class="alert alert-warning d-none mb-0" role="alert"></div>
+                    <div id="info-bus-seleccionado" class="small text-muted mt-2"></div>
+                </div>
+            </div>
+
+            <!-- Detalle del bus seleccionado -->
+            <div class="info-panel animate__animated animate__fadeInLeft" style="animation-delay: 0.1s;">
+                <div class="card-header text-white" style="background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);">
+                    <h6 class="mb-0 fw-bold">
+                        <i class="bi bi-list-ul me-2"></i>
+                        Estado del Bus
+                    </h6>
+                </div>
+                <div class="card-body p-0" style="max-height: 220px; overflow-y: auto;">
                     <div id="busesInfo">
                         <!-- Loading skeleton -->
                         <div class="p-3">
@@ -495,7 +525,7 @@
                     <button class="floating-btn" onclick="verTodosBuses()" title="Ver todos los buses">
                         <i class="bi bi-zoom-out"></i>
                     </button>
-                    <button class="floating-btn" onclick="cargarDatosBusesSimulados()" title="Actualizar">
+                    <button class="floating-btn" onclick="cargarVistaBusSeleccionada()" title="Actualizar">
                         <i class="bi bi-arrow-clockwise"></i>
                     </button>
                 </div>
@@ -512,11 +542,17 @@
 <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
 
 @section Scripts {
+    <script type="application/json" id="config-mapa-tiempo-real">@Html.Raw(Model.ConfigJson)</script>
     <script>
         // Variables globales - declaradas una sola vez
         let mapaRealTime;
         let marcadores = {};
         let polylines = {};
+        let capasRutaEnfocada = [];
+        let marcadoresParadasEnfocadas = [];
+        let configMapa = { modoSelector: true };
+        let busesElegibles = [];
+        let signalRGrupoBus = null;
         let seguimientoActivo = false;
         let vistaSatelite = false;
         let busSeleccionado = null;
@@ -571,100 +607,486 @@
             }
         };
 
-        // Inicialización cuando el DOM esté listo
-        document.addEventListener('DOMContentLoaded', async function() {
-            console.log('Iniciando sistema de tiempo real...');
-            inicializarMapaRealTime();
-            cargarDatosBusesSimulados();
+        function mostrarIndicadorEnVivo(visible) {
+            const badge = document.getElementById('live-indicator-badge');
+            if (badge) badge.classList.toggle('d-none', !visible);
+        }
 
-            // Configurar actualización automática cada 5 segundos
-            actualizacionInterval = setInterval(cargarDatosBusesSimulados, 5000);
+        function limpiarMarcadoresFlota() {
+            Object.keys(marcadores).forEach(id => {
+                mapaRealTime.removeLayer(marcadores[id]);
+                delete marcadores[id];
+            });
+            limpiarCapasEnfocadas();
+        }
 
-            // ─── SignalR: recibir ubicaciones en tiempo real del piloto ───
+        function mostrarAlertaHorario(mensaje) {
+            const el = document.getElementById('alerta-horario-bus');
+            if (el) {
+                if (!mensaje) {
+                    el.classList.add('d-none');
+                    el.textContent = '';
+                } else {
+                    el.classList.remove('d-none');
+                    el.innerHTML = `<i class="bi bi-exclamation-triangle me-2"></i>${mensaje}`;
+                }
+            }
+
+            const mapaEl = document.getElementById('map');
+            const existente = document.getElementById('banner-fuera-horario');
+            if (existente) existente.remove();
+
+            if (mensaje && mapaEl?.parentElement) {
+                const banner = document.createElement('div');
+                banner.id = 'banner-fuera-horario';
+                banner.className = 'alert alert-warning mb-0 position-absolute top-0 start-0 end-0 mx-3 mt-3';
+                banner.style.zIndex = '1000';
+                banner.innerHTML = `<strong><i class="bi bi-clock-history me-2"></i>Fuera de horario:</strong> ${mensaje}`;
+                mapaEl.parentElement.appendChild(banner);
+            }
+        }
+
+        async function cargarBusesElegibles() {
+            if (Array.isArray(configMapa.busesElegibles)) {
+                busesElegibles = configMapa.busesElegibles;
+                poblarSelectoresBus();
+                return;
+            }
+
+            const resp = await fetch('/api/mapa-tiempo-real/buses-eligibles', { credentials: 'same-origin' });
+            if (!resp.ok) throw new Error('No se pudieron cargar los buses');
+            const data = await resp.json();
+            busesElegibles = data.buses || [];
+            poblarSelectoresBus();
+        }
+
+        function poblarSelectoresBus() {
+            const selectBus = document.getElementById('select-bus-monitor');
+            const selectRuta = document.getElementById('select-ruta-monitor');
+            if (!selectBus || !selectRuta) return;
+
+            selectBus.innerHTML = '<option value="">-- Seleccione un bus --</option>';
+            busesElegibles.forEach(bus => {
+                const opt = document.createElement('option');
+                opt.value = String(bus.idBus);
+                opt.textContent = `${bus.placa} — ${bus.alumnosAsignados} alumno(s), ${bus.rutas.length} ruta(s)`;
+                selectBus.appendChild(opt);
+            });
+
+            if (busesElegibles.length === 0) {
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.textContent = 'No hay buses con rutas y alumnos';
+                opt.disabled = true;
+                selectBus.appendChild(opt);
+            }
+
+            if (configMapa.idBusPreseleccionado) {
+                selectBus.value = String(configMapa.idBusPreseleccionado);
+                actualizarRutasDelBusSeleccionado(configMapa.idRutaPreseleccionada);
+            }
+        }
+
+        function actualizarRutasDelBusSeleccionado(idRutaPreseleccionada) {
+            const selectBus = document.getElementById('select-bus-monitor');
+            const selectRuta = document.getElementById('select-ruta-monitor');
+            const idBus = parseInt(selectBus.value);
+            selectRuta.innerHTML = '<option value="">-- Seleccione una ruta --</option>';
+
+            if (!idBus) {
+                selectRuta.disabled = true;
+                return;
+            }
+
+            const bus = busesElegibles.find(b => b.idBus == idBus);
+            if (!bus) {
+                selectRuta.disabled = true;
+                return;
+            }
+
+            bus.rutas.forEach(ruta => {
+                const opt = document.createElement('option');
+                opt.value = ruta.idRuta;
+                const estado = ruta.esActiva ? 'Operativa' : 'Inactiva';
+                opt.textContent = `${ruta.nombre} (${ruta.tipoRuta}) — ${estado}`;
+                selectRuta.appendChild(opt);
+            });
+
+            selectRuta.disabled = bus.rutas.length === 0;
+
+            if (idRutaPreseleccionada && bus.rutas.some(r => r.idRuta == idRutaPreseleccionada)) {
+                selectRuta.value = idRutaPreseleccionada;
+            } else {
+                const turnoActual = bus.rutas.find(r => r.turnoActual && r.esActiva)
+                    || bus.rutas.find(r => r.esActiva)
+                    || bus.rutas[0];
+                if (turnoActual) selectRuta.value = turnoActual.idRuta;
+            }
+        }
+
+        async function cargarVistaBusSeleccionada() {
+            const idBus = parseInt(document.getElementById('select-bus-monitor').value);
+            const idRuta = parseInt(document.getElementById('select-ruta-monitor').value);
+            if (!idBus) {
+                alert('Seleccione un bus');
+                return;
+            }
+
+            const url = idRuta
+                ? `/api/mapa-tiempo-real/vista?idBus=${idBus}&idRuta=${idRuta}`
+                : `/api/mapa-tiempo-real/vista?idBus=${idBus}`;
+
+            const resp = await fetch(url, { credentials: 'same-origin' });
+            if (!resp.ok) {
+                alert('No se pudo cargar la ruta del bus seleccionado.');
+                return;
+            }
+
+            const vista = await resp.json();
+            configMapa = vista;
+            configMapa.modoEnfocado = true;
+            configMapa.busesElegibles = busesElegibles;
+
+            limpiarMarcadoresFlota();
+            document.getElementById('aviso-sin-ruta-bus')?.remove();
+            mostrarAlertaHorario(vista.enHorario ? null : (vista.mensajeHorario || 'El autobús no está en recorrido por el horario.'));
+            mostrarIndicadorEnVivo(true);
+
+            const info = document.getElementById('info-bus-seleccionado');
+            if (info && vista.ruta) {
+                info.innerHTML = vista.rutaEnRecorrido
+                    ? '<span class="text-success"><i class="bi bi-broadcast"></i> Bus en recorrido en vivo</span>'
+                    : vista.enHorario
+                        ? '<span class="text-primary"><i class="bi bi-hourglass-split"></i> En horario — esperando señal del piloto/monitor</span>'
+                        : '<span class="text-secondary"><i class="bi bi-pause-circle"></i> Ruta asignada visible — sin recorrido activo</span>';
+            }
+
+            inicializarVistaBusEnfocada();
+            await conectarSignalRBusEnfocado();
+            actualizarEstadisticasPanel(vista);
+        }
+
+        function actualizarEstadisticasPanel(vista) {
+            const activos = document.getElementById('busesActivos');
+            const enRuta = document.getElementById('busesEnRuta');
+            if (activos) activos.textContent = vista?.bus ? '1' : '0';
+            if (enRuta) enRuta.textContent = vista?.rutaEnRecorrido ? '1' : '0';
+        }
+
+        function configurarEventosSelector() {
+            const selectBus = document.getElementById('select-bus-monitor');
+            const selectRuta = document.getElementById('select-ruta-monitor');
+            if (selectBus) {
+                selectBus.addEventListener('change', () => actualizarRutasDelBusSeleccionado(null));
+            }
+            if (selectRuta) {
+                selectRuta.addEventListener('change', () => {
+                    if (selectBus?.value) cargarVistaBusSeleccionada();
+                });
+            }
+        }
+
+        function cargarConfigMapa() {
+            const el = document.getElementById('config-mapa-tiempo-real');
+            if (!el || !el.textContent.trim()) return;
             try {
-                window.mapaSignalR = new NotificacionesCliente();
-                await window.mapaSignalR.conectar();
-                console.log('✅ [MapaTiempoReal] SignalR conectado');
+                configMapa = JSON.parse(el.textContent);
+            } catch (error) {
+                console.warn('[MapaTiempoReal] Error al parsear configuración:', error);
+            }
+        }
 
-                // Unirse a los grupos de todos los buses de la simulación (Bus_1 … Bus_4)
-                // y también a grupos que el servidor pueda usar en el futuro
-                const gruposBuses = [1, 2, 3, 4];
-                for (const id of gruposBuses) {
-                    await window.mapaSignalR.unirseAGrupo(`Bus_${id}`);
+        function limpiarCapasEnfocadas() {
+            capasRutaEnfocada.forEach(capa => mapaRealTime.removeLayer(capa));
+            capasRutaEnfocada = [];
+            marcadoresParadasEnfocadas.forEach(m => mapaRealTime.removeLayer(m));
+            marcadoresParadasEnfocadas = [];
+        }
+
+        function dibujarRutaBusEnfocada(paradas) {
+            const coords = (paradas || [])
+                .map(p => [parseFloat(p.latitud), parseFloat(p.longitud)])
+                .filter(c => !isNaN(c[0]) && !isNaN(c[1]) && c[0] !== 0 && c[1] !== 0);
+
+            if (coords.length < 2) return;
+
+            const enRecorrido = configMapa.rutaEnRecorrido === true;
+            const colorRuta = enRecorrido ? '#C1121F' : '#6c757d';
+
+            const borde = L.polyline(coords, {
+                color: '#FFFFFF',
+                weight: 9,
+                opacity: 0.95,
+                lineJoin: 'round',
+                lineCap: 'round',
+                dashArray: enRecorrido ? null : '12, 8'
+            }).addTo(mapaRealTime);
+
+            const linea = L.polyline(coords, {
+                color: colorRuta,
+                weight: 5,
+                opacity: enRecorrido ? 0.95 : 0.75,
+                lineJoin: 'round',
+                lineCap: 'round',
+                dashArray: enRecorrido ? null : '12, 8'
+            }).addTo(mapaRealTime);
+
+            capasRutaEnfocada.push(borde, linea);
+        }
+
+        function dibujarParadasBusEnfocada(paradas) {
+            (paradas || []).forEach(parada => {
+                const lat = parseFloat(parada.latitud);
+                const lng = parseFloat(parada.longitud);
+                if (isNaN(lat) || isNaN(lng) || lat === 0 || lng === 0) return;
+
+                const esColegio = parada.esColegio;
+                const icono = esColegio
+                    ? L.divIcon({
+                        className: 'custom-school-marker',
+                        html: '<div class="school-icon">🏫</div>',
+                        iconSize: [46, 46],
+                        iconAnchor: [23, 23],
+                        popupAnchor: [0, -23]
+                    })
+                    : L.divIcon({
+                        className: 'custom-bus-marker',
+                        html: `<div style="background:#C1121F;color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-weight:bold;border:2px solid #fff;">${parada.orden || '•'}</div>`,
+                        iconSize: [28, 28],
+                        iconAnchor: [14, 14]
+                    });
+
+                const titulo = esColegio
+                    ? 'Colegio'
+                    : (parada.nombreAlumno || parada.direccion || `Parada ${parada.orden}`);
+
+                const marcador = L.marker([lat, lng], { icon: icono })
+                    .addTo(mapaRealTime)
+                    .bindPopup(`<strong>${titulo}</strong><br><small>Orden: ${parada.orden || '-'}</small>`);
+
+                marcadoresParadasEnfocadas.push(marcador);
+            });
+        }
+
+        function ajustarVistaBusEnfocada(paradas, latBus, lngBus) {
+            const coords = (paradas || [])
+                .map(p => [parseFloat(p.latitud), parseFloat(p.longitud)])
+                .filter(c => !isNaN(c[0]) && !isNaN(c[1]) && c[0] !== 0 && c[1] !== 0);
+
+            if (!isNaN(latBus) && !isNaN(lngBus)) {
+                coords.push([latBus, lngBus]);
+            }
+
+            if (coords.length === 0) {
+                mapaRealTime.setView([14.6349, -90.5069], 15);
+                return;
+            }
+
+            if (coords.length === 1) {
+                mapaRealTime.setView(coords[0], 16);
+                return;
+            }
+
+            mapaRealTime.fitBounds(coords, { padding: [50, 50], maxZoom: 16 });
+            if (mapaRealTime.getZoom() < 13) {
+                mapaRealTime.setZoom(13);
+            }
+        }
+
+        function crearBusDataEnfocado() {
+            const bus = configMapa.bus || {};
+            const ruta = configMapa.ruta || {};
+            const ubicacion = configMapa.ubicacion;
+            const paradas = configMapa.paradas || [];
+            const enRecorrido = configMapa.rutaEnRecorrido === true;
+
+            let lat = 14.6349;
+            let lng = -90.5069;
+            if (paradas.length) {
+                lat = parseFloat(paradas[0].latitud);
+                lng = parseFloat(paradas[0].longitud);
+            }
+
+            let estado = paradas.length ? 'Detenido' : 'SinSeñal';
+            let velocidad = 0;
+            let ultimaActualizacion = new Date().toISOString();
+
+            if (enRecorrido && ubicacion) {
+                lat = parseFloat(ubicacion.latitud);
+                lng = parseFloat(ubicacion.longitud);
+                velocidad = ubicacion.velocidad ? parseFloat(ubicacion.velocidad) : 0;
+                ultimaActualizacion = ubicacion.fechaHora;
+                estado = velocidad > 5 ? 'Movimiento' : 'Detenido';
+            }
+
+            return {
+                idBus: bus.idBus,
+                placa: bus.placa || `Bus #${bus.idBus}`,
+                rutaId: ruta.idRuta || bus.idBus,
+                rutaNombre: ruta.nombre || 'Ruta asignada',
+                capacidadTotal: bus.capacidad || 0,
+                estudiantesAbordo: 0,
+                estado,
+                enRecorrido,
+                velocidad: Math.round(velocidad),
+                latitud: lat,
+                longitud: lng,
+                ultimaActualizacion
+            };
+        }
+
+        function actualizarTituloBusEnfocado() {
+            const bus = configMapa.bus;
+            const ruta = configMapa.ruta;
+            if (!bus) return;
+
+            const titulo = document.querySelector('.realtime-header h1');
+            if (titulo) {
+                titulo.innerHTML = `<i class="bi bi-bus-front-fill me-3"></i>Mapa en Vivo — ${bus.placa}`;
+            }
+
+            const subtitulo = document.querySelector('.realtime-header p');
+            if (subtitulo && ruta) {
+                const badgeRecorrido = configMapa.rutaEnRecorrido
+                    ? '<span class="badge bg-light text-success ms-2">En recorrido</span>'
+                    : '<span class="badge bg-light text-secondary ms-2">Ruta asignada — sin movimiento en vivo</span>';
+                const estadoRuta = ruta.esActiva
+                    ? 'Operativa'
+                    : 'Inactiva';
+                subtitulo.innerHTML = `<i class="bi bi-signpost-split me-2"></i>Ruta asignada: ${ruta.nombre} (${ruta.tipoRuta}) · ${estadoRuta} ${badgeRecorrido}`;
+            } else if (subtitulo) {
+                subtitulo.innerHTML = `<i class="bi bi-exclamation-triangle me-2"></i>Este bus no tiene rutas asignadas. Calcule rutas o cree paradas primero.`;
+            }
+        }
+
+        function mostrarAvisoSinParadas() {
+            const paradas = configMapa.paradas || [];
+            const ruta = configMapa.ruta;
+            if (paradas.length > 0) return;
+
+            const mapaEl = document.getElementById('map');
+            if (!mapaEl || document.getElementById('aviso-sin-ruta-bus')) return;
+
+            const aviso = document.createElement('div');
+            aviso.id = 'aviso-sin-ruta-bus';
+            aviso.className = 'alert alert-warning m-3 position-absolute top-0 start-0 end-0';
+            aviso.style.zIndex = '1000';
+            aviso.innerHTML = ruta
+                ? '<strong>Ruta asignada sin trazado:</strong> la ruta existe pero aún no tiene paradas con coordenadas. Agréguelas en Gestionar Paradas.'
+                : '<strong>Sin ruta asignada:</strong> calcule o asigne una ruta a este bus para verla en el mapa.';
+            mapaEl.parentElement.style.position = 'relative';
+            mapaEl.parentElement.appendChild(aviso);
+        }
+
+        function inicializarVistaBusEnfocada() {
+            actualizarTituloBusEnfocado();
+
+            const paradas = configMapa.paradas || [];
+            const busData = crearBusDataEnfocado();
+            busesData = [busData];
+            busSeleccionado = busData.idBus;
+
+            limpiarCapasEnfocadas();
+            dibujarRutaBusEnfocada(paradas);
+            dibujarParadasBusEnfocada(paradas);
+            actualizarMarcadores();
+            cargarListaBuses();
+            actualizarEstadisticas();
+            ajustarVistaBusEnfocada(paradas, busData.latitud, busData.longitud);
+            mostrarAvisoSinParadas();
+
+            setTimeout(() => mapaRealTime.invalidateSize(), 150);
+        }
+
+        async function conectarSignalRBusEnfocado() {
+            if (!configMapa.modoEnfocado || !configMapa.idBus) return;
+
+            try {
+                if (!window.mapaSignalR) {
+                    window.mapaSignalR = new NotificacionesCliente();
+                    await window.mapaSignalR.conectar();
+
+                    window.mapaSignalR.onUbicacionActualizada((data) => {
+                        if (!configMapa.modoEnfocado || !configMapa.enHorario) return;
+
+                        const idBus = Number(data.idBus ?? data.IdBus);
+                        if (idBus !== configMapa.idBus) return;
+                        if (!configMapa.ruta?.esActiva) return;
+
+                        configMapa.rutaEnRecorrido = true;
+
+                        const lat = parseFloat(data.latitud ?? data.Latitud);
+                        const lng = parseFloat(data.longitud ?? data.Longitud);
+                        if (isNaN(lat) || isNaN(lng)) return;
+
+                        const bus = busesData[0];
+                        if (bus) {
+                            bus.latitud = lat;
+                            bus.longitud = lng;
+                            bus.enRecorrido = true;
+                            bus.estado = 'Movimiento';
+                            bus.ultimaActualizacion = new Date().toISOString();
+                        }
+
+                        limpiarCapasEnfocadas();
+                        dibujarRutaBusEnfocada(configMapa.paradas || []);
+                        dibujarParadasBusEnfocada(configMapa.paradas || []);
+
+                        const marcadorId = `bus_${idBus}`;
+                        if (marcadores[marcadorId]) {
+                            marcadores[marcadorId].setLatLng([lat, lng]);
+                        } else {
+                            actualizarMarcadores();
+                        }
+
+                        actualizarTituloBusEnfocado();
+                        cargarListaBuses();
+                        actualizarEstadisticas();
+                        actualizarEstadisticasPanel(configMapa);
+
+                        const info = document.getElementById('info-bus-seleccionado');
+                        if (info) {
+                            info.innerHTML = '<span class="text-success"><i class="bi bi-broadcast"></i> Bus en recorrido en vivo</span>';
+                        }
+
+                        if (seguimientoActivo) {
+                            mapaRealTime.setView([lat, lng], Math.max(mapaRealTime.getZoom(), 15));
+                        }
+                    });
                 }
 
-                // Escuchar actualización de ubicación emitida por el servidor tras el POST del piloto
-                window.mapaSignalR.onUbicacionActualizada((data) => {
-                    const idBusRaw = data.idBus ?? data.IdBus;
-                    const idBus = Number(idBusRaw);
-                    const lat   = parseFloat(data.latitud  ?? data.Latitud);
-                    const lng   = parseFloat(data.longitud ?? data.Longitud);
-                    if (!idBus || isNaN(lat) || isNaN(lng)) return;
-
-                    console.log(`📍 [MapaTiempoReal] Bus ${idBus} → ${lat}, ${lng}`);
-
-                    // Actualizar en el array de buses (para que el popup también se actualice)
-                    const bus = busesData.find(b => b.idBus === idBus);
-                    if (bus) {
-                        bus.latitud = lat;
-                        bus.longitud = lng;
-                        bus.ultimaActualizacion = new Date().toISOString();
-                        bus.estado = 'Movimiento';
-                    } else {
-                        // Bus no estaba en la lista simulada → agregarlo
-                        busesData.push({
-                            idBus: idBus,
-                            placa: `Bus #${idBus}`,
-                            rutaId: idBus,
-                            rutaNombre: 'Ruta en vivo',
-                            capacidadTotal: 45,
-                            estudiantesAbordo: 0,
-                            estado: 'Movimiento',
-                            velocidad: 10,
-                            latitud: lat,
-                            longitud: lng,
-                            ultimaActualizacion: new Date().toISOString()
-                        });
-                    }
-
-                    // Mover/crear marcador inmediatamente
-                    const marcadorId = `bus_${idBus}`;
-                    if (marcadores[marcadorId]) {
-                        marcadores[marcadorId].setLatLng([lat, lng]);
-                    } else {
-                        const icono = crearIconoBus('Movimiento');
-                        marcadores[marcadorId] = L.marker([lat, lng], { icon: icono })
-                            .addTo(mapaRealTime)
-                            .bindPopup(`<strong>🚌 Bus #${idBus}</strong><br>En vivo`);
-                    }
-
-                    // Actualizar panel lateral
-                    cargarListaBuses();
-                    actualizarEstadisticas();
-
-                    // Si seguimiento activo, centrar en el bus seleccionado
-                    if (seguimientoActivo && busSeleccionado === idBus) {
-                        mapaRealTime.setView([lat, lng], 16);
-                    }
-                });
-
-                // Escuchar alertas (proximidad / llegada colegio)
-                window.mapaSignalR.onAlerta((data) => {
-                    const msg = data.mensaje || data.Mensaje || 'Alerta';
-                    console.log('🔔 [MapaTiempoReal] Alerta:', msg);
-                    const el = document.createElement('div');
-                    el.className = 'alert alert-warning alert-dismissible fade show position-fixed';
-                    el.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 260px;';
-                    el.innerHTML = `<strong>🔔</strong> ${msg} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
-                    document.body.appendChild(el);
-                    setTimeout(() => { if (el.parentNode) el.remove(); }, 6000);
-                });
-
+                const nuevoGrupo = `Bus_${configMapa.idBus}`;
+                if (signalRGrupoBus && signalRGrupoBus !== nuevoGrupo) {
+                    await window.mapaSignalR.salirDeGrupo(signalRGrupoBus);
+                }
+                if (signalRGrupoBus !== nuevoGrupo) {
+                    await window.mapaSignalR.unirseAGrupo(nuevoGrupo);
+                    signalRGrupoBus = nuevoGrupo;
+                }
             } catch (e) {
                 console.warn('[MapaTiempoReal] SignalR no disponible:', e);
             }
+        }
 
-            console.log('Sistema de tiempo real iniciado');
+        // Inicialización cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('Iniciando mapa en tiempo real (selector)...');
+            cargarConfigMapa();
+            inicializarMapaRealTime();
+            configurarEventosSelector();
+            mostrarIndicadorEnVivo(false);
+
+            try {
+                await cargarBusesElegibles();
+            } catch (e) {
+                console.error('[MapaTiempoReal] Error cargando buses:', e);
+            }
+
+            setTimeout(() => mapaRealTime?.invalidateSize(), 200);
+
+            if (configMapa.idBusPreseleccionado) {
+                await cargarVistaBusSeleccionada();
+            }
         });
 
         // Inicializar mapa centrado en Ciudad de Guatemala
@@ -677,10 +1099,13 @@
                 maxZoom: 19
             }).addTo(mapaRealTime);
 
-            // Agregar marcador del Colegio Yulimay PC
-            agregarMarcadorColegio();
+            // Agregar marcador del Colegio Yulimay PC (solo vista general)
+            if (!configMapa.modoEnfocado) {
+                agregarMarcadorColegio();
+            }
 
             console.log('Mapa de tiempo real inicializado');
+            setTimeout(() => mapaRealTime.invalidateSize(), 100);
         }
 
         // Agregar marcador del colegio Yulimay PC
@@ -1135,6 +1560,14 @@
         }
 
         function verTodosBuses() {
+            if (configMapa.modoEnfocado) {
+                const bus = busesData[0];
+                ajustarVistaBusEnfocada(configMapa.paradas || [], bus?.latitud, bus?.longitud);
+                busSeleccionado = configMapa.idBus;
+                cargarListaBuses();
+                return;
+            }
+
             if (busesData.length > 0) {
                 const bounds = busesData.map(bus => [bus.latitud, bus.longitud]);
                 mapaRealTime.fitBounds(bounds, { padding: [20, 20] });

@@ -21,7 +21,6 @@ namespace TransportesGenesis.Controllers.Api
             _logger = logger;
         }
 
-        // GET: api/paradas
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ParadaDto>>> GetParadas()
         {
@@ -58,13 +57,12 @@ namespace TransportesGenesis.Controllers.Api
             }
         }
 
-        // GET: api/paradas/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<Parada>> GetParada(int id)
+        public async Task<ActionResult<ParadaDto>> GetParada(int id)
         {
             try
             {
-                var parada = await _context.ParadasDb.FindAsync(id);
+                var parada = await ObtenerParadaDtoAsync(id);
 
                 if (parada == null)
                 {
@@ -80,36 +78,57 @@ namespace TransportesGenesis.Controllers.Api
             }
         }
 
-        // POST: api/paradas
         [HttpPost]
-        public async Task<ActionResult<Parada>> CreateParada([FromBody] Parada parada)
+        public async Task<ActionResult<ParadaDto>> CreateParada([FromBody] Parada parada)
         {
             try
             {
-                if (!ModelState.IsValid)
+                var errorValidacion = await ValidarParadaAsync(parada.IdRuta, parada.IdAlumno, null);
+                if (errorValidacion != null)
                 {
-                    return BadRequest(ModelState);
+                    return BadRequest(new { message = errorValidacion });
                 }
 
-                // Establecer valores por defecto
-                parada.Activo = parada.Activo;
-                parada.FechaRegistro = DateTime.Now;
+                if (parada.Orden <= 0)
+                {
+                    var maxOrden = await _context.ParadasDb
+                        .Where(p => p.IdRuta == parada.IdRuta)
+                        .Select(p => (int?)p.Orden)
+                        .MaxAsync() ?? 0;
+                    parada.Orden = maxOrden + 1;
+                }
 
-                _context.ParadasDb.Add(parada);
+                var nuevaParada = new Parada
+                {
+                    IdRuta = parada.IdRuta,
+                    IdAlumno = parada.IdAlumno,
+                    Latitud = parada.Latitud,
+                    Longitud = parada.Longitud,
+                    Direccion = parada.Direccion,
+                    Orden = parada.Orden,
+                    HoraEstimada = parada.HoraEstimada,
+                    Activo = parada.Activo,
+                    FechaRegistro = DateTime.Now,
+                    Completada = false
+                };
+
+                _context.ParadasDb.Add(nuevaParada);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation("Parada con ID {Id} creada correctamente", parada.IdParada);
+                await AsignarBusAlAlumnoSiAplicaAsync(nuevaParada.IdRuta, nuevaParada.IdAlumno);
 
-                return CreatedAtAction(nameof(GetParada), new { id = parada.IdParada }, parada);
+                _logger.LogInformation("Parada con ID {Id} creada correctamente", nuevaParada.IdParada);
+
+                var dto = await ObtenerParadaDtoAsync(nuevaParada.IdParada);
+                return CreatedAtAction(nameof(GetParada), new { id = nuevaParada.IdParada }, dto);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al crear parada");
-                return StatusCode(500, "Error al crear parada: " + ex.Message);
+                return StatusCode(500, new { message = "Error al crear parada: " + ex.Message });
             }
         }
 
-        // PUT: api/paradas/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateParada(int id, [FromBody] Parada parada)
         {
@@ -117,22 +136,29 @@ namespace TransportesGenesis.Controllers.Api
             {
                 if (id != parada.IdParada)
                 {
-                    return BadRequest("El ID de la parada no coincide");
+                    return BadRequest(new { message = "El ID de la parada no coincide" });
                 }
 
                 var paradaExistente = await _context.ParadasDb.FindAsync(id);
                 if (paradaExistente == null)
                 {
-                    return NotFound($"Parada con ID {id} no encontrada");
+                    return NotFound(new { message = $"Parada con ID {id} no encontrada" });
                 }
 
-                // Actualizar solo los campos permitidos
+                var idRuta = parada.IdRuta > 0 ? parada.IdRuta : paradaExistente.IdRuta;
+                var errorValidacion = await ValidarParadaAsync(idRuta, parada.IdAlumno, id);
+                if (errorValidacion != null)
+                {
+                    return BadRequest(new { message = errorValidacion });
+                }
+
                 paradaExistente.Latitud = parada.Latitud;
                 paradaExistente.Longitud = parada.Longitud;
                 paradaExistente.Orden = parada.Orden;
                 paradaExistente.Activo = parada.Activo;
                 paradaExistente.Direccion = parada.Direccion;
                 paradaExistente.HoraEstimada = parada.HoraEstimada;
+                paradaExistente.IdAlumno = parada.IdAlumno;
 
                 await _context.SaveChangesAsync();
 
@@ -143,16 +169,15 @@ namespace TransportesGenesis.Controllers.Api
             catch (DbUpdateConcurrencyException ex)
             {
                 _logger.LogError(ex, "Error de concurrencia al actualizar parada {Id}", id);
-                return StatusCode(409, "Error de concurrencia al actualizar parada");
+                return StatusCode(409, new { message = "Error de concurrencia al actualizar parada" });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al actualizar parada {Id}", id);
-                return StatusCode(500, "Error al actualizar parada: " + ex.Message);
+                return StatusCode(500, new { message = "Error al actualizar parada: " + ex.Message });
             }
         }
 
-        // DELETE: api/paradas/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteParada(int id)
         {
@@ -161,10 +186,9 @@ namespace TransportesGenesis.Controllers.Api
                 var parada = await _context.ParadasDb.FindAsync(id);
                 if (parada == null)
                 {
-                    return NotFound($"Parada con ID {id} no encontrada");
+                    return NotFound(new { message = $"Parada con ID {id} no encontrada" });
                 }
 
-                // Marcar como inactivo en lugar de eliminar (soft delete)
                 parada.Activo = 0;
                 await _context.SaveChangesAsync();
 
@@ -175,8 +199,103 @@ namespace TransportesGenesis.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al eliminar parada {Id}", id);
-                return StatusCode(500, "Error al eliminar parada: " + ex.Message);
+                return StatusCode(500, new { message = "Error al eliminar parada: " + ex.Message });
             }
+        }
+
+        private async Task<ParadaDto?> ObtenerParadaDtoAsync(int idParada)
+        {
+            return await _context.ParadasDb
+                .Where(p => p.IdParada == idParada)
+                .Select(p => new ParadaDto
+                {
+                    IdParada = p.IdParada,
+                    IdRuta = p.IdRuta,
+                    IdAlumno = p.IdAlumno,
+                    Latitud = p.Latitud,
+                    Longitud = p.Longitud,
+                    Direccion = p.Direccion,
+                    Orden = p.Orden,
+                    HoraEstimada = p.HoraEstimada,
+                    Completada = p.Completada,
+                    Activo = p.Activo,
+                    FechaRegistro = p.FechaRegistro,
+                    NombreRuta = p.Ruta != null ? p.Ruta.Nombre : null,
+                    NombreAlumno = p.Alumno != null ? p.Alumno.Nombre + " " + p.Alumno.Apellido : null
+                })
+                .FirstOrDefaultAsync();
+        }
+
+        private async Task<string?> ValidarParadaAsync(int idRuta, int? idAlumno, int? idParadaExcluir)
+        {
+            if (idRuta <= 0)
+                return "Seleccione una ruta válida.";
+
+            var ruta = await _context.RutasDb.FirstOrDefaultAsync(r => r.IdRuta == idRuta);
+            if (ruta == null)
+                return "La ruta seleccionada no existe.";
+
+            if (!ruta.EsActiva)
+                return "La ruta seleccionada no está activa.";
+
+            if (idAlumno.HasValue)
+            {
+                var alumno = await _context.AlumnosDb.FirstOrDefaultAsync(a => a.IdAlumno == idAlumno.Value);
+                if (alumno == null)
+                    return "El alumno seleccionado no existe.";
+
+                if (alumno.IdBusAsignado.HasValue && alumno.IdBusAsignado != ruta.IdBus)
+                    return "El alumno ya está asignado a otro bus.";
+
+                var paradaEnOtraRuta = await _context.ParadasDb.AnyAsync(p =>
+                    p.IdAlumno == idAlumno.Value &&
+                    (!idParadaExcluir.HasValue || p.IdParada != idParadaExcluir.Value));
+
+                if (paradaEnOtraRuta)
+                    return "El alumno ya tiene una parada asignada en otra ruta.";
+
+                var duplicada = await _context.ParadasDb.AnyAsync(p =>
+                    p.IdRuta == idRuta &&
+                    p.IdAlumno == idAlumno.Value &&
+                    (!idParadaExcluir.HasValue || p.IdParada != idParadaExcluir.Value));
+
+                if (duplicada)
+                    return "Ya existe una parada para este alumno en la ruta seleccionada.";
+
+                if (!alumno.IdBusAsignado.HasValue)
+                {
+                    var asignados = await _context.AlumnosDb.CountAsync(a => a.IdBusAsignado == ruta.IdBus);
+                    var bus = await _context.BusesDb.FindAsync(ruta.IdBus);
+                    if (bus != null && asignados >= bus.Capacidad)
+                        return $"El bus {bus.Placa} ya alcanzó su capacidad máxima ({bus.Capacidad} pasajeros).";
+                }
+            }
+            else
+            {
+                var colegioExistente = await _context.ParadasDb.AnyAsync(p =>
+                    p.IdRuta == idRuta &&
+                    p.IdAlumno == null &&
+                    (!idParadaExcluir.HasValue || p.IdParada != idParadaExcluir.Value));
+
+                if (colegioExistente)
+                    return "Ya existe una parada del colegio en esta ruta.";
+            }
+
+            return null;
+        }
+
+        private async Task AsignarBusAlAlumnoSiAplicaAsync(int idRuta, int? idAlumno)
+        {
+            if (!idAlumno.HasValue) return;
+
+            var ruta = await _context.RutasDb.FindAsync(idRuta);
+            if (ruta == null) return;
+
+            var alumno = await _context.AlumnosDb.FindAsync(idAlumno.Value);
+            if (alumno == null || alumno.IdBusAsignado.HasValue) return;
+
+            alumno.IdBusAsignado = ruta.IdBus;
+            await _context.SaveChangesAsync();
         }
     }
 }

@@ -76,14 +76,7 @@ namespace TransportesGenesis.Controllers
                 }
                 else if (roles.Contains("PadreDeFamilia"))
                 {
-                    // Verificar si el padre necesita configurar dirección de recogida
-                    var necesitaConfiguracion = await VerificarSiNecesitaConfiguracionInicial(user.Id);
-                    if (necesitaConfiguracion)
-                    {
-                        return RedirectToPage("/Padre/ConfiguracionInicial");
-                    }
-
-                    return RedirectToPage("/Padres/DashboardRutaBusAsignado");
+                    return await RedirigirPadreDespuesLoginAsync(user.Id);
                 }
                 else if (roles.Contains("Piloto"))
                 {
@@ -113,6 +106,7 @@ namespace TransportesGenesis.Controllers
 
         // GET: /Auth/ForceChangePassword
         [HttpGet]
+        [Authorize]
         public IActionResult ForceChangePassword()
         {
             return View();
@@ -120,6 +114,7 @@ namespace TransportesGenesis.Controllers
 
         // POST: /Auth/ForceChangePassword
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> ForceChangePassword(ChangePasswordViewModel model)
         {
             if (!ModelState.IsValid)
@@ -136,6 +131,17 @@ namespace TransportesGenesis.Controllers
             {
                 user.IsFirstLogin = false;
                 await _userManager.UpdateAsync(user);
+
+                if (await _userManager.IsInRoleAsync(user, "PadreDeFamilia"))
+                {
+                    return await RedirigirPadreDespuesLoginAsync(user.Id);
+                }
+
+                if (await _userManager.IsInRoleAsync(user, "Administrador"))
+                {
+                    return RedirectToAction("Index", "Admin");
+                }
+
                 return RedirectToAction("Index", "Home");
             }
 
@@ -168,6 +174,19 @@ namespace TransportesGenesis.Controllers
         public IActionResult AccessDenied()
         {
             return View();
+        }
+
+        /// <summary>
+        /// Redirige al padre: primero configuración de ubicación si falta, luego dashboard principal.
+        /// </summary>
+        private async Task<IActionResult> RedirigirPadreDespuesLoginAsync(string userId)
+        {
+            if (await VerificarSiNecesitaConfiguracionInicial(userId))
+            {
+                return RedirectToPage("/Padre/ConfiguracionInicial");
+            }
+
+            return RedirectToAction("Index", "PagosPadresFamilia");
         }
 
         /// <summary>

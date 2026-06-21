@@ -223,11 +223,16 @@
                                         <td class="text-center">
                                             @if (resultado.Exitoso && resultado.IdRuta.HasValue)
                                             {
-                                                <a href="/Piloto/MiRuta?idRuta=@resultado.IdRuta" 
+                                                <a href="/Admin/VerRuta?idRuta=@resultado.IdRuta" 
                                                    class="btn btn-sm btn-outline-primary"
                                                    target="_blank"
                                                    title="Ver ruta en mapa">
                                                     <i class="bi bi-map"></i> Ver
+                                                </a>
+                                                <a href="/Admin/GestionarParadas?idRuta=@resultado.IdRuta" 
+                                                   class="btn btn-sm btn-outline-secondary ms-1"
+                                                   title="Editar paradas de esta ruta">
+                                                    <i class="bi bi-pencil"></i>
                                                 </a>
                                             }
                                             else

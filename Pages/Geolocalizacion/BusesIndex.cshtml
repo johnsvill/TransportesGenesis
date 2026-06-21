@@ -247,7 +247,7 @@
                         <div class="card-body p-4">
                             <!-- Información del bus -->
                             <div class="row mb-3">
-                                <div class="col-6">
+                                <div class="col-4">
                                     <div class="text-center">
                                         <div class="capacity-badge d-inline-block">
                                             <i class="bi bi-people-fill me-2"></i>
@@ -258,14 +258,25 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-6">
+                                <div class="col-4">
                                     <div class="text-center">
                                         <div class="routes-indicator d-inline-block">
-                                            <i class="bi bi-geo-alt-fill me-2"></i>
-                                            @bus.RutasActivas
+                                            <i class="bi bi-signpost-split me-2"></i>
+                                            @bus.RutasAsignadas
                                         </div>
                                         <div class="mt-2">
-                                            <small class="text-muted">Rutas Activas</small>
+                                            <small class="text-muted">Rutas asignadas</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="text-center">
+                                        <div class="routes-indicator d-inline-block @(bus.RutasActivas > 0 ? "bg-success text-white" : "")">
+                                            <i class="bi bi-bus-front me-2"></i>
+                                            @(bus.RutasActivas > 0 ? "Sí" : "No")
+                                        </div>
+                                        <div class="mt-2">
+                                            <small class="text-muted">En recorrido</small>
                                         </div>
                                     </div>
                                 </div>
@@ -330,8 +341,12 @@
                                 <small class="text-muted">Capacidad Total</small>
                             </div>
                             <div class="col-6 col-md-3">
-                                <div class="fw-bold fs-4 text-warning">@Model.Buses.Sum(b => b.RutasActivas)</div>
-                                <small class="text-muted">Rutas Totales</small>
+                                <div class="fw-bold fs-4 text-warning">@Model.Buses.Sum(b => b.RutasAsignadas)</div>
+                                <small class="text-muted">Rutas asignadas</small>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="fw-bold fs-4 text-success">@Model.Buses.Count(b => b.RutasActivas > 0)</div>
+                                <small class="text-muted">En recorrido</small>
                             </div>
                         </div>
                     </div>

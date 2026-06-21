@@ -10,6 +10,8 @@ namespace TransportesGenesis.DTOs.Geolocalizacion
         public DateTime FechaRegistro { get; set; }
 
         // Datos adicionales para vistas
+        public int RutasAsignadas { get; set; }
+        /// <summary>Rutas en recorrido ahora (EsActiva + GPS reciente).</summary>
         public int RutasActivas { get; set; }
         public string? PilotoAsignado { get; set; }
     }

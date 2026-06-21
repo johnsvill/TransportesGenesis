@@ -1,0 +1,132 @@
+@page
+@model TransportesGenesis.Pages.Geolocalizacion.BusDetailsModel
+@{
+    ViewData["Title"] = "Detalle de Bus";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <h2 class="text-primary"><i class="bi bi-eye"></i> Detalle de Bus</h2>
+        <div class="d-flex gap-2">
+            <a asp-page="./BusEdit" asp-route-id="@Model.Bus!.IdBus" class="btn btn-warning">
+                <i class="bi bi-pencil"></i> Editar
+            </a>
+            <a asp-page="./BusesIndex" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Volver
+            </a>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-warning text-dark">
+                    <i class="bi bi-bus-front"></i> Información del Bus
+                </div>
+                <div class="card-body">
+                    <p class="mb-1"><strong>Placa:</strong> @Model.Bus!.Placa</p>
+                    <p class="mb-1"><strong>Modelo:</strong> @(Model.Bus.Modelo ?? "N/A")</p>
+                    <p class="mb-1"><strong>Capacidad:</strong> @Model.Bus.Capacidad</p>
+                    <p class="mb-1"><strong>Rutas asignadas:</strong> @Model.Bus.RutasAsignadas</p>
+                    <p class="mb-1">
+                        <strong>En recorrido:</strong>
+                        <span class="badge @(Model.Bus.RutasActivas > 0 ? "bg-success" : "bg-secondary")">
+                            @(Model.Bus.RutasActivas > 0 ? "Sí" : "No")
+                        </span>
+                    </p>
+                    <p class="mb-0">
+                        <strong>Estado:</strong>
+                        <span class="badge @(Model.Bus.Estado ? "bg-success" : "bg-secondary")">
+                            @(Model.Bus.Estado ? "Activo" : "Inactivo")
+                        </span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <i class="bi bi-person-badge"></i> Piloto Asignado
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(Model.NombrePiloto))
+                    {
+                        <p class="mb-1"><strong>Nombre:</strong> @Model.NombrePiloto</p>
+                        <p class="mb-0"><strong>Email:</strong> @(Model.EmailPiloto ?? "N/A")</p>
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-2">Sin piloto asignado.</p>
+                        <a href="/Admin/GestionarAsignaciones" class="btn btn-sm btn-outline-primary">Gestionar Asignaciones</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="bi bi-signpost-split"></i> Rutas del Bus
+        </div>
+        <div class="card-body p-0">
+            @if (Model.Rutas.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Turno</th>
+                                <th>Hora Inicio</th>
+                                <th>Paradas</th>
+                                <th>Estado ruta</th>
+                                <th>En recorrido</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var ruta in Model.Rutas)
+                            {
+                                <tr>
+                                    <td>@ruta.IdRuta</td>
+                                    <td>@ruta.Nombre</td>
+                                    <td>@ruta.TipoRuta</td>
+                                    <td>@ruta.HoraInicio.ToString(@"hh\:mm")</td>
+                                    <td>@ruta.TotalParadas</td>
+                                    <td>
+                                        <span class="badge @(ruta.EsActiva ? "bg-success" : "bg-secondary")">
+                                            @(ruta.EsActiva ? "Operativa" : "Inactiva")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if (ruta.EsActiva && Model.Bus!.RutasActivas > 0)
+                                        {
+                                            <span class="badge bg-success">Sí</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">No</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p class="text-muted p-3 mb-0">No hay rutas registradas para este bus.</p>
+            }
+        </div>
+    </div>
+
+    <div class="d-flex gap-2 flex-wrap">
+        <a asp-page="/Geolocalizacion/MapaEnTiempoReal" asp-route-idBus="@Model.Bus!.IdBus" class="btn btn-info">
+            <i class="bi bi-map"></i> Ver en Mapa en Vivo
+        </a>
+        <a href="/Admin/GestionarAsignaciones" class="btn btn-primary">
+            <i class="bi bi-people"></i> Gestionar Asignaciones
+        </a>
+    </div>
+</div>

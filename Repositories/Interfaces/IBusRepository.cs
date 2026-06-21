@@ -4,6 +4,7 @@ namespace TransportesGenesis.Repositories.Interfaces
 {
     public interface IBusRepository : IRepositoryBase<Bus>
     {
+        Task<IEnumerable<Bus>> GetAllConRutasAsync();
         Task<IEnumerable<Bus>> GetActivosAsync();
         Task<Bus?> GetByPlacaAsync(string placa);
         Task<Bus?> GetConRutasAsync(int idBus);

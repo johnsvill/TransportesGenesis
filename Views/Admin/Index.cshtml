@@ -6,7 +6,14 @@
     <h2 class="text-primary">Panel de Administrador</h2>
     <p class="lead">Bienvenido, @User.Identity.Name</p>
 
-    <div class="row mt-4">
+    <!-- Sección 1: Operaciones en vivo -->
+    <hr class="my-4" />
+    <div class="row">
+        <div class="col-12">
+            <h4 class="text-secondary mb-3">Operaciones en vivo</h4>
+        </div>
+    </div>
+    <div class="row">
         <div class="col-md-4 mb-4">
             <div class="card h-100">
                 <div class="card-body">
@@ -16,17 +23,126 @@
                 </div>
             </div>
         </div>
-
         <div class="col-md-4 mb-4">
             <div class="card h-100">
                 <div class="card-body">
-                    <h5 class="card-title">🚌 Gestión de Rutas</h5>
-                    <p class="card-text">Calcular y administrar rutas de transporte</p>
-                    <a href="/Admin/CalcularRutas" class="btn btn-primary">Ir a Rutas</a>
+                    <h5 class="card-title">🚌 Gestión de Buses</h5>
+                    <p class="card-text">Administrar la flota de transporte y ubicaciones en mapa</p>
+                    <a href="/Geolocalizacion/BusesIndex" class="btn btn-primary">Ir a Buses</a>
                 </div>
             </div>
         </div>
+        <div class="col-md-4 mb-4">
+            <div class="card border-danger h-100">
+                <div class="card-body">
+                    <h5 class="card-title">📋 Historial de Alertas</h5>
+                    <p class="card-text">Acceder al historial completo de alertas y su gestión</p>
+                    <a href="/Admin/AlertasHistorial" class="btn btn-danger">Ver Historial Completo</a>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- Sección 2: Planificación de rutas y paradas -->
+    <hr class="my-4" />
+    <div class="row">
+        <div class="col-12">
+            <h4 class="text-secondary mb-3">Planificación de rutas y paradas</h4>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">🚌 Calcular Rutas Escolares</h5>
+                    <p class="card-text">Generar rutas optimizadas para todos los buses</p>
+                    <a href="/Admin/CalcularRutas" class="btn btn-primary">Calcular Rutas</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card border-primary h-100">
+                <div class="card-body">
+                    <h5 class="card-title">📍 Gestionar Paradas</h5>
+                    <p class="card-text">Editor interactivo de paradas en el mapa</p>
+                    <a href="/Admin/GestionarParadas" class="btn btn-primary">Abrir Editor</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card border-success h-100">
+                <div class="card-body">
+                    <h5 class="card-title">📊 Reporte de Rutas</h5>
+                    <p class="card-text">Ver listado completo de rutas registradas</p>
+                    <a href="/Admin/ReporteRutas" class="btn btn-success">Ver Reporte</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección 3: Personal y asignaciones -->
+    <hr class="my-4" />
+    <div class="row">
+        <div class="col-12">
+            <h4 class="text-secondary mb-3">Personal y asignaciones</h4>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">🔧 Gestionar Asignaciones</h5>
+                    <p class="card-text">Asignar pilotos y monitores a buses</p>
+                    <a href="/Admin/GestionarAsignaciones" class="btn btn-primary">Gestionar</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card border-info h-100">
+                <div class="card-body">
+                    <h5 class="card-title">👥 Asignaciones Personal</h5>
+                    <p class="card-text">Ver asignaciones de pilotos y monitores a buses</p>
+                    <a href="/Admin/ReporteAsignaciones" class="btn btn-info">Ver Asignaciones</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">👨‍💼 Usuarios del Sistema</h5>
+                    <p class="card-text">Administrar cuentas y roles del personal</p>
+                    <a href="/Admin/Usuarios" class="btn btn-success">Gestionar Usuarios</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección 4: Alumnos y asistencia -->
+    <hr class="my-4" />
+    <div class="row">
+        <div class="col-12">
+            <h4 class="text-secondary mb-3">Alumnos y asistencia</h4>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card border-success h-100">
+                <div class="card-body">
+                    <h5 class="card-title">👨‍🎓 Gestionar Alumnos</h5>
+                    <p class="card-text">Administrar alumnos, buses y coordenadas</p>
+                    <a href="/Admin/GestionarAlumnos" class="btn btn-success">Gestionar Alumnos</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card border-success h-100">
+                <div class="card-body">
+                    <h5 class="card-title">📋 Reporte de Asistencias</h5>
+                    <p class="card-text">Estadísticas y filtros de asistencia de alumnos</p>
+                    <a href="/Admin/ReporteAsistencias" class="btn btn-success">Ver Reporte</a>
+                </div>
+            </div>
+        </div>
         <div class="col-md-4 mb-4">
             <div class="card h-100">
                 <div class="card-body">
@@ -38,150 +154,42 @@
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-md-4 mb-4">
-            <div class="card border-success h-100">
-                <div class="card-body">
-                    <h5 class="card-title">📊 Reporte de Rutas</h5>
-                    <p class="card-text">Ver listado completo de rutas registradas</p>
-                    <a href="/Admin/ReporteRutas" class="btn btn-success">Ver Reporte</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4 mb-4">
-            <div class="card border-info h-100">
-                <div class="card-body">
-                    <h5 class="card-title">👥 Asignaciones Personal</h5>
-                    <p class="card-text">Ver asignaciones de pilotos y monitores a buses</p>
-                    <a href="/Admin/ReporteAsignaciones" class="btn btn-info">Ver Asignaciones</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card border-info">
-                <div class="card-body">
-                    <h5 class="card-title">📊 Dashboard Analítico</h5>
-                    <p class="card-text">KPIs, métricas y gráficos del sistema</p>
-                    <a href="/Admin/Dashboard" class="btn btn-info">Ver Dashboard</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card border-warning">
-                <div class="card-body">
-                    <h5 class="card-title">🗺️ Planificador de Rutas</h5>
-                    <p class="card-text">Herramienta de planificación avanzada</p>
-                    <a href="/Planner" class="btn btn-warning">Abrir Planner</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card border-success">
-                <div class="card-body">
-                    <h5 class="card-title">📋 Reporte de Asistencias</h5>
-                    <p class="card-text">Estadísticas y filtros de asistencia de alumnos</p>
-                    <a href="/Admin/ReporteAsistencias" class="btn btn-success">Ver Reporte</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-4 mb-4">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title">📊 Geolocalización</h5>
-                    <p class="card-text">Ver buses y ubicaciones en tiempo real</p>
-                    <a href="/Geolocalizacion/BusesIndex" class="btn btn-primary">Ir a Buses</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4 mb-4">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title">👨‍💼 Gestión de Usuarios</h5>
-                    <p class="card-text">Administrar usuarios del sistema</p>
-                    <a href="/Admin/Usuarios" class="btn btn-success">Gestionar Usuarios</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4 mb-4">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title">🔧 Gestionar Asignaciones</h5>
-                    <p class="card-text">Asignar pilotos y monitores a buses</p>
-                    <a href="/Admin/GestionarAsignaciones" class="btn btn-primary">Gestionar</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4 mb-4">
-            <div class="card border-primary h-100">
-                <div class="card-body">
-                    <h5 class="card-title">📍 Gestionar Paradas</h5>
-                    <p class="card-text">Editor interactivo de paradas en el mapa</p>
-                    <a href="/Admin/GestionarParadas" class="btn btn-primary">Abrir Editor</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card border-success">
-                <div class="card-body">
-                    <h5 class="card-title">👨‍🎓 Gestionar Alumnos</h5>
-                    <p class="card-text">Administrar alumnos, buses y coordenadas</p>
-                    <a href="/Admin/GestionarAlumnos" class="btn btn-success">Gestionar Alumnos</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
+    <!-- Sección 5: Control financiero -->
     <hr class="my-4" />
-
     <div class="row">
         <div class="col-12">
             <h4 class="text-secondary mb-3">💰 Control Financiero y Mensualidades</h4>
         </div>
     </div>
-
     <div class="row">
-        <div class="col-md-4 mb-4">
+        <div class="col-md-3 mb-4">
             <div class="card h-100">
                 <div class="card-body">
                     <h5 class="card-title">💵 Asignar Montos</h5>
-                    <p class="card-text">Configura el monto que cada padre de familia debe pagar mensualmente.</p>
+                    <p class="card-text">Configura el monto mensual que cada padre debe pagar.</p>
                     <a asp-controller="MontosPadres" asp-action="Index" class="btn btn-primary">Entrar</a>
                 </div>
             </div>
         </div>
-
-        <div class="col-md-4 mb-4">
+        <div class="col-md-3 mb-4">
             <div class="card border-success h-100">
                 <div class="card-body">
                     <h5 class="card-title">👥 Gestión de Cuentas y Padres</h5>
-                    <p class="card-text">Administra padres de familia, cuentas de acceso y roles del sistema.</p>
+                    <p class="card-text">Administra padres de familia, cuentas de acceso y roles.</p>
                     <a asp-controller="Admin" asp-action="GestionUsuarios" class="btn btn-success">Entrar</a>
                 </div>
             </div>
         </div>
-
-        <div class="col-md-4 mb-4">
+        <div class="col-md-3 mb-4">
             <div class="card border-danger h-100">
                 <div class="card-body">
                     <h5 class="card-title">💳 Validar Pagos</h5>
-                    <p class="card-text">Revisa y valida los pagos realizados por los padres de familia.</p>
+                    <p class="card-text">Revisa y valida los pagos realizados por los padres.</p>
                     <a asp-controller="Admin" asp-action="DashboardPagos" class="btn btn-danger">Entrar</a>
                 </div>
             </div>
         </div>
-
-        <div class="col-md-4 mb-4">
+        <div class="col-md-3 mb-4">
             <div class="card border-info h-100">
                 <div class="card-body">
                     <h5 class="card-title">📅 Calendario de Pagos</h5>
@@ -192,20 +200,39 @@
         </div>
     </div>
 
+    <!-- Sección 6: Analítica -->
     <hr class="my-4" />
-
     <div class="row">
         <div class="col-12">
-            <h4 class="text-secondary mb-3">🚨 Acciones Rápidas - Sistema de Alertas</h4>
+            <h4 class="text-secondary mb-3">Analítica</h4>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card border-info h-100">
+                <div class="card-body">
+                    <h5 class="card-title">📊 Dashboard Analítico</h5>
+                    <p class="card-text">KPIs, métricas y gráficos del sistema</p>
+                    <a href="/Admin/Dashboard" class="btn btn-info">Ver Dashboard</a>
+                </div>
+            </div>
         </div>
     </div>
 
-        <div class="col-md-4">
-            <div class="card border-danger">
+    <!-- Sección 7: Planner del proyecto -->
+    <hr class="my-4" />
+    <div class="row">
+        <div class="col-12">
+            <h4 class="text-secondary mb-3">Planner del proyecto</h4>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card border-warning h-100">
                 <div class="card-body">
-                    <h5 class="card-title">📋 Historial de Alertas</h5>
-                    <p class="card-text">Acceder al historial completo de alertas y su gestión</p>
-                    <a href="/Admin/AlertasHistorial" class="btn btn-danger">Ver Historial Completo</a>
+                    <h5 class="card-title">🗺️ Planner del desarrollo</h5>
+                    <p class="card-text">Herramienta interna de planificación y seguimiento del proyecto</p>
+                    <a href="/Planner" class="btn btn-warning">Abrir Planner</a>
                 </div>
             </div>
         </div>
