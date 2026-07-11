@@ -65,6 +65,46 @@ namespace TransportesGenesis.Controllers.Api
             }
         }
 
+        /// <summary>
+        /// Sincroniza un lote de puntos encolados offline (orden cronológico en el cliente).
+        /// Persiste cada punto y notifica SignalR; el último actualiza la UI en vivo.
+        /// </summary>
+        [HttpPost("lote")]
+        public async Task<ActionResult<object>> RegistrarUbicacionesLote([FromBody] List<UbicacionBusCreateDto> puntos)
+        {
+            if (puntos == null || puntos.Count == 0)
+                return BadRequest(new { error = "El lote está vacío." });
+
+            if (puntos.Count > 500)
+                return BadRequest(new { error = "El lote no puede exceder 500 puntos." });
+
+            try
+            {
+                var guardados = 0;
+                UbicacionBusDto? ultima = null;
+
+                foreach (var dto in puntos)
+                {
+                    ultima = await _ubicacionService.RegistrarUbicacionYNotificarAsync(dto);
+                    guardados++;
+                }
+
+                return Ok(new
+                {
+                    guardados,
+                    ultima
+                });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
         [HttpGet("{idBus}/historial")]
         public async Task<ActionResult<IEnumerable<UbicacionBusDto>>> GetHistorial(
             int idBus,

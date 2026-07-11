@@ -1,8 +1,25 @@
-# Plan de Pruebas: UAT, Carga y Rendimiento
-
-Documento explicativo para el equipo, el colegio y las familias sobre **cómo se probará** el sistema **Transportes Génesis** antes de ponerlo en uso real.
-
-> Este documento está escrito en lenguaje sencillo, sin tecnicismos ni código. Su objetivo es que **cualquier persona** entienda qué vamos a probar, por qué y cuándo.
+---
+documento: Plan de Pruebas — Anexo de Tesis
+proyecto: Transportes Génesis
+tipo: UAT, Carga y Rendimiento
+formato:
+  fuente: Times New Roman
+  tamano: 12 pt
+  interlineado: 1.5
+  margenes_cm:
+    superior: 2.5
+    inferior: 2.5
+    izquierdo: 3.0
+    derecho: 2.5
+  alineacion: Justificado
+  sangria_primera_linea: 0.63 cm
+institucion: "[Nombre de la universidad]"
+carrera: "[Nombre de la carrera]"
+autor: "[Nombre del autor]"
+asesor: "[Nombre del asesor]"
+lugar: San Cristóbal, departamento de San Marcos, Guatemala
+fecha: Julio 2026
+---
 
 ---
 
@@ -17,13 +34,13 @@ Documento explicativo para el equipo, el colegio y las familias sobre **cómo se
 | **Monitor** | Acompaña al piloto, ve el listado de niños y también transmite la ruta. |
 | **Administrador** | Gestiona usuarios, buses, rutas, asignaciones y valida los pagos. |
 
-**Objetivo de este documento:** dejar claro cómo se harán las pruebas para asegurar que el sistema funciona bien y es fácil de usar **antes** de entregarlo al colegio. Buscamos evitar sorpresas y dar confianza a las familias.
+**Objetivo de este documento:** establecer de forma formal y detallada cómo se ejecutarán las pruebas del sistema **Transportes Génesis** antes de entregarlo al colegio, validando los módulos de geolocalización, pagos y demás funcionalidades, con participación del segmento de **padres de familia con hijos en primer grado** en San Cristóbal, departamento de San Marcos.
+
+**Vinculación con la tesis:** Este anexo sustenta los objetivos específicos 5 y 6 del Capítulo 1 y las sub-hipótesis H1 (geolocalización), H2 (pagos) e H3 (integración), mediante pruebas UAT, encuesta post-UAT y pruebas de carga.
 
 ---
 
-## 1.b Alcance: TODOS los módulos que se van a probar
-
-No probaremos solamente el mapa. Vamos a revisar **todo el sistema**:
+## 1.2. Alcance de módulos a probar
 
 | Módulo | Qué se prueba |
 |--------|---------------|
@@ -31,12 +48,31 @@ No probaremos solamente el mapa. Vamos a revisar **todo el sistema**:
 | **Geolocalización / mapa en vivo** | Ver la ruta del bus, mapa en tiempo real, simulación de recorrido y alertas de proximidad. |
 | **Rutas y paradas** | Cálculo de rutas de mañana y tarde, gestión de paradas y sus ubicaciones. |
 | **Asistencia** | El padre confirma la asistencia y el monitor ve el listado de niños. |
-| **Pagos (módulo completo)** | Monto asignado a cada padre, subir el comprobante de pago mensual, datos de bancos y cuentas, validación del pago por el administrador (aprobado, pendiente o rechazado), panel de pagos del administrador, historial y pago en línea. |
+| **Pagos (módulo principal)** | Monto asignado, comprobante mensual, bancos/cuentas, validación admin, dashboard, historial |
+| **Pagos en línea (opcional v1.0)** | Pasarela Stripe — prueba complementaria si está habilitada en el entorno |
+| **Reportes administrativos** | Reportes de rutas, asignaciones y pagos desde panel admin |
+| **Registro de recogida** | Monitor registra recogida de estudiantes en paradas |
 | **Traslados** | Solicitud y gestión de traslados. |
 | **Alertas y notificaciones** | Avisos que recibe cada usuario. |
 | **Administración** | Gestión de usuarios, buses y asignación de piloto/monitor a cada bus. |
 
-> La idea es que **el pago funcione tan bien como el mapa**: ambos son igual de importantes para las familias.
+> El alcance incluye geolocalización y pagos como módulos centrales de la investigación; ambos deben validarse con igual rigor.
+
+### 1.2.1. Matriz de cobertura (módulo × ronda × tipo de prueba)
+
+| Módulo | Ronda 1 | Ronda 2 | Ronda 3 UAT | Ronda 4 | Selenium | Carga |
+|--------|---------|---------|-------------|---------|----------|-------|
+| Autenticación y roles | Sí | Si hubo fallo | Sí | Sí | Sí | No |
+| Geolocalización / mapa | Sí | Si hubo fallo | Sí | Sí | Sí | Sí |
+| Rutas y paradas | Sí | Si hubo fallo | Parcial (admin) | Sí | No | No |
+| Asistencia | Sí | Si hubo fallo | Sí | Sí | Sí | No |
+| Pagos (comprobante) | Sí | Si hubo fallo | Sí | Sí | Sí | Sí |
+| Pagos en línea (Stripe) | Opcional | Opcional | Opcional | Opcional | No | No |
+| Traslados | Sí | Si hubo fallo | Parcial | Sí | No | No |
+| Alertas | Sí | Si hubo fallo | Parcial | Sí | No | No |
+| Administración | Sí | Si hubo fallo | Sí | Sí | Parcial | No |
+| Reportes | Sí | Si hubo fallo | No | Sí | No | No |
+| Encuesta post-UAT | No | No | Sí | Sí | No | No |
 
 ---
 
@@ -67,7 +103,15 @@ Una **ronda de prueba** es una "vuelta completa" en la que revisamos el sistema,
 - Un padre puede darse cuenta de detalles que el equipo técnico no nota (por ejemplo, que un texto confunde o que un paso es incómodo).
 - Dan **confianza y respaldo**: si los usuarios aprueban, hay acuerdo de que el sistema está listo.
 
-**¿Quiénes participan?** Representantes del colegio y padres de prueba, acompañados por nuestro equipo.
+**¿Quiénes participan?** Representantes del colegio y **padres de familia con hijos en primer grado** (mínimo 5 participantes del segmento de estudio), acompañados por el equipo de Transportes Génesis.
+
+**Criterios de aceptación vinculados a la investigación:**
+
+| Sub-hipótesis | Qué valida la prueba | Evidencia |
+|---------------|----------------------|-----------|
+| **H1** | Mapa en vivo reduce incertidumbre | Escenario UAT mapa + ítem encuesta de seguridad |
+| **H2** | Pagos digitales mejoran transparencia | Escenario UAT pagos + ítem encuesta de claridad |
+| **H3** | Integración mejora satisfacción | Demo 3 navegadores + ítem encuesta global |
 
 **¿Cómo se registran los resultados?** Cada prueba se marca como:
 
@@ -159,6 +203,14 @@ Si el sistema se pusiera lento o se cayera en esos momentos, afectaría directam
 | **Estabilidad del mapa en vivo** | Que el mapa siga actualizándose sin trabarse ni caerse. |
 | **Estabilidad de los pagos** | Que subir y validar comprobantes funcione incluso con mucha gente a la vez. |
 
+**Metas de referencia (criterios de aprobación):**
+
+| Indicador | Meta sugerida |
+|-----------|---------------|
+| Tiempo de respuesta de pantallas | Menos de 3 segundos |
+| Mapa en vivo sin desconexiones | Sin caídas durante 30 min de simulación |
+| Subida de comprobantes simultáneos | Sin errores con al menos 10 usuarios a la vez |
+
 ---
 
 ## 7. Cómo ejecutar el plan de pruebas (paso a paso)
@@ -178,11 +230,14 @@ Esta sección explica **qué haremos en la práctica** para llevar a cabo todo l
 
 **Checklist de preparación:**
 
-- [ ] Entorno de prueba levantado
-- [ ] Usuarios de prueba funcionando (login correcto)
-- [ ] Rutas de mañana y tarde calculadas para la fecha de prueba
-- [ ] Bitácora de defectos lista
-- [ ] Reunión con colegio agendada (antes de ronda 3)
+| Ítem | Verificado (Sí/No) |
+|------|-------------------|
+| Entorno de prueba levantado | |
+| Usuarios de prueba funcionando (login correcto) | |
+| Rutas de mañana y tarde calculadas para la fecha de prueba | |
+| Bitácora de defectos lista | |
+| Reunión con colegio agendada (antes de ronda 3) | |
+| Credenciales listas para padres de primer grado (mín. 5) | |
 
 ---
 
@@ -204,7 +259,13 @@ Esta sección explica **qué haremos en la práctica** para llevar a cabo todo l
 | 6 | Padre – asistencia | Confirmar asistencia del hijo para mañana o tarde. | Confirmación guardada sin error. |
 | 7 | Padre – pagos | Ver monto, subir comprobante de prueba. | Comprobante queda en estado pendiente de validar. |
 | 8 | Admin – pagos | Revisar dashboard de pagos y validar el comprobante. | Pago marcado como aprobado o rechazado. |
-| 9 | Traslados y alertas | Probar solicitud de traslado y revisar alertas. | Flujo completo sin errores graves. |
+| 9 | Traslados | Solicitar traslado desde panel padre. | Solicitud registrada sin error grave. |
+| 10 | Alertas | Verificar alertas de proximidad durante simulación. | Alertas visibles en pantallas correspondientes. |
+| 11 | Primer ingreso | Usuario con `IsFirstLogin` debe cambiar contraseña. | Redirección a cambio de clave obligatorio. |
+| 12 | Piloto (rol separado) | Login piloto, ver ruta y simular recorrido. | Mismo bus que padre de prueba (BUS-001). |
+| 13 | Monitor (rol separado) | Login monitor, listado de niños y simulación. | Listado y mapa operativos. |
+| 14 | Admin – reportes | Generar reporte de rutas o pagos. | Reporte descargable o visible sin error. |
+| 15 | Pagos en línea (opcional) | Probar pasarela Stripe si está habilitada. | Transacción de prueba o documentar exclusión. |
 
 **Al terminar la ronda 1:**
 
@@ -232,7 +293,7 @@ Esta sección explica **qué haremos en la práctica** para llevar a cabo todo l
 ### 7.4 Ejecución de la Ronda 3 — UAT con el colegio
 
 **Cuándo:** según fecha acordada en la reunión con el colegio.  
-**Participantes:** representantes del colegio, padres de prueba (idealmente del segmento acordado) y nuestro equipo.
+**Participantes:** representantes del colegio, **padres con hijos en primer grado** (mínimo 5) y el equipo de Transportes Génesis.
 
 **Antes de la sesión UAT:**
 
@@ -245,14 +306,20 @@ Esta sección explica **qué haremos en la práctica** para llevar a cabo todo l
 
 **Escenarios UAT para el colegio (lista de ejecución):**
 
-| # | Escenario | Rol | Pregunta al usuario |
-|---|-----------|-----|---------------------|
-| 1 | Iniciar sesión | Padre | ¿Pudo entrar sin ayuda? |
-| 2 | Ver ruta del bus en el mapa | Padre | ¿Entiende dónde va el bus? |
-| 3 | Confirmar asistencia del hijo | Padre | ¿Le resultó claro el proceso? |
-| 4 | Consultar monto y subir comprobante | Padre | ¿Pudo registrar su pago? |
-| 5 | Simular recorrido del bus | Monitor/Piloto | ¿La pantalla muestra la ruta correcta? |
-| 6 | Validar un pago | Admin | ¿Puede aprobar o rechazar comprobantes? |
+| # | Escenario | Rol | Pregunta al usuario | Hipótesis |
+|---|-----------|-----|---------------------|-----------|
+| 1 | Iniciar sesión | Padre (1er grado) | ¿Pudo entrar sin ayuda? | H3 |
+| 2 | Ver ruta del bus en el mapa | Padre (1er grado) | ¿Entiende dónde va el bus? | H1 |
+| 3 | Confirmar asistencia del hijo | Padre (1er grado) | ¿Le resultó claro el proceso? | H3 |
+| 4 | Consultar monto y subir comprobante | Padre (1er grado) | ¿Pudo registrar su pago? | H2 |
+| 5 | Consultar historial de pagos | Padre (1er grado) | ¿Ve claramente el estado de sus pagos? | H2 |
+| 6 | Simular recorrido del bus | Monitor | ¿La pantalla muestra la ruta correcta? | H1 |
+| 7 | Simular recorrido del bus | Piloto | ¿Puede transmitir ubicación sin error? | H1 |
+| 8 | Validar un pago | Admin | ¿Puede aprobar o rechazar comprobantes? | H2 |
+| 9 | Gestionar asignación piloto-bus | Admin | ¿La asignación queda activa correctamente? | — |
+| 10 | Solicitar traslado | Padre | ¿El formulario es comprensible? | H3 |
+| 11 | Demo integrada (3 navegadores) | Todos | ¿El bus se mueve en padre y admin al simular? | H1, H3 |
+| 12 | Encuesta post-UAT | Padre (1er grado) | Escala Likert seguridad, transparencia, satisfacción | H1, H2, H3 |
 
 **Durante la sesión:**
 
@@ -279,11 +346,14 @@ Esta sección explica **qué haremos en la práctica** para llevar a cabo todo l
 | Paso | Acción |
 |------|--------|
 | 1 | El tester **prepara el script** con los pasos de cada flujo (login, mapa, asistencia, pagos). |
-| 2 | Verifica que el entorno de prueba esté activo. |
-| 3 | **Ejecuta el script** desde la herramienta Selenium. |
-| 4 | Revisa el **reporte de resultados**: qué pasó y qué falló. |
-| 5 | Si algo falla, lo anota en la bitácora y lo reporta al equipo de desarrollo. |
-| 6 | Tras corregir el error, **vuelve a ejecutar** solo ese script. |
+| 2 | Verifica entorno activo en `https://localhost:7241` (o URL acordada). |
+| 3 | Confirma credenciales de prueba (padre1, monitor1, admin) según `Docs/CONFIGURACION_PRUEBAS_PADRE_PILOTO_MONITOR.md`. |
+| 4 | **Ejecuta el script** desde la herramienta Selenium. |
+| 5 | Revisa el **reporte de resultados**: qué pasó y qué falló. |
+| 6 | Si algo falla, lo anota en la bitácora y lo reporta al equipo de desarrollo. |
+| 7 | Tras corregir el error, **vuelve a ejecutar** solo ese script. |
+
+**Criterio de script aprobado:** el script pasa 3 ejecuciones consecutivas sin fallos en el entorno de prueba.
 
 **Flujos a ejecutar en cada ronda con Selenium:**
 
@@ -309,16 +379,8 @@ Esta sección explica **qué haremos en la práctica** para llevar a cabo todo l
 | 2 | Configurar la herramienta de carga (JMeter o k6) con esos escenarios. |
 | 3 | Ejecutar la simulación en el **entorno de prueba** (nunca en producción). |
 | 4 | Registrar: tiempo de respuesta, errores, caídas del mapa o de pagos. |
-| 5 | Comparar resultados con las metas (ver tabla de la sección 6). |
+| 5 | Comparar resultados con las **metas de la sección 6**. |
 | 6 | Si no cumple → reportar al equipo técnico para optimizar antes de la ronda 4. |
-
-**Metas de referencia:**
-
-| Indicador | Meta sugerida |
-|-----------|---------------|
-| Tiempo de respuesta de pantallas | Menos de 3 segundos |
-| Mapa en vivo sin desconexiones | Sin caídas durante 30 min de simulación |
-| Subida de comprobantes simultáneos | Sin errores con al menos 10 usuarios a la vez |
 
 ---
 
@@ -331,8 +393,9 @@ Esta sección explica **qué haremos en la práctica** para llevar a cabo todo l
 1. Repetir los escenarios UAT que quedaron con observaciones o rechazados.
 2. Ejecutar scripts Selenium de los flujos corregidos.
 3. Confirmar con el colegio (breve sesión o por escrito) que los puntos pendientes quedaron resueltos.
-4. Elaborar **acta de cierre** con: fecha, participantes, módulos probados, resultado final.
-5. Marcar el plan como **completado** si no hay errores graves abiertos.
+4. Elaborar **acta de cierre** (ver plantilla sección 9.1).
+5. Ejecutar **demo integrada 7.8** como prueba de cierre obligatoria.
+6. Marcar el plan como **completado** si no hay errores graves abiertos.
 
 ---
 
@@ -353,27 +416,51 @@ Para validar geolocalización + pagos en una sola sesión, seguir este orden (de
 
 ## 8. Entorno de pruebas
 
-Todas las pruebas se realizan en un **ambiente separado** (de prueba), **no** en el sistema real que usarán las familias. Esto asegura que:
+Todas las pruebas se realizan en un **ambiente separado** (de prueba), **no** en el sistema real que usarán las familias.
 
-- Ningún experimento afecte los datos reales del colegio ni de los padres.
-- Podamos usar **datos de prueba** con libertad (usuarios, buses y pagos ficticios).
+| Elemento | Especificación |
+|----------|----------------|
+| **URL de prueba** | `https://localhost:7241` (desarrollo) o servidor acordado |
+| **Base de datos** | `TransportesGenesis` en entorno local o de prueba |
+| **Sistema operativo** | Windows 10/11 (equipo de desarrollo) |
+| **Navegadores** | Chrome, Edge o Firefox (versiones actuales) |
+| **Usuarios seed** | padre1, monitor1, piloto1, admin — contraseña `Admin123!` |
+| **Bus de demo** | BUS-001 (IdBus 4) alineado con hijos de padre1 |
+| **Documentación de apoyo** | `Docs/CONFIGURACION_PRUEBAS_PADRE_PILOTO_MONITOR.md` |
 
-El proyecto ya cuenta con usuarios y escenarios de prueba definidos (por ejemplo, el padre de prueba, piloto/monitor y el bus **BUS-001**), descritos en el documento `Docs/CONFIGURACION_PRUEBAS_PADRE_PILOTO_MONITOR.md`.
+Esto asegura que ningún experimento afecte los datos reales del colegio ni de los padres, y que se puedan usar datos de prueba con libertad.
 
 ---
 
 ## 9. Registro de errores (bitácora de defectos)
 
-Cada problema que se encuentre se anota en una **bitácora** simple para darle seguimiento hasta cerrarlo:
+Cada problema se registra en la bitácora con los siguientes campos:
 
-| Dato | Ejemplo |
-|------|---------|
-| **Qué falló** | "Al subir el comprobante aparece un error." |
-| **En qué módulo/rol** | Pagos / Padre de familia. |
-| **Gravedad** | Grave, media o menor. |
-| **Estado** | Abierto, en corrección o cerrado. |
+| Campo | Descripción | Ejemplo |
+|-------|-------------|---------|
+| **ID** | Identificador único | DEF-001 |
+| **Qué falló** | Descripción breve | Error al subir comprobante |
+| **Módulo / Rol** | Área afectada | Pagos / Padre de familia |
+| **Pasos para reproducir** | Secuencia | 1. Login padre 2. Pagos 3. Subir archivo |
+| **Gravedad** | Grave / Media / Menor | Media |
+| **Estado** | Abierto / En corrección / Cerrado | Abierto |
+| **Evidencia** | Captura o referencia | captura_pago_error.png |
+| **Responsable** | Quién corrige | Equipo desarrollo |
+| **Fecha cierre** | Cuándo se resolvió | — |
 
-Así nada se pierde y todos sabemos qué falta corregir antes de avanzar de ronda.
+### 9.1. Plantilla de acta de cierre
+
+| Campo | Contenido |
+|-------|-----------|
+| **Fecha** | |
+| **Participantes** | Equipo Génesis + representantes colegio |
+| **Rondas completadas** | 1, 2, 3, 4 |
+| **Módulos probados** | Listado de módulos de sección 1.2 |
+| **Escenarios UAT** | Aprobados / Con observaciones / Rechazados |
+| **Encuesta post-UAT** | Promedio H1, H2, H3 (escala 1–5) |
+| **Errores graves abiertos** | Ninguno / Listado |
+| **Resultado final** | Aprobado para entrega / Pendiente |
+| **Firmas** | Responsable equipo / Representante colegio |
 
 ---
 
@@ -412,7 +499,10 @@ Así nada se pierde y todos sabemos qué falta corregir antes de avanzar de rond
 | **Script** | Lista de pasos escrita por adelantado que indica qué hacer en cada prueba. |
 | **Carga** | Muchos usuarios usando el sistema al mismo tiempo. |
 | **Rendimiento** | Qué tan rápido responde el sistema. |
-| **Bitácora de defectos** | Lista donde se anotan y se les da seguimiento a los errores encontrados. |
+| **Bitácora de defectos** | Registro formal de errores con seguimiento hasta cierre. |
+| **Acta de cierre** | Documento firmado que certifica fin de pruebas y resultado. |
+| **Encuesta post-UAT** | Cuestionario Likert para medir H1, H2 y H3. |
+| **Entorno de prueba** | Instancia del sistema separada de producción. |
 
 ---
 
@@ -428,4 +518,4 @@ Con estos tres pilares buscamos entregar al colegio un sistema **probado, establ
 
 ---
 
-*Documento elaborado para Transportes Génesis — julio 2026.*
+*Documento formal de tesis — Transportes Génesis — Julio 2026*

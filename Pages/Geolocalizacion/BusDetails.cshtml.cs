@@ -40,7 +40,7 @@ namespace TransportesGenesis.Pages.Geolocalizacion
             Bus = await _busService.GetBusByIdAsync(id);
             if (Bus == null)
             {
-                return RedirectToPage("./BusesIndex");
+                return RedirectToPage("/Geolocalizacion/BusesIndex");
             }
 
             Rutas = await _rutaService.GetRutasByBusAsync(id);

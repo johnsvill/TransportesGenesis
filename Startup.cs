@@ -139,13 +139,12 @@ public static class Startup
         // SignalR endpoint para notificaciones
         app.MapHub<TransportesGenesis.Hubs.NotificacionesHub>("/notificacionesHub");
 
-        // Mapear rutas de controladores MVC ANTES que Razor Pages para que AuthController tenga prioridad
+        // Razor Pages primero: evita que {controller}/{action} capture URLs como /Geolocalizacion/BusCreate
+        app.MapRazorPages();
+
         app.MapControllerRoute(
             name: "default",
             pattern: "{controller=Home}/{action=Index}/{id?}");
-
-        // Habilitar Razor Pages (necesarias para Admin, Padres, Geolocalizacion, etc.)
-        app.MapRazorPages();
     }
 
     private static async Task SeedRolesAndAdmin(RoleManager<IdentityRole> roleManager, UserManager<AppUser> userManager)

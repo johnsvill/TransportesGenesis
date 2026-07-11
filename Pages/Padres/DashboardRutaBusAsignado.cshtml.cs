@@ -32,8 +32,11 @@ namespace TransportesGenesis.Pages.Padres
         public string RutaCompletaJson   { get; set; } = "[]"; // ruta completa del bus (en vivo)
         public string ParadasHijosJson   { get; set; } = "[]"; // paradas/casas de los hijos del padre
 
-        public decimal ColegioLatitud  { get; set; } = 14.6270m;
-        public decimal ColegioLongitud { get; set; } = -90.5125m;
+        public decimal ColegioLatitud  { get; set; } = 14.6235m;
+        public decimal ColegioLongitud { get; set; } = -90.4956m;
+        public string ColegioNombre { get; set; } = "Colegio";
+        public bool AvisoBusesDistintos { get; set; }
+        public string? MensajeBusesDistintos { get; set; }
 
         private readonly IAlumnoRepository    _alumnoRepo;
         private readonly IBusService          _busService;
@@ -102,6 +105,18 @@ namespace TransportesGenesis.Pages.Padres
 
                 IdBusAsignado = grupoBus.Key;
 
+                var busesDistintos = hijos
+                    .Where(h => h.IdBusAsignado.HasValue)
+                    .Select(h => h.IdBusAsignado!.Value)
+                    .Distinct()
+                    .Count();
+                if (busesDistintos > 1)
+                {
+                    AvisoBusesDistintos = true;
+                    MensajeBusesDistintos =
+                        $"Tus hijos están en {busesDistintos} buses distintos. Se muestra el bus #{IdBusAsignado} (el más frecuente). Contacta al administrador si necesitas ver otro.";
+                }
+
                 var bus = await _busService.GetBusByIdAsync(IdBusAsignado);
                 if (bus != null)
                 {
@@ -124,10 +139,11 @@ namespace TransportesGenesis.Pages.Padres
                         NombrePiloto = asignacion.UserName ?? asignacion.Email ?? "—";
                 }
 
-                // [FASE 0.6] Colegio desde configuración del sistema
-                var (latCole, lonCole) = await _configService.ObtenerCoordenadasColegioAsync();
-                ColegioLatitud  = latCole;
-                ColegioLongitud = lonCole;
+                // Colegio desde configuración del sistema
+                var colegio = await _configService.ObtenerColegioAsync();
+                ColegioLatitud  = colegio.Latitud;
+                ColegioLongitud = colegio.Longitud;
+                ColegioNombre = colegio.Nombre;
 
                 var rutas = (await _rutaRepo.GetActivasByBusAsync(IdBusAsignado)).ToList();
 
@@ -169,7 +185,7 @@ namespace TransportesGenesis.Pages.Padres
                             {
                                 nombre    = p.IdAlumno.HasValue
                                     ? $"{p.Alumno?.Nombre} {p.Alumno?.Apellido}".Trim()
-                                    : "Colegio Genesis",
+                                    : ColegioNombre,
                                 lat       = (double)p.Latitud,
                                 lng       = (double)p.Longitud,
                                 orden     = p.Orden,
@@ -253,7 +269,7 @@ namespace TransportesGenesis.Pages.Padres
 
                             paradasFiltradas.Add(new
                             {
-                                nombre   = "Colegio Genesis",
+                                nombre   = ColegioNombre,
                                 lat      = (double)ColegioLatitud,
                                 lng      = (double)ColegioLongitud,
                                 orden    = 3,
@@ -266,7 +282,7 @@ namespace TransportesGenesis.Pages.Padres
                             // Tarde: colegio → parada hijo → casa
                             paradasFiltradas.Add(new
                             {
-                                nombre   = "Colegio Genesis",
+                                nombre   = ColegioNombre,
                                 lat      = (double)ColegioLatitud,
                                 lng      = (double)ColegioLongitud,
                                 orden    = 1,

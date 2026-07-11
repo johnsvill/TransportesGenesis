@@ -148,6 +148,9 @@
                             <span id="estadoGPS" class="badge bg-secondary badge-gps">
                                 <i class="bi bi-geo-alt"></i> Detectando GPS...
                             </span>
+                            <span id="badgeColaOffline" class="badge bg-warning text-dark d-none">
+                                <i class="bi bi-cloud-slash"></i> <span id="textoColaOffline">Sin conexión</span>
+                            </span>
                             <a href="/Auth/Logout" class="btn btn-light btn-sm">
                                 <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
                             </a>
@@ -1349,25 +1352,67 @@
                     setTimeout(()=>{ if (cont.parentNode) cont.remove(); }, 6000);
                 });
 
-                // [EN VIVO - FASE 0.3] Canal principal: POST /api/ubicaciones → UbicacionBusService → SignalR
-                // [FALLBACK] Si el API falla, usar hub directo
+                // [EN VIVO] Canal principal: POST /api/ubicaciones (+ cola offline si falla la red)
+                function actualizarBadgeColaOffline(n) {
+                    const badge = document.getElementById('badgeColaOffline');
+                    const texto = document.getElementById('textoColaOffline');
+                    if (!badge || !texto) return;
+                    if (window.UbicacionOfflineQueue?.isFlushing?.()) {
+                        badge.classList.remove('d-none');
+                        badge.className = 'badge bg-info text-dark';
+                        texto.innerHTML = 'Sincronizando…';
+                        return;
+                    }
+                    if (n > 0 || !navigator.onLine) {
+                        badge.classList.remove('d-none');
+                        badge.className = 'badge bg-warning text-dark';
+                        texto.innerHTML = !navigator.onLine
+                            ? `Sin conexión – cola (${n})`
+                            : `Puntos en cola (${n})`;
+                    } else {
+                        badge.classList.add('d-none');
+                    }
+                }
+
+                if (window.UbicacionOfflineQueue) {
+                    window.UbicacionOfflineQueue.onChange(actualizarBadgeColaOffline);
+                    actualizarBadgeColaOffline(window.UbicacionOfflineQueue.size());
+                    window.addEventListener('online', () => {
+                        actualizarBadgeColaOffline(window.UbicacionOfflineQueue.size());
+                        window.UbicacionOfflineQueue.flush();
+                    });
+                    window.addEventListener('offline', () => actualizarBadgeColaOffline(window.UbicacionOfflineQueue.size()));
+                }
+
                 setInterval(() => {
                     try {
                         if (typeof simulacionPilotoActiva !== 'undefined' && simulacionPilotoActiva && typeof marcadorBusSimulacion !== 'undefined' && marcadorBusSimulacion) {
                             const latlng = marcadorBusSimulacion.getLatLng();
                             if (idBus !== null) {
-                                fetch('/api/ubicaciones', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ idBus: parseInt(idBus), latitud: latlng.lat, longitud: latlng.lng, velocidad: 10.0, direccion: 0 })
-                                }).then(r => {
-                                    if (!r.ok) throw new Error('API ' + r.status);
-                                }).catch(() => {
-                                    try {
-                                        if (window.pilotoNot?.reportarUbicacionBus)
-                                            window.pilotoNot.reportarUbicacionBus(parseInt(idBus), latlng.lat, latlng.lng);
-                                    } catch (e) { console.warn('[Piloto] Fallback hub falló:', e); }
-                                });
+                                const point = { idBus: parseInt(idBus), latitud: latlng.lat, longitud: latlng.lng, velocidad: 10.0, direccion: 0 };
+                                if (window.UbicacionOfflineQueue) {
+                                    window.UbicacionOfflineQueue.enviarUbicacion(point, {
+                                        onHubFallback: (p) => {
+                                            try {
+                                                if (window.pilotoNot?.reportarUbicacionBus)
+                                                    window.pilotoNot.reportarUbicacionBus(p.idBus, p.latitud, p.longitud);
+                                            } catch (e) { console.warn('[Piloto] Fallback hub falló:', e); }
+                                        }
+                                    });
+                                } else {
+                                    fetch('/api/ubicaciones', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify(point)
+                                    }).then(r => {
+                                        if (!r.ok) throw new Error('API ' + r.status);
+                                    }).catch(() => {
+                                        try {
+                                            if (window.pilotoNot?.reportarUbicacionBus)
+                                                window.pilotoNot.reportarUbicacionBus(parseInt(idBus), latlng.lat, latlng.lng);
+                                        } catch (e) { console.warn('[Piloto] Fallback hub falló:', e); }
+                                    });
+                                }
                             }
                         }
                     } catch (e) { console.warn('Error reporter ubicación:', e); }

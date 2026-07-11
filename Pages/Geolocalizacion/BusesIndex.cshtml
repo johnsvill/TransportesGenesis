@@ -1,4 +1,4 @@
-@page
+@page "/Geolocalizacion/BusesIndex"
 @model TransportesGenesis.Pages.Geolocalizacion.BusesIndexModel
 @{
     ViewData["Title"] = "Gestión de Buses";
@@ -198,18 +198,71 @@
                 </p>
             </div>
             <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                <div class="d-flex justify-content-center justify-content-md-end">
+                <div class="d-flex justify-content-center justify-content-md-end gap-2">
                     <div class="bg-white bg-opacity-20 rounded-pill px-4 py-2">
                         <i class="bi bi-speedometer2 me-2"></i>
                         <span class="fw-semibold">@(Model.Buses?.Count() ?? 0) Buses</span>
                     </div>
+                    @if (Model.Buses != null && Model.Buses.Any())
+                    {
+                        <button type="button" class="btn btn-light" onclick="document.getElementById('crear-bus-form')?.scrollIntoView({ behavior: 'smooth' })">
+                            <i class="bi bi-plus-circle me-1"></i> Nuevo bus
+                        </button>
+                    }
                 </div>
             </div>
         </div>
     </div>
 
+    @if (TempData["Mensaje"] != null)
+    {
+        <div class="alert alert-@(TempData["TipoMensaje"] ?? "success") alert-dismissible fade show">
+            @TempData["Mensaje"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(Model.Mensaje))
+    {
+        <div class="alert alert-@(Model.TipoMensaje ?? "danger") alert-dismissible fade show">
+            @Model.Mensaje
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
     @if (Model.Buses != null && Model.Buses.Any())
     {
+        <div id="crear-bus-form" class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Agregar bus</h5>
+            </div>
+            <div class="card-body">
+                <form method="post"
+                      asp-page="/Geolocalizacion/BusesIndex"
+                      asp-page-handler="CrearBus"
+                      asp-antiforgery="true"
+                      class="row g-3 align-items-end">
+                    @Html.AntiForgeryToken()
+                    <div class="col-md-3">
+                        <label asp-for="Input.Placa" class="form-label">Placa *</label>
+                        <input asp-for="Input.Placa" class="form-control" placeholder="BUS-002" required />
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Input.Modelo" class="form-label">Modelo</label>
+                        <input asp-for="Input.Modelo" class="form-control" placeholder="Mercedes-Benz Sprinter" />
+                    </div>
+                    <div class="col-md-2">
+                        <label asp-for="Input.Capacidad" class="form-label">Capacidad *</label>
+                        <input asp-for="Input.Capacidad" type="number" min="1" max="100" class="form-control" value="30" required />
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-plus-circle me-1"></i> Crear bus
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <!-- Vista de cards para móvil y tablet -->
         <div class="row g-4">
             @foreach (var bus in Model.Buses)
@@ -365,12 +418,32 @@
                     </div>
                     <h4 class="mb-3 text-muted">¡No hay buses registrados!</h4>
                     <p class="text-muted mb-4">
-                        Comienza agregando tu primer bus para gestionar el transporte escolar
+                        Completa el formulario para registrar tu primer bus
                     </p>
-                    <a asp-page="./BusCreate" class="btn btn-primary btn-lg px-5 py-3">
-                        <i class="bi bi-plus-circle-fill me-2"></i>
-                        Crear Primer Bus
-                    </a>
+                <form id="crear-bus-form" method="post"
+                      asp-page="/Geolocalizacion/BusesIndex"
+                      asp-page-handler="CrearBus"
+                      asp-antiforgery="true"
+                      class="text-start mx-auto"
+                      style="max-width: 420px;">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label asp-for="Input.Placa" class="form-label fw-semibold">Placa *</label>
+                            <input asp-for="Input.Placa" class="form-control" placeholder="Ej: BUS-001" required />
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Input.Modelo" class="form-label fw-semibold">Modelo</label>
+                            <input asp-for="Input.Modelo" class="form-control" placeholder="Ej: Mercedes-Benz Sprinter" />
+                        </div>
+                        <div class="mb-4">
+                            <label asp-for="Input.Capacidad" class="form-label fw-semibold">Capacidad *</label>
+                            <input asp-for="Input.Capacidad" type="number" min="1" max="100" class="form-control" value="30" required />
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="bi bi-plus-circle-fill me-2"></i>
+                            Crear Primer Bus
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -378,7 +451,7 @@
 </div>
 
 <!-- Botón flotante para agregar (solo en móvil) -->
-<button class="floating-add-btn d-md-none" onclick="window.location.href='/Geolocalizacion/BusCreate'">
+<button type="button" class="floating-add-btn d-md-none" onclick="document.getElementById('crear-bus-form')?.scrollIntoView({ behavior: 'smooth' })">
     <i class="bi bi-plus"></i>
 </button>
 

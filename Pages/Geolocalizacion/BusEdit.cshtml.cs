@@ -26,7 +26,7 @@ namespace TransportesGenesis.Pages.Geolocalizacion
             var bus = await _busService.GetBusByIdAsync(id);
             if (bus == null)
             {
-                return RedirectToPage("./BusesIndex");
+                return RedirectToPage("/Geolocalizacion/BusesIndex");
             }
 
             Bus = new BusUpdateDto
@@ -60,7 +60,7 @@ namespace TransportesGenesis.Pages.Geolocalizacion
                 await _busService.UpdateBusAsync(Bus);
                 TempData["Mensaje"] = "Bus actualizado correctamente.";
                 TempData["TipoMensaje"] = "success";
-                return RedirectToPage("./BusesIndex");
+                return RedirectToPage("/Geolocalizacion/BusesIndex");
             }
             catch (Exception ex)
             {

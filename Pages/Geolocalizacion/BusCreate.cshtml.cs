@@ -44,7 +44,7 @@ namespace TransportesGenesis.Pages.Geolocalizacion
                 await _busService.CreateBusAsync(Bus);
                 TempData["Mensaje"] = "Bus creado correctamente.";
                 TempData["TipoMensaje"] = "success";
-                return RedirectToPage("./BusesIndex");
+                return RedirectToPage("/Geolocalizacion/BusesIndex");
             }
             catch (Exception ex)
             {

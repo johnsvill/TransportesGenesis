@@ -395,8 +395,8 @@ namespace TransportesGenesis.Services.Implementations
                 {
                     IdParada = p.IdParada,
                     IdAlumno = p.IdAlumno,
-                    // Si IdAlumno es null (colegio), usar "Colegio Genesis"
-                    NombreAlumno = p.IdAlumno.HasValue ? (p.Alumno?.Nombre ?? "Desconocido") : "Colegio Genesis",
+                    // Si IdAlumno es null (colegio), usar nombre configurado
+                    NombreAlumno = p.IdAlumno.HasValue ? (p.Alumno?.Nombre ?? "Desconocido") : "Colegio",
                     Latitud = p.Latitud,
                     Longitud = p.Longitud,
                     Direccion = p.Direccion,
@@ -436,6 +436,8 @@ namespace TransportesGenesis.Services.Implementations
             // Obtener coordenadas del colegio
             var (latColegio, lonColegio) = await _configuracionService.ObtenerCoordenadasColegioAsync();
             var direccionColegio = await _configuracionService.ObtenerDireccionColegioAsync();
+            var colegioConfig = await _configuracionService.ObtenerColegioAsync();
+            var nombreColegio = colegioConfig.Nombre;
             Console.WriteLine($"[ALGORITMO] Colegio en: {latColegio}, {lonColegio} - {direccionColegio}");
 
             // Determinar punto de inicio según turno
@@ -462,7 +464,7 @@ namespace TransportesGenesis.Services.Implementations
                 paradas.Add(new ParadaRutaDto
                 {
                     IdAlumno = null, // null indica que es el colegio (sin alumno asignado)
-                    NombreAlumno = "Colegio Genesis",
+                    NombreAlumno = nombreColegio,
                     Latitud = latColegio,
                     Longitud = lonColegio,
                     Direccion = direccionColegio,
@@ -532,7 +534,7 @@ namespace TransportesGenesis.Services.Implementations
                 paradas.Add(new ParadaRutaDto
                 {
                     IdAlumno = null, // null indica que es el colegio (sin alumno asignado)
-                    NombreAlumno = "Colegio Genesis",
+                    NombreAlumno = nombreColegio,
                     Latitud = latColegio,
                     Longitud = lonColegio,
                     Direccion = direccionColegio,

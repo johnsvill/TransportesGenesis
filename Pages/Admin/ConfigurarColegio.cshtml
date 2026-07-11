@@ -1,0 +1,157 @@
+@page
+@model TransportesGenesis.Pages.Admin.ConfigurarColegioModel
+@{
+    ViewData["Title"] = "Configurar Colegio";
+}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="text-primary mb-1">
+                <i class="bi bi-building"></i> Colegio (principal)
+            </h2>
+            <p class="text-muted mb-0">
+                Parada fija del sistema. Hoy hay un colegio; más adelante se podrán agregar varios.
+            </p>
+        </div>
+        <a href="/Admin/Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Volver al panel
+        </a>
+    </div>
+
+    @if (TempData["Mensaje"] != null)
+    {
+        <div class="alert alert-@(TempData["TipoMensaje"] ?? "success") alert-dismissible fade show">
+            @TempData["Mensaje"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(Model.Mensaje))
+    {
+        <div class="alert alert-@(Model.TipoMensaje ?? "danger") alert-dismissible fade show">
+            @Model.Mensaje
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row g-4">
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-gear me-2"></i>Datos del colegio</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="form-colegio">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label asp-for="Input.Nombre" class="form-label fw-semibold">Nombre *</label>
+                            <input asp-for="Input.Nombre" class="form-control" required />
+                            <span asp-validation-for="Input.Nombre" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Input.Direccion" class="form-label fw-semibold">Dirección</label>
+                            <input asp-for="Input.Direccion" class="form-control" placeholder="Calle, zona, ciudad" />
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label asp-for="Input.Latitud" class="form-label fw-semibold">Latitud *</label>
+                                <input asp-for="Input.Latitud" id="input-lat" class="form-control" required />
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label asp-for="Input.Longitud" class="form-label fw-semibold">Longitud *</label>
+                                <input asp-for="Input.Longitud" id="input-lng" class="form-control" required />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label asp-for="Input.HoraInicioClases" class="form-label fw-semibold">Inicio clases</label>
+                                <input asp-for="Input.HoraInicioClases" class="form-control" placeholder="07:00" />
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label asp-for="Input.HoraFinClases" class="form-label fw-semibold">Fin clases</label>
+                                <input asp-for="Input.HoraFinClases" class="form-control" placeholder="14:30" />
+                            </div>
+                        </div>
+                        <p class="small text-muted">
+                            Haz clic en el mapa o arrastra el marcador para fijar la parada del colegio.
+                        </p>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-save me-1"></i> Guardar colegio
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-geo-alt me-2"></i>Ubicación en el mapa</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div id="mapa-colegio" style="height: 420px; border-radius: 0 0 8px 8px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        (function () {
+            const latInput = document.getElementById('input-lat');
+            const lngInput = document.getElementById('input-lng');
+            let lat = parseFloat(latInput.value) || 14.6235;
+            let lng = parseFloat(lngInput.value) || -90.4956;
+
+            const mapa = L.map('mapa-colegio').setView([lat, lng], 15);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap'
+            }).addTo(mapa);
+
+            const icono = L.divIcon({
+                className: 'custom-school-marker',
+                html: '<div style="font-size:2rem;line-height:1;">🏫</div>',
+                iconSize: [40, 40],
+                iconAnchor: [20, 20]
+            });
+
+            const marcador = L.marker([lat, lng], { draggable: true, icon: icono }).addTo(mapa);
+
+            function syncInputs(ll) {
+                latInput.value = ll.lat.toFixed(6);
+                lngInput.value = ll.lng.toFixed(6);
+            }
+
+            marcador.on('dragend', () => syncInputs(marcador.getLatLng()));
+
+            mapa.on('click', (e) => {
+                marcador.setLatLng(e.latlng);
+                syncInputs(e.latlng);
+            });
+
+            ['input', 'change'].forEach(ev => {
+                latInput.addEventListener(ev, () => {
+                    const a = parseFloat(latInput.value);
+                    const b = parseFloat(lngInput.value);
+                    if (!isNaN(a) && !isNaN(b)) {
+                        marcador.setLatLng([a, b]);
+                        mapa.setView([a, b], mapa.getZoom());
+                    }
+                });
+                lngInput.addEventListener(ev, () => {
+                    const a = parseFloat(latInput.value);
+                    const b = parseFloat(lngInput.value);
+                    if (!isNaN(a) && !isNaN(b)) {
+                        marcador.setLatLng([a, b]);
+                        mapa.setView([a, b], mapa.getZoom());
+                    }
+                });
+            });
+
+            setTimeout(() => mapa.invalidateSize(), 200);
+        })();
+    </script>
+}

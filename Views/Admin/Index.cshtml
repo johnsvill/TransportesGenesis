@@ -43,7 +43,54 @@
         </div>
     </div>
 
-    <!-- Sección 2: Planificación de rutas y paradas -->
+    <!-- Sección 2: Configurar flota (checklist operativo) -->
+    <hr class="my-4" />
+    <div class="row">
+        <div class="col-12">
+            <h4 class="text-secondary mb-3">Configurar flota</h4>
+            <p class="text-muted small mb-3">Orden recomendado: colegio → buses → asignaciones → rutas → mapa en vivo.</p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="card border-warning h-100">
+                <div class="card-body">
+                    <h5 class="card-title">🏫 Colegio (parada fija)</h5>
+                    <p class="card-text">Nombre, dirección y coordenadas del colegio principal.</p>
+                    <a href="/Admin/ConfigurarColegio" class="btn btn-warning">Configurar Colegio</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">🚌 Buses</h5>
+                    <p class="card-text">Crear y administrar uno o más buses de la flota.</p>
+                    <a href="/Geolocalizacion/BusesIndex" class="btn btn-primary">Gestionar Buses</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">🔧 Asignaciones</h5>
+                    <p class="card-text">Asignar piloto y monitor a cada bus.</p>
+                    <a href="/Admin/GestionarAsignaciones" class="btn btn-primary">Asignar personal</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card border-info h-100">
+                <div class="card-body">
+                    <h5 class="card-title">📍 Ver bus en vivo</h5>
+                    <p class="card-text">Elige un bus y monitorea su ubicación en el mapa.</p>
+                    <a href="/Geolocalizacion/MapaEnTiempoReal" class="btn btn-info">Abrir mapa</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección 3: Planificación de rutas y paradas -->
     <hr class="my-4" />
     <div class="row">
         <div class="col-12">

@@ -77,6 +77,9 @@
                         <span id="estadoSignalR" class="badge bg-secondary fs-6">
                             <i class="bi bi-wifi-off"></i> Conectando...
                         </span>
+                        <span id="badgeUltimaPosicion" class="badge bg-secondary fs-6 d-none">
+                            <i class="bi bi-geo"></i> <span id="textoUltimaPosicion">Última posición conocida</span>
+                        </span>
                         <span class="badge bg-info fs-6">
                             <i class="bi bi-bus-front"></i>
                             Bus #@Model.IdBusAsignado — @Model.PlacaBus
@@ -93,6 +96,17 @@
             </div>
         </div>
     </div>
+
+    @if (Model.AvisoBusesDistintos)
+    {
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="alert alert-warning mb-0">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>@Model.MensajeBusesDistintos
+                </div>
+            </div>
+        </div>
+    }
 
     <div class="row mb-3">
         <div class="col-12">
@@ -644,6 +658,8 @@
             if (isNaN(lat) || isNaN(lng)) return;
 
             ultimaUbicacionVivo = [lat, lng];
+            ultimaUbicacionTs = Date.now();
+            actualizarBadgeUltimaPosicion(true);
 
             if (simMarker) { mapa.removeLayer(simMarker); simMarker = null; }
 
@@ -820,6 +836,41 @@
             b.className = `badge ${ok ? 'bg-success' : 'bg-danger'} fs-6`;
             b.innerHTML = ok ? '<i class="bi bi-wifi"></i> En vivo' : '<i class="bi bi-wifi-off"></i> Sin conexión';
         }
+
+        let ultimaUbicacionTs = null;
+        const STALE_MS = 60000; // 1 min sin updates → última posición conocida
+
+        function actualizarBadgeUltimaPosicion(fresh) {
+            const badge = document.getElementById('badgeUltimaPosicion');
+            const texto = document.getElementById('textoUltimaPosicion');
+            if (!badge || !texto) return;
+            if (!ultimaUbicacionTs) {
+                badge.classList.add('d-none');
+                return;
+            }
+            if (fresh) {
+                badge.classList.add('d-none');
+                return;
+            }
+            const ago = Math.round((Date.now() - ultimaUbicacionTs) / 1000);
+            badge.classList.remove('d-none');
+            badge.className = 'badge bg-warning text-dark fs-6';
+            texto.textContent = ago < 60
+                ? `Última posición hace ${ago}s`
+                : `Última posición hace ${Math.round(ago / 60)} min`;
+        }
+
+        setInterval(() => {
+            if (!ultimaUbicacionTs) return;
+            const stale = (Date.now() - ultimaUbicacionTs) > STALE_MS;
+            actualizarBadgeUltimaPosicion(!stale);
+            if (stale && ultimaUbicacionVivo) {
+                const el = document.getElementById('estadoSimulacion');
+                if (el && !el.innerHTML.includes('Última posición')) {
+                    el.innerHTML = '<span class="text-warning"><i class="bi bi-geo"></i> Última posición conocida (sin señal reciente)</span>';
+                }
+            }
+        }, 5000);
 
         // ── Panel de alertas ──────────────────────────────────────────────────
         function agregarAlerta(mensaje, tipo) {
