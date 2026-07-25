@@ -138,12 +138,21 @@
                         <span class="badge bg-warning text-dark">👤</span> tus hijos
                         · Mañana: verde → colegio · Tarde: verde colegio → tus hijos
                     </small>
-                    <div class="d-flex gap-2">
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button onclick="mapaZoomIn()" class="btn btn-sm btn-light" title="Acercar">
+                            <i class="bi bi-zoom-in"></i>
+                        </button>
+                        <button onclick="mapaZoomOut()" class="btn btn-sm btn-light" title="Alejar">
+                            <i class="bi bi-zoom-out"></i>
+                        </button>
+                        <button onclick="ampliarVista()" class="btn btn-sm btn-warning text-dark" title="Ampliar vista (zoom máximo)">
+                            <i class="bi bi-arrows-fullscreen"></i>
+                        </button>
                         <button onclick="centrarEnBus()" class="btn btn-sm btn-light" title="Centrar en bus">
                             <i class="bi bi-crosshair"></i>
                         </button>
                         <button onclick="verRutaCompleta()" class="btn btn-sm btn-light" title="Ver ruta completa">
-                            <i class="bi bi-zoom-out"></i>
+                            <i class="bi bi-map"></i>
                         </button>
                     </div>
                 </div>
@@ -631,6 +640,21 @@
                     toast(msg, 'hijo');
                 });
 
+                // Listeners de Pausa / Reanudacion de ruta
+                if (window.padreNot.connection) {
+                    window.padreNot.connection.on('RutaPausada', function(data) {
+                        const msg = data.mensaje ?? data.Mensaje ?? 'Ruta pausada';
+                        const det = data.descripcion ?? data.Descripcion ?? '';
+                        mostrarAlertaPausa(msg, det, 'warning');
+                        agregarAlerta(msg, 'warning');
+                    });
+                    window.padreNot.connection.on('RutaReanudada', function(data) {
+                        const msg = data.mensaje ?? data.Mensaje ?? 'Ruta reanudada';
+                        mostrarAlertaPausa(msg, '', 'success');
+                        agregarAlerta(msg, 'success');
+                    });
+                }
+
                 // Si no llegan datos en vivo, sugerir plan B
                 setTimeout(() => {
                     if (!ultimaUbicacionVivo && modoVisualizacion === 'vivo') {
@@ -646,6 +670,20 @@
                 document.getElementById('estadoSimulacion').innerHTML =
                     '<span class="text-danger">Sin conexión en vivo. Usa el botón de simulación.</span>';
             }
+        }
+
+        // Notificacion flotante de pausa / reanudacion para el padre
+        function mostrarAlertaPausa(mensaje, detalle, tipo) {
+            const clases = { warning: 'alert-warning', success: 'alert-success', danger: 'alert-danger', info: 'alert-info' };
+            const iconos = { warning: 'bi-pause-circle-fill', success: 'bi-play-circle-fill', danger: 'bi-exclamation-triangle-fill', info: 'bi-info-circle-fill' };
+            const div = document.createElement('div');
+            div.className = 'alert ' + (clases[tipo] || 'alert-info') + ' alert-dismissible fade show position-fixed shadow';
+            div.style.cssText = 'top:80px;right:20px;z-index:9999;min-width:300px;max-width:420px;border-radius:10px;';
+            div.innerHTML = '<i class="bi ' + (iconos[tipo] || 'bi-info-circle-fill') + ' me-2"></i><strong>' + mensaje + '</strong>'
+                + (detalle ? '<br><small class="text-muted">' + detalle + '</small>' : '')
+                + '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+            document.body.appendChild(div);
+            setTimeout(function() { if (div.parentNode) div.remove(); }, 9000);
         }
 
         // [EN VIVO] Mover marcador verde con ubicación del piloto
@@ -910,6 +948,18 @@
         }
 
         // ── Controles del mapa ────────────────────────────────────────────────
+        function mapaZoomIn()  { if (mapa) mapa.zoomIn(); }
+        function mapaZoomOut() { if (mapa) mapa.zoomOut(); }
+        function ampliarVista() {
+            if (!mapa) return;
+            const nivelActual = mapa.getZoom();
+            const nivelAmpliado = Math.min(nivelActual + 3, 19);
+            if (busMarker) {
+                mapa.setView(busMarker.getLatLng(), nivelAmpliado, { animate: true });
+            } else {
+                mapa.setZoom(nivelAmpliado, { animate: true });
+            }
+        }
         function centrarEnBus() {
             if (busMarker) { mapa.setView(busMarker.getLatLng(), 16); busMarker.openPopup(); }
             else if (PARADAS_BD.length) mapa.setView([PARADAS_BD[0].lat, PARADAS_BD[0].lng], 14);

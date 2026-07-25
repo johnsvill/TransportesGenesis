@@ -98,6 +98,38 @@
 
     /* Audio indicator */
     .audio-indicator {
+
+    /* ── Pausa de ruta ── */
+    .panel-pausa {
+        border: 3px solid #fd7e14;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%);
+        box-shadow: 0 4px 15px rgba(253, 126, 20, 0.25);
+    }
+    .panel-pausa.en-pausa {
+        border-color: #dc3545;
+        background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        animation: pausa-pulse 1.8s ease-in-out infinite;
+    }
+    .panel-pausa.en-incidente {
+        border-color: #6f42c1;
+        background: linear-gradient(135deg, #e8d5f5 0%, #d1b3ea 100%);
+        box-shadow: 0 4px 15px rgba(111, 66, 193, 0.3);
+        animation: pausa-pulse 1.8s ease-in-out infinite;
+    }
+    @@keyframes pausa-pulse {
+        0%, 100% { box-shadow: 0 4px 15px rgba(220,53,69,0.3); }
+        50% { box-shadow: 0 6px 25px rgba(220,53,69,0.6); }
+    }
+    .btn-pausa-motivo {
+        font-size: 0.9rem;
+        transition: transform 0.15s ease;
+    }
+    .btn-pausa-motivo:hover { transform: scale(1.04); }
+    /* ─────────────────── */
+
+    .audio-indicator {
         position: fixed;
         top: 20px;
         right: 20px;
@@ -337,6 +369,63 @@
         </div>
     </div>
 
+    <!-- ═══════════════ PANEL PAUSAR RUTA ═══════════════ -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div id="panelPausaRuta" class="card panel-pausa">
+                <div class="card-header d-flex justify-content-between align-items-center"
+                     style="background: linear-gradient(135deg,#fd7e14,#e85d04); color:white;">
+                    <div>
+                        <i class="bi bi-pause-circle-fill"></i> Control de Pausa de Ruta
+                    </div>
+                    <span id="badgeEstadoPausa" class="badge bg-light text-dark">
+                        <i class="bi bi-play-circle"></i> En movimiento
+                    </span>
+                </div>
+                <div class="card-body">
+                    <!-- Estado normal (no pausado) -->
+                    <div id="bloqueNoPausado">
+                        <p class="mb-2"><strong>Pausar la ruta por uno de estos motivos:</strong></p>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button class="btn btn-outline-warning btn-pausa-motivo"
+                                    onclick="pausarRuta('espera_nino')">
+                                <i class="bi bi-person-x-fill me-1"></i> Niño no está en parada
+                            </button>
+                            <button class="btn btn-outline-danger btn-pausa-motivo"
+                                    onclick="pausarRuta('incidente')">
+                                <i class="bi bi-tools me-1"></i> Incidente en el bus
+                            </button>
+                            <button class="btn btn-outline-secondary btn-pausa-motivo"
+                                    onclick="pausarRuta('manual')">
+                                <i class="bi bi-hand-index-fill me-1"></i> Pausa manual
+                            </button>
+                        </div>
+                        <small class="text-muted mt-2 d-block">
+                            <i class="bi bi-info-circle"></i>
+                            El bus se detendrá en la última coordenada y los padres recibirán notificación.
+                        </small>
+                    </div>
+                    <!-- Estado pausado -->
+                    <div id="bloquePausado" class="d-none">
+                        <div class="alert alert-danger mb-3 py-2">
+                            <i class="bi bi-pause-circle-fill me-2"></i>
+                            <strong id="textoMotivoPausa">Ruta pausada</strong>
+                            <br>
+                            <small id="textoCoordenadaPausa" class="text-muted"></small>
+                        </div>
+                        <button class="btn btn-success btn-lg" onclick="reanudarRuta()">
+                            <i class="bi bi-play-circle-fill me-2"></i> Reanudar Ruta
+                        </button>
+                        <small class="text-muted ms-3">
+                            El bus continuará desde la posición actual.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ══════════════════════════════════════════════════ -->
+
     @if (Model.RutaActiva != null && Model.RutaActiva.Paradas.Any())
     {
         <!-- Lista de Paradas -->
@@ -553,6 +642,130 @@
             if (p.idAlumno != null) return false;
             const n = (p.nombre || '').toLowerCase();
             return n.includes('colegio') || n.includes('yulimay');
+        }
+
+        // ── Variables de pausa de ruta ──
+        let simulacionEnPausa = false;
+        let motivoPausa       = null;
+        let coordenadaPausa   = null;
+        let indicePausa       = 0;
+
+        // Inyecta ubicacion del monitor como primera parada de la ruta
+        function inyectarUbicacionPilotoComoParada0(lat, lng) {
+            if (!datosSimulacionPiloto || !datosSimulacionPiloto.paradas || !datosSimulacionPiloto.paradas.length) return;
+            if (datosSimulacionPiloto.paradas[0] && datosSimulacionPiloto.paradas[0].esPiloto) return;
+            datosSimulacionPiloto.paradas.forEach(function(p) { p.orden = (p.orden || 0) + 1; });
+            datosSimulacionPiloto.paradas.unshift({
+                nombre: 'Ubicacion del Monitor (inicio de ruta)',
+                coordenadas: [lat, lng], orden: 0, idParada: null, idAlumno: null, esPiloto: true
+            });
+            console.log('[Monitor] Ubicacion inyectada como parada 0:', lat, lng);
+        }
+
+        function pausarRuta(motivo) {
+            if (!simulacionPilotoActiva) { alert('Inicia la simulacion de ruta antes de pausarla.'); return; }
+            if (simulacionEnPausa) return;
+            simulacionEnPausa = true;
+            motivoPausa = motivo;
+            coordenadaPausa = marcadorBusSimulacion ? marcadorBusSimulacion.getLatLng() : null;
+            const textos = { espera_nino: 'Esperando al nino en la parada', incidente: 'Incidente en el bus', manual: 'Pausa manual activada' };
+            const desc = textos[motivo] || 'Ruta pausada';
+            const bloqueNo = document.getElementById('bloqueNoPausado');
+            const bloqueSi = document.getElementById('bloquePausado');
+            if (bloqueNo) bloqueNo.classList.add('d-none');
+            if (bloqueSi) bloqueSi.classList.remove('d-none');
+            const textoEl = document.getElementById('textoMotivoPausa');
+            if (textoEl) textoEl.textContent = desc;
+            const coordEl = document.getElementById('textoCoordenadaPausa');
+            if (coordEl && coordenadaPausa) {
+                coordEl.textContent = 'Detenido en: ' + coordenadaPausa.lat.toFixed(5) + ', ' + coordenadaPausa.lng.toFixed(5);
+            }
+            const badge = document.getElementById('badgeEstadoPausa');
+            if (badge) { badge.innerHTML = '<i class="bi bi-pause-circle-fill"></i> PAUSADO'; badge.className = 'badge bg-danger'; }
+            const panel = document.getElementById('panelPausaRuta');
+            if (panel) { panel.classList.remove('en-pausa', 'en-incidente'); panel.classList.add(motivo === 'incidente' ? 'en-incidente' : 'en-pausa'); }
+            const estadoEl = document.getElementById('estadoSimulacionPiloto');
+            if (estadoEl) estadoEl.innerHTML = 'Ruta pausada: ' + desc;
+            if (marcadorBusSimulacion) {
+                marcadorBusSimulacion.setIcon(L.divIcon({
+                    className: 'custom-marker',
+                    html: '<div style="width:50px;height:50px;background:#dc3545;border:4px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;color:white;box-shadow:0 4px 15px rgba(220,53,69,0.55);">||</div>',
+                    iconSize: [50, 50], iconAnchor: [25, 25]
+                }));
+                marcadorBusSimulacion.openPopup();
+            }
+            const idBus = @(Model.IdBus.HasValue ? Model.IdBus.Value.ToString() : "0");
+            const client = window.monitorNot || window.pilotoNot;
+            if (idBus && client && client.connection) {
+                const lat2 = coordenadaPausa ? coordenadaPausa.lat : 0;
+                const lng2 = coordenadaPausa ? coordenadaPausa.lng : 0;
+                client.connection.invoke('PausarRuta', idBus, motivo, lat2, lng2)
+                    .catch(function(e) { console.warn('[Monitor] PausarRuta SignalR:', e); });
+            }
+        }
+
+        function reanudarRuta() {
+            if (!simulacionEnPausa) return;
+            simulacionEnPausa = false;
+            const bloqueNo = document.getElementById('bloqueNoPausado');
+            const bloqueSi = document.getElementById('bloquePausado');
+            if (bloqueNo) bloqueNo.classList.remove('d-none');
+            if (bloqueSi) bloqueSi.classList.add('d-none');
+            const badge = document.getElementById('badgeEstadoPausa');
+            if (badge) { badge.innerHTML = '<i class="bi bi-play-circle"></i> En movimiento'; badge.className = 'badge bg-light text-dark'; }
+            const panel = document.getElementById('panelPausaRuta');
+            if (panel) panel.classList.remove('en-pausa', 'en-incidente');
+            const estadoEl = document.getElementById('estadoSimulacionPiloto');
+            if (estadoEl) estadoEl.innerHTML = 'Ruta reanudada - Bus en movimiento';
+            if (marcadorBusSimulacion) {
+                marcadorBusSimulacion.setIcon(L.divIcon({
+                    className: 'custom-marker',
+                    html: '<div class="bus-simulacion" style="width:50px;height:50px;background:linear-gradient(135deg,#ff6b35 0%,#f7931e 100%);border:4px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;color:white;box-shadow:0 4px 15px rgba(255,107,53,0.4);">Bus</div>',
+                    iconSize: [50, 50], iconAnchor: [25, 25]
+                }));
+            }
+            const puntosRestantes = (rutaSimulacionPiloto ? rutaSimulacionPiloto.length : 0) - indicePausa;
+            const minutosEta = Math.max(1, Math.round(puntosRestantes * 0.8 / 60));
+            const idBus = @(Model.IdBus.HasValue ? Model.IdBus.Value.ToString() : "0");
+            const client = window.monitorNot || window.pilotoNot;
+            if (idBus && client && client.connection) {
+                const lat2 = coordenadaPausa ? coordenadaPausa.lat : 0;
+                const lng2 = coordenadaPausa ? coordenadaPausa.lng : 0;
+                client.connection.invoke('ReanudarRuta', idBus, lat2, lng2, minutosEta)
+                    .catch(function(e) { console.warn('[Monitor] ReanudarRuta SignalR:', e); });
+            }
+            motivoPausa = null;
+            coordenadaPausa = null;
+            animarBusDesde(indicePausa);
+        }
+
+        function animarBusDesde(desdeIndice) {
+            const velocidad = 800;
+            let ip = desdeIndice;
+            function moverPuntoReanudado() {
+                if (!simulacionPilotoActiva || !rutaSimulacionPiloto || ip >= rutaSimulacionPiloto.length) {
+                    if (typeof finalizarSimulacion === 'function') finalizarSimulacion();
+                    return;
+                }
+                if (simulacionEnPausa) { indicePausa = ip; return; }
+                const pt = rutaSimulacionPiloto[ip];
+                marcadorBusSimulacion.setLatLng(pt.coordenadas);
+                mapa.panTo(pt.coordenadas, { animate: true, duration: 0.5 });
+                const progreso = Math.floor((ip / rutaSimulacionPiloto.length) * 100);
+                const est = document.getElementById('estadoSimulacionPiloto');
+                if (est) est.innerHTML = 'Bus en movimiento - Progreso: ' + progreso + '%';
+                if (pt.esParada) {
+                    if (typeof reproducirSonidoParada === 'function') reproducirSonidoParada();
+                    if (typeof mostrarAlertaParada === 'function') mostrarAlertaParada(pt);
+                    if (pt.idParada && typeof completarParadaEnServidor === 'function') completarParadaEnServidor(pt.idParada);
+                    if (est) est.innerHTML = 'Llegando a: ' + pt.nombreParada;
+                    setTimeout(function() { ip++; setTimeout(moverPuntoReanudado, velocidad + 2000); }, 1000);
+                } else {
+                    ip++;
+                    setTimeout(moverPuntoReanudado, velocidad);
+                }
+            }
+            moverPuntoReanudado();
         }
 
         function shuffleArray(arr) {
@@ -1216,6 +1429,9 @@
                         if (!rutaData || !rutaData.paradas) {
                             mapa.setView([lat, lon], 15);
                         }
+
+                        // Inyectar ubicación del monitor como parada 0 (inicio de ruta)
+                        inyectarUbicacionPilotoComoParada0(lat, lon);
                     },
                     function(error) {
                         console.error('Error obteniendo ubicación:', error);
@@ -1605,6 +1821,12 @@
             function moverSiguientePunto() {
                 if (!simulacionPilotoActiva || indicePunto >= rutaSimulacionPiloto.length) {
                     finalizarSimulacion();
+                    return;
+                }
+
+                // Verificar si la ruta está pausada
+                if (simulacionEnPausa) {
+                    indicePausa = indicePunto;
                     return;
                 }
 

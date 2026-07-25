@@ -679,9 +679,10 @@
 @section Scripts {
     <script>
         // Variables globales
+        const ID_ALUMNO = @Model.IdAlumno;  // inyectado desde el servidor
         let fechaActual = new Date();
         let fechaSeleccionada = null;
-        let asistenciaData = {}; // Simulación de datos
+        let asistenciaData = {};
 
         document.addEventListener('DOMContentLoaded', function() {
             inicializarPagina();
@@ -716,7 +717,7 @@
             // Generar calendario
             generarCalendario(year, month);
 
-            // Cargar datos de asistencia (simulados)
+            // Cargar datos de asistencia desde la API
             cargarDatosAsistencia();
         }
 
@@ -803,23 +804,28 @@
             }
         }
 
-        function cargarDatosAsistencia() {
-            // Simulación de datos de asistencia
-            const year = fechaActual.getFullYear();
+        async function cargarDatosAsistencia() {
+            if (!ID_ALUMNO) return;
+
+            const year  = fechaActual.getFullYear();
             const month = fechaActual.getMonth() + 1;
+            const inicio = `${year}-${String(month).padStart(2,'0')}-01`;
+            const lastDay = new Date(year, month, 0).getDate();
+            const fin   = `${year}-${String(month).padStart(2,'0')}-${String(lastDay).padStart(2,'0')}`;
 
-            // Generar algunos datos de ejemplo
-            for (let i = 1; i <= 15; i++) {
-                const fechaKey = `${year}-${month}-${i}`;
-                const random = Math.random();
-
-                if (random > 0.7) {
-                    asistenciaData[fechaKey] = { mañana: true, tarde: true };
-                } else if (random > 0.4) {
-                    asistenciaData[fechaKey] = { mañana: true, tarde: false };
-                } else if (random > 0.2) {
-                    asistenciaData[fechaKey] = { mañana: false, tarde: false };
-                }
+            try {
+                const res = await fetch(`/api/asistencia/alumno/${ID_ALUMNO}/historial?fechaInicio=${inicio}&fechaFin=${fin}`);
+                if (!res.ok) return;
+                const lista = await res.json();
+                asistenciaData = {};
+                lista.forEach(item => {
+                    const f = new Date(item.fecha);
+                    const key = `${f.getFullYear()}-${f.getMonth() + 1}-${f.getDate()}`;
+                    asistenciaData[key] = { mañana: item.asisteMañana, tarde: item.asisteTarde };
+                });
+                generarCalendario(year, month - 1);
+            } catch (e) {
+                console.warn('[Asistencia] No se pudo cargar historial:', e);
             }
         }
 
@@ -865,34 +871,54 @@
             element.innerHTML = html;
         }
 
-        function confirmarRuta(ruta, asistira) {
+        async function confirmarRuta(ruta, asistira) {
             if (!fechaSeleccionada) return;
 
-            const year = fechaSeleccionada.getFullYear();
+            const year  = fechaSeleccionada.getFullYear();
             const month = fechaSeleccionada.getMonth() + 1;
-            const day = fechaSeleccionada.getDate();
+            const day   = fechaSeleccionada.getDate();
             const fechaKey = `${year}-${month}-${day}`;
 
-            // Actualizar datos
+            // Actualizar estado local optimista
             if (!asistenciaData[fechaKey]) {
                 asistenciaData[fechaKey] = { mañana: null, tarde: null };
             }
-
             asistenciaData[fechaKey][ruta] = asistira;
 
             // Actualizar panel
             const elementId = ruta === 'mañana' ? 'estadoActualMañana' : 'estadoActualTarde';
             actualizarEstadoPanel(elementId, asistira);
 
-            // Regenerar calendario para actualizar colores
+            // Regenerar calendario
             generarCalendario(year, month - 1);
 
-            // Mostrar notificación
-            const rutaTexto = ruta === 'mañana' ? 'Matutina' : 'Vespertina';
-            const estadoTexto = asistira ? 'asistirá' : 'no asistirá';
-
-            // Crear notificación simple
-            mostrarNotificacion(`Ruta ${rutaTexto}: ${estadoTexto} confirmado`, 'success');
+            // Persistir en el servidor
+            if (ID_ALUMNO) {
+                const data = asistenciaData[fechaKey];
+                const fechaISO = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}T00:00:00`;
+                try {
+                    const res = await fetch('/api/asistencia/confirmar', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            idAlumno:     ID_ALUMNO,
+                            fecha:        fechaISO,
+                            asisteMañana: data.mañana ?? true,
+                            asisteTarde:  data.tarde  ?? true
+                        })
+                    });
+                    const json = await res.json();
+                    const rutaTexto  = ruta === 'mañana' ? 'Matutina' : 'Vespertina';
+                    const estadoTexto = asistira ? 'asistirá' : 'no asistirá';
+                    mostrarNotificacion(`Ruta ${rutaTexto}: ${estadoTexto} confirmado`, json.success ? 'success' : 'warning');
+                } catch (e) {
+                    mostrarNotificacion('Confirmación guardada localmente (sin conexión)', 'warning');
+                }
+            } else {
+                const rutaTexto  = ruta === 'mañana' ? 'Matutina' : 'Vespertina';
+                const estadoTexto = asistira ? 'asistirá' : 'no asistirá';
+                mostrarNotificacion(`Ruta ${rutaTexto}: ${estadoTexto} confirmado`, 'success');
+            }
         }
 
         function cerrarPanelConfirmacion() {

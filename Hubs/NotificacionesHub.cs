@@ -241,6 +241,79 @@ namespace TransportesGenesis.Hubs
 
         #endregion
 
+        #region Métodos de Pausa / Reanudación de Ruta
+
+        /// <summary>
+        /// Piloto o monitor pausa la ruta en la coordenada actual.
+        /// motivo: "espera_nino" | "incidente" | "manual"
+        /// </summary>
+        public async Task PausarRuta(int idBus, string motivo, decimal latitud, decimal longitud)
+        {
+            _logger.LogInformation($"[SIGNALR-PAUSA] Bus {idBus} pausado. Motivo: {motivo} en ({latitud},{longitud})");
+
+            var descripcionMotivo = motivo switch
+            {
+                "espera_nino" => "⏳ Esperando al niño en la parada",
+                "incidente"   => "🔧 Incidente en el bus (mecánico/llanta)",
+                _             => "⏸️ Pausa manual activada"
+            };
+
+            var data = new
+            {
+                IdBus      = idBus,
+                Motivo     = motivo,
+                Descripcion = descripcionMotivo,
+                Latitud    = latitud,
+                Longitud   = longitud,
+                Mensaje    = $"🚌 Bus #{idBus} detenido. {descripcionMotivo}",
+                FechaHora  = DateTime.Now
+            };
+
+            // Notificar a padres del bus
+            await Clients.Group($"Bus_{idBus}").SendAsync("RutaPausada", data);
+
+            // Registrar en historial de alertas (grupo Administradores)
+            await Clients.Group("Administradores").SendAsync("AlertaHistorial", new
+            {
+                Tipo      = "Pausa",
+                IdBus     = idBus,
+                Mensaje   = $"Ruta Bus #{idBus} pausada — {descripcionMotivo}",
+                FechaHora = DateTime.Now
+            });
+        }
+
+        /// <summary>
+        /// Piloto o monitor reanuda la ruta desde la coordenada donde se pausó.
+        /// </summary>
+        public async Task ReanudarRuta(int idBus, decimal latitud, decimal longitud, int minutosEtaActualizado)
+        {
+            _logger.LogInformation($"[SIGNALR-PAUSA] Bus {idBus} reanudado desde ({latitud},{longitud}). ETA +{minutosEtaActualizado} min");
+
+            var data = new
+            {
+                IdBus                  = idBus,
+                Latitud                = latitud,
+                Longitud               = longitud,
+                MinutosEtaActualizado  = minutosEtaActualizado,
+                Mensaje                = $"✅ Bus #{idBus} ha reanudado la ruta. ETA actualizado +{minutosEtaActualizado} min.",
+                FechaHora              = DateTime.Now
+            };
+
+            // Notificar a padres del bus
+            await Clients.Group($"Bus_{idBus}").SendAsync("RutaReanudada", data);
+
+            // Registrar en historial de alertas
+            await Clients.Group("Administradores").SendAsync("AlertaHistorial", new
+            {
+                Tipo      = "Reanudacion",
+                IdBus     = idBus,
+                Mensaje   = $"Ruta Bus #{idBus} reanudada desde coordenada ({latitud:F5},{longitud:F5})",
+                FechaHora = DateTime.Now
+            });
+        }
+
+        #endregion
+
         #region Métodos de Prueba (Testing)
 
         /// <summary>
