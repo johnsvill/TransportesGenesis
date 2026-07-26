@@ -903,8 +903,8 @@
                         body: JSON.stringify({
                             idAlumno:     ID_ALUMNO,
                             fecha:        fechaISO,
-                            asisteMañana: data.mañana ?? true,
-                            asisteTarde:  data.tarde  ?? true
+                            asisteMañana: data.mañana ?? false,
+                            asisteTarde:  data.tarde  ?? false
                         })
                     });
                     const json = await res.json();

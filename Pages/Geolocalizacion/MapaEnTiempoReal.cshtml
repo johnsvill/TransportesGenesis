@@ -570,7 +570,85 @@
         let COLEGIO_COORDS = [14.6235, -90.4956];
         let COLEGIO_NOMBRE = 'Colegio';
 
-        // Puntos de origen para cada bus
+        // ── Helpers de estado real ────────────────────────────────────────────
+        function calcularEstadoBus(velocidad, ultimaActualizacionIso) {
+            if (!ultimaActualizacionIso) return 'SinSeñal';
+            const minutos = (Date.now() - new Date(ultimaActualizacionIso).getTime()) / 60000;
+            if (minutos > 10) return 'SinSeñal';
+            const vel = parseFloat(velocidad) || 0;
+            return vel > 5 ? 'Movimiento' : 'Detenido';
+        }
+
+        async function segmentoOSRM(desde, hasta) {
+            try {
+                const r = await fetch(
+                    `https://router.project-osrm.org/route/v1/driving/${desde[1]},${desde[0]};${hasta[1]},${hasta[0]}?overview=full&geometries=geojson`
+                );
+                const j = await r.json();
+                if (j.routes?.[0]?.geometry?.coordinates)
+                    return j.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+            } catch (e) { console.warn('[MapaAdmin] OSRM falló:', e); }
+            return [desde, hasta];
+        }
+
+        async function cargarBusesActivosReales() {
+            try {
+                const resp = await fetch('/api/ubicaciones/buses-activos', { credentials: 'same-origin' });
+                if (!resp.ok) return;
+                const ubicaciones = await resp.json();
+                const nuevos = [];
+
+                for (const u of ubicaciones) {
+                    const elegible = busesElegibles.find(b => b.idBus === u.idBus);
+                    const ruta = elegible?.rutas?.find(r => r.turnoActual) || elegible?.rutas?.[0];
+                    const ts = u.ultimaActualizacion || u.fechaHora;
+                    nuevos.push({
+                        idBus: u.idBus,
+                        placa: u.placaBus || elegible?.placa || `Bus #${u.idBus}`,
+                        rutaNombre: ruta?.nombre || 'Sin ruta',
+                        capacidadTotal: elegible?.capacidad || 0,
+                        estudiantesAbordo: elegible?.alumnosAsignados || 0,
+                        estado: u.estado || calcularEstadoBus(u.velocidad, ts),
+                        velocidad: Math.round(parseFloat(u.velocidad) || 0),
+                        latitud: parseFloat(u.latitud),
+                        longitud: parseFloat(u.longitud),
+                        ultimaActualizacion: ts || new Date().toISOString(),
+                        enRecorrido: (u.estado || calcularEstadoBus(u.velocidad, ts)) === 'Movimiento'
+                    });
+                }
+
+                // Buses elegibles sin señal GPS → SinSeñal
+                for (const be of busesElegibles) {
+                    if (!nuevos.find(b => b.idBus === be.idBus)) {
+                        const ruta = be.rutas?.find(r => r.turnoActual) || be.rutas?.[0];
+                        nuevos.push({
+                            idBus: be.idBus,
+                            placa: be.placa,
+                            rutaNombre: ruta?.nombre || 'Sin ruta',
+                            capacidadTotal: be.capacidad || 0,
+                            estudiantesAbordo: be.alumnosAsignados || 0,
+                            estado: 'SinSeñal',
+                            velocidad: 0,
+                            latitud: COLEGIO_COORDS[0],
+                            longitud: COLEGIO_COORDS[1],
+                            ultimaActualizacion: null,
+                            enRecorrido: false
+                        });
+                    }
+                }
+
+                if (!configMapa.modoEnfocado) {
+                    busesData = nuevos;
+                    actualizarMarcadores();
+                    cargarListaBuses();
+                    actualizarEstadisticas();
+                    const el = document.getElementById('lastUpdate');
+                    if (el) el.textContent = new Date().toLocaleTimeString();
+                }
+            } catch (e) {
+                console.warn('[MapaTiempoReal] Error cargando buses activos:', e);
+            }
+        }
         const puntosOrigen = {
             1: [14.6418, -90.5135], // Zona 1
             2: [14.6152, -90.4895], // Cayalá
@@ -815,31 +893,34 @@
             marcadoresParadasEnfocadas = [];
         }
 
-        function dibujarRutaBusEnfocada(paradas) {
-            const coords = (paradas || [])
+        async function dibujarRutaBusEnfocada(paradas) {
+            const pts = (paradas || [])
                 .map(p => [parseFloat(p.latitud), parseFloat(p.longitud)])
                 .filter(c => !isNaN(c[0]) && !isNaN(c[1]) && c[0] !== 0 && c[1] !== 0);
 
-            if (coords.length < 2) return;
+            if (pts.length < 2) return;
 
             const enRecorrido = configMapa.rutaEnRecorrido === true;
             const colorRuta = enRecorrido ? '#C1121F' : '#6c757d';
 
-            const borde = L.polyline(coords, {
-                color: '#FFFFFF',
-                weight: 9,
-                opacity: 0.95,
-                lineJoin: 'round',
-                lineCap: 'round',
+            // Construir ruta real vía OSRM (misma lógica que monitor/padre)
+            let todosCoords = [];
+            for (let i = 0; i < pts.length - 1; i++) {
+                const seg = await segmentoOSRM(pts[i], pts[i + 1]);
+                if (i === 0) todosCoords.push(...seg);
+                else todosCoords.push(...seg.slice(1));
+            }
+
+            const borde = L.polyline(todosCoords, {
+                color: '#FFFFFF', weight: 9, opacity: 0.95,
+                lineJoin: 'round', lineCap: 'round',
                 dashArray: enRecorrido ? null : '12, 8'
             }).addTo(mapaRealTime);
 
-            const linea = L.polyline(coords, {
-                color: colorRuta,
-                weight: 5,
+            const linea = L.polyline(todosCoords, {
+                color: colorRuta, weight: 5,
                 opacity: enRecorrido ? 0.95 : 0.75,
-                lineJoin: 'round',
-                lineCap: 'round',
+                lineJoin: 'round', lineCap: 'round',
                 dashArray: enRecorrido ? null : '12, 8'
             }).addTo(mapaRealTime);
 
@@ -990,7 +1071,7 @@
             mapaEl.parentElement.appendChild(aviso);
         }
 
-        function inicializarVistaBusEnfocada() {
+        async function inicializarVistaBusEnfocada() {
             actualizarTituloBusEnfocado();
 
             const paradas = configMapa.paradas || [];
@@ -999,7 +1080,7 @@
             busSeleccionado = busData.idBus;
 
             limpiarCapasEnfocadas();
-            dibujarRutaBusEnfocada(paradas);
+            await dibujarRutaBusEnfocada(paradas);
             dibujarParadasBusEnfocada(paradas);
             actualizarMarcadores();
             cargarListaBuses();
@@ -1046,37 +1127,38 @@
                     await window.mapaSignalR.conectar();
 
                     window.mapaSignalR.onUbicacionActualizada((data) => {
-                        if (!configMapa.modoEnfocado || !configMapa.enHorario) return;
+                        if (!configMapa.modoEnfocado) return;
 
                         const idBus = Number(data.idBus ?? data.IdBus);
                         if (idBus !== configMapa.idBus) return;
-                        if (!configMapa.ruta?.esActiva) return;
-
-                        configMapa.rutaEnRecorrido = true;
 
                         const lat = parseFloat(data.latitud ?? data.Latitud);
                         const lng = parseFloat(data.longitud ?? data.Longitud);
                         if (isNaN(lat) || isNaN(lng)) return;
 
+                        const vel = parseFloat(data.velocidad ?? data.Velocidad) || 0;
+                        const ts  = data.fechaHora ?? data.FechaHora ?? new Date().toISOString();
+                        const estado = calcularEstadoBus(vel, ts);
+
                         ultimaUbicacionAdminTs = Date.now();
-                        actualizarBadgeSenalAdmin('vivo');
+                        actualizarBadgeSenalAdmin(estado === 'SinSeñal' ? 'stale' : 'vivo');
+
+                        configMapa.rutaEnRecorrido = estado === 'Movimiento';
 
                         const bus = busesData[0];
                         if (bus) {
                             bus.latitud = lat;
                             bus.longitud = lng;
-                            bus.enRecorrido = true;
-                            bus.estado = 'Movimiento';
-                            bus.ultimaActualizacion = new Date().toISOString();
+                            bus.velocidad = Math.round(vel);
+                            bus.estado = estado;
+                            bus.enRecorrido = estado === 'Movimiento';
+                            bus.ultimaActualizacion = ts;
                         }
-
-                        limpiarCapasEnfocadas();
-                        dibujarRutaBusEnfocada(configMapa.paradas || []);
-                        dibujarParadasBusEnfocada(configMapa.paradas || []);
 
                         const marcadorId = `bus_${idBus}`;
                         if (marcadores[marcadorId]) {
                             marcadores[marcadorId].setLatLng([lat, lng]);
+                            marcadores[marcadorId].setIcon(crearIconoBus(estado));
                         } else {
                             actualizarMarcadores();
                         }
@@ -1088,7 +1170,12 @@
 
                         const info = document.getElementById('info-bus-seleccionado');
                         if (info) {
-                            info.innerHTML = '<span class="text-success"><i class="bi bi-broadcast"></i> Bus en recorrido en vivo</span>';
+                            if (estado === 'Movimiento')
+                                info.innerHTML = '<span class="text-success"><i class="bi bi-broadcast"></i> Bus en recorrido en vivo</span>';
+                            else if (estado === 'Detenido')
+                                info.innerHTML = '<span class="text-warning"><i class="bi bi-pause-circle"></i> Bus detenido — señal activa</span>';
+                            else
+                                info.innerHTML = '<span class="text-secondary"><i class="bi bi-wifi-off"></i> Sin señal reciente</span>';
                         }
 
                         if (seguimientoActivo) {
@@ -1111,6 +1198,58 @@
             }
         }
 
+        // SignalR modo general: Admin ve todos los buses actualizarse en tiempo real
+        async function conectarSignalRGeneral() {
+            if (configMapa.modoEnfocado) return;
+            try {
+                if (!window.mapaSignalR) {
+                    window.mapaSignalR = new NotificacionesCliente();
+                    await window.mapaSignalR.conectar();
+
+                    window.mapaSignalR.onUbicacionActualizada((data) => {
+                        const idBus = Number(data.idBus ?? data.IdBus);
+                        const lat   = parseFloat(data.latitud  ?? data.Latitud);
+                        const lng   = parseFloat(data.longitud ?? data.Longitud);
+                        if (isNaN(lat) || isNaN(lng)) return;
+
+                        const vel = parseFloat(data.velocidad ?? data.Velocidad) || 0;
+                        const ts  = data.fechaHora ?? data.FechaHora ?? new Date().toISOString();
+                        const estado = calcularEstadoBus(vel, ts);
+
+                        let bus = busesData.find(b => b.idBus === idBus);
+                        if (bus) {
+                            bus.latitud = lat;
+                            bus.longitud = lng;
+                            bus.velocidad = Math.round(vel);
+                            bus.estado = estado;
+                            bus.enRecorrido = estado === 'Movimiento';
+                            bus.ultimaActualizacion = ts;
+                        } else {
+                            const elegible = busesElegibles.find(b => b.idBus === idBus);
+                            busesData.push({
+                                idBus, placa: elegible?.placa || `Bus #${idBus}`,
+                                rutaNombre: elegible?.rutas?.[0]?.nombre || 'Sin ruta',
+                                capacidadTotal: 0, estudiantesAbordo: 0,
+                                latitud: lat, longitud: lng, velocidad: Math.round(vel),
+                                estado, enRecorrido: estado === 'Movimiento', ultimaActualizacion: ts
+                            });
+                        }
+
+                        actualizarMarcadores();
+                        actualizarEstadisticas();
+                        cargarListaBuses();
+                        const el = document.getElementById('lastUpdate');
+                        if (el) el.textContent = new Date().toLocaleTimeString();
+                        console.log(`🔵 [MapaGeneral] Bus ${idBus} → ${estado} (${lat}, ${lng})`);
+                    });
+                }
+                await window.mapaSignalR.unirseAGrupo('Administradores');
+                console.log('✅ [MapaTiempoReal] Unido al grupo Administradores (modo general)');
+            } catch (e) {
+                console.warn('[MapaTiempoReal] SignalR general no disponible:', e);
+            }
+        }
+
         // Inicialización cuando el DOM esté listo
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('Iniciando mapa en tiempo real (selector)...');
@@ -1121,14 +1260,22 @@
 
             try {
                 await cargarBusesElegibles();
+                await cargarBusesActivosReales();
             } catch (e) {
                 console.error('[MapaTiempoReal] Error cargando buses:', e);
             }
+
+            // Refrescar estado real cada 30 segundos
+            actualizacionInterval = setInterval(async () => {
+                if (!configMapa.modoEnfocado) await cargarBusesActivosReales();
+            }, 30000);
 
             setTimeout(() => mapaRealTime?.invalidateSize(), 200);
 
             if (configMapa.idBusPreseleccionado) {
                 await cargarVistaBusSeleccionada();
+            } else {
+                await conectarSignalRGeneral();
             }
         });
 
@@ -1536,9 +1683,11 @@
         // Actualizar estadísticas
         function actualizarEstadisticas() {
             const totalBuses = busesData.length;
+            if (totalBuses === 0) return;
+
             const busesActivos = busesData.filter(b => b.estado === 'Movimiento').length;
-            const velocidadPromedio = busesData.reduce((sum, bus) => sum + bus.velocidad, 0) / totalBuses;
-            const estudiantesTotales = busesData.reduce((sum, bus) => sum + bus.estudiantesAbordo, 0);
+            const velocidadPromedio = busesData.reduce((sum, bus) => sum + (bus.velocidad || 0), 0) / totalBuses;
+            const estudiantesTotales = busesData.reduce((sum, bus) => sum + (bus.estudiantesAbordo || 0), 0);
 
             document.getElementById('busesActivos').textContent = totalBuses;
             document.getElementById('busesEnRuta').textContent = busesActivos;

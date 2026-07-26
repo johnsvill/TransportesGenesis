@@ -145,7 +145,7 @@
                         <button onclick="mapaZoomOut()" class="btn btn-sm btn-light" title="Alejar">
                             <i class="bi bi-zoom-out"></i>
                         </button>
-                        <button onclick="ampliarVista()" class="btn btn-sm btn-warning text-dark" title="Ampliar vista (zoom máximo)">
+                        <button onclick="ampliarVista()" class="btn btn-sm btn-warning text-dark" title="Ver toda la ruta (zoom general)">
                             <i class="bi bi-arrows-fullscreen"></i>
                         </button>
                         <button onclick="centrarEnBus()" class="btn btn-sm btn-light" title="Centrar en bus">
@@ -242,6 +242,12 @@
         const COLEGIO_LAT    = @Html.Raw(coleLatStr);        // última parada o fallback
         const COLEGIO_LNG    = @Html.Raw(coleLngStr);
         const TIPO_RUTA      = '@Model.TipoRutaActiva';
+
+        console.log('🔵 [PADRE] Configuración inicial:');
+        console.log('   - ID_BUS:', ID_BUS);
+        console.log('   - IDS_ALUMNOS:', IDS_ALUMNOS);
+        console.log('   - Grupos a suscribir:', `Bus_${ID_BUS}`, IDS_ALUMNOS.map(id => `Alumno_${id}`));
+
         // [FASE 0.2] Segmento Plan B (fallback) y ruta completa del bus (en vivo)
         const PARADAS_BD     = @Html.Raw(Model.ParadasJson);
         const PARADAS_HIJOS  = @Html.Raw(Model.ParadasHijosJson);
@@ -285,7 +291,24 @@
             dibujarMarcadoresFijos();
             await dibujarRutaVivoCompleta();
             await conectarSignalR();
+            await cargarUltimaUbicacionInicial();
         });
+
+        async function cargarUltimaUbicacionInicial() {
+            if (!ID_BUS) return;
+            try {
+                const resp = await fetch(`/api/ubicaciones/${ID_BUS}/ultima`);
+                if (resp.ok) {
+                    const data = await resp.json();
+                    if (modoVisualizacion !== 'fallback') {
+                        actualizarMarcadorVivo(data);
+                        console.log('[PadreDashboard] Ubicación inicial cargada desde BD');
+                    }
+                }
+            } catch (e) {
+                console.warn('[PadreDashboard] Sin ubicación previa en BD:', e);
+            }
+        }
 
         // ── Mapa ──────────────────────────────────────────────────────────────
         function inicializarMapa() {
@@ -600,9 +623,19 @@
 
                 // [EN VIVO] Ubicación desde servidor (canal principal vía POST /api/ubicaciones)
                 window.padreNot.onUbicacionActualizada((data) => {
+                    console.log('🔵 [PADRE] UbicacionBusActualizada recibida:', data);
                     if (modoVisualizacion === 'fallback') return;
                     actualizarMarcadorVivo(data);
                 });
+
+                // FALLBACK: Escuchar también directamente desde el Hub
+                if (window.padreNot.connection) {
+                    window.padreNot.connection.on('UbicacionBusActualizada', (data) => {
+                        console.log('🔵 [PADRE - FALLBACK] UbicacionBusActualizada desde Hub:', data);
+                        if (modoVisualizacion === 'fallback') return;
+                        actualizarMarcadorVivo(data);
+                    });
+                }
 
                 // Ruta demo aleatoria sincronizada desde el monitor
                 const handlerRutaDemo = (data) => {
@@ -948,29 +981,61 @@
         }
 
         // ── Controles del mapa ────────────────────────────────────────────────
-        function mapaZoomIn()  { if (mapa) mapa.zoomIn(); }
-        function mapaZoomOut() { if (mapa) mapa.zoomOut(); }
+        function mapaZoomIn()  {
+            if (!mapa) return;
+            mapa.invalidateSize();
+            mapa.zoomIn(2);
+        }
+        function mapaZoomOut() {
+            if (!mapa) return;
+            mapa.invalidateSize();
+            mapa.zoomOut(2);
+        }
+
+        // Ampliar vista: muestra toda la ruta en pantalla (zoom out / fitBounds)
         function ampliarVista() {
             if (!mapa) return;
-            const nivelActual = mapa.getZoom();
-            const nivelAmpliado = Math.min(nivelActual + 3, 19);
-            if (busMarker) {
-                mapa.setView(busMarker.getLatLng(), nivelAmpliado, { animate: true });
+            mapa.invalidateSize();
+
+            // Recopilar todos los puntos disponibles
+            const puntos = [];
+
+            if (routeSegmentosVivo.length) {
+                routeSegmentosVivo.forEach(s => {
+                    if (s.poly) s.poly.getLatLngs().forEach(ll => puntos.push(ll));
+                });
+            }
+            if (routePolylineFallback) {
+                routePolylineFallback.getLatLngs().forEach(ll => puntos.push(ll));
+            }
+            if (PARADAS_BD.length) {
+                PARADAS_BD.forEach(p => puntos.push(L.latLng(p.lat, p.lng)));
+            }
+            if (busMarker) puntos.push(busMarker.getLatLng());
+
+            if (puntos.length >= 2) {
+                mapa.fitBounds(L.latLngBounds(puntos).pad(0.12), { animate: true });
             } else {
-                mapa.setZoom(nivelAmpliado, { animate: true });
+                // Fallback: zoom mínimo centrado en colegio
+                mapa.setView([colegioLat, colegioLng], 12, { animate: true });
             }
         }
+
         function centrarEnBus() {
-            if (busMarker) { mapa.setView(busMarker.getLatLng(), 16); busMarker.openPopup(); }
-            else if (PARADAS_BD.length) mapa.setView([PARADAS_BD[0].lat, PARADAS_BD[0].lng], 14);
+            if (!mapa) return;
+            mapa.invalidateSize();
+            if (busMarker) { mapa.setView(busMarker.getLatLng(), 16, { animate: true }); busMarker.openPopup(); }
+            else if (PARADAS_BD.length) mapa.setView([PARADAS_BD[0].lat, PARADAS_BD[0].lng], 14, { animate: true });
         }
 
         function verRutaCompleta() {
+            if (!mapa) return;
+            mapa.invalidateSize();
             if (modoVisualizacion === 'fallback' && routePolylineFallback)
-                mapa.fitBounds(routePolylineFallback.getBounds().pad(.1));
+                mapa.fitBounds(routePolylineFallback.getBounds().pad(.1), { animate: true });
             else if (routeSegmentosVivo.length) {
                 const grupo = L.featureGroup(routeSegmentosVivo.map(s => s.poly));
-                mapa.fitBounds(grupo.getBounds().pad(.1));
+                mapa.fitBounds(grupo.getBounds().pad(.1), { animate: true });
             }
         }
 

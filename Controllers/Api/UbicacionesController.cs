@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TransportesGenesis.DTOs.Geolocalizacion;
 using TransportesGenesis.Services.Interfaces;
 
 namespace TransportesGenesis.Controllers.Api
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class UbicacionesController : ControllerBase
@@ -46,6 +48,7 @@ namespace TransportesGenesis.Controllers.Api
             }
         }
 
+        [Authorize(Roles = "Monitor,Piloto")]
         [HttpPost]
         public async Task<ActionResult<UbicacionBusDto>> RegistrarUbicacion([FromBody] UbicacionBusCreateDto dto)
         {
@@ -69,6 +72,7 @@ namespace TransportesGenesis.Controllers.Api
         /// Sincroniza un lote de puntos encolados offline (orden cronológico en el cliente).
         /// Persiste cada punto y notifica SignalR; el último actualiza la UI en vivo.
         /// </summary>
+        [Authorize(Roles = "Monitor,Piloto")]
         [HttpPost("lote")]
         public async Task<ActionResult<object>> RegistrarUbicacionesLote([FromBody] List<UbicacionBusCreateDto> puntos)
         {

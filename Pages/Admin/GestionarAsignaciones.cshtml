@@ -120,6 +120,7 @@
                         <thead class="table-dark">
                             <tr>
                                 <th>ID</th>
+                                <th>Rol</th>
                                 <th>Usuario</th>
                                 <th>Bus</th>
                                 <th>Fecha Asignación</th>
@@ -130,9 +131,13 @@
                             @foreach (var asignacion in Model.AsignacionesActivas)
                             {
                                 var usuario = Model.TodosLosUsuarios.FirstOrDefault(u => u.Id == asignacion.IdUsuarioPiloto);
+                                var rol = Model.RolPorUsuarioId.GetValueOrDefault(asignacion.IdUsuarioPiloto, "—");
+                                var rolBadge = rol == "Piloto" ? "bg-primary" : rol == "Monitor" ? "bg-info" : "bg-secondary";
+                                var rolIcon  = rol == "Piloto" ? "👨‍✈️" : rol == "Monitor" ? "👨‍🏫" : "👤";
 
                                 <tr>
                                     <td>@asignacion.IdAsignacion</td>
+                                    <td><span class="badge @rolBadge">@rolIcon @rol</span></td>
                                     <td>
                                         <strong>@(usuario?.UserName ?? "Usuario desconocido")</strong><br />
                                         <small class="text-muted">@(usuario?.Email ?? "")</small>

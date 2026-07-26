@@ -9,6 +9,8 @@ namespace TransportesGenesis.Models.DB.Negocio
         [Key]
         public int IdAlumno { get; set; }
 
+        public int IdPadre { get; set; }
+
         [ForeignKey("IdPadre")]
         public Padres Padres { get; set; }
 

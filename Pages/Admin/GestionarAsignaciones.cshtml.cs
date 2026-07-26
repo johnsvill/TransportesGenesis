@@ -32,6 +32,7 @@ namespace TransportesGenesis.Pages.Admin
         public List<AppUser> TodosLosUsuarios { get; set; } = new List<AppUser>(); // Para mostrar en tabla activas
         public List<Bus> BusesDisponibles { get; set; } = new List<Bus>();
         public List<AsignacionPilotoBus> AsignacionesActivas { get; set; } = new List<AsignacionPilotoBus>();
+        public Dictionary<string, string> RolPorUsuarioId { get; set; } = new();
 
         // NO usar [BindProperty] para evitar binding en handlers que no los necesitan
 
@@ -111,15 +112,52 @@ namespace TransportesGenesis.Pages.Admin
 
                 _logger.LogInformation($"Verificando asignación existente para bus: {IdBus}");
 
-                // VALIDACIÓN 2: Verificar si el bus ya tiene una asignación activa
-                var busYaTieneAsignacion = await _context.AsignacionesPilotoBusDb
-                    .FirstOrDefaultAsync(a => a.IdBus == IdBus && a.EsActual);
-
-                if (busYaTieneAsignacion != null)
+                // VALIDACIÓN 2: Verificar que el usuario existe (necesario antes de validar roles)
+                var usuarioExiste = await _userManager.FindByIdAsync(IdUsuario);
+                if (usuarioExiste == null)
                 {
-                    var usuarioAsignado = await _userManager.FindByIdAsync(busYaTieneAsignacion.IdUsuarioPiloto);
-                    _logger.LogWarning($"Bus #{IdBus} ya tiene asignación activa con usuario {usuarioAsignado?.UserName}");
-                    Mensaje = $"El bus ya tiene una asignación activa con el usuario {usuarioAsignado?.UserName}. Debe finalizarla primero.";
+                    _logger.LogError($"Usuario con ID {IdUsuario} no existe en la base de datos");
+                    Mensaje = $"❌ Error: El usuario seleccionado no existe.";
+                    TipoMensaje = "danger";
+                    await CargarDatosAsync();
+                    return Page();
+                }
+
+                // VALIDACIÓN 3: Verificar que el bus no tenga ya alguien con el mismo rol
+                var asignacionesBus = await _context.AsignacionesPilotoBusDb
+                    .Where(a => a.IdBus == IdBus && a.EsActual)
+                    .ToListAsync();
+
+                var rolesUsuarioNuevo = await _userManager.GetRolesAsync(usuarioExiste);
+                var esPiloto = rolesUsuarioNuevo.Contains("Piloto");
+                var esMonitor = rolesUsuarioNuevo.Contains("Monitor");
+
+                foreach (var asig in asignacionesBus)
+                {
+                    var userAsig = await _userManager.FindByIdAsync(asig.IdUsuarioPiloto);
+                    if (userAsig == null) continue;
+                    var rolesAsig = await _userManager.GetRolesAsync(userAsig);
+
+                    if (esPiloto && rolesAsig.Contains("Piloto"))
+                    {
+                        Mensaje = $"El bus #{IdBus} ya tiene un piloto asignado ({userAsig.UserName}). Finalice esa asignación primero.";
+                        TipoMensaje = "warning";
+                        await CargarDatosAsync();
+                        return Page();
+                    }
+                    if (esMonitor && rolesAsig.Contains("Monitor"))
+                    {
+                        Mensaje = $"El bus #{IdBus} ya tiene un monitor asignado ({userAsig.UserName}). Finalice esa asignación primero.";
+                        TipoMensaje = "warning";
+                        await CargarDatosAsync();
+                        return Page();
+                    }
+                }
+
+                // Un bus puede tener hasta 2 asignaciones activas: 1 piloto + 1 monitor
+                if (asignacionesBus.Count >= 2)
+                {
+                    Mensaje = $"El bus #{IdBus} ya tiene piloto y monitor asignados. Finalice una asignación para reasignar.";
                     TipoMensaje = "warning";
                     await CargarDatosAsync();
                     return Page();
@@ -138,17 +176,6 @@ namespace TransportesGenesis.Pages.Admin
                 }
 
                 _logger.LogInformation("Validaciones pasadas, creando asignación...");
-
-                // VALIDACIÓN 3: Verificar que el usuario existe
-                var usuarioExiste = await _userManager.FindByIdAsync(IdUsuario);
-                if (usuarioExiste == null)
-                {
-                    _logger.LogError($"Usuario con ID {IdUsuario} no existe en la base de datos");
-                    Mensaje = $"❌ Error: El usuario seleccionado no existe.";
-                    TipoMensaje = "danger";
-                    await CargarDatosAsync();
-                    return Page();
-                }
 
                 // VALIDACIÓN 4: Verificar que el bus existe
                 var busExiste = await _context.BusesDb.FindAsync(IdBus);
@@ -282,42 +309,61 @@ namespace TransportesGenesis.Pages.Admin
 
         private async Task CargarDatosAsync()
         {
-            // Obtener asignaciones activas primero
             AsignacionesActivas = await _context.AsignacionesPilotoBusDb
                 .Include(a => a.Bus)
                 .Where(a => a.EsActual)
                 .ToListAsync();
 
-            // Obtener IDs de usuarios y buses ya asignados
-            var usuariosYaAsignados = AsignacionesActivas.Select(a => a.IdUsuarioPiloto).ToHashSet();
-            var busesYaAsignados = AsignacionesActivas.Select(a => a.IdBus).ToHashSet();
-
-            // Obtener todos los usuarios (para mostrar en tabla de asignaciones activas)
             TodosLosUsuarios = await _userManager.Users.ToListAsync();
 
-            // Filtrar pilotos y monitores SIN asignación activa (para listas de selección)
-            foreach (var usuario in TodosLosUsuarios)
+            RolPorUsuarioId = new Dictionary<string, string>();
+            foreach (var u in TodosLosUsuarios)
             {
-                var roles = await _userManager.GetRolesAsync(usuario);
-
-                // Solo incluir en listas de selección si NO tienen asignación activa
-                if (!usuariosYaAsignados.Contains(usuario.Id))
-                {
-                    if (roles.Contains("Piloto"))
-                    {
-                        Pilotos.Add(usuario);
-                    }
-                    if (roles.Contains("Monitor"))
-                    {
-                        Monitores.Add(usuario);
-                    }
-                }
+                var roles = await _userManager.GetRolesAsync(u);
+                if (roles.Contains("Piloto"))       RolPorUsuarioId[u.Id] = "Piloto";
+                else if (roles.Contains("Monitor")) RolPorUsuarioId[u.Id] = "Monitor";
             }
 
-            // Obtener buses disponibles SIN asignación activa
-            BusesDisponibles = await _context.BusesDb
-                .Where(b => b.Estado && b.Activo == 1 && !busesYaAsignados.Contains(b.IdBus))
+            var usuariosYaAsignados = AsignacionesActivas.Select(a => a.IdUsuarioPiloto).ToHashSet();
+
+            // Mapear qué roles tiene asignados cada bus
+            var rolesPorBus = new Dictionary<int, HashSet<string>>();
+            foreach (var asignacion in AsignacionesActivas)
+            {
+                var usuario = TodosLosUsuarios.FirstOrDefault(u => u.Id == asignacion.IdUsuarioPiloto);
+                if (usuario == null) continue;
+                var roles = await _userManager.GetRolesAsync(usuario);
+
+                if (!rolesPorBus.ContainsKey(asignacion.IdBus))
+                    rolesPorBus[asignacion.IdBus] = new HashSet<string>();
+
+                if (roles.Contains("Piloto"))  rolesPorBus[asignacion.IdBus].Add("Piloto");
+                if (roles.Contains("Monitor")) rolesPorBus[asignacion.IdBus].Add("Monitor");
+            }
+
+            // Pilotos y monitores sin asignación activa
+            foreach (var usuario in TodosLosUsuarios)
+            {
+                if (usuariosYaAsignados.Contains(usuario.Id)) continue;
+                var roles = await _userManager.GetRolesAsync(usuario);
+                if (roles.Contains("Piloto"))  Pilotos.Add(usuario);
+                if (roles.Contains("Monitor")) Monitores.Add(usuario);
+            }
+
+            // Bus disponible si le falta piloto O monitor (desaparece solo cuando tiene ambos)
+            var todosLosBuses = await _context.BusesDb
+                .Where(b => b.Estado && b.Activo == 1)
                 .ToListAsync();
+
+            BusesDisponibles = todosLosBuses.Where(b =>
+            {
+                if (!rolesPorBus.TryGetValue(b.IdBus, out var roles))
+                    return true; // sin asignaciones → disponible
+
+                var tienePiloto  = roles.Contains("Piloto");
+                var tieneMonitor = roles.Contains("Monitor");
+                return !tienePiloto || !tieneMonitor;
+            }).ToList();
         }
     }
 }

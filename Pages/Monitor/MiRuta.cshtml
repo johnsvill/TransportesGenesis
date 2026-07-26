@@ -357,6 +357,10 @@
                                     class="btn btn-primary btn-lg w-100">
                                 <i class="bi bi-play-circle-fill me-2"></i>Simular Ruta
                             </button>
+                            <button id="btnRutaEnVivo" onclick="toggleRutaEnVivo()"
+                                    class="btn btn-success btn-lg w-100 mt-2">
+                                <i class="bi bi-broadcast me-2"></i>Iniciar Ruta en Vivo (GPS real)
+                            </button>
                             <div class="mt-2 text-center">
                                 <small class="text-muted" id="tiempoSimulacion">
                                     Duración estimada: 5-8 minutos
@@ -649,23 +653,132 @@
         let motivoPausa       = null;
         let coordenadaPausa   = null;
         let indicePausa       = 0;
+        let transmisionGpsEnVivoActiva = false;
+        let watchIdGps = null;
+        let ultimoReporteGpsTs = 0;
+        const INTERVALO_REPORTE_GPS_MS = 5000;
 
-        // Inyecta ubicacion del monitor como primera parada de la ruta
-        function inyectarUbicacionPilotoComoParada0(lat, lng) {
-            if (!datosSimulacionPiloto || !datosSimulacionPiloto.paradas || !datosSimulacionPiloto.paradas.length) return;
-            if (datosSimulacionPiloto.paradas[0] && datosSimulacionPiloto.paradas[0].esPiloto) return;
-            datosSimulacionPiloto.paradas.forEach(function(p) { p.orden = (p.orden || 0) + 1; });
-            datosSimulacionPiloto.paradas.unshift({
-                nombre: 'Ubicacion del Monitor (inicio de ruta)',
-                coordenadas: [lat, lng], orden: 0, idParada: null, idAlumno: null, esPiloto: true
+        function rutaTransmisionActiva() {
+            return simulacionPilotoActiva || transmisionGpsEnVivoActiva;
+        }
+
+        function obtenerCoordenadasBusActuales() {
+            if (marcadorBusSimulacion) return marcadorBusSimulacion.getLatLng();
+            if (marcadorUsuario) return marcadorUsuario.getLatLng();
+            return null;
+        }
+
+        function asegurarMarcadorBusEnVivo(lat, lng) {
+            if (simulacionPilotoActiva) return;
+            const iconoBus = L.divIcon({
+                className: 'custom-marker',
+                html: '<div style="width:50px;height:50px;background:linear-gradient(135deg,#28a745 0%,#20c997 100%);border:4px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;color:white;box-shadow:0 4px 15px rgba(40,167,69,0.45);">🚌</div>',
+                iconSize: [50, 50], iconAnchor: [25, 25], popupAnchor: [0, -25]
             });
-            console.log('[Monitor] Ubicacion inyectada como parada 0:', lat, lng);
+            if (!marcadorBusSimulacion) {
+                marcadorBusSimulacion = L.marker([lat, lng], { icon: iconoBus })
+                    .addTo(mapa)
+                    .bindPopup('<strong>🚌 Bus en vivo (GPS real)</strong>');
+            } else {
+                marcadorBusSimulacion.setLatLng([lat, lng]);
+                marcadorBusSimulacion.setIcon(iconoBus);
+            }
+        }
+
+        function actualizarUiRutaEnVivo(activa) {
+            const btn = document.getElementById('btnRutaEnVivo');
+            const estado = document.getElementById('estadoSimulacionPiloto');
+            if (!btn) return;
+            if (activa) {
+                btn.innerHTML = '<i class="bi bi-stop-circle-fill me-2"></i>Detener Ruta en Vivo';
+                btn.className = 'btn btn-danger btn-lg w-100 mt-2';
+                if (estado) estado.innerHTML = '📡 Ruta en vivo — transmitiendo GPS real a padres y admin';
+            } else {
+                btn.innerHTML = '<i class="bi bi-broadcast me-2"></i>Iniciar Ruta en Vivo (GPS real)';
+                btn.className = 'btn btn-success btn-lg w-100 mt-2';
+            }
+        }
+
+        function toggleRutaEnVivo() {
+            if (transmisionGpsEnVivoActiva) {
+                detenerRutaEnVivo();
+                return;
+            }
+            if (simulacionPilotoActiva) {
+                alert('Detén la simulación antes de iniciar la ruta en vivo con GPS real.');
+                return;
+            }
+            if (!navigator.geolocation) {
+                alert('GPS no disponible en este dispositivo.');
+                return;
+            }
+            transmisionGpsEnVivoActiva = true;
+            ultimoReporteGpsTs = 0;
+            actualizarUiRutaEnVivo(true);
+            watchIdGps = navigator.geolocation.watchPosition(
+                function(position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    asegurarMarcadorBusEnVivo(lat, lng);
+                    mapa.panTo([lat, lng], { animate: true, duration: 0.4 });
+                    const now = Date.now();
+                    if (now - ultimoReporteGpsTs >= INTERVALO_REPORTE_GPS_MS) {
+                        ultimoReporteGpsTs = now;
+                        reportarUbicacionBus(lat, lng);
+                    }
+                },
+                function(error) {
+                    console.warn('[Monitor] Error GPS en vivo:', error);
+                    document.getElementById('estadoSimulacionPiloto').innerHTML =
+                        '⚠️ Error GPS en vivo — verifica permisos de ubicación';
+                },
+                { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 }
+            );
+        }
+
+        function detenerRutaEnVivo() {
+            transmisionGpsEnVivoActiva = false;
+            if (watchIdGps != null) {
+                navigator.geolocation.clearWatch(watchIdGps);
+                watchIdGps = null;
+            }
+            actualizarUiRutaEnVivo(false);
+            if (!simulacionPilotoActiva && marcadorBusSimulacion) {
+                mapa.removeLayer(marcadorBusSimulacion);
+                marcadorBusSimulacion = null;
+            }
+            const estado = document.getElementById('estadoSimulacionPiloto');
+            if (estado && !simulacionPilotoActiva) {
+                estado.textContent = 'Reproduce la animación del bus o inicia ruta en vivo con GPS real';
+            }
+        }
+
+        function quitarParadaInicioSiExiste() {
+            if (!datosSimulacionPiloto?.paradas?.length) return;
+            const first = datosSimulacionPiloto.paradas[0];
+            if (first.esPiloto || first.esInicioRuta) {
+                datosSimulacionPiloto.paradas.shift();
+                datosSimulacionPiloto.paradas.forEach(function(p, i) { p.orden = i + 1; });
+            }
         }
 
         function pausarRuta(motivo) {
-            if (!simulacionPilotoActiva) { alert('Inicia la simulacion de ruta antes de pausarla.'); return; }
+            if (!rutaTransmisionActiva()) {
+                alert('Inicia "Simular Ruta" o "Ruta en Vivo (GPS real)" y luego podrás detenerlo en una parada.');
+                return;
+            }
             if (simulacionEnPausa) return;
             simulacionEnPausa = true;
+            if (marcadorBusSimulacion && rutaSimulacionPiloto.length) {
+                const pos = marcadorBusSimulacion.getLatLng();
+                let mejor = 0, minDist = Infinity;
+                for (let i = 0; i < rutaSimulacionPiloto.length; i++) {
+                    const c = rutaSimulacionPiloto[i].coordenadas;
+                    const d = Math.pow(c[0] - pos.lat, 2) + Math.pow(c[1] - pos.lng, 2);
+                    if (d < minDist) { minDist = d; mejor = i; }
+                }
+                indicePausa = mejor;
+            }
             motivoPausa = motivo;
             coordenadaPausa = marcadorBusSimulacion ? marcadorBusSimulacion.getLatLng() : null;
             const textos = { espera_nino: 'Esperando al nino en la parada', incidente: 'Incidente en el bus', manual: 'Pausa manual activada' };
@@ -902,6 +1015,88 @@
         }
 
         /**
+         * Mañana: inicio desde GPS (predio/hogar). Tarde: inicio desde colegio.
+         */
+        async function aplicarParadaInicioPorTurno(lat, lng) {
+            if (!datosSimulacionPiloto?.paradas?.length) return;
+
+            quitarParadaInicioSiExiste();
+            const esMañana = esTurnoMañana();
+
+            if (esMañana) {
+                if (lat == null || lng == null) {
+                    console.warn('[Monitor] Mañana sin GPS; se omite parada de inicio');
+                    return;
+                }
+                datosSimulacionPiloto.paradas.forEach(function(p) { p.orden = (p.orden || 0) + 1; });
+                datosSimulacionPiloto.paradas.unshift({
+                    nombre: 'Inicio — ubicación actual (predio/hogar)',
+                    coordenadas: [lat, lng],
+                    orden: 0,
+                    idParada: null,
+                    idAlumno: null,
+                    esPiloto: true,
+                    esInicioRuta: true
+                });
+                console.log('[Monitor] Mañana: inicio desde GPS', lat, lng);
+            } else {
+                const colegio = getColegioDefault();
+                const primera = datosSimulacionPiloto.paradas[0];
+                if (esParadaColegio(primera)) {
+                    primera.esInicioRuta = true;
+                    primera.esColegio = true;
+                    primera.coordenadas = [...colegio.coordenadas];
+                    if (colegio.nombre) primera.nombre = colegio.nombre;
+                } else {
+                    datosSimulacionPiloto.paradas = datosSimulacionPiloto.paradas.filter(function(p) { return !esParadaColegio(p); });
+                    datosSimulacionPiloto.paradas.forEach(function(p) { p.orden = (p.orden || 0) + 1; });
+                    datosSimulacionPiloto.paradas.unshift({
+                        nombre: colegio.nombre,
+                        coordenadas: [...colegio.coordenadas],
+                        orden: 0,
+                        idParada: colegio.idParada ?? null,
+                        idAlumno: null,
+                        esColegio: true,
+                        esInicioRuta: true
+                    });
+                }
+                console.log('[Monitor] Tarde: inicio desde colegio', colegio.coordenadas);
+            }
+
+            await generarRutaCompleta();
+            if (typeof mostrarParadasSimulacionPreview === 'function' && rutaSimulacionPiloto.length) {
+                mostrarParadasSimulacionPreview();
+            }
+        }
+
+        function obtenerGpsActual() {
+            return new Promise(function(resolve, reject) {
+                if (!navigator.geolocation) {
+                    reject(new Error('Geolocalización no disponible'));
+                    return;
+                }
+                navigator.geolocation.getCurrentPosition(
+                    function(pos) { resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }); },
+                    reject,
+                    { enableHighAccuracy: true, timeout: 12000, maximumAge: 30000 }
+                );
+            });
+        }
+
+        async function aplicarParadaInicioPorTurnoConGps() {
+            if (esTurnoMañana()) {
+                try {
+                    const pos = await obtenerGpsActual();
+                    await aplicarParadaInicioPorTurno(pos.lat, pos.lng);
+                } catch (e) {
+                    console.warn('[Monitor] GPS no disponible para inicio Mañana:', e);
+                }
+            } else {
+                await aplicarParadaInicioPorTurno(null, null);
+            }
+        }
+
+        /**
          * Demo: orden/escenario aleatorio respetando turno Mañana/Tarde y puntos fijos Diego/Sofía.
          */
         function generarEscenarioAleatorio(escenario) {
@@ -972,7 +1167,8 @@
             paradasCompletadasSim.clear();
 
             limpiarMarcadoresSimulacionMapa();
-            await generarRutaCompleta();
+            await aplicarParadaInicioPorTurnoConGps();
+            if (!rutaSimulacionPiloto.length) await generarRutaCompleta();
 
             if (mapa && rutaSimulacionPiloto.length) {
                 mostrarParadasSimulacionPreview();
@@ -999,7 +1195,8 @@
             modoRutaAleatoriaActiva = false;
             paradasCompletadasSim.clear();
             limpiarMarcadoresSimulacionMapa();
-            await generarRutaCompleta();
+            await aplicarParadaInicioPorTurnoConGps();
+            if (!rutaSimulacionPiloto.length) await generarRutaCompleta();
             const el = document.getElementById('lblEscenarioActivo');
             if (el) el.textContent = 'Ruta restaurada desde Admin/Calcular Rutas.';
             await broadcastRutaDemoAlPadre();
@@ -1430,8 +1627,8 @@
                             mapa.setView([lat, lon], 15);
                         }
 
-                        // Inyectar ubicación del monitor como parada 0 (inicio de ruta)
-                        inyectarUbicacionPilotoComoParada0(lat, lon);
+                        // Mañana: GPS como inicio; Tarde: colegio como inicio
+                        aplicarParadaInicioPorTurno(lat, lon);
                     },
                     function(error) {
                         console.error('Error obteniendo ubicación:', error);
@@ -1648,7 +1845,8 @@
         document.addEventListener('DOMContentLoaded', async function() {
             initDatosSimulacionFromRutaData();
             inicializarMapa();
-            await generarRutaCompleta();
+            await aplicarParadaInicioPorTurnoConGps();
+            if (!rutaSimulacionPiloto.length) await generarRutaCompleta();
             inicializarAudio();
         });
 
@@ -1667,6 +1865,10 @@
                 detenerSimulacionPiloto();
                 return;
             }
+            if (transmisionGpsEnVivoActiva) {
+                alert('Detén la ruta en vivo antes de iniciar la simulación.');
+                return;
+            }
 
             const btn = document.getElementById('btnSimularRutaPiloto');
             const estado = document.getElementById('estadoSimulacionPiloto');
@@ -1678,8 +1880,9 @@
             try {
                 if (document.getElementById('chkRutaAleatoria')?.checked) {
                     await prepararRutaAleatoria();
-                } else if (!rutaSimulacionPiloto.length) {
-                    await generarRutaCompleta();
+                } else {
+                    await aplicarParadaInicioPorTurnoConGps();
+                    if (!rutaSimulacionPiloto.length) await generarRutaCompleta();
                 }
                 await broadcastRutaDemoAlPadre();
             } catch (e) {
@@ -1970,6 +2173,11 @@
         // Detener simulación del piloto
         function detenerSimulacionPiloto() {
             simulacionPilotoActiva = false;
+            if (simulacionEnPausa) {
+                simulacionEnPausa = false;
+                document.getElementById('bloqueNoPausado')?.classList.remove('d-none');
+                document.getElementById('bloquePausado')?.classList.add('d-none');
+            }
 
             const btn = document.getElementById('btnSimularRutaPiloto');
             const estado = document.getElementById('estadoSimulacionPiloto');
@@ -1981,8 +2189,8 @@
             estado.textContent = 'Reproduce la animación del bus con sonidos de alerta al llegar a cada parada';
             tiempo.textContent = 'Duración estimada: 5-8 minutos';
 
-            // Remover bus de simulación
-            if (marcadorBusSimulacion) {
+            // Remover bus de simulación (no si ruta en vivo activa)
+            if (marcadorBusSimulacion && !transmisionGpsEnVivoActiva) {
                 mapa.removeLayer(marcadorBusSimulacion);
                 marcadorBusSimulacion = null;
             }
@@ -2041,9 +2249,9 @@
                 // Respaldo: enviar ubicación cada 2s durante simulación
                 setInterval(() => {
                     try {
-                        if (simulacionPilotoActiva && marcadorBusSimulacion && idBus !== null) {
-                            const latlng = marcadorBusSimulacion.getLatLng();
-                            reportarUbicacionBus(latlng.lat, latlng.lng);
+                        if (rutaTransmisionActiva() && idBus !== null) {
+                            const ll = obtenerCoordenadasBusActuales();
+                            if (ll) reportarUbicacionBus(ll.lat, ll.lng);
                         }
                     } catch (e) { console.warn('[Monitor] Error reportando ubicación:', e); }
                 }, 2000);

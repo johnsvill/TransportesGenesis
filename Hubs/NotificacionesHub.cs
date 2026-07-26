@@ -70,14 +70,19 @@ namespace TransportesGenesis.Hubs
         {
             _logger.LogInformation($"[SIGNALR] Bus {idBus} reporta ubicación: Lat {latitud}, Lon {longitud}");
 
-            // Broadcast a todos los padres del bus
-            await Clients.Group($"Bus_{idBus}").SendAsync("UbicacionBusActualizada", new
+            var ubicacionData = new
             {
                 IdBus = idBus,
                 Latitud = latitud,
                 Longitud = longitud,
                 FechaHora = DateTime.Now
-            });
+            };
+
+            // Broadcast a todos los padres del bus
+            await Clients.Group($"Bus_{idBus}").SendAsync("UbicacionBusActualizada", ubicacionData);
+
+            // También enviar a los Administradores para tracking en tiempo real
+            await Clients.Group("Administradores").SendAsync("UbicacionBusActualizada", ubicacionData);
         }
 
         /// <summary>

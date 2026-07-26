@@ -5,11 +5,17 @@ using TransportesGenesis.Repositories.Interfaces;
 using TransportesGenesis.Services.Interfaces;
 using Microsoft.AspNetCore.SignalR;
 using TransportesGenesis.Hubs;
+using System.Collections.Concurrent;
 
 namespace TransportesGenesis.Services.Implementations
 {
     public class UbicacionBusService : IUbicacionBusService
     {
+        // Throttling de alertas: evita spam al padre en cada tick GPS.
+        // Clave: (idBus, idAlumno). Valor: momento del último envío.
+        private static readonly ConcurrentDictionary<(int, int), DateTime> _ultimaAlertaProximidad = new();
+        private static readonly ConcurrentDictionary<int, DateTime> _ultimaAlertaColegio = new();
+        private static readonly TimeSpan _intervaloAlertas = TimeSpan.FromSeconds(20);
         private readonly IUbicacionBusRepository _ubicacionRepository;
         private readonly IBusRepository _busRepository;
         private readonly IMapper _mapper;
@@ -114,7 +120,7 @@ namespace TransportesGenesis.Services.Implementations
                 var colegioLat = (double)colegioLatDec;
                 var colegioLon = (double)colegioLonDec;
 
-                // Verificar proximidad por alumno
+                // Verificar proximidad por alumno (con throttling: máximo 1 alerta por alumno cada 60 s)
                 if (alumnos != null && alumnos.Any())
                 {
                     foreach (var alumno in alumnos)
@@ -124,50 +130,66 @@ namespace TransportesGenesis.Services.Implementations
                             var d = DistanciaMetros((double)alumno.Latitud.Value, (double)alumno.Longitud.Value, lat, lon);
                             if (d <= umbralProxima)
                             {
-                                var alertaData = new
-                                {
-                                    IdAlerta = 0,
-                                    IdBus = dto.IdBus,
-                                    IdAlumno = alumno.IdAlumno,
-                                    TipoAlerta = "proximidad",
-                                    Mensaje = $"El bus está próximo a la casa de {alumno.Nombre} {alumno.Apellido}",
-                                    ParadasRestantes = (int?)null,
-                                    FechaHora = DateTime.Now,
-                                    RequiereConfirmacion = true
-                                };
+                                var claveThrottle = (dto.IdBus, alumno.IdAlumno);
+                                var ahora = DateTime.Now;
+                                var ultimaVez = _ultimaAlertaProximidad.GetOrAdd(claveThrottle, DateTime.MinValue);
 
-                                // Enviar a grupo del bus y al grupo del alumno
-                                await _hubContext.Clients.Group($"Bus_{dto.IdBus}").SendAsync("AlertaRecibida", alertaData);
-                                await _hubContext.Clients.Group($"Alumno_{alumno.IdAlumno}").SendAsync("AlertaPersonal", alertaData);
+                                if (ahora - ultimaVez >= _intervaloAlertas)
+                                {
+                                    _ultimaAlertaProximidad[claveThrottle] = ahora;
+
+                                    var alertaData = new
+                                    {
+                                        IdAlerta = 0,
+                                        IdBus = dto.IdBus,
+                                        IdAlumno = alumno.IdAlumno,
+                                        TipoAlerta = "proximidad",
+                                        Mensaje = $"El bus está próximo a la casa de {alumno.Nombre} {alumno.Apellido}",
+                                        ParadasRestantes = (int?)null,
+                                        FechaHora = ahora,
+                                        RequiereConfirmacion = true
+                                    };
+
+                                    await _hubContext.Clients.Group($"Bus_{dto.IdBus}").SendAsync("AlertaRecibida", alertaData);
+                                    await _hubContext.Clients.Group($"Alumno_{alumno.IdAlumno}").SendAsync("AlertaPersonal", alertaData);
+                                }
                             }
                         }
                     }
                 }
 
-                // Verificar llegada al colegio
+                // Verificar llegada al colegio (con throttling: máximo 1 alerta por bus cada 60 s)
                 var distCole = DistanciaMetros(lat, lon, colegioLat, colegioLon);
                 if (distCole <= umbralLlegadaColegio)
                 {
-                    var alertaColegio = new
-                    {
-                        IdAlerta = 0,
-                        IdBus = dto.IdBus,
-                        IdAlumno = (int?)null,
-                        TipoAlerta = "llegada_colegio",
-                        Mensaje = "El bus ha llegado al colegio.",
-                        ParadasRestantes = (int?)null,
-                        FechaHora = DateTime.Now,
-                        RequiereConfirmacion = false
-                    };
+                    var ahora = DateTime.Now;
+                    var ultimaVezColegio = _ultimaAlertaColegio.GetOrAdd(dto.IdBus, DateTime.MinValue);
 
-                    await _hubContext.Clients.Group($"Bus_{dto.IdBus}").SendAsync("AlertaRecibida", alertaColegio);
-
-                    // También notificar a cada alumno del bus (para padres suscritos por Alumno_id)
-                    if (alumnos != null && alumnos.Any())
+                    if (ahora - ultimaVezColegio >= _intervaloAlertas)
                     {
-                        foreach (var alumno in alumnos)
+                        _ultimaAlertaColegio[dto.IdBus] = ahora;
+
+                        var alertaColegio = new
                         {
-                            await _hubContext.Clients.Group($"Alumno_{alumno.IdAlumno}").SendAsync("AlertaPersonal", alertaColegio);
+                            IdAlerta = 0,
+                            IdBus = dto.IdBus,
+                            IdAlumno = (int?)null,
+                            TipoAlerta = "llegada_colegio",
+                            Mensaje = "El bus ha llegado al colegio.",
+                            ParadasRestantes = (int?)null,
+                            FechaHora = ahora,
+                            RequiereConfirmacion = false
+                        };
+
+                        await _hubContext.Clients.Group($"Bus_{dto.IdBus}").SendAsync("AlertaRecibida", alertaColegio);
+
+                        // También notificar a cada alumno del bus (para padres suscritos por Alumno_id)
+                        if (alumnos != null && alumnos.Any())
+                        {
+                            foreach (var alumno in alumnos)
+                            {
+                                await _hubContext.Clients.Group($"Alumno_{alumno.IdAlumno}").SendAsync("AlertaPersonal", alertaColegio);
+                            }
                         }
                     }
                 }
@@ -179,11 +201,19 @@ namespace TransportesGenesis.Services.Implementations
                         IdBus = dto.IdBus,
                         Latitud = dto.Latitud,
                         Longitud = dto.Longitud,
+                        Velocidad = dto.Velocidad,
                         FechaHora = DateTime.Now
                     };
 
+                    Console.WriteLine($"🔵 [UbicacionService] Enviando ubicación Bus {dto.IdBus} -> Lat: {dto.Latitud}, Lon: {dto.Longitud}");
+
                     // Enviar al grupo del bus
                     await _hubContext.Clients.Group($"Bus_{dto.IdBus}").SendAsync("UbicacionBusActualizada", ubicacionBroadcast);
+                    Console.WriteLine($"✅ [UbicacionService] Enviado a grupo Bus_{dto.IdBus}");
+
+                    // Enviar a administradores para tracking en tiempo real
+                    await _hubContext.Clients.Group("Administradores").SendAsync("UbicacionBusActualizada", ubicacionBroadcast);
+                    Console.WriteLine($"✅ [UbicacionService] Enviado a grupo Administradores");
 
                     // Enviar a cada alumno asociado (grupo Alumno_{id})
                     if (alumnos != null && alumnos.Any())
@@ -191,6 +221,7 @@ namespace TransportesGenesis.Services.Implementations
                         foreach (var alumno in alumnos)
                         {
                             await _hubContext.Clients.Group($"Alumno_{alumno.IdAlumno}").SendAsync("UbicacionBusActualizada", ubicacionBroadcast);
+                            Console.WriteLine($"✅ [UbicacionService] Enviado a grupo Alumno_{alumno.IdAlumno}");
                         }
                     }
                 }

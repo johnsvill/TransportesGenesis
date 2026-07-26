@@ -61,7 +61,13 @@ namespace TransportesGenesis.Pages.Padres
         public async Task OnGetAsync(string? turno = null)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId)) return;
+            if (string.IsNullOrEmpty(userId)) 
+            {
+                Console.WriteLine("❌ [PADRE] userId está vacío");
+                return;
+            }
+
+            Console.WriteLine($"🔵 [PADRE] Cargando dashboard para userId: {userId}");
 
             try
             {
@@ -76,8 +82,16 @@ namespace TransportesGenesis.Pages.Padres
                 DescripcionTurno = TipoRutaActiva == "Mañana"
                     ? "Mañana: recoge en casas → el colegio es la última parada (destino final)."
                     : "Tarde: sale del colegio (parada 1) → deja alumnos en casa. No regresa al colegio.";
+
                 var hijos = await _alumnoRepo.GetAlumnosByPadreUserIdAsync(userId);
-                if (hijos == null || !hijos.Any()) return;
+
+                Console.WriteLine($"🔵 [PADRE] GetAlumnosByPadreUserIdAsync devolvió: {hijos?.Count() ?? 0} hijos");
+
+                if (hijos == null || !hijos.Any()) 
+                {
+                    Console.WriteLine("❌ [PADRE] No se encontraron hijos para este padre");
+                    return;
+                }
 
                 var primerHijo = hijos.First();
                 if (primerHijo.Padres != null)
@@ -85,6 +99,9 @@ namespace TransportesGenesis.Pages.Padres
 
                 NombreHijo = string.Join(", ", hijos.Select(h => $"{h.Nombre} {h.Apellido}"));
                 IdsAlumnos = hijos.Select(h => h.IdAlumno).ToList();
+
+                Console.WriteLine($"✅ [PADRE] IdsAlumnos cargados: [{string.Join(", ", IdsAlumnos)}]");
+
                 var idsHijos = IdsAlumnos.ToHashSet();
 
                 var hijoCoordenadas = hijos.FirstOrDefault(h => h.Latitud.HasValue && h.Longitud.HasValue);

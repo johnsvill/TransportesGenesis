@@ -24,6 +24,7 @@ public class AdminController : Controller
     }
 
     [HttpGet]
+    [Authorize(Roles = "Administrador")]
     public IActionResult Index()
     {
         return View();
