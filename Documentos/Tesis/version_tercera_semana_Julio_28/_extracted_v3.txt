@@ -1,0 +1,993 @@
+UNIVERSIDAD GALILEO
+Ingeneria en ciencias y sistemas
+IMPLEMENTACIÓN DE UNA PLATAFORMA WEB INTEGRADA DE GEOLOCALIZACIÓN, REGISTRO DE ABORDAJE Y GESTIÓN DIGITAL DE PAGOS PARA LA EMPRESA DE TRANSPORTES GÉNESIS.
+Trabajo de graduación presentado por:
+Jonathan Samuel Villeda Pérez, 
+José David Florián Secaida
+Guatemala, julio de 2026
+DECLARACIÓN DEL TRABAJO
+Esta tesis fue elaborada por [Jonathan Villeda, David Florián como requisito para obtener el grado o título de [Ingeniería en ciencias y sistemas].
+Guatemala, julio de 2026.
+DEDICATORIA
+Sección pendiente. antes de la entrega final.
+CARTA DE APROBACIÓN DEL ASESOR
+Estado: pendiente de insertar la carta oficial firmada por el asesor.
+DICTAMEN DEL DIRECTOR DE PROGRAMAS
+Estado: pendiente de insertar el dictamen oficial firmado por el Director de Programas.
+AUTORIZACIÓN DEL DECANO
+Estado: pendiente de insertar la autorización oficial para publicar el trabajo de graduación.
+PREFACIO Y AGRADECIMIENTOS
+Sección Pendiente. El autor podrá reconocer la colaboración de Transportes Génesis, del centro educativo, de los padres participantes, del asesor y de las personas que contribuyeron a la investigación.
+ÍNDICE GENERAL
+CARÁTULA1
+DECLARACIÓN DEL TRABAJOii
+DEDICATORIAiii
+CARTA DE APROBACIÓN DEL ASESORiv
+DICTAMEN DEL DIRECTOR DE PROGRAMASv
+AUTORIZACIÓN DEL DECANOvi
+PREFACIO Y AGRADECIMIENTOSvii
+ÍNDICE GENERALviii
+ÍNDICE DE CUADROSxv
+ÍNDICE DE FIGURASxvi
+RESUMENxvii
+CAPÍTULO 11
+INTRODUCCIÓN1
+1.1 Tema principal1
+1.2 Contexto de la investigación1
+1.3 Hipótesis2
+1.4 Objetivos3
+1.4.1 Objetivo general3
+1.4.2 Objetivos específicos4
+1.5 Planteamiento del problema5
+1.6 Justificación6
+1.6.1 Justificación social6
+1.6.2 Justificación económica6
+1.6.3 Justificación operativa6
+1.6.4 Justificación tecnológica7
+1.6.5 Justificación académica7
+1.7 Delimitación7
+1.8 Alcance8
+1.9 Limitaciones8
+1.10 Resumen del capítulo9
+CAPÍTULO 21
+MARCO TEÓRICO1
+2.1 Sistemas de información y digitalización de procesos1
+2.2 Transporte escolar y confianza de los padres1
+2.3 Geolocalización2
+2.3.1 Representación cartográfica2
+2.3.2 Distancia y alertas de proximidad3
+2.3.3 Comunicación en tiempo real3
+2.4 Registro de asistencia y abordaje3
+2.5 Gestión digital de pagos4
+2.5.1 Seguridad del flujo de pagos4
+2.6 Integración de módulos y arquitectura web4
+2.7 Usabilidad y aceptación tecnológica5
+2.8 Escalas Likert5
+2.9 Pruebas de software6
+2.10 Protección de datos y ética6
+2.11 Definiciones7
+2.12 Resumen del capítulo7
+CAPÍTULO 31
+MARCO METODOLÓGICO1
+3.1 Enfoque y tipo de investigación1
+3.2 Unidad de análisis, población y muestra1
+3.3 Variables2
+3.4 Indicadores y criterios3
+3.5 Técnicas e instrumentos4
+3.5.1 Revisión documental4
+3.5.2 Observación de tareas4
+3.5.3 Encuesta4
+3.5.4 Pruebas técnicas4
+3.6 Validez del instrumento5
+3.7 Procedimiento5
+3.8 Escenarios UAT6
+3.9 Plan de análisis7
+3.10 Ética7
+3.11 Amenazas a la validez8
+3.12 Resumen del capítulo8
+CAPÍTULO 41
+DISEÑO E IMPLEMENTACIÓN DE LA SOLUCIÓN1
+4.1 Descripción general1
+4.2 Usuarios y roles1
+4.3 Arquitectura1
+4.4 Tecnologías2
+4.5 Módulo de geolocalización2
+4.6 Rutas y paradas3
+4.7 Asistencia y abordaje4
+4.8 Alertas4
+4.9 Gestión de pagos4
+4.10 Datos principales5
+4.11 Controles de seguridad5
+4.12 Restricciones observadas6
+4.13 Resumen del capítulo7
+CAPÍTULO 51
+VALIDACIÓN Y RESULTADOS1
+5.1 Propósito1
+5.2 Preparación del ambiente1
+5.3 Caracterización de participantes1
+5.4 Resultados UAT2
+5.5 Confianza e incertidumbre2
+5.6 Tiempo y costo del pago3
+5.7 Transparencia y satisfacción3
+5.8 Resultados técnicos4
+5.9 Evaluación de la hipótesis4
+5.10 Discusión5
+5.11 Amenazas y limitaciones observadas5
+5.12 Resumen del capítulo5
+CAPÍTULO 61
+CONCLUSIONES Y TRABAJO FUTURO1
+6.1 Estado de las conclusiones1
+6.2 Matriz para conclusiones1
+6.3 Conclusiones técnicas preliminares1
+6.4 Recomendaciones2
+6.5 Trabajo futuro2
+6.6 Cierre3
+GLOSARIO3
+REFERENCIAS4
+APÉNDICE A1
+CUESTIONARIO PARA PADRES DE FAMILIA1
+A.1 Datos de control1
+A.2 Preprueba1
+A.3 Posprueba2
+A.4 Mediciones posteriores3
+APÉNDICE B1
+CONSENTIMIENTO INFORMADO1
+APÉNDICE C1
+FORMATO DE CASO DE PRUEBA UAT1
+APÉNDICE D1
+BITÁCORA DE DEFECTOS1
+APÉNDICE E1
+PROTOCOLO DE PRUEBAS TÉCNICAS1
+APÉNDICE F1
+LISTA DE INFORMACIÓN PENDIENTE1
+APÉNDICE G1
+GUÍA DE ENTREVISTA SOBRE EL PROCESO ACTUAL1
+RESUMEN
+El presente trabajo propone la implementación y evaluación de una plataforma web integrada para Transportes Génesis, empresa dedicada al servicio de transporte escolar en San Cristóbal, departamento de Guatemla, Guatemala. El problema de investigación se origina en la utilización de procedimientos manuales y canales dispersos para comunicar la ubicación del bus, registrar el abordaje de los estudiantes y gestionar los pagos mensuales. Estas condiciones pueden generar incertidumbre en los padres de familia, poca trazabilidad administrativa y desplazamientos destinados a confirmar o efectuar pagos.
+La solución integra geolocalización en tiempo casi real, registro operativo de asistencia y abordaje, administración de rutas, alertas dentro del navegador y gestión digital de pagos. La plataforma fue desarrollada con ASP.NET Core 8, SQL Server, Entity Framework Core, ASP.NET Core Identity, SignalR, Leaflet, OpenStreetMap, OSRM y tecnologías web de interfaz adaptable. El estudio se delimita a padres de familia con hijos en primer grado de un colegio atendido por Transportes Génesis.
+Se plantea una investigación aplicada con enfoque mixto y diseño preexperimental de un solo grupo. La validación combinará pruebas de aceptación de usuario, mediciones técnicas y un cuestionario posterior al uso. Las variables dependientes serán la confianza y satisfacción percibidas, la incertidumbre respecto del traslado, y el tiempo y costo de desplazamiento asociados al pago presencial. Los resultados se analizarán mediante estadística descriptiva y evidencia cualitativa. Debido a que este documento corresponde a una versión inicial, los resultados empíricos, su discusión y las conclusiones definitivas permanecen pendientes hasta ejecutar el protocolo aprobado.
+CAPÍTULO 1
+INTRODUCCIÓN
+1.1 Tema principal
+Implementación de una plataforma web integrada de geolocalización, registro de abordaje y gestión digital de pagos para Transportes Génesis, orientada a padres de familia con hijos en primer grado de un colegio en San Cristóbal, departamento de Guatemala.
+1.2 Contexto de la investigación
+El transporte escolar constituye un servicio de apoyo para las familias que necesitan trasladar diariamente a sus hijos entre el hogar y el centro educativo. Su operación requiere coordinar horarios, rutas, paradas, estudiantes, pilotos, monitores y pagos. Cuando estos procesos se administran mediante llamadas telefónicas, mensajes instantáneos, documentos impresos y registros separados, la información puede llegar tarde, duplicarse o resultar difícil de verificar.
+Transportes Génesis presta este servicio en San Cristóbal, departamento de Guatemala. Antes de la propuesta tecnológica, la comunicación sobre recorridos y pagos dependía principalmente de procedimientos manuales o canales no integrados. El padre de familia debía consultar por mensaje o llamada la ubicación del bus; la empresa debía revisar información distribuida para determinar asistencias y cobros; y el comprobante de un pago podía quedar separado del historial administrativo.
+La necesidad adquiere especial importancia en familias con hijos en primer grado. Durante esta etapa, los padres pueden requerir mayor información sobre el momento de recogida, el traslado y la llegada del estudiante. Sin embargo, una plataforma tecnológica no garantiza por sí misma la seguridad física del niño. Su aporte consiste en ofrecer información oportuna, trazabilidad y registros que puedan aumentar la confianza percibida y apoyar la coordinación del servicio.
+La plataforma Transportes Génesis centraliza las funciones principales en un sistema web con acceso por roles. El administrador gestiona usuarios, buses, rutas, paradas y pagos; el piloto y el monitor consultan el recorrido y registran acciones operativas; y el padre visualiza el bus asignado, confirma asistencia, consulta pagos y recibe avisos dentro del navegador. La investigación evaluará si esta integración produce beneficios perceptibles y medibles frente a los procedimientos anteriores.
+1.3 Hipótesis
+Hipótesis de investigación (H1 general):
+La implementación y uso de una plataforma web integrada de geolocalización, registro de abordaje y gestión digital de pagos en Transportes Génesis aumentará la confianza y satisfacción de los padres de familia con hijos en primer grado, al reducir la incertidumbre sobre el traslado de sus hijos y disminuir el tiempo y los costos de desplazamiento asociados al pago presencial del servicio.
+Hipótesis nula (H0):
+La implementación y uso de la plataforma web integrada de Transportes Génesis no producirá un aumento medible en la confianza y satisfacción de los padres de familia, ni una reducción en la incertidumbre sobre el traslado o en el tiempo y los costos de desplazamiento asociados al pago presencial.
+La hipótesis es compuesta porque relaciona una intervención tecnológica con más de un resultado. Su comprobación no se realizará mediante una apreciación general aislada, sino a través de dimensiones e indicadores definidos antes de recolectar datos.
+Cuadro 1.1. Descomposición de la hipótesis
+Componente
+Variable
+Indicadores principales
+Plataforma integrada
+Variable independiente
+Uso de mapa, consulta de abordaje, registro y consulta de pagos
+Confianza
+Variable dependiente
+Percepción de información oportuna
+Incertidumbre
+Variable dependiente
+Frecuencia de llamadas o mensajes de consulta; valoración Likert
+Tiempo de pago
+Variable dependiente
+Minutos requeridos antes y con el sistema
+Costo de desplazamiento
+Variable dependiente
+Quetzales destinados a transporte para realizar o confirmar el pago
+Satisfacción
+Variable dependiente
+Disposición de uso
+1.4 Objetivos
+1.4.1 Objetivo general
+Desarrollar, implementar y validar una plataforma web integrada de geolocalización, registro de abordaje y gestión digital de pagos para Transportes Génesis, con el propósito de aumentar la confianza y satisfacción de los padres de familia, reducir la incertidumbre sobre el traslado de sus hijos y disminuir el tiempo y los costos de desplazamiento asociados al pago presencial del servicio.
+1.4.2 Objetivos específicos
+Analizar el proceso actual de seguimiento del transporte, registro de abordaje y gestión de pagos, así como las necesidades de los padres y del personal de Transportes Génesis.
+Diseñar e implementar un módulo de geolocalización que permita visualizar en un mapa la ubicación reportada por el bus y las paradas de la ruta.
+Implementar el registro de asistencia y abordaje para mejorar la trazabilidad operativa del traslado de los estudiantes.
+Diseñar e implementar un módulo de gestión digital de pagos que permita registrar comprobantes, consultar estados e historial y efectuar la validación administrativa.
+Integrar los módulos en una plataforma web con autenticación y autorización diferenciadas para administrador, piloto, monitor y padre de familia.
+Validar la funcionalidad, usabilidad y rendimiento del sistema mediante casos de prueba, pruebas de aceptación de usuario y mediciones técnicas.
+Evaluar los cambios percibidos en confianza, incertidumbre y satisfacción, así como la diferencia en tiempo y costo de desplazamiento relacionados con el proceso de pago.
+1.5 Planteamiento del problema
+La operación de un transporte escolar produce información que cambia durante el día. El bus inicia un recorrido, visita paradas, recoge o deja estudiantes y puede experimentar retrasos. Al mismo tiempo, la administración necesita conocer quién utilizará el servicio y mantener control de los pagos mensuales. Cuando los padres no disponen de una fuente centralizada, recurren a llamadas y mensajes para resolver dudas. La empresa debe responder consultas repetidas mientras coordina la ruta.
+La falta de visibilidad no significa necesariamente que exista un incidente, pero sí genera incertidumbre. Un retraso sin información puede ocasionar que el padre espere durante más tiempo o pregunte repetidamente por la ubicación del bus. Asimismo, un registro manual de abordaje limita la posibilidad de consultar posteriormente qué estudiante fue marcado como presente o ausente.
+En la gestión de pagos, el padre puede necesitar desplazarse a un banco o a otro punto, enviar el comprobante por un canal informal y solicitar confirmación. Esto implica tiempo y, en algunos casos, gastos de transporte. Para la administración, los comprobantes distribuidos entre conversaciones o archivos dificultan la trazabilidad del mes, monto y estado de validación.
+Por lo anterior, el problema central consiste en la ausencia de una plataforma integrada que reúna información del recorrido, registros operativos y pagos. La investigación busca responder la siguiente pregunta:
+¿En qué medida la implementación y uso de una plataforma web integrada de geolocalización, registro de abordaje y gestión digital de pagos aumenta la confianza y satisfacción de los padres de familia con hijos en primer grado, reduce la incertidumbre sobre el traslado y disminuye el tiempo y costo de desplazamiento asociados al pago presencial del servicio de Transportes Génesis?
+1.6 Justificación
+1.6.1 Justificación social
+La información sobre el recorrido puede contribuir a que las familias organicen mejor los horarios de recogida y entrega. El registro de asistencia y abordaje proporciona evidencia operativa adicional. El beneficio esperado no debe describirse como garantía absoluta de seguridad, sino como mejora en información, confianza percibida y coordinación.
+1.6.2 Justificación económica
+La posibilidad de registrar y consultar pagos de forma remota puede evitar ciertos desplazamientos destinados únicamente a entregar o confirmar un comprobante. La magnitud del ahorro no se asumirá de antemano: se calculará a partir del tiempo y del costo declarado por los participantes para el procedimiento anterior y el procedimiento digital.
+1.6.3 Justificación operativa
+La centralización reduce la fragmentación de información entre llamadas, mensajes, documentos y hojas separadas. Los roles permiten que cada participante consulte o registre la información necesaria. La trazabilidad de ubicaciones, recogidas y pagos apoya el seguimiento administrativo.
+1.6.4 Justificación tecnológica
+El proyecto demuestra la aplicación de tecnologías web disponibles para construir una solución local: ASP.NET Core para el servidor, SQL Server para persistencia, SignalR para comunicación en tiempo real y herramientas cartográficas abiertas para visualizar rutas y ubicaciones.
+1.6.5 Justificación académica
+La investigación vincula una solución de ingeniería de software con un protocolo de evaluación. La hipótesis, las variables, los instrumentos y los criterios de éxito se definen antes de observar los resultados. Esto permite presentar evidencia favorable, desfavorable o mixta con el mismo criterio de honestidad académica.
+1.7 Delimitación
+Cuadro 1.2. Delimitación del estudio
+Dimensión
+Delimitación
+Geográfica
+San Cristóbal, departamento de Guatemala, Guatemala
+Poblacional
+Padres con hijos en primer grado de un colegio atendido por Transportes Génesis
+Temporal
+Desarrollo y validación durante 2026
+Tecnológica
+Plataforma web adaptable; no incluye aplicación móvil nativa
+Funcional
+Geolocalización, rutas, asistencia, abordaje, pagos, alertas web y administración
+Institucional
+Transportes Génesis y el colegio participante, cuyo nombre puede reservarse
+1.8 Alcance
+El trabajo comprende el análisis, diseño, implementación y validación inicial de una plataforma web. Incluye autenticación por roles, administración de buses y rutas, visualización cartográfica, recepción y almacenamiento de ubicaciones, comunicación SignalR, confirmación de asistencia, registro operativo de recogidas, gestión de comprobantes e historial de pagos y pruebas con usuarios.
+La evaluación incluye casos funcionales, pruebas UAT, encuesta de percepción, medición de tiempo y costo del proceso de pago, y pruebas de carga y rendimiento en ambiente controlado.
+1.9 Limitaciones
+La versión evaluada es web y no incluye una aplicación nativa para Android o iOS.
+Las alertas funcionan dentro del navegador y no constituyen notificaciones push, SMS o WhatsApp.
+La transmisión demostrable depende del navegador del piloto o monitor y del entorno de simulación; no utiliza un dispositivo GPS dedicado instalado permanentemente en el bus.
+El registro de abordaje es efectuado por el personal; no utiliza QR, NFC, RFID ni biometría.
+El pago con pasarela es complementario. La evaluación principal se enfoca en comprobantes e historial.
+La muestra puede ser pequeña y no permite generalizar automáticamente los resultados a toda Guatemala.
+La conectividad, precisión del dispositivo y disponibilidad de servicios cartográficos externos pueden afectar la experiencia.
+Los resultados definitivos dependen de ejecutar el protocolo con usuarios reales y no pueden inferirse solo del funcionamiento técnico.
+1.10 Resumen del capítulo
+El capítulo presentó el contexto, el problema, la hipótesis compuesta y los objetivos. La propuesta busca evaluar beneficios concretos sin afirmar que la tecnología garantiza la seguridad. La investigación medirá confianza, incertidumbre, tiempo, costo y satisfacción, además del funcionamiento técnico de la plataforma.
+CAPÍTULO 2
+MARCO TEÓRICO
+2.1 Sistemas de información y digitalización de procesos
+Un sistema de información integra personas, procedimientos, datos y tecnología para apoyar operaciones y decisiones. La calidad de la solución no depende únicamente del software: también requiere procesos definidos, datos confiables y usuarios capaces de utilizarla. En Transportes Génesis, la plataforma sustituye parcialmente la dispersión de información por un punto común de consulta y registro.
+La digitalización consiste en rediseñar actividades para que la información pueda capturarse, almacenarse, procesarse y recuperarse de manera sistemática. En un servicio de transporte escolar, esto abarca asignaciones, rutas, paradas, ubicaciones, asistencia, recogidas y pagos. La integración evita que cada módulo sea una aplicación aislada, aunque internamente conserve responsabilidades separadas.
+2.2 Transporte escolar y confianza de los padres
+La confianza es una expectativa sobre el comportamiento de un servicio y sobre la calidad de la información recibida. En este estudio se entiende como percepción del padre respecto de la oportunidad, claridad y utilidad de la información que proporciona Transportes Génesis. No equivale a ausencia de riesgo ni reemplaza los protocolos físicos de seguridad.
+La incertidumbre aparece cuando el usuario no dispone de información suficiente para anticipar o comprender una situación. Durante un recorrido escolar puede expresarse en dudas sobre la ubicación del bus, el retraso o el abordaje. Un mapa actualizado y un registro operativo pueden reducir la necesidad de consultas, siempre que los datos sean comprensibles y recientes.
+2.3 Geolocalización
+La geolocalización permite determinar la posición de un dispositivo mediante coordenadas. La API de geolocalización del navegador expone esta capacidad con autorización del usuario y en un contexto seguro. La precisión depende del hardware, la red y el entorno; por ello, una coordenada debe acompañarse de fecha y hora y no considerarse exacta en todo momento (World Wide Web Consortium, 2024).
+El término «tiempo real» suele utilizarse en aplicaciones web para describir actualizaciones recibidas sin recargar la pantalla. En este proyecto es más preciso hablar de tiempo casi real: el dispositivo envía ubicaciones periódicas al servidor, este las almacena y comunica a los clientes conectados. Siempre existe una latencia producida por captura, red, procesamiento y representación.
+2.3.1 Representación cartográfica
+Leaflet es una biblioteca de JavaScript para mapas interactivos. OpenStreetMap aporta datos cartográficos abiertos; OSRM calcula recorridos sobre la red vial; y Nominatim permite búsquedas geográficas. Estas piezas cumplen funciones distintas. El mapa base no calcula por sí mismo la ruta, y una ruta sugerida no reemplaza el criterio del piloto ni las condiciones reales de tránsito.
+2.3.2 Distancia y alertas de proximidad
+La distancia entre dos coordenadas puede aproximarse con la fórmula de Haversine. Transportes Génesis utiliza radios de referencia para generar avisos cuando el bus se aproxima a la casa del alumno o al colegio. Estas alertas dependen de la ubicación reportada y de que el padre mantenga una sesión web activa.
+2.3.3 Comunicación en tiempo real
+SignalR facilita la comunicación bidireccional entre servidor y clientes web. El servidor puede enviar eventos a conexiones o grupos sin que el navegador consulte repetidamente. En Génesis, la ubicación se recibe mediante una API REST, se almacena y luego se distribuye por SignalR. Esta separación permite conservar trazabilidad y actualizar el mapa.
+2.4 Registro de asistencia y abordaje
+La asistencia anticipada informa si el estudiante utilizará el servicio en un turno. El abordaje registra una acción observada durante el recorrido. Son datos relacionados pero distintos: una confirmación previa no prueba que el estudiante haya subido, y un registro de recogida depende de la actuación del monitor o piloto.
+La trazabilidad requiere identificar fecha, estudiante, parada, estado y responsable del registro. También demanda controles de acceso, porque la información de un menor no debe mostrarse a usuarios ajenos a su relación autorizada.
+2.5 Gestión digital de pagos
+La gestión de pagos comprende asignación de montos, registro, evidencia, validación e historial. En un flujo con comprobante, el padre carga una imagen o documento; la administración verifica la información y establece un estado. La trazabilidad permite consultar el mes, monto, fecha, tipo y resultado de validación.
+Un pago digital no elimina automáticamente todos los costos. Puede reducir desplazamientos cuando el procedimiento se completa de forma remota, pero todavía puede existir el costo de conectividad, de una transferencia bancaria o de una comisión. Por esa razón, este estudio compara el costo declarado del proceso anterior con el costo asociado al uso del sistema.
+2.5.1 Seguridad del flujo de pagos
+La aplicación debe validar archivos, restringir tipos y tamaños, proteger credenciales y aplicar autorización. Cuando interviene una pasarela, los datos sensibles de tarjeta deben procesarse mediante componentes del proveedor y bajo prácticas como las del PCI Security Standards Council (2024). La tesis no debe presentar el almacenamiento local de comprobantes como equivalente a una certificación de seguridad.
+2.6 Integración de módulos y arquitectura web
+La arquitectura de Génesis separa presentación, controladores o páginas, servicios, acceso a datos y comunicación en tiempo real. La modularidad facilita asignar responsabilidades y probar componentes, mientras que la integración ofrece una sesión y una experiencia unificadas.
+ASP.NET Core Identity administra usuarios, autenticación y roles. Entity Framework Core relaciona objetos con tablas de SQL Server. Las API reciben datos estructurados; Razor Pages y MVC generan interfaces; SignalR envía eventos a clientes conectados.
+2.7 Usabilidad y aceptación tecnológica
+La usabilidad comprende efectividad, eficiencia y satisfacción en un contexto de uso. La norma ISO/IEC 25010:2023 sitúa la calidad de interacción como parte de la evaluación del producto. Una función puede ser técnicamente correcta y, aun así, resultar confusa.
+El Modelo de Aceptación Tecnológica propone que la utilidad y facilidad de uso percibidas influyen en la intención de utilizar un sistema (Davis, 1989). Para Génesis, la aceptación se evaluará mediante tareas reales y preguntas sobre claridad, utilidad y satisfacción.
+Las pruebas con un grupo reducido permiten descubrir problemas frecuentes de interfaz, pero no sustituyen una muestra estadística amplia. El cuestionario System Usability Scale fue propuesto como una medida breve de usabilidad percibida (Brooke, 1996). Este estudio utiliza preguntas Likert vinculadas directamente a la hipótesis y puede incluir SUS como indicador complementario.
+2.8 Escalas Likert
+Las escalas de categorías ordenadas permiten registrar niveles de acuerdo o percepción. Likert (1932) propuso un procedimiento de medición basado en respuestas graduadas. En esta investigación se empleará una escala de cinco puntos, desde «totalmente en desacuerdo» hasta «totalmente de acuerdo».
+Los resultados se reportarán por ítem y dimensión. El promedio facilita una síntesis, pero debe acompañarse de distribución, mediana y tamaño de muestra. Con una muestra pequeña, no se presentarán inferencias poblacionales que los datos no soporten.
+2.9 Pruebas de software
+Las pruebas funcionales verifican que las acciones produzcan el resultado esperado. Las pruebas de integración comprueban la interacción entre componentes. Las pruebas UAT permiten que usuarios representativos determinen si el sistema satisface necesidades operativas. Las pruebas de carga examinan el comportamiento ante concurrencia, y las de rendimiento miden latencia, tasa de errores y estabilidad.
+La calidad debe evaluarse con criterios definidos antes de ejecutar. Para Génesis se proponen tiempos de respuesta, estabilidad de actualización, éxito de tareas, claridad de pagos y percepción de utilidad.
+2.10 Protección de datos y ética
+La geolocalización y los datos de estudiantes requieren precaución. Los participantes deben conocer qué información se recolectará, para qué se utilizará, por cuánto tiempo se conservará y quién podrá acceder. La investigación utilizará códigos en lugar de nombres en la base de análisis.
+El consentimiento debe ser voluntario. Un padre puede retirarse sin afectar el servicio. Las capturas utilizadas como evidencia deben ocultar nombres, direcciones, credenciales y datos financieros. Las cuentas de demostración no deben exponer secretos reales.
+2.11 Definiciones
+Cuadro 2.1. Términos principales
+Término
+Definición operacional
+Geolocalización
+Obtención de latitud y longitud desde un dispositivo autorizado
+Tiempo casi real
+Actualización con una latencia breve y medible, sin promesa de inmediatez absoluta
+Abordaje
+Registro manual de presencia o recogida efectuado por personal autorizado
+Trazabilidad
+Capacidad de reconstruir eventos mediante registros con fecha, estado y responsable
+Pago digital
+Registro o procesamiento de un pago mediante la plataforma
+Confianza percibida
+Valoración del padre sobre oportunidad y utilidad de la información
+Incertidumbre
+Falta de información suficiente respecto del traslado
+UAT
+Prueba de aceptación ejecutada por usuarios representativos
+SignalR
+Biblioteca para comunicación en tiempo real entre servidor y cliente
+Rol
+Conjunto de permisos asignado a un tipo de usuario
+2.12 Resumen del capítulo
+El marco teórico relaciona sistemas de información, geolocalización, trazabilidad, pagos, usabilidad y evaluación. La tecnología aporta datos y canales de consulta, pero sus beneficios deben comprobarse con usuarios y métricas.
+CAPÍTULO 3
+MARCO METODOLÓGICO
+3.1 Enfoque y tipo de investigación
+La investigación es aplicada porque desarrolla una solución para un problema concreto. Emplea un enfoque mixto: los indicadores de percepción, tiempo, costo y rendimiento producen datos cuantitativos; las observaciones y respuestas abiertas aportan información cualitativa.
+El alcance es descriptivo y evaluativo. Se describen los procesos y se evalúan cambios observados tras utilizar la plataforma. El diseño propuesto es preexperimental de un solo grupo con preprueba y posprueba. Antes de utilizar la plataforma se medirán confianza, incertidumbre, satisfacción con el proceso vigente, tiempo y costo de desplazamiento. Después de ejecutar las tareas UAT se repetirán los indicadores comparables. Esta decisión responde a la disponibilidad limitada de participantes; por ello, las conclusiones se circunscribirán al grupo estudiado y no atribuirán causalidad definitiva.
+3.2 Unidad de análisis, población y muestra
+La unidad de análisis principal es el padre o responsable con un hijo en primer grado que utiliza el servicio de Transportes Génesis. La población accesible se determinará con el listado autorizado por la empresa.
+Se utilizará muestreo no probabilístico por conveniencia. La meta mínima es cinco padres para pruebas cualitativas de usabilidad. Si la población accesible lo permite, se buscará una participación mayor para fortalecer la descripción cuantitativa. También participarán, como informantes operativos, al menos un administrador, un piloto o monitor.
+Estado: el tamaño final de población y muestra está pendiente de confirmación.
+3.3 Variables
+Cuadro 3.1. Operacionalización de variables
+Variable
+Tipo
+Dimensión
+Indicador
+Instrumento
+Uso de plataforma integrada
+Independiente
+Exposición
+Tareas completadas en geo, abordaje y pagos
+Bitácora UAT
+Confianza
+Dependiente
+Confianza en la información del traslado
+Diferencia preprueba-posprueba en ítems de confianza
+Encuesta Likert
+Incertidumbre
+Dependiente
+Necesidad de consulta
+Llamadas/mensajes semanales y puntaje preprueba-posprueba
+Encuesta
+Tiempo de pago
+Dependiente
+Eficiencia
+Minutos por trámite antes y con plataforma
+Encuesta y cronómetro
+Costo de desplazamiento
+Dependiente
+Costo directo
+Quetzales por trámite antes y con plataforma
+Encuesta
+Claridad de pagos
+Dependiente
+Transparencia
+Diferencia preprueba-posprueba en ítems de claridad
+Encuesta Likert
+Satisfacción
+Dependiente
+Experiencia global
+Diferencia preprueba-posprueba en ítems de satisfacción
+Encuesta Likert
+Calidad técnica
+Interviniente
+Rendimiento
+Latencia, errores, estabilidad
+Logs y prueba de carga
+3.4 Indicadores y criterios
+Los criterios se fijan antes de recolectar datos:
+Diferencia positiva entre preprueba y posprueba en confianza, con promedio posterior igual o superior a 4.0 de 5.
+Diferencia positiva entre preprueba y posprueba en claridad del pago, con promedio posterior igual o superior a 4.0 de 5.
+Diferencia positiva entre preprueba y posprueba en satisfacción, con promedio posterior igual o superior a 4.0 de 5.
+Reducción positiva en la mediana de minutos destinados al trámite de pago.
+Reducción positiva en la mediana de quetzales destinados al desplazamiento para pagar o confirmar.
+Disminución en llamadas o mensajes de consulta y en el puntaje de incertidumbre entre preprueba y posprueba.
+Al menos 80 % de tareas UAT completadas sin ayuda crítica.
+Percentil 95 del tiempo de respuesta menor de tres segundos, con una tasa de error inferior al 1 %, en las páginas y API definidas para el escenario de veinte usuarios concurrentes.
+Mapa estable durante treinta minutos de simulación controlada.
+Carga de comprobantes sin error con al menos diez usuarios concurrentes en el ambiente de prueba.
+Los criterios 8 a 10 son referencias de validación técnica y no demuestran por sí solos la hipótesis social.
+3.5 Técnicas e instrumentos
+3.5.1 Revisión documental
+Se analizarán procesos, requerimientos, código, modelo de datos, manuales y bitácoras para describir el sistema real. El objetivo específico de análisis se complementará con la guía de entrevista del Apéndice G aplicada al administrador y al personal operativo.
+3.5.2 Observación de tareas
+Cada participante ejecutará tareas sin que el investigador tome el control del dispositivo. Se registrarán éxito, ayuda, errores, tiempo y comentarios.
+3.5.3 Encuesta
+El cuestionario incluirá datos de contexto no sensibles, estimaciones del proceso anterior, preguntas posteriores al uso y respuestas abiertas. Las preguntas se muestran en el Apéndice A.
+3.5.4 Pruebas técnicas
+Se ejecutarán casos funcionales, automatización de flujos repetibles y escenarios de carga. Las credenciales, capturas y archivos de prueba serán ficticios.
+3.6 Validez del instrumento
+El cuestionario será revisado por el asesor y, cuando sea posible, por un experto en metodología y un representante del dominio. Se realizará una prueba piloto con dos personas que no formen parte de la muestra final o cuyos resultados se identifiquen como piloto.
+La redacción evitará preguntas dobles o que induzcan una respuesta favorable. Cada ítem se vinculará a una variable. Si una dimensión contiene varios ítems y la muestra lo permite, se calculará consistencia interna; con muestras muy pequeñas se reportará como análisis exploratorio.
+3.7 Procedimiento
+Obtener autorización de Transportes Génesis.
+Confirmar población, participantes, fechas y ambiente.
+Entregar información y consentimiento.
+Aplicar la preprueba sobre confianza, incertidumbre, claridad, satisfacción, tiempo y costo del proceso vigente.
+Preparar cuentas y datos ficticios.
+Explicar el objetivo sin indicar respuestas esperadas.
+Ejecutar escenarios UAT de mapa, asistencia, abordaje y pagos.
+Registrar tiempos, errores, ayuda y comentarios.
+Aplicar la posprueba con los mismos constructos y preguntas de experiencia de uso.
+Ejecutar pruebas técnicas en ambiente separado.
+Anonimizar, consolidar y revisar datos.
+Analizar resultados respecto de cada indicador.
+3.8 Escenarios UAT
+Cuadro 3.2. Escenarios de aceptación
+ID
+Rol
+Tarea
+Resultado esperado
+Variable
+UAT-01
+Padre
+Iniciar sesión
+Acceso a funciones autorizadas
+Usabilidad
+UAT-02
+Padre
+Abrir mapa
+Visualiza ruta y ubicación disponible
+Confianza
+UAT-03
+Padre
+Confirmar asistencia
+Registro persistido y recuperado desde la base de datos
+Integración
+UAT-04
+Monitor
+Marcar presencia o recogida
+Registro asociado al estudiante
+Trazabilidad
+UAT-05
+Padre
+Consultar abordaje o aviso
+Comprende el estado mostrado
+Confianza
+UAT-06
+Padre
+Registrar comprobante
+Pago queda registrado
+Tiempo/costo
+UAT-07
+Administrador
+Validar pago
+Estado actualizado
+Transparencia
+UAT-08
+Padre
+Consultar historial
+Identifica mes, monto y estado
+Satisfacción
+UAT-09
+Piloto/monitor
+Transmitir o simular ruta
+Mapa se actualiza
+Calidad técnica
+UAT-10
+Todos
+Flujo integrado
+Módulos operan con roles correctos
+Satisfacción
+3.9 Plan de análisis
+Para cada ítem Likert se calcularán frecuencia, porcentaje, mediana y promedio. Para cada dimensión se obtendrá un puntaje compuesto y se comparará la preprueba con la posprueba. El tiempo y costo se analizarán mediante diferencia absoluta y porcentual:
+Reducción de tiempo (%) = ((tiempo anterior − tiempo con plataforma) / tiempo anterior) × 100
+Reducción de costo (%) = ((costo anterior − costo con plataforma) / costo anterior) × 100
+Si el valor anterior es cero, no se calculará porcentaje; se reportará la diferencia absoluta. Las respuestas abiertas se agruparán por temas: confianza, claridad, dificultad, utilidad, barreras y sugerencias.
+La hipótesis se considerará respaldada total o parcialmente según el patrón conjunto. No se forzará una conclusión binaria si algunos componentes mejoran y otros no. Por tratarse de un diseño preexperimental y una muestra no probabilística, cualquier cambio se interpretará como evidencia observada en los participantes y no como demostración causal definitiva.
+3.10 Ética
+Se solicitará consentimiento informado. No se publicarán nombres, direcciones, coordenadas del hogar, teléfonos, credenciales ni comprobantes reales. Los participantes se identificarán mediante códigos P01, P02 y sucesivos. Los datos se utilizarán únicamente para la investigación y se conservarán en un medio protegido durante el período autorizado.
+La participación será voluntaria. Se reportarán resultados negativos y limitaciones con la misma transparencia que los resultados favorables.
+3.11 Amenazas a la validez
+La muestra por conveniencia puede introducir sesgo de selección. La medición retrospectiva del proceso anterior puede contener sesgo de memoria. La presencia del investigador puede modificar el comportamiento. La simulación no reproduce todas las condiciones de una ruta real. La novedad del sistema puede elevar temporalmente la satisfacción. Estas amenazas se documentarán al interpretar los resultados.
+3.12 Resumen del capítulo
+La metodología define cómo medir la hipótesis mediante UAT, encuesta y pruebas técnicas. La operacionalización evita confundir funcionamiento con beneficio y establece condiciones para analizar resultados aún desfavorables.
+CAPÍTULO 4
+DISEÑO E IMPLEMENTACIÓN DE LA SOLUCIÓN
+4.1 Descripción general
+Transportes Génesis es una aplicación web desarrollada sobre .NET 8. Reúne funciones administrativas y operativas con interfaces diferenciadas. La solución utiliza una base de datos relacional y comunicación en tiempo real para el mapa.
+4.2 Usuarios y roles
+Cuadro 4.1. Roles del sistema
+Rol
+Responsabilidades
+Administrador
+Gestionar usuarios, buses, rutas, paradas, asignaciones, pagos y reportes
+Piloto
+Consultar ruta asignada y transmitir o simular ubicación
+Monitor
+Consultar ruta, revisar estudiantes y registrar recogidas
+Padre de familia
+Consultar mapa, confirmar asistencia, gestionar pagos y solicitudes
+ASP.NET Core Identity autentica a los usuarios. Las políticas por rol reducen la exposición de pantallas, aunque deben complementarse con validaciones sobre la propiedad de los datos.
+4.3 Arquitectura
+Figura 4.1. Flujo general de la plataforma
+Usuarios web    │    ▼Razor Pages / MVC / API REST    │    ├── Servicios de negocio    ├── ASP.NET Core Identity    ├── SignalR    ▼Entity Framework Core    ▼SQL ServerServicios cartográficos externos: OpenStreetMap, OSRM y Nominatim
+La arquitectura combina Razor Pages y MVC por la evolución del proyecto. Las API atienden ubicaciones y rutas. Los servicios encapsulan reglas de negocio y Entity Framework Core gestiona persistencia.
+4.4 Tecnologías
+Cuadro 4.2. Tecnologías principales
+Capa
+Tecnología
+Propósito
+Servidor
+ASP.NET Core 8
+Aplicación, páginas, controladores y API
+Persistencia
+SQL Server
+Almacenamiento relacional
+Acceso a datos
+Entity Framework Core
+Mapeo y consultas
+Seguridad
+ASP.NET Core Identity
+Usuarios y roles
+Tiempo real
+SignalR
+Eventos hacia navegadores
+Mapa
+Leaflet y OpenStreetMap
+Visualización
+Rutas
+OSRM
+Trazado sobre calles
+Geocodificación
+Nominatim
+Búsqueda de direcciones
+Interfaz
+Bootstrap, JavaScript y jQuery
+Presentación adaptable
+4.5 Módulo de geolocalización
+El piloto o monitor utiliza una pantalla web. Durante la demostración, la ruta puede simularse y enviar una coordenada aproximadamente cada dos segundos. La API recibe identificador de bus, latitud, longitud y datos relacionados. El servicio almacena el registro y emite un evento SignalR.
+Figura 4.2. Flujo de una ubicación
+Piloto o monitor      │ POST /api/ubicaciones      ▼UbicacionesController      ▼UbicacionBusService      ├── Guarda en SQL Server      ├── Calcula proximidad      └── Emite SignalR                  ▼          Mapa del padre
+El sistema identifica una ubicación como reciente según reglas temporales. Puede clasificar el bus como detenido, en movimiento o sin señal. Las alertas se calculan por distancia aproximada. No se utilizan geocercas poligonales.
+Una cola local permite conservar temporalmente puntos cuando se interrumpe la conexión y enviarlos en lote al restablecerse. Este mecanismo mejora continuidad, pero no garantiza que todos los puntos se reciban.
+Retroalimentación de usuario conductor. El conductor valoró que la interfaz operativa mantiene un diseño simple y directo. Como mejora funcional observada, el inicio de la ruta debe reflejar la ubicación operativa del vehículo: desde el colegio cuando corresponde al turno de salida, o desde el predio, hogar o posición actual del conductor cuando inicia el recorrido de recogida. Esta condición debe verificarse en UAT mediante escenarios con ambos puntos de partida.
+Retroalimentación de usuario padre de familia. En la pantalla de ruta en tiempo real se reportó que los controles de acercar y alejar no respondían de forma adecuada. Se registra como criterio de usabilidad la disponibilidad de controles sincronizados con el mapa para acercar, alejar y ampliar la vista con un nivel adicional de zoom. Su aceptación requiere comprobar la interacción sobre el mapa durante UAT.
+4.6 Rutas y paradas
+Las rutas se organizan por bus y turno. El sistema ordena paradas mediante una heurística de vecino más cercano. Este procedimiento busca una solución práctica, pero no garantiza la ruta globalmente óptima. OSRM dibuja el trayecto sobre calles disponibles.
+El administrador mantiene paradas y asignaciones. El piloto y monitor consultan el recorrido. La información de asistencia puede modificar la lista de estudiantes esperados, con comportamientos de respaldo para ambientes de demostración.
+Retroalimentación de usuario conductor. Se solicita un control de «Stop» para pausar temporalmente la ruta cuando un estudiante aún no ha llegado o salido a la parada. El control debe conservar la posición del vehículo y permitir reanudar el recorrido desde esa misma coordenada, registrando el motivo operativo. Esta funcionalidad se documenta como parte del flujo de rutas y paradas; su comportamiento, notificación y recuperación deben validarse con casos UAT antes de reportarse como resultado aceptado.
+4.7 Asistencia y abordaje
+El proyecto contiene la interfaz, el modelo y la API para confirmar si el estudiante utilizará el transporte por la mañana o por la tarde. Sin embargo, la vista actual incluye comportamiento de demostración y la API puede devolver respuestas simuladas ante determinados errores. Por ello, la confirmación no se considerará funcionalmente validada hasta comprobar que el dato se persiste y se recupera desde SQL Server durante UAT. Al completar una parada se crea un registro de recogida; el monitor también dispone de una interfaz para marcar presencia o ausencia.
+El término «registro de abordaje» se utiliza como concepto operativo. El sistema no verifica identidad mediante hardware y depende de la acción del usuario autorizado. Esta limitación será comunicada a los participantes.
+Retroalimentación de usuario padre de familia. Se reportó que la paleta visual dificultaba la lectura del Calendario de Asistencia. Para facilitar la accesibilidad visual, se establece como criterio de interfaz que el calendario utilice fondo blanco y texto negro, manteniendo contraste suficiente para los estados de asistencia.
+También se reportó que una confirmación efectuada para el 28/07/2026 se aplicaba a todos los días en vez de al día seleccionado. La confirmación debe quedar asociada únicamente a la fecha individual elegida por el padre y conservar dicha fecha durante el envío, la persistencia y la consulta posterior. La persistencia por fecha y turno seguirá considerándose pendiente de validación hasta que UAT compruebe el registro y la recuperación desde SQL Server.
+4.8 Alertas
+SignalR distribuye eventos de ubicación, proximidad, parada completada y retraso. El padre debe mantener el navegador conectado. Algunas alertas automáticas se muestran en tiempo real, pero no todas se almacenan en el historial. Por ello, la tesis distinguirá entre recepción en pantalla y persistencia.
+4.9 Gestión de pagos
+El padre consulta meses y montos, registra un pago o carga una boleta y revisa el historial. La administración puede validar o rechazar registros según el flujo activo. El proyecto contiene modelos de pagos de distintas etapas, por lo que la validación se enfocará en el flujo visible y utilizado durante UAT. La lógica actual de meses deberá probarse para los doce meses del año, pues la lista configurada no cubre de forma segura todos los casos; no se afirmará gestión mensual completa mientras esta prueba no sea aprobada.
+La pasarela Stripe se considera complementaria. Si no se encuentra habilitada con credenciales de prueba, se documentará su exclusión y no se presentará como resultado validado.
+4.10 Datos principales
+Cuadro 4.3. Entidades relevantes
+Entidad
+Finalidad
+Bus
+Vehículo y capacidad
+Ruta
+Recorrido por bus y turno
+Parada
+Punto, orden y estudiante relacionado
+UbicacionBusEnTiempoReal
+Coordenada y fecha reportada
+Alumno
+Estudiante asociado a responsable
+Padre
+Responsable del estudiante
+AsistenciaAlumno
+Confirmación diaria por turno
+RegistroRecogida
+Evidencia operativa de parada
+PagoPadre
+Pago web, mes, monto, tipo y comprobante
+Usuario y rol
+Autenticación y autorización
+4.11 Controles de seguridad
+La solución utiliza autenticación y restricciones por rol en varias páginas, pero la cobertura de autorización no es completa en todas las API, acciones administrativas y grupos SignalR. En consecuencia, el control de acceso se tratará como requisito pendiente de endurecimiento y deberá someterse a casos negativos antes de aprobarse. También se requiere conexión segura, validación de entrada y control de archivos. Las contraseñas no deben aparecer en la tesis. Los datos de demostración deben ser ficticios. Los secretos de Stripe o conexión no deben quedar en el repositorio ni en capturas.
+4.12 Restricciones observadas
+El GPS real continuo no está implementado con `watchPosition`; la demostración utiliza simulación o envío periódico desde la vista.
+Algunas rutas de demostración contienen valores de bus preconfigurados.
+Existen respuestas de respaldo o simulación en determinados flujos.
+Las notificaciones no salen del navegador.
+Algunos modelos y pantallas de pagos reflejan etapas diferentes del desarrollo.
+La integración se da en una plataforma y sesión comunes; geolocalización y pagos conservan flujos funcionales separados.
+La persistencia de asistencia debe verificarse porque la interfaz y la API contienen comportamiento de simulación.
+Determinadas API, acciones y suscripciones SignalR requieren controles de autorización adicionales.
+El cálculo de meses del módulo de pagos debe corregirse o validarse para noviembre y diciembre.
+Estas restricciones no invalidan el prototipo, pero delimitan las afirmaciones y el diseño de prueba.
+4.13 Resumen del capítulo
+El capítulo documentó la arquitectura y el funcionamiento realmente implementado. Se evitó presentar simulaciones, funciones complementarias o trabajos futuros como capacidades plenamente validadas.
+CAPÍTULO 5
+VALIDACIÓN Y RESULTADOS
+5.1 Propósito
+Este capítulo deberá presentar la evidencia obtenida durante UAT y pruebas técnicas. En esta versión inicial no se han proporcionado conjuntos de resultados verificables. Por ética académica, no se incluyen porcentajes, promedios ni testimonios ficticios.
+5.2 Preparación del ambiente
+Estado pendiente. Completar:
+Fecha y lugar de las pruebas.
+Versión o identificador del sistema.
+Servidor, base de datos y navegadores utilizados.
+Cantidad y rol de participantes.
+Datos ficticios preparados.
+Autorizaciones y consentimientos obtenidos.
+5.3 Caracterización de participantes
+Cuadro 5.1. Caracterización de la muestra
+Indicador
+Resultado
+Población accesible
+Pendiente
+Padres invitados
+Pendiente
+Padres participantes
+Pendiente
+Participantes que completaron la sesión
+Pendiente
+Experiencia previa con pagos digitales
+Pendiente
+Dispositivo principal
+Pendiente
+No se publicarán combinaciones de características que permitan identificar a una familia.
+5.4 Resultados UAT
+Cuadro 5.2. Resultados de escenarios
+Escenario
+Aprobado
+Con observaciones
+Rechazado
+Tiempo mediano
+Hallazgo
+Inicio de sesión
+Pendiente
+Pendiente
+Pendiente
+Pendiente
+Pendiente
+Mapa y ubicación
+Pendiente
+Pendiente
+Pendiente
+Pendiente
+Pendiente
+Confirmación de asistencia
+Pendiente
+Pendiente
+Pendiente
+Pendiente
+Pendiente
+Registro de abordaje
+Pendiente
+Pendiente
+Pendiente
+Pendiente
+Pendiente
+Registro de pago
+Pendiente
+Pendiente
+Pendiente
+Pendiente
+Pendiente
+Validación de pago
+Pendiente
+Pendiente
+Pendiente
+Pendiente
+Pendiente
+Historial de pagos
+Pendiente
+Pendiente
+Pendiente
+Pendiente
+Pendiente
+Flujo integrado
+Pendiente
+Pendiente
+Pendiente
+Pendiente
+Pendiente
+La tasa de éxito se calculará como tareas completadas sin ayuda crítica entre tareas intentadas, multiplicada por cien.
+Registro de retroalimentación para ejecución UAT. Antes de consolidar resultados, se incluirán escenarios que verifiquen: (a) legibilidad del calendario con fondo blanco y texto negro; (b) confirmación de asistencia exclusiva para la fecha seleccionada; (c) controles de acercar, alejar y ampliar vista en el mapa del padre; (d) inicio de ruta desde el punto operativo correspondiente; y (e) pausa y reanudación mediante «Stop» conservando coordenada y motivo. Estas observaciones son insumos de prueba y no constituyen resultados UAT aprobados.
+5.4.1 Escenarios de prueba propuestos
+Los escenarios siguientes se incorporan como propuesta de ejecución y registro. Su estado inicial es pendiente; deberán completarse en el formato de caso de prueba UAT y en la bitácora de defectos antes de que se utilicen para calcular indicadores de aceptación.
+PT-PAD-01 — Calendario legible. Rol: padre de familia. Precondición: sesión iniciada y pantalla Confirmar Asistencia disponible. Pasos: abrir el calendario, revisar fondo, texto y distintivos de estado. Resultado esperado: fondo blanco, texto negro y contraste suficiente para identificar los estados sin ambigüedad.
+PT-PAD-02 — Asistencia por fecha individual. Rol: padre de familia. Precondición: existe un alumno asociado y se muestra el calendario. Pasos: seleccionar el 28/07/2026, confirmar asistencia para un turno y consultar una fecha distinta. Resultado esperado: el registro queda asociado únicamente al 28/07/2026, conserva el turno indicado y no altera los demás días.
+PT-PAD-03 — Controles de mapa. Rol: padre de familia. Precondición: mapa de ruta en tiempo real cargado. Pasos: utilizar Acercar, Alejar y Ampliar vista. Resultado esperado: cada acción modifica el nivel de zoom del mapa; Ampliar vista aumenta el zoom adicional sin desincronizar el marcador ni la ruta.
+PT-CON-01 — Punto inicial operativo. Rol: conductor o monitor. Precondición: ruta y ubicación disponibles. Pasos: iniciar un recorrido de mañana y uno de tarde. Resultado esperado: el recorrido parte del punto operativo aplicable, ya sea ubicación del vehículo, predio/hogar o colegio según el turno configurado.
+PT-CON-02 — Pausa y reanudación de ruta. Rol: conductor o monitor. Precondición: recorrido activo. Pasos: seleccionar Stop, indicar que se espera a un estudiante, comprobar posición, y reanudar. Resultado esperado: la ruta se pausa, conserva la coordenada y el motivo, y continúa desde la misma ubicación al reanudar; la notificación correspondiente se entrega al padre cuando esté disponible.
+Criterio de registro. Para cada escenario se anotarán fecha, ambiente, participante anonimizado, resultado esperado, resultado observado, evidencia disponible, severidad de defecto si aplica y decisión pendiente/aprobada/rechazada. No se incorporarán porcentajes de éxito hasta contar con ejecuciones verificables.
+Trazabilidad. Las observaciones anteriores se relacionan con los escenarios PT-PAD-01 a PT-PAD-03 y PT-CON-01 a PT-CON-02. Durante UAT se registrará para cada observación si fue atendida, si persiste como defecto o si requiere ajuste de alcance. Los comentarios se anonimizarán y se reportarán sin atribuirles resultados estadísticos mientras no exista una muestra y procedimiento de medición completados.
+Conductores. Se valoró positivamente el diseño simple de la interfaz operativa. Como mejoras, se solicitó que el punto de inicio refleje la ubicación operativa de la ruta según turno y que exista un control Stop para pausar temporalmente el recorrido cuando un estudiante no se encuentre aún en la parada, con posterior reanudación desde la misma ubicación.
+Padres de familia. Se identificaron tres observaciones: necesidad de mayor contraste visual en el Calendario de Asistencia mediante fondo blanco y letras negras; necesidad de que una confirmación de asistencia afecte únicamente la fecha seleccionada; y necesidad de controles de Acercar, Alejar y Ampliar vista que respondan de forma sincronizada con el mapa de ruta en tiempo real.
+La retroalimentación se recopila como evidencia cualitativa para orientar el refinamiento de la solución y el diseño de UAT. No sustituye las mediciones cuantitativas ni se presenta como evidencia de aceptación hasta que los casos propuestos sean ejecutados y documentados.
+5.4.2 Retroalimentación de usuarios
+5.5 Confianza e incertidumbre
+Estado pendiente. Se presentarán:
+Distribución de respuestas por ítem.
+Promedio y mediana de la dimensión confianza.
+Frecuencia declarada de consultas antes y después.
+Comentarios favorables y críticos anonimizados.
+Contraste con el criterio de 4.0 de 5.
+Figura 5.1. Confianza percibida por ítem
+Pendiente de generar con datos reales.
+5.6 Tiempo y costo del pago
+Cuadro 5.3. Comparación del trámite de pago
+Indicador
+Proceso anterior
+Plataforma
+Diferencia
+Reducción porcentual
+Tiempo mediano, minutos
+Pendiente
+Pendiente
+Pendiente
+Pendiente
+Costo mediano, quetzales
+Pendiente
+Pendiente
+Pendiente
+Pendiente
+Desplazamientos por pago
+Pendiente
+Pendiente
+Pendiente
+Pendiente
+La interpretación deberá indicar si el padre aún incurre en costos bancarios o de conectividad. No se atribuirá a la plataforma un ahorro que no esté respaldado por respuestas.
+5.7 Transparencia y satisfacción
+Estado pendiente. Se reportarán claridad del estado de pago, facilidad de consulta, satisfacción global e intención de uso. Los ítems negativos, si se utilizan, se recodificarán antes de calcular la dimensión.
+Figura 5.2. Satisfacción y claridad de pagos
+Pendiente de generar con datos reales.
+5.8 Resultados técnicos
+Cuadro 5.4. Pruebas técnicas
+Prueba
+Criterio
+Resultado
+Estado
+Respuesta de pantallas
+Menor de 3 segundos
+Pendiente
+Pendiente
+Estabilidad de mapa
+30 minutos sin caída
+Pendiente
+Pendiente
+Ubicaciones enviadas
+Sin errores críticos
+Pendiente
+Pendiente
+Diez cargas de comprobante
+Sin error
+Pendiente
+Pendiente
+Autorización por rol
+Sin acceso indebido en casos probados
+Pendiente
+Pendiente
+Se documentarán herramienta, configuración, número de iteraciones, hardware y tasa de error para permitir reproducción.
+5.9 Evaluación de la hipótesis
+Cuadro 5.5. Matriz de decisión
+Componente
+Evidencia requerida
+Resultado
+Decisión
+Aumento de confianza
+Encuesta y consultas
+Pendiente
+Pendiente
+Reducción de incertidumbre
+Consultas antes/después
+Pendiente
+Pendiente
+Reducción de tiempo
+Minutos antes/después
+Pendiente
+Pendiente
+Reducción de costo
+Quetzales antes/después
+Pendiente
+Pendiente
+Aumento de satisfacción
+Encuesta
+Pendiente
+Pendiente
+La hipótesis podrá quedar respaldada completamente, respaldada parcialmente o no respaldada. La decisión se explicará por componente.
+5.10 Discusión
+Estado pendiente. La discusión comparará los resultados con los conceptos del Capítulo 2 y analizará:
+Si la oportunidad de la ubicación fue suficiente.
+Si el registro manual de abordaje generó confianza o dudas.
+Si la plataforma evitó desplazamientos o solo cambió el canal de confirmación.
+Si la facilidad de uso condicionó la satisfacción.
+Si la conectividad afectó la experiencia.
+Qué diferencias aparecieron entre percepción y rendimiento técnico.
+5.11 Amenazas y limitaciones observadas
+Esta sección se completará con incidentes reales. Como mínimo deberá revisar muestra, sesgo de selección, memoria, entorno simulado, duración de uso, conectividad y efecto de novedad.
+5.12 Resumen del capítulo
+El capítulo queda preparado para incorporar resultados sin modificar la lógica de evaluación. Los espacios pendientes impiden confundir expectativas con evidencia.
+CAPÍTULO 6
+CONCLUSIONES Y TRABAJO FUTURO
+6.1 Estado de las conclusiones
+Las conclusiones definitivas se redactarán después de ejecutar y analizar las pruebas. En esta versión no corresponde afirmar que la hipótesis fue comprobada.
+6.2 Matriz para conclusiones
+Cuadro 6.1. Relación entre objetivos y conclusiones
+Objetivo
+Evidencia
+Conclusión
+Analizar procesos y necesidades
+Entrevistas y revisión
+Pendiente
+Implementar geolocalización
+Código y UAT
+Pendiente
+Implementar abordaje
+Código y UAT
+Pendiente
+Implementar pagos
+Código y UAT
+Pendiente
+Integrar roles y módulos
+Flujo integrado
+Pendiente
+Validar calidad
+Pruebas técnicas
+Pendiente
+Evaluar beneficios
+Encuesta, tiempo y costo
+Pendiente
+Cada conclusión deberá responder a un objetivo y utilizar cifras del Capítulo 5 cuando corresponda.
+6.3 Conclusiones técnicas preliminares
+Es posible concluir, a partir de la revisión del artefacto, que la plataforma contiene componentes parcialmente integrados de autenticación por roles, gestión operativa, ubicación, registros y pagos. También se concluye que la solución tiene restricciones: el seguimiento continuo utiliza un flujo de demostración, la persistencia de asistencia debe comprobarse, la cobertura de autorización requiere fortalecimiento, el abordaje es manual y las alertas requieren navegador activo. Estas son conclusiones descriptivas de implementación, no resultados de aceptación.
+6.4 Recomendaciones
+Ejecutar el protocolo con usuarios reales antes de presentar beneficios.
+Medir por separado tiempo de transferencia, desplazamiento y confirmación.
+Conservar bitácoras y evidencia anonimizada.
+Corregir defectos críticos antes de UAT.
+Solicitar revisión metodológica del cuestionario.
+Actualizar el índice y campos de Word antes de entregar.
+6.5 Trabajo futuro
+Sustituir o complementar la simulación con captura GPS continua y un dispositivo controlado.
+Implementar aplicación móvil o notificaciones push con consentimiento.
+Incorporar confirmación de abordaje mediante un mecanismo verificable, evaluando privacidad y costo.
+Unificar el modelo de pagos y fortalecer el flujo administrativo.
+Persistir de forma consistente las alertas relevantes.
+Evaluar rutas con datos de tráfico y métodos de optimización adicionales.
+Ampliar la muestra y realizar un estudio longitudinal.
+Aplicar auditorías de seguridad y protección de datos antes de producción.
+6.6 Cierre
+Transportes Génesis constituye una propuesta tecnológica pertinente para centralizar información del transporte escolar. Su valor académico dependerá de mantener correspondencia entre lo implementado, lo medido y lo concluido. La versión final deberá incorporar evidencia real y reconocer tanto los beneficios como las limitaciones observadas.
+GLOSARIO
+API: interfaz que permite comunicación estructurada entre componentes.
+ASP.NET Core: plataforma de Microsoft para aplicaciones web.
+Abordaje: registro operativo de que un estudiante fue recogido o marcado como presente.
+Entity Framework Core: herramienta de acceso a datos para .NET.
+Geolocalización: determinación de coordenadas geográficas de un dispositivo.
+Haversine: fórmula para aproximar distancia entre puntos geográficos.
+Identity: componente de ASP.NET Core para usuarios, autenticación y roles.
+Leaflet: biblioteca para mapas interactivos.
+Likert: escala de respuesta ordenada utilizada para medir percepción o acuerdo.
+OSRM: servicio de cálculo de rutas sobre una red vial.
+OpenStreetMap: proyecto colaborativo de datos cartográficos abiertos.
+SignalR: biblioteca para comunicación en tiempo real.
+SQL Server: sistema de gestión de bases de datos relacionales.
+Trazabilidad: capacidad de reconstruir eventos mediante registros.
+UAT: pruebas de aceptación realizadas por usuarios.
+REFERENCIAS
+Bangor, A., Kortum, P. T., y Miller, J. T. (2008). An empirical evaluation of the System Usability Scale. International Journal of Human-Computer Interaction, 24(6), 574–594. https://doi.org/10.1080/10447310802205776
+Brooke, J. (1996). SUS: A “quick and dirty” usability scale. En P. W. Jordan, B. Thomas, B. A. Weerdmeester y I. L. McClelland (Eds.), Usability evaluation in industry (pp. 189–194). Taylor & Francis.
+Davis, F. D. (1989). Perceived usefulness, perceived ease of use, and user acceptance of information technology. MIS Quarterly, 13(3), 319–340. https://doi.org/10.2307/249008
+International Organization for Standardization. (2023). ISO/IEC 25010:2023 Systems and software engineering—Systems and software Quality Requirements and Evaluation (SQuaRE)—Product quality model. https://www.iso.org/standard/78176.html
+Likert, R. (1932). A technique for the measurement of attitudes. Archives of Psychology, 22(140), 1–55.
+Microsoft. (2024). Introduction to ASP.NET Core SignalR. Microsoft Learn. https://learn.microsoft.com/aspnet/core/signalr/introduction
+OpenStreetMap contributors. (2026). OpenStreetMap. https://www.openstreetmap.org/
+OWASP Foundation. (2021). OWASP Application Security Verification Standard 4.0.3. https://owasp.org/www-project-application-security-verification-standard/
+PCI Security Standards Council. (2024). Payment Card Industry Data Security Standard: Requirements and testing procedures, version 4.0.1. https://www.pcisecuritystandards.org/
+Project OSRM. (2026). Open Source Routing Machine. https://project-osrm.org/
+World Wide Web Consortium. (2024). Geolocation: W3C Recommendation 14 August 2024. https://www.w3.org/TR/2024/REC-geolocation-20240814/
+APÉNDICE A
+CUESTIONARIO PARA PADRES DE FAMILIA
+A.1 Datos de control
+Código del participante: ______
+Fecha: ______
+Dispositivo utilizado: teléfono / tableta / computadora
+A.2 Preprueba
+Escala: 1 totalmente en desacuerdo; 2 en desacuerdo; 3 neutral; 4 de acuerdo; 5 totalmente de acuerdo.
+Confío en que la información que recibo actualmente sobre el recorrido es oportuna.
+Confío en los registros actuales sobre la recogida de mi hijo.
+Tengo claridad sobre la ubicación del bus durante el recorrido.
+Siento incertidumbre cuando no conozco la ubicación del bus.
+Necesito llamar o enviar mensajes para conocer el estado del traslado.
+El proceso actual me permite saber con claridad si mi pago fue recibido.
+Puedo consultar fácilmente el historial de mis pagos.
+Estoy satisfecho con la forma actual de recibir información del transporte.
+Estoy satisfecho con la forma actual de registrar y confirmar pagos.
+Preguntas cuantitativas:
+¿Cuántos minutos emplea normalmente para realizar y confirmar un pago? ______
+¿Cuánto gasta en transporte para efectuar o confirmar el pago? Q ______
+¿Cuántas llamadas o mensajes realiza por semana para consultar la ubicación del bus? ______
+Describa brevemente el procedimiento actual: ______
+A.3 Posprueba
+Utilice la misma escala de cinco puntos.
+Confío en que la información mostrada por la plataforma sobre el recorrido es oportuna.
+Confío en el registro de recogida mostrado por la plataforma.
+Tengo claridad sobre la ubicación del bus cuando utilizo el mapa.
+Siento incertidumbre aun cuando consulto la plataforma.
+Necesitaría llamar o enviar mensajes adicionales después de consultar la plataforma.
+La plataforma me permite saber con claridad si mi pago fue recibido o validado.
+Puedo consultar fácilmente el historial de mis pagos en la plataforma.
+Estoy satisfecho con la información del transporte presentada por la plataforma.
+Estoy satisfecho con la forma de registrar y confirmar pagos en la plataforma.
+Las funciones principales fueron fáciles de utilizar.
+Me resultó útil encontrar geolocalización, asistencia y pagos dentro de la misma plataforma.
+Los ítems 4 y 5 se interpretan de forma inversa: una puntuación menor representa menor incertidumbre.
+A.4 Mediciones posteriores
+Minutos requeridos para completar la tarea digital de pago: ______
+Comisión o costo adicional asociado a la tarea digital: Q ______
+Costo de desplazamiento requerido para completar la tarea digital: Q ______
+¿Cuántas llamadas o mensajes considera que todavía necesitaría realizar por semana después de consultar la plataforma? ______
+¿Qué desplazamiento concreto podría evitar utilizando la plataforma? ______
+¿Qué función le resultó más útil? ______
+¿Qué le resultó difícil o confuso? ______
+¿Qué cambiaría antes de utilizar el sistema regularmente? ______
+APÉNDICE B
+CONSENTIMIENTO INFORMADO
+Se invita a participar en una evaluación académica de la plataforma Transportes Génesis. La sesión incluye tareas de uso, una encuesta y registro de tiempos y observaciones. No se utilizarán pagos, credenciales ni datos bancarios reales. La participación es voluntaria y puede finalizarse en cualquier momento.
+Los resultados se presentarán de forma agrupada y anonimizada. No se publicarán nombres, direcciones, coordenadas del hogar ni información que identifique al estudiante. Al firmar, el participante confirma que recibió una explicación, tuvo oportunidad de preguntar y acepta participar.
+Nombre o código: ____________________
+Firma: ____________________
+Fecha: ____________________
+Firma del investigador: ____________________
+APÉNDICE C
+FORMATO DE CASO DE PRUEBA UAT
+Campo
+Contenido
+Identificador
+UAT-__
+Fecha
+Rol
+Precondiciones
+Datos de prueba
+Pasos
+Resultado esperado
+Resultado obtenido
+Tiempo
+Ayuda requerida
+Estado
+Aprobado / con observaciones / rechazado
+Evidencia anonimizada
+Observaciones
+APÉNDICE D
+BITÁCORA DE DEFECTOS
+ID
+Módulo
+Descripción
+Severidad
+Pasos
+Estado
+Responsable
+Evidencia
+DEF-001
+Pendiente
+Pendiente
+Pendiente
+Pendiente
+Pendiente
+Pendiente
+Pendiente
+APÉNDICE E
+PROTOCOLO DE PRUEBAS TÉCNICAS
+Registrar versión, fecha, servidor, hardware y red.
+Verificar que el ambiente no contenga datos reales.
+Medir tiempo de respuesta de páginas principales.
+Mantener una simulación de mapa durante treinta minutos.
+Simular usuarios concurrentes según el escenario aprobado.
+Registrar latencia, percentil 95, errores y consumo de recursos.
+Repetir la medición al menos tres veces.
+Conservar scripts, configuración y resultados como evidencia.
+APÉNDICE F
+LISTA DE INFORMACIÓN PENDIENTE
+Nombre oficial de facultad o escuela.
+Carrera, grado académico, autor, carné y asesor.
+Nombre público o reservado del colegio.
+Autorizaciones institucionales.
+Población y muestra final.
+Fechas de trabajo de campo.
+Resultados UAT, encuesta y pruebas técnicas.
+Evidencias anonimizadas.
+Revisión bibliográfica adicional solicitada por el asesor.
+Cartas de aprobación y autorización para publicación.
+APÉNDICE G
+GUÍA DE ENTREVISTA SOBRE EL PROCESO ACTUAL
+Esta guía se aplicará al administrador de Transportes Génesis y, cuando sea posible, a un piloto o monitor. Las respuestas se registrarán sin incluir credenciales ni datos personales de estudiantes.
+¿Cómo se informa actualmente a los padres sobre la ubicación o los retrasos del bus?
+¿Cuáles son las consultas más frecuentes que realizan los padres durante una ruta?
+¿Cómo se confirma actualmente si un estudiante utilizará el transporte?
+¿Cómo se registra que un estudiante fue recogido o entregado?
+¿Cómo se reciben, verifican y archivan los comprobantes de pago?
+¿Qué información se pierde, duplica o resulta difícil de consultar?
+¿Cuánto tiempo dedica el personal a responder consultas y confirmar pagos?
+¿Qué riesgos o dificultades observa en el proceso actual?
+¿Qué funciones considera indispensables en la plataforma?La información se codificará en las categorías: comunicación, incertidumbre, abordaje, pagos, tiempo administrativo, trazabilidad, riesgos y requisitos.

@@ -1,0 +1,2092 @@
+
+
+===== PAGINA 1 =====
+
+JOS ´E JACOBO DEL VALLE GIR ´ON
+Redes neuronales y transferencia de
+aprendizaje aplicado a la tarea de
+perﬁlamiento de autores de textos
+an´ onimos
+UNIVERSIDAD GALILEO
+FACULTAD DE INGENIER ´IA DE SISTEMAS ,
+INFORM ´ATICA Y CIENCIAS DE LA COMPUTACI ´ON
+GUATEMALA , 2019
+
+===== PAGINA 2 =====
+
+
+
+===== PAGINA 3 =====
+
+,ru
+Guatemala,22 dejulio de 2019
+Señor
+José Jacobo Del Valle Girón
+Presente
+Estimado señor Del Valle:
+Tengo mucho gusto en informarle que después de tener a la vista la carta del Director de
+la Canera quien, indica haber revisado el trabajo de Tesis, cuyo título es 'REDES
+NEURONALES Y TRANSFERENCIA DE APRENDIZAJE APLICADO A LA TAREA DE
+nERFIL,AMIENTO DE AUTORES DE TEXTOS ANÓNIMOS" y de haber obtenido el
+dictamen del asesor específico; el Ingeniero Ronald Israel López España, autorizo la publicación
+del mismo.
+Aprovecho la oportunidad para felicitarlo por el magnífico trabajo realizado, el cual es de
+indiscutible beneficio para el desarrollo de las Ciencias de la Computación en Guatemala.
+Atentamente,
+FACULTAD DE INGENIERIA DE SISTEMAS,
+TNFORMATICA Y CIENCIAS DE LA COMPUTACION
+ñ,?s-
+Ing. Rodrigo Baessa
+Decano
+ril
+
+===== PAGINA 4 =====
+
+Guatemala,lT dejulio de 2019
+Ing. Rodrigo Baessa Iunge
+Decano de FISICC
+Universidad Galileo
+Estimado Ingeniero,
+Tengo el gusto de informarl" q* he tenido a la vista el trabajo de tesis titulado *REDES
+NEURONALES Y TRANSFENNNCIA DE APRENDIzuJE APLICADO A LA TAREA DE
+PERFIL,LMIENTO DE AUTORES DE TEXTOS ANONIMOS" elaborado por del estudiante
+José Jacobo Del Valle Girón quién se identifica con carnet número 10002079, el cual fue
+asesorado por del Ingeniero Ronald Israel López España colegiado número 5634, por tanto doy
+por Aprobado que se inicie Trámite Final de Tesis de la carrera de Ingeniería de Sistemas,
+Informática y Ciencias de la Computación
+Atentamente,
+FACULTAD DE INGENIERIA DE SISTEMAS,
+INT'ORMATICA Y CIENCIAS DE LA COMPUTACION
+mputación
+rachte
+ril
+
+===== PAGINA 5 =====
+
+Ciudad de Guatemala,09 de julio de 2019.
+lngeniero
+Rodrigo Baessa
+Decano FlSlCC
+Universidad Galileo
+Presente.
+Señor Decano:
+Le informo que la tesis "REDE§ NEURONALES YTRANSFERENCIA DE APRENDIZA,E APLICADO
+A 1.A TAREA DE PERFILAMIENTO DE AUTORES DE TEKTOS ANÓNIMOS", dCI EStUdiANtE JOSé
+Jacobo DelValle Girón, ha sido objeto de revisión gramaticaly est¡lística, por lo que puede
+continuar con eltrámite de graduación.
+Atentamente.
+I
+Lic. Edgar Lizardo
+Asesor Li
+Universidad Galileo
+
+===== PAGINA 6 =====
+
+&omafd fsraef López trqpaña
+lngeniero de Sistemas lnformática y Ciencias de Computación
+Guatemala,24 de junio de2015
+lngeniero José Eduardo Suger Castillo
+Decano
+Facultad de Ingeniería en Sistemas, lnformática y Ciencias de la Computación
+Universidad Galileo
+Estimado lngeniero Suger,
+Me dirijo a usted para informarle que he asesorado el trabajo de Tesis
+titulado -REDES NEURONALES Y TRANSFERENCIA DE APRENDIZAJE
+APL¡GADO A LA TAREA DE PERFILAMIENTO DE AUTORES DE TEXTOS
+ANÓNIMOS" elaborado por el estudiante José Jacobo Del Valle Girón, carné
+1 0002079.
+El estudiante elaboró un trabajo qué será de gran utilidad en el área de
+Ciencias de Ia Computación. Por ello me complace informarle que doy por
+APROBADO el contenido de este trabajo, el cual someto a su consideración.
+Atentamente,
+España
+fsPaña
+**a§#Jlj*EiFt"¿y,$li""x1i;crr
+rilopez@galileo.edu
+
+===== PAGINA 7 =====
+
+.ffi
+Guatemala,3 de mayo de2019
+Señor
+José Jacobo Del Valle Girón
+Presente
+Estimado señor Del Valle
+Tengo mucho gusto en informarle que ha sido aprobado su punto de Tesis, previo a
+optar al diploma de Ingeniero de Sistemaso lnformática y Ciencias de la Computación
+cuyo título es "REDES NEURONALE§ Y TRANSFERENCIA DE APRENDIZAJE
+APLICADO A LA TAREA DE PERFILAMIENTO DE AUTORES DE TEXTOS
+ANÓNTN,TOS".
+Al mismo tiempo le informo que ha sido aprobadala designación del Ingeniero
+Ronald Israel LópezEspaña para asesorar su trabajo de graduación.
+Atentamente,
+FACULTAD DE INGENTERIA DE STSTEMAS,
+INF'ORMATICA Y CIENCIAS DE LA COMPUTACION
+á,,Y
+Ing. Rodrigo Baessa Iunge
+Decano
+ril
+
+===== PAGINA 8 =====
+
+Guatemala, 3 de mayo de 2019
+Ingeniero
+Ronald Israel López España
+Presente
+Estimado Ingeniero López:
+Tengo mucho gusto en informarle que ha sido aprobada su designación como
+Asesor del trabajo de Tesis del alumno José Jacobo Del Valle Girón, previo a optar al
+diploma de Ingeniero de Sistemas, Informática y Ciencias de la Computación cuyo
+título es *REDES NEURONALES Y TRANSFERENCIA DE APRENDIZAJE
+APLTCADO A LA TAREA DE PERFILAMIENTO DE AUTORES DE TEXTOS
+¡.NÓNIVrOS'.
+Para su información adjunto a la presente, copia de la carta de solicitud y respuesta
+al señor Del Valle.
+Atentamente,
+FACULTAD DE INGENIERIA DE SISTEMAS,
+INFORMATICA Y CIENCIAS DE LA COMPUTACION
+% ?\/
+Ing. Rodrigo Baessa Iunge
+Decano
+ril
+
+===== PAGINA 9 =====
+
+Guatemala, 8 de abrilde 2019.
+lngeniero
+Rodrigo Baessa
+Fr^^--^ E!GI^^gtuattv F¡grvv
+Univercidad Galileo
+Presente
+Estimado lng. Baessa:
+Le saludo cordialmente y deseándole éxitos en sus labores diarias. El motivo de la
+presente es solicitarle ta aprobación de punto de tesis previo a optar al tÍtulo de ingenierc en
+sistemas, informáüca, y ciencias de la computación.
+EI punto de tesis es "REDES HEUROTTALES Y TRAI{SFERENCIA DE APRENDIZAJE
+APLICADO A LA T;AREA DE PERFILAIIIENTO DE AUTORES SE TEXTOS ANÓHIIHOS'" !A
+cual cubre los siguientes temas:
+1. Trasfondo del aprendizaje profundo (Deep Leaming)
+') -r.^-^f^-^-^;^ .¡^ ^^.^--ti-^;^ ^- -^J^^ -^...^-^t^^ h;^ñ+^ .¡^ t^^^,,^i^^1. rrarrorErErruro uE qPrsf rur4ajE Err rEugo rrEurvrrqrED srr P¡uwoarrilgrrru ug rErruuajsJ
+naturales
+3. Pre-entrenamiento de modelo de lenguaje
+Á Ea+¡an¡mian{a Aa alaaiGnaáara^ ¡.caaáa tranafaran¡ia ¡la anranáizaia nara la *araa ¡lau.so¡¡rwuur Eü uñl auv fr ol ror9r sr avrq u9 oPr El lul¿qjs Pqr q ¡E Er sE uu
+perf¡lamiento de autores
+Asimismo, solicito la designación del lng. Ronald lsrael López España, colegiado No.
+EA2/ ^^'ñ^ ¡^l +.-h^i^ ¡^ +Á-i-vvv- w¡rru qoeovl vgr lrqvqlv ug t9gr9.
+Agradeciendo su atención y en espera de una respuesta positiva me despido
+.^^-Ji^l-^^¡^w¡urat¡rref rtEt
+Jacobo DelValle
+1 CC0207g
+5765-3829
+defuelleiacoho@gd¡&Eo.edu
+W
+
+===== PAGINA 10 =====
+
+Guatemala, 8 de abril de 2019
+lngeniero Rodrigo Baessa lunge
+Decano de FISICC
+Universidad Galileo
+Estimado lngeniero Baessa,
+Me dirijo a usted para informarle que, a requerimiento de José Jacobo Del
+Valle Girón quien es estudiante de lngeniería de Sistemas, lnformática y Ciencias
+de la Computación, estaré asesorándole en la elaboración de su trabajo de tesis
+titulado "REDES NEURONALES Y TRANSFERENC¡A DE APRENDIZAJE
+APLICADO A LA TAREA DE PERFILAMIENTO DE AUTORES DE TEXTOS
+ANÓNIMOS'.
+Atentamente,
+lng. España
+Ronald lsrael López España
+Ingerl,.r o de §istemas
+Colegiado No.5634
+
+===== PAGINA 11 =====
+
+XI
+Resumen
+Redes neuronales y transferencia de aprendizaje aplicado a la tarea de
+perﬁlamiento de autores de textos an´ onimos
+por Jos´e Jacobo DEL VALLE GIR ´ON
+En tiempos de la expansi ´on del campo de Deep Learning (aprendizaje profun-
+do), es sorprendente c ´omo las nuevas contribuciones hacen que sus ´areas de
+aplicaci´on sean cada vez m ´as. Esto se debe al crecimiento exponencial de datos
+disponibles en esta ´epoca de la internet, que es relevante para el aprendizaje pro-
+fundo, ya que para tener un modelo eﬁcaz es necesario una cantidad masiva de
+datos. Algunas ´areas no cuentan con la cantidad de datos que se necesitan, por
+lo que en la actualidad se utilizan a ´un t´ecnicas de Machine Learning tradicional
+para obtener los resultados deseados. Una de estas ´areas es el procesamiento de
+lenguaje natural (NLP por sus siglas en ingl´es).
+Este trabajo presenta el perﬁlamiento de autores como una tarea que puede ser
+abordada con Deep Learning y aplicarse el concepto de transfer learning en el
+´area de NLP de manera exitosa. Este concepto permite realizar tareas con menos
+datos de lo antes asumido.
+Los resultados obtenidos con este proyecto alcanzan niveles del estado del arte
+de t ´ecnicas de Deep Learning y son comparables con resultados obtenidos al
+utilizar ambas t´ecnicas tradicionales y de Deep Learning.
+
+===== PAGINA 12 =====
+
+
+
+===== PAGINA 13 =====
+
+XIII
+´Indice general
+Resumen XI
+´Indice de ﬁguras XV
+´Indice de cuadros XVII
+1. Introducci´ on 1
+1.1. Tema principal . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 1
+1.2. Introducci ´on . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 1
+1.3. Hip ´otesis . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 2
+1.4. Objetivo General . . . . . . . . . . . . . . . . . . . . . . . . . . . . 3
+1.4.1. Objetivos espec ´ıﬁcos . . . . . . . . . . . . . . . . . . . . . . 3
+1.5. Planteamiento del problema . . . . . . . . . . . . . . . . . . . . . . 4
+1.6. Resumen . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5
+2. Marco te´ orico 7
+2.1. Trasfondo de Deep Learning . . . . . . . . . . . . . . . . . . . . . . 7
+2.2. Aprendizaje supervisado . . . . . . . . . . . . . . . . . . . . . . . . 7
+2.3. Redes neuronales . . . . . . . . . . . . . . . . . . . . . . . . . . . . 11
+2.3.1. Redes neuronales est ´andar . . . . . . . . . . . . . . . . . . 11
+2.3.2. Redes neuronales recurrentes . . . . . . . . . . . . . . . . . 14
+2.4. Generalizaci ´on de una red neuronal . . . . . . . . . . . . . . . . . 15
+2.5. Proceso general al aplicar una red neuronal . . . . . . . . . . . . . 16
+2.6. Deﬁniciones varias . . . . . . . . . . . . . . . . . . . . . . . . . . . 18
+3. Transferencia de aprendizaje 21
+3.1. Transferencia de aprendizaje . . . . . . . . . . . . . . . . . . . . . . 21
+3.2. Concepto de transferencia . . . . . . . . . . . . . . . . . . . . . . . 22
+3.3. Aplicaci ´on en CV . . . . . . . . . . . . . . . . . . . . . . . . . . . . 23
+3.4. Aplicaci ´on en NLP . . . . . . . . . . . . . . . . . . . . . . . . . . . 24
+
+===== PAGINA 14 =====
+
+XIV
+3.4.1. ULMFiT . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 25
+3.4.1.1. Aﬁnaci ´on de modelo de lenguaje . . . . . . . . . 25
+3.4.1.2. Aﬁnaci ´on de modelo a tarea de clasiﬁcaci ´on . . . 26
+3.4.2. Modelo de lenguaje bidireccional . . . . . . . . . . . . . . . 27
+4. Datos utilizados 29
+4.1. Pre-procesamiento de datos . . . . . . . . . . . . . . . . . . . . . . 30
+4.1.1. Datos tabulares . . . . . . . . . . . . . . . . . . . . . . . . . 30
+4.1.2. Datos textuales . . . . . . . . . . . . . . . . . . . . . . . . . 31
+4.2. Fuente de los datos . . . . . . . . . . . . . . . . . . . . . . . . . . . 33
+5. LEFTy: Implementaci´ on y aplicaci´ on 35
+5.1. Pre-entrenamiento de modelo de lenguaje . . . . . . . . . . . . . . 35
+5.1.1. Modelo de lenguaje de Wikipedia . . . . . . . . . . . . . . 36
+5.1.1.1. Resultados . . . . . . . . . . . . . . . . . . . . . . 39
+5.1.1.2. Recursos utilizados para entrenamiento . . . . . 41
+5.1.2. Modelos clasiﬁcadores . . . . . . . . . . . . . . . . . . . . . 42
+5.2. Resultados . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 45
+5.2.1. Predicci ´on sobre textos informales . . . . . . . . . . . . . . 46
+5.2.1.1. Predicci ´on de g´enero . . . . . . . . . . . . . . . . 47
+5.2.1.2. Predicci ´on de regi´on . . . . . . . . . . . . . . . . . 48
+5.2.2. Predicci ´on sobre textos formales . . . . . . . . . . . . . . . 50
+5.2.2.1. Resultados . . . . . . . . . . . . . . . . . . . . . . 51
+6. Conclusiones 53
+6.1. Conclusiones . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 53
+6.2. Trabajo futuro . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 55
+Glosario 59
+Bibliograf´ ıa 63
+
+===== PAGINA 15 =====
+
+XV
+´Indice de ﬁguras
+1.1. Estructura del proyecto planteado en este trabajo de investiga-
+ci´on. La ﬁgura est ´a dise ˜nada para prop´ositos ilustrativos. LM de-
+nota el modelo de lenguaje que es pre-entrenado con texto deWi-
+kipedia y es un paso previo. . . . . . . . . . . . . . . . . . . . . . . . 6
+2.1. Una red neuronal est ´andar con una capa oculta que tiene tres
+unidades neuronales. La red est´a completamente conectada, tiene
+tres nodos de entrada y uno de salida. . . . . . . . . . . . . . . . . 12
+2.2. En azul se puede ver la direcci ´on del ﬂujo de informaci´on durante
+la propagaci´on hacia adelante. En rojo se aprecia que la direcci´on
+se invierte para la propagaci´on hacia atr´as y que lleva los gradien-
+tes necesarios para propagar el error despu´es del entrenamiento. 13
+3.1. Ejemplo ilustrativo de lo que podr ´ıa aprender una red profunda
+de visi´on artiﬁcial para la detecci ´on de veh´ıculos. . . . . . . . . . 22
+5.1. Estructura de datos resultante al extraer un archivo de Wikipedia. 37
+5.2. Ilustraci ´on de progreso de la funci ´on lr find de fast.ai. Al mo-
+mento de divergir el m ´etodo deja de aumentar γ y devuelve los
+resultados. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 38
+
+===== PAGINA 16 =====
+
+XVI
+5.3. Evoluci ´on de la p ´erdida conforme se cambia la tasa de aprendi-
+zaje en el clasiﬁcador. Al igual que con el LM, se deber´a elegir un
+valor ´optimo para mayor eﬁciencia. . . . . . . . . . . . . . . . . . 44
+5.4. Avance de p ´erdida conforme avanzan las ´epocas de entrenamien-
+to. Menor es mejor. . . . . . . . . . . . . . . . . . . . . . . . . . . . 45
+
+===== PAGINA 17 =====
+
+XVII
+´Indice de cuadros
+2.1. Ejemplo de una matriz de confusi ´on que muestra distintos tipos
+de errores. La tabla tiene ´unicamente prop´ositos ilustrativos. Los
+n ´umeros resaltados representan la cantidad de predicciones co-
+rrectas; las otras dos cifras ser´an los errores tipo I y tipo II. . . . . 20
+4.1. Ejemplo de datos tabulares que alimentar ´an a un modelo, ya sea
+de aprendizaje de m ´aquina o de Deep Learning. En la tabla se
+ilustran algunos errores de datos (campo edad) y datos faltantes
+(en el campo G´ enero). Tambi´en se aprecian discrepancias en el for-
+mato de algunos campos (campo de Moneda y Sueldo) y campos
+completamente inservibles para un modelo (campo CORRELATI-
+VO. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 30
+5.1. Muestras de tokenizaci ´on al utilzar spaCy y t´ecnicas de fastai . . . 37
+5.2. Resultados de los modelos entrenados. La m ´etrica que se utiliza
+para comparar entre los modelos es perplexity que indica y repre-
+senta qu´e tantas opciones se tienen para la siguiente palabra. . . . 39
+5.3. Comparaci ´on de LMs con modelos del estado del arte en ingl´es y
+modelos de referencia para el espa ˜nol. Menor perplexity es mejor.
+Separamos el modelo Transformer-XL ya que utiliza otra arquitec-
+tura y est´a presente en la tabla solamente como referencia al mejor
+resultado, al momento de haber escrito este trabajo. . . . . . . . . 40
+
+===== PAGINA 18 =====
+
+XVIII
+5.4. Ejempliﬁcaci ´on de normalizaci ´on de textos informales obtenidos
+del dataset PAN17 para la tarea de perﬁlaci ´on de autores. El pro-
+ceso de normalizaci ´on permite extraer informaci ´on de los tokens
+que son menciones de usuario yhashtags. En la tabla se aprecia un
+ejemplo real con dr´asticos cambios que depende del procesamiento. 43
+5.5. Matriz de confusi ´on de resultados sobre predicci ´on de g´enero en
+tuits individuales. . . . . . . . . . . . . . . . . . . . . . . . . . . . . 47
+5.6. Matriz de confusi ´on de resultados de predicciones por autor. . . . 47
+5.7. Comparaci ´on de modelos de Deep Learning en la tarea de pre-
+dicci´on de g ´enero — mayor es mejor. El ensamble de modelos se
+separa, ya que no se puede hacer una comparaci´on directa. . . . . 48
+5.8. Matriz de confusi ´on de resultados sobre predicci ´on de regi ´on en
+tuits individuales. . . . . . . . . . . . . . . . . . . . . . . . . . . . . 49
+5.9. Matriz de confusi ´on de resultados de predicci ´on de regi ´on por
+autor. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 49
+5.10. Comparaci ´on de modelos de Deep Learning en la tarea de pre-
+dicci´on de regi ´on — mayor es mejor. El ensamble de modelos se
+separa, ya que no es posible hacer una comparaci´on directa. . . . 50
+5.11. Distribuci ´on de datos usados para la tarea de clasiﬁcaci ´on de tex-
+tos formales. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 51
+5.12. Comparaci ´on de modelos en la tarea de clasiﬁcaci´on de SpanText.
+El ´unico modelo de Deep Learning es el propio. El resultado es la
+precisi´on de la predicci´on, por lo que un mayor resultado es mejor. 52
+
+===== PAGINA 19 =====
+
+1
+Cap´ ıtulo 1
+Introducci´ on
+1.1. Tema principal
+Redes neuronales y transferencia de aprendizaje aplicado a la tarea de per-
+ﬁlamiento de autores de textos an ´onimos.
+1.2. Introducci´ on
+Los campos de machine learning (aprendizaje de m´aquinas o aprendizaje ar-
+tiﬁcial) y deep learning (aprendizaje profundo) (LeCun, Bengio & Hinton, 2015)
+no son nuevos, pero se han vuelto gran sensaci ´on en los ´ultimos a ˜nos, cada vez
+ganando m ´as popularidad. Los primeros conceptos desarrollados en el campo
+tienen d´ecadas de antig ¨uedad. La primer red neuronal — la base del modelo a
+utilizar en este trabajo y la base del campo de Deep Learning — fue plantea-
+da en los a ˜nos 80 (Werbos, 1982). ¿Qu ´e ha cambiado, entonces, en los ´ultimos
+a˜nos, que ha generado una explosi ´on en el ´area? La disponibilidad de los datos
+y la accesibilidad a poder computacional (Jordan & Mitchell, 2015). Con el surgi-
+miento y la penetraci´on cada vez m´as alta del internet se han abierto las puertas
+a cantidad de datos nunca antes vista.
+
+===== PAGINA 20 =====
+
+2 Cap´ıtulo 1. Introducci ´on
+La revoluci ´on de los datos ha llevado a la comunidad cient ´ıﬁca y a las in-
+dustrias a recolectar grandes cantidades de datos e informaci ´on y organizarlos
+de forma que se puedan interpretar y obtener valor de la misma.
+Los sistemas de Deep Learning necesitan pasar por una fase de aprendizaje
+(com ´unmente llamada fase de entrenamiento) y estos modelos tienen la carac-
+ter´ıstica de necesitar cantidades masivas de datos para generalizar bien lo apren-
+dido. Esto, combinado con la explosi ´on de datos, ha llevado a que las t ´ecnicas
+tengan un surgimiento en todas las´areas de software, mostrando mucha prome-
+sa en algunos campos en espec ´ıﬁco como Computer Vision (CV) (Hoo-Chang
+y col., 2016) y en Natural Language Processing (NLP).
+Conforme ha avanzado el campo se ha determinado que para algunas ta-
+reas en espec´ıﬁco no se cuenta con la cantidad necesaria para obtener un modelo
+competente. Esto ha llevado al desarrollo de una t ´ecnica llamada transfer lear-
+ning, que permite utilizar conocimiento previamente obtenido al resolver una
+tarea general y aplicarlo a una tarea relacionada mediante proceso de ajuste. Es-
+ta fase requiere de una cantidad de datos considerablemente menor, comparado
+con tener que entrenar un modelo completamente desde cero.
+La t´ecnica de transfer learning ha permitido muchos avances en el ´area de
+CV espec´ıﬁcamente (Hoo-Chang y col., 2016). Este trabajo intenta mostrar que
+se puede aplicar este concepto en un ´area distinta, puntualmente el campo de
+NLP y espec´ıﬁcamente en el proceso de perﬁlamiento de autores.
+1.3. Hip´ otesis
+La aplicaci´ on de transfer learning en la tarea de perﬁlamiento de auto-
+res provee una ventaja en desempe ˜ no medible.Se desglosa en los siguientes
+
+===== PAGINA 21 =====
+
+1.4. Objetivo General 3
+aspectos:
+Aplicabilidad de deep learning en la tarea . La hip ´otesis se basa en el he-
+cho de que conceptos de deep learning sean aplicables a tareas del campo
+de NLP . En el campo de NLP se ha tenido mucha duda si deep learning
+tiene la capacidad de penetrar el campo con soluciones eﬁcaces.
+Transfer learning provee ventaja de desempe ˜ no en la tarea. El hecho de
+mostrar que hay una ventaja, implica medir de forma emp´ırica los resulta-
+dos obtenidos por diferentes t´ecnicas. Con este ﬁn se utilizar ´an resultados
+publicados por investigadores de este campo y se usar´an las mismas m´etri-
+cas para que los resultados sean directamente comparables.
+Diferencia en cantidad de datos disponibles. Se debe fundamentar que la
+cantidad de datos necesaria para el uso de deep learning es m ´as elevado
+del que se necesita si se utiliza transfer learning.
+1.4. Objetivo General
+Aplicar conceptos del estado del arte a un problema que ha recibido poca
+atenci´on en el ´area de Natural Language Processing (NLP), por sus siglas en
+ingl´es). Lo anterior con el prop´osito de mostrar la capacidad de las redes neuro-
+nales recurrentes (Recurrent Neural Networks (RNNs)) y transfer learning en la
+tarea espec´ıﬁca.
+1.4.1. Objetivos espec´ ıﬁcos
+Ser pionero en la aplicaci ´on de transfer learning en la tarea espec ´ıﬁca de
+perﬁlamiento de autores en el ´area de procesamiento de lenguaje natural.
+
+===== PAGINA 22 =====
+
+4 Cap´ıtulo 1. Introducci ´on
+Exponer las ventajas y desventajas de utilizar esta tecnolog ´ıa en esta sub-
+tarea.
+Exponer como caso de uso la utilidad de esta aplicaci´on en distintas ´areas,
+como en el mercadeo.
+Contribuir a la academia con los resultados obtenidos.
+1.5. Planteamiento del problema
+En el ´area de NLP han existido t ´ecnicas poderosas por d ´ecadas que abu-
+san de algunas suposiciones que no siempre reﬂejan la realidad y se basan en
+simples m´etodos estad´ısticos que asignan valores a caracter´ısticas del texto (Ed-
+mundson, 1969; Kupiec, Pedersen & Chen, 1995). El campo tambi ´en ha depen-
+dido de ingenier ´ıa de caracter´ısticas en los datos, que signiﬁca que se realiza
+un esfuerzo activo y serio en analizar cada sub-tarea a fondo para determinar
+cu´ales son los mejores determinantes de un resultado deseado, p.e. las carac-
+ter´ısticas principales que determinan la categor ´ıa que se le debe asignar a un
+texto (Aggarwal & Zhai, 2012).
+En campos como el mercadeo y las ciencias forenses hay una necesidad de
+identiﬁcar textos escritos a los cuales no se les ha atribuido un autor y obtener
+caracter´ısticas de los mismos para poder catalogarlos de forma autom´atica. Esto
+con el ﬁn de poder, en el caso del mercadeo, orientar mejor la publicidad de
+ciertos productos a una audiencia apropiada (Aggarwal & Zhai, 2012); y, en el
+´area forense, identiﬁcar a sospechosos vinculados a alg ´un crimen a partir de un
+texto an´onimo obtenido en el contexto del caso.
+Existe fundamento ling¨u´ıstico del hecho de identiﬁcar a una persona por su
+lenguaje, ya sea de manera escrita u oral (Coulthard, 2004; Louwerse, 2004). El
+
+===== PAGINA 23 =====
+
+1.6. Resumen 5
+concepto de idiolecto y sociolecto nos permitir ´a realizar predicciones de manera
+precisa.
+Despu´es de analizar lo planteado anteriormente, se ve la necesidad de que
+un sistema automatizado sea capaz de no s ´olo extraer informaci ´on de un texto
+an´onimo de forma precisa y conﬁable, sino tambi ´en hacerlo sin necesidad de
+un agente experto o realizar una ingenier ´ıa de caracter´ısticas claves para cada
+posible par´ametro que se quiera obtener de los textos.
+A partir de esta conclusi´on, los requisitos para este proyecto son los siguien-
+tes:
+Permitir la categorizaci´on de textos a partir de diferentes caracter´ısticas.
+Realizar el entrenamiento para obtener los datos de forma r ´apida y con
+demandas de hardware modestas.
+Una vez el entrenamiento est´e completo, realizar predicciones sobre textos
+an´onimos con los datos a obtener elegidos.
+Permitir la automatizaci´on de predicciones al ofrecer un servicio web f´acil
+de consultar.
+La ﬁgura 1.1 muestra la estructura del proyecto planteado, que llenar ´ıa los
+requisitos expuestos en esta secci ´on. El ﬂujo de la informaci ´on tendr´ıa la forma
+ilustrada en la ﬁgura y las predicciones mostradas son ejemplos de categoriza-
+ciones.
+1.6. Resumen
+El proyecto deber ´a tener la ﬂexibilidad de adaptarse a las necesidades del
+caso de uso espec´ıﬁco que se le d´e y a la vez tener la capacidad predictiva de un
+
+===== PAGINA 24 =====
+
+6 Cap´ıtulo 1. Introducci ´on
+Lorem ipsum dolor sit amet, consectetur 
+adipiscing elit. Morbi tempus consectetur 
+sapien eu convallis. Mauris quis nisi nec 
+augue laoreet dapibus. Proin non varius 
+ante, vitae dignissim felis. Ut lectus augue, 
+porttitor eget ornare eu, dignissim id est. 
+Etiam id pretium lacus. Proin non felis ac 
+quam rhoncus tincidunt eu et massa. 
+Quisque ut neque erat. Etiam dignissim 
+tellus non molestie mollis. Mauris molestie, 
+ex a rhoncus bibendum, leo est finibus 
+tortor, nec ornare tortor velit ac felis. Proin 
+ornare, ipsum vel eleifend imperdiet, purus 
+tellus malesuada lorem, a laoreet libero 
+sapien quis orci. Vivamus a augue feugiat, 
+consequat metus molestie, aliquam justo.
+Quisque rutrum arcu eu libero scelerisque 
+iaculis. Morbi elementum malesuada ex vel 
+malesuada. Curabitur volutpat, metus a 
+posuere elementum, velit nisi cursus ligula, 
+eu malesuada odio arcu eu augue. In a 
+arcu eu metus tempus mollis id ac enim. In 
+sit amet rutrum sem. Mauris risus diam, 
+sollicitudin et turpis nec, malesuada 
+tincidunt nulla. Donec eu magna nec leo 
+ornare commodo in in orci. Suspendisse 
+sollicitudin malesuada eros in porta. 
+Aenean sagittis placerat sollicitudin. Ut 
+blandit nisi volutpat mi vestibulum 
+dignissim.
+Vivamus iaculis enim massa, ut egestas 
+enim accumsan ac. Vivamus semper sem 
+massa, quis sodales diam sagittis 
+bibendum. Cras faucibus consequat risus, 
+at viverra ante varius et. Cras ut enim vitae 
+ligula ullamcorper rutrum ac non nibh. 
+Donec ac odio volutpat, ornare odio non, 
+consectetur velit. Mauris elit dolor, ultrices 
+et risus sit amet, elementum varius nisl. 
+Phasellus at porta ligula. In tincidunt nisl ex, 
+nec convallis metus ultrices in.
+WIKIPEDIA
+LEFTy
+LM
+-- 25-30
+-- Femenino
+-- Perú
+ ?
+FIGURA 1.1: Estructura del proyecto planteado en este trabajo de
+investigaci´on. La ﬁgura est ´a dise ˜nada para prop´ositos ilustrativos.
+LM denota el modelo de lenguaje que es pre-entrenado con texto
+de Wikipedia y es un paso previo.
+modelo del estado del arte. El modelo utilizar ´a tecnolog´ıas de Deep Learning,
+por ser la tecnolog´ıa m´as prometedora en este campo.
+
+===== PAGINA 25 =====
+
+7
+Cap´ ıtulo 2
+Marco te´ orico
+2.1. Trasfondo de Deep Learning
+En este cap´ıtulo se plantear´a y explicar´a el fundamento te´orico de las t´ecni-
+cas del campo de Deep Learning utilizados en este trabajo. Los fundamentos
+geom´etricos te ´oricos (Lei, Luo, Yau & Xianfeng Gu, 2018) del porqu ´e de la fun-
+cionalidad b´asica de los modelos del campo, no se abordar´an en esta tesis.
+2.2. Aprendizaje supervisado
+En el ´area de aprendizaje (profundo) artiﬁcial existen dos tipos b ´asicos de
+problema. Esto se determina dependiendo de las caracter ´ısticas de los datos a
+utilizar para el entrenamiento del modelo (Schmidhuber, 2015).
+Cuando los datos — ya sea informaci ´on tabulada, im ´agenes, textos — no
+tienen ninguna categor´ıa asociada o ning´un valor a predecir y lo que se desea es
+obtener informaci ´on no espec´ıﬁca, es decir sin tener alguna referencia, se trata
+de un aprendizaje no supervisado.
+
+===== PAGINA 26 =====
+
+8 Cap´ıtulo 2. Marco te ´orico
+Si los datos, por otro lado, tienen una clasiﬁcaci ´on — llamada etiqueta —
+asignada, que a futuro es el resultado a predecir, los m ´etodos a utilizar son los
+del aprendizaje supervisado. Debido a que el problema a abordar en este trabajo
+es un problema de clasiﬁcaci ´on, el resto del fundamento te ´orico ser´a basado en
+este tipo de contexto.
+El aprendizaje supervisado puede entonces ser descrito como una funci ´on
+f : X→ Y donde X representa los datos con los que se alimenta la funci ´on,
+es decir las caracter ´ısticas que utilizar´a el modelo para inferir, y Y el resultado
+asignado o a predecir.
+Para ilustrar el proceso de Deep Learning se utilizar´a un caso individual de
+la funci ´on en donde y es el resultado deseado, f (x) = ˆy es la funci ´on aplicada
+a un caso espec´ıﬁco y ˆy representa el resultado obtenido con la funci ´on que no
+necesariamente es el resultado deseado o esperado.
+El objetivo. En concreto, buscamos una funci ´on f que sea la mejor can-
+didata para predecir los resultados deseados. Si deﬁnimos una funci ´on de costo
+L( ˆy, y) que representa, en un valor escalar, la diferencia cuantitativa entre la eva-
+luaci´on de una funci ´on f candidata y el resultado real y podemos concluir que
+el objetivo es encontrar una f∗ que cumpla con:
+f∗ = m´ın
+f∈F
+1
+N
+N
+∑
+i=0
+L( f (xi), yi)
+Donde N es el n ´umero de instancias de los datos para entrenar el modelo;
+y F es un conjunto de funciones candidatas.
+Deﬁnici´ on de las funciones. La base de todo modelo de Deep Learning
+
+===== PAGINA 27 =====
+
+2.2. Aprendizaje supervisado 9
+es una red neuronal — cuyo comportamiento ser ´a deﬁnido en la siguiente sec-
+ci´on as´ı como otros detalles relevantes — y su comportamiento b´asico puede ser
+descrito de la siguiente forma:
+f (xi) = wxi + b
+Donde xi es la instancia de datos i con prop ´ositos de entreno o de predic-
+ci´on. Esto nos dice que w y b ser´an los par ´ametros a modiﬁcar de manera sis-
+tem´atica para encontrar la funci ´on f∗. Con ﬁnes de brevedad, la concatenaci ´on
+de w y b ser´an representados por θ.
+Una posible funci ´on de p ´erdida en un problema de clasiﬁcaci ´on para una
+predicci´on obtenida, toma la forma del error de la entrop´ıa cruzada, es decir:
+L( ˆ y, y) =−
+C
+∑
+j
+yjlog
+( ˆyj
+)
+(2.1)
+Donde C es el n ´umero de clasiﬁcaciones independientes posibles, y es un
+vector de dimensi´on C con solamente un ´unico valor en 1 el cual indica la clasi-
+ﬁcaci ´on correcta y ˆ yes el vector de predicci´on de dimensi´on C, que contiene las
+probabilidades para cada posible clasiﬁcaci ´on. De esto podemos concluir que
+∑ ˆ y= 1.
+Si C = 2 se puede simpliﬁcar la expresi ´on, utilizar solamente un resultado
+escalar
+L( ˆy, y) =−ylog ( ˆy)− (1− y) log (1− ˆy) (2.2)
+Al tener el error — la p ´erdida — para una predicci ´on se puede expandir
+esta idea para obtener la p´erdida a trav´es de un conjunto de datos, que resultar´a
+
+===== PAGINA 28 =====
+
+10 Cap´ıtulo 2. Marco te ´orico
+muy ´util cuando se deba entrenar. Para obtener una aproximaci´on de la p´erdida
+sobre un conjunto de datos se puede utilizar el promedio sobre las p ´erdidas
+individuales de los datos evaluados:
+L( ˆ y, y) =− 1
+N
+N
+∑
+i=1
+[yilog ˆyi + (1− yi)log (1− ˆyi)]
+Optimizaci´ on de la funci´ on de costo.Con una funci´on a minimizar estable-
+cida y una cantidad N de datos sobre los que se debe encontrar una funci ´on f ,
+candidata cada vez mejor, se recurre al m ´etodo del descenso de gradiente. Este
+m´etodo nos permite utilizar propiedades b´asicas de las derivadas de las funcio-
+nes y poco a poco avanzar hasta llegar a un valor m ´ınimo de la funci´on. Cada
+nueva funci´on candidata, entonces, podr´a ser derivada de la siguiente forma:
+fi(xi) = θixi
+Donde
+θi+1 = θi− γ∇θL( ˆyi, yi). (2.3)
+Este proceso de utilizar el descenso de gradiente a trav ´es de las instancias
+nos permite minimizar el error de la funci´on, hasta deducir la funci´on que mues-
+tra el menor error, lo que alcanza nuestro objetivo principal.
+La tasa de aprendizaje. La velocidad de convergencia de este proceso de-
+pender´a en gran parte de γ, que representa la tasa de aprendizaje; espec ´ıﬁca-
+mente es la ponderaci ´on que se le da al componente del gradiente cuando se
+propone la nueva funci ´on. Un γ muy alto arriesga una divergencia debido a
+que podr´ıa oscilar alrededor de un m´ınimo sin nunca converger en´el. Un γ muy
+
+===== PAGINA 29 =====
+
+2.3. Redes neuronales 11
+bajo, por el otro lado, puede resultar en un aprendizaje muy lento, que puede
+llevar a un resultado no ´optimo debido a limitaciones de recursos o tiempo. Este
+concepto representa mucho valor en este trabajo.
+2.3. Redes neuronales
+Las redes neuronales son el modelo base para el Deep Learning. Esto de-
+bido a que ha sido demostrado que son aproximadores universales (Hornik,
+Stinchcombe & White, 1989) — es decir que para cualquier funci ´on h se tiene la
+capacidad de encontrar un red neuronal ˆH que aproxime a h con cierto grado
+de precisi´on — un error de ϵ — dado que se tenga la cantidad de unidades en la
+red y datos suﬁcientes para entrenar. Formalmente se dice que
+| ˆH(x)− h(x)| < ϵ (2.4)
+Con ayuda del concepto de las redes neuronales, especiﬁcaremos m´as acer-
+ca de la funci ´on f que hasta ahora ha permanecido general, ´unicamente con la
+restricci´on de ser derivable. Hay diferentes tipos de redes neuronales en el cam-
+po y en este trabajo se abordar´an ´unicamente las est´andar y las recurrentes.
+2.3.1. Redes neuronales est´ andar
+Inspiraci´ on e intuici´ on.Estas redes neuronales fueron basadas en compor-
+tamientos biol´ogicos y reﬂejan un comportamiento similar a la comunicaci´on de
+neuronas que se aprecia en la naturaleza. La entrada de datos en una neurona es
+procesada y alimentar´a a la siguiente neurona y as´ı, sucesivamente, hasta haber
+recorrido toda la red. La redes neuronales no son secuencias directas y lineales
+
+===== PAGINA 30 =====
+
+12 Cap´ıtulo 2. Marco te ´orico
+x1
+x2
+x3
+y
+FIGURA 2.1: Una red neuronal est ´andar con una capa oculta que
+tiene tres unidades neuronales. La red est ´a completamente conec-
+tada, tiene tres nodos de entrada y uno de salida.
+de neuronas; las redes est ´an divididas en capas, las que pueden contener m ´as
+de una unidad. Una red completamente conectada, como la que se aprecia en
+la ﬁgura 2.1, conecta a todas las unidades de una capa con todas las unidades
+de la siguiente. As´ı como las neuronas en la naturaleza, las neuronas en una red
+neuronal tienen una unidad o c´elula principal, axones y su conexi´on es llamada
+sinapsis.
+Propagaci´ on hacia adelante.En las redes neuronales esto es el proceso del
+ﬂujo de la informaci´on a trav´es de la red, y las funciones que la componen, hasta
+obtener un resultado. En el caso de una red neuronal t ´ıpica, este proceso signi-
+ﬁca que la salida de una neurona en una capa alimenta parcialmente a las de la
+capa siguiente. La funci´on a utilizar por cada unidad individual es una regresi´on
+lineal simple que puede ser descrita como f (x) = w· x + b, es decir, una matriz
+de par´ametros a multiplicarse con los datos de entrada a la neurona. Adicional
+a esto, se maneja una funci ´on de activaci ´on para el resultado de esa multiplica-
+ci´on, que es no lineal, a cada elemento resultante (p.e. tanh). De esto se concluye
+que para, por ejemplo, obtener el resultado de una neurona en la cuarta capa se
+
+===== PAGINA 31 =====
+
+2.3. Redes neuronales 13
+Propagación 
+hacia adelante
+Propagación 
+hacia atrás
+∂g   ∂f
+∂x   ∂g
+∂g   ∂f
+∂x   ∂g
+FIGURA 2.2: En azul se puede ver la direcci ´on del ﬂujo de infor-
+maci´on durante la propagaci ´on hacia adelante. En rojo se aprecia
+que la direcci ´on se invierte para la propagaci ´on hacia atr ´as y que
+lleva los gradientes necesarios para propagar el error despu ´es del
+entrenamiento.
+tiene que
+f (x) = W4· σ(W3· σ(W2· σ(W1· x))) (2.5)
+Donde W4 es una matriz de par´ametros de la cuarta capa,W3 es una matriz
+de par ´ametros de la tercera capa, y as ´ı sucesivamente, y x representa los datos
+de entrada.
+Propagaci´ on hacia atr´ as(Rumelhart, Hinton & Williams, 1986). Ya que est´a
+presente un mecanismo para evaluar el conjunto de funciones que representa
+cada unidad de la red, debemos tener un mecanismo para optimizar los par´ame-
+tros que deﬁnen cada funci ´on. La propagaci ´on hacia atr ´as se encarga de esto al
+utilizar el concepto previamente descrito como el descenso de gradiente. Para
+realizar la propagaci ´on hacia atr ´as se aplica la regla de la cadena que establece
+que ∂ f (g(x))
+∂x = ∂g
+∂x
+∂ f
+∂g. Se debe notar que la funci´on que se quiere derivar toma una
+forma similar a la que tenemos en la ecuaci ´on 2.5, con la adici ´on de que g(x) es
+
+===== PAGINA 32 =====
+
+14 Cap´ıtulo 2. Marco te ´orico
+una funci ´on que anida a ´un m ´as funciones. Para obtener la optimizaci ´on de los
+par´ametros podemos derivar en direcci´on hacia atr´as propagando la mejora que
+se propone con el gradiente.
+La actualizaci´on de la funci´on de cada unidad neuronal se realiza de acuer-
+do a como fue descrito en la ecuaci´on 2.3.
+2.3.2. Redes neuronales recurrentes
+Este tipo de redes tienen la peculiaridad que se alimentan no solamente de
+los resultados de las funciones de activaci ´on de las capas anteriores, sino tam-
+bi´en del resultado de la instancia previamente evaluada; para datos evaluados
+en en un tiempo t la deﬁnici ´on ser´ıa ht = fθ(ht−1, xt). Este tipo de estructura
+de red neuronal es aplicado a conjuntos de datos secuenciales como es el proce-
+samiento de textos — textos cuya representaci ´on consiste en una secuencia de
+palabras representadas de forma vectorial — y procesamiento de secuencias de
+se˜nales.
+Se debe aclarar para esta estructura de red neuronal tambi ´en existen dis-
+tintas extensiones. Estas surgen debido a la inhabilidad de las redes recurrentes
+t´ıpicas de conservar contexto en cadenas de texto largas. El subtipo relevante
+para este trabajo de investigaci ´on es la red Long Short Term Memory (LSTM) –
+memoria corta a largo plazo.
+Esta extensi´on de las redes LSTM permite tener un estado memorizado por
+cada unidad de la red. Se deﬁnen par ´ametros, que son aprendidos por la red
+con el mismo mecanismo de propagaci ´on, que deﬁnen cu ´ando se debe guardar
+parte del contexto, qu´e parte en espec´ıﬁco y ﬁnalmente cu´ando se deben olvidar.
+
+===== PAGINA 33 =====
+
+2.4. Generalizaci ´on de una red neuronal 15
+2.4. Generalizaci´ on de una red neuronal
+Una red neuronal aprende a elegir una funci ´on que minimice el costo de
+evaluar un conjunto de datos. Intuitivamente podemos ver que este proceso lle-
+va a que la red aprenda caracter´ısticas de los datos que est´a utilizando, y poco a
+poco aprenda a predecir categor´ıas basado en este conjunto de datos de manera
+m´as precisa. Las palabras claves son este conjunto de datos , es decir se habla de
+que la red aprende sobre un conjunto limitado de datos y fuera de ´el no hay
+garant´ıa de que sea competente. Para que el modelo pueda generalizar lo apren-
+dido con estos datos, existen distintos mecanismos. En esta secci´on se explicar´an
+dos de estos conceptos.
+Cantidad de datos. La cantidad de datos utilizados para entrenar un mode-
+lo inﬂuye mucho en su capacidad de generalizar. Mientras m´as datos se tengan,
+mayor ser´a la posibilidad de generalizar, esto con la condici´on que la data sea di-
+versa y representativa del problema real. La explicaci´on de esto se puede ilustrar
+llevando el concepto a sus extremos y con un ejemplo sencillo: se debe suponer
+que se quiere aprender a deﬁnir el conectivo l ´ogico and. Si se provee solamente
+un ejemplo de c ´omo funciona este operador, la red no sabr ´a qu ´e hacer cuando
+los valores de entrada diﬁeran de ese ejemplo. Por el otro lado si se le alimentan
+todas las combinaciones posibles, la red deber ´a ser capaz de aprender todo el
+contexto del problema.
+T´ ermino de regularizaci´ on.Esta t´ecnica es muy esencial cuando se lidia con
+modelos de Deep Learning. Consisten en agregar un t ´ermino de regularizaci ´on
+a la funci ´on de predicci´on que se est ´a optimizando. La funci ´on entonces tendr´a
+la forma siguiente:
+
+===== PAGINA 34 =====
+
+16 Cap´ıtulo 2. Marco te ´orico
+f∗ = m´ın
+f∈F
+1
+N ∑
+i
+L( f (xi), yi) + ∑
+j
+λ(w2
+j )
+Esto funciona ya que limita el crecimiento de los par ´ametros, que desen-
+frenado podr´ıa causar que el modelo dependa mucho de una caracter ´ıstica de
+los datos y una dependencia exagerada puede llevar a falta de generalizaci ´on.
+En otras palabras, mantiene un balance sobre la ponderaci ´on de los par´ametros
+aprendidos. Adicionalmente se incluye el t´ermino λ que controla qu´e tanto afec-
+ta el t´ermino de regularizaci´on a la funci´on de p´erdida.
+2.5. Proceso general al aplicar una red neuronal
+Un proyecto de Deep Learning con redes neuronales lleva por lo general
+el mismo conjunto de pasos para llegar a un resultado cercano a lo ´optimo. Los
+pasos a seguir son los siguientes:
+Obtenci´ on de datos:Dependiendo del problema a resolver, estos datos
+podr´an tomar distintas formas y los m ´etodos para obtenerlos podr ´an va-
+riar en gran manera. Para que una red neuronal pueda generalizar de for-
+ma exitosa lo aprendido durante la fase de entrenamiento, es importante
+tener una muestra representativa del escenario real del problema a resolver
+y tener una cantidad elevada de datos. M ´etodos comunes incluyen reco-
+lecci´on y etiquetaci ´on manual, descarga de corpora de internet y scraping
+de la web.
+An´ alisis y preparaci´ on de los datos:Los datos obtenidos en el primer pa-
+so pueden llegar a tener caracter´ısticas m´ınimas no deseadas, que pueden
+
+===== PAGINA 35 =====
+
+2.5. Proceso general al aplicar una red neuronal 17
+a˜nadir ruido a la representaci´on que estos datos dan. Debido a esto es im-
+portante tratar los datos de manera que se eliminen datos que sesguen
+mucho los posibles modelos, datos faltantes, datos con formato inconsis-
+tente, e incluso considerar la posibildad de eliminar caracter ´ısticas com-
+pletas. En esta fase tambi ´en se separar´an los datos en distintos segmentos
+que despu´es ser ´an ´utiles para determinar la eﬁcacia del modelo resultan-
+te. Estos segmentos son los datos de entrenamiento, validaci´ ony prueba. La
+proporci´on de cada uno de estos puede variar y lo recomendado es que
+la distribuci ´on de cada uno de ellos sea la misma. De no ser posible esto,
+hacer que al menos los segmentos de validaci´on y prueba tengan la misma
+distribuci´on.
+Dise ˜ no de modelo:En este campo hay gran variedad de opciones, en es-
+pecial si no se limitan estas opciones al Deep Learning ya que existen he-
+rramientas de distintos tipos para modelar un sistema. En el caso del Deep
+Learning, tambi´en se deben tomar decisiones importantes con respecto al
+modelo a utilizar. En concreto se deber ´a elegir el tipo de red neuronal co-
+mo tambi ´en su estructura. En esta fase se deﬁnir ´an de forma preliminar
+detalles como el n ´umero de capas en la red y el n ´umero de unidades por
+cada una de las capas.
+Optimizaci´ on de hiper-par´ ametros:Esta fase estar ´a muy relacionada a la
+siguiente, ya que se utilizan los mismo mecanismos para determinar los
+resultados preliminares. Para elegir los mejores hiper-par´ametros para un
+modelo en espec ´ıﬁco se deber ´a evaluar los datos al variar sus valores y
+obtener resultados preliminares. Esto se deber ´a hacer al utilizar una ma-
+triz aleatoria para los distintos hiper-par´ametros con el ﬁn de optimizar el
+tiempo de ejecuci´on de esta fase.
+
+===== PAGINA 36 =====
+
+18 Cap´ıtulo 2. Marco te ´orico
+Entrenamiento del modelo: En esta fase se optimizar´an los par´ametros de
+la red para que sea capaz de modelar el problema y realizar predicciones.
+En esta fase se aplicar ´an de forma iterativa las fases de propagaci ´on hacia
+adelante y hacia atr ´as, hasta llegar a una convergencia. Si se cuenta con
+tiempo limitado, se deber´a elegir un resultado que sea suﬁcientemente sa-
+tisfactorio y se detendr´a el entrenamiento en ese punto.
+Validaci´ on de resultados:Durante esta fase se har ´a uso de los datos seg-
+mentados para validaci ´on. Sobre este conjunto se aplicar ´a el modelo en
+su modalidad de propagaci ´on hacia adelante ´unicamente, con lo que se
+obtienen predicciones. Estas se pueden comparar con las etiquetas asocia-
+das respectivamente. El ﬁn de evaluar el modelo en datos que no est ´an
+presentes en el conjunto de entrenamiento, es determinar el poder de ge-
+neralizaci´on del modelo.
+Los pasos de entrenamiento y validaci ´on de resultados podr ´an repetirse
+las veces que sean necesarias para variar los par ´ametros y evaluar los tipos de
+errores para mejorar los resultados.
+2.6. Deﬁniciones varias
+En esta secci´on se deﬁnen conceptos varios que son mencionados y utiliza-
+dos en este trabajo. Las explicaciones var´ıan en su profundidad dependiendo de
+la importancia y relevancia del concepto en el trabajo.
+´Epoca. En ingl ´es llamada epoch, es el nombre que se le da al proceso de
+iterar sobre todas las instancias de entrenamiento, tanto en propagaci ´on hacia
+adelante como hacia atr´as. Generalmente un modelo se itera sobre varias´epocas
+a trav ´es de los datos, una ´unica vista a cada instancia de datos puede no ser
+
+===== PAGINA 37 =====
+
+2.6. Deﬁniciones varias 19
+suﬁciente para que el modelo aprenda las caracter ´ısticas que dar´an los mejores
+resultados.
+Tipos de errores en clasiﬁcaci´ on.Cuando se clasiﬁca datos en clases, exis-
+ten dos tipos de errores posibles. Un falso positivo es un error tipo I, es decir se
+rechaza una hip´otesis nula verdadera. Un error de tipo II, por el contrario, es un
+falso negativo, es decir no lograr rechazar una hip´otesis nula falsa.
+Desequilibrio de clases. Cuando en un problema de clasiﬁcaci ´on uno de
+los resultados es mucho m´as com´un que el resto se dice que hay un problema de
+desequilibrio de clases. Esto puede llevar a complicaciones en la generalizaci ´on
+del modelo o en la evaluaci´on del desempe˜no del mismo.
+Matriz de confusi´ on.En problemas de clasiﬁcaci ´on se tienen distintas me-
+didas de las que la m ´as com ´un es la precisi ´on del modelo. Esta medida puede
+no llegar a ser muy representativa del desempe˜no del modelo. Una situaci´on en
+donde esto se podr´ıa manifestar es cuando los datos que representan el proble-
+ma tienen un problema de desequilibrio de clases. Si la tasa de desequilibrio es
+demasiado alta, es posible predecir ´unicamente una clase con un modelo y ob-
+tener una precisi ´on del modelo bastante elevada, a pesar de que el modelo no
+est´a prediciendo nada. Debido a esto, es importante tener en cuenta m ´as herra-
+mientas de retroalimentaci´on. Algunos ejemplos de ellas son:
+Exhaustividad
+M´etrica de Fβ
+Curvas ROC
+
+===== PAGINA 38 =====
+
+20 Cap´ıtulo 2. Marco te ´orico
+Referencia
+Predicci´on 0 1
+0 1507 19
+1 34 1201
+CUADRO 2.1: Ejemplo de una matriz de confusi ´on que muestra
+distintos tipos de errores. La tabla tiene ´unicamente prop ´ositos
+ilustrativos. Los n ´umeros resaltados representan la cantidad de
+predicciones correctas; las otras dos cifras ser ´an los errores tipo I
+y tipo II.
+
+===== PAGINA 39 =====
+
+21
+Cap´ ıtulo 3
+Transferencia de aprendizaje
+En este cap´ıtulo se cubren y se fundamentan las t´ecnicas de transferencia de
+aprendizaje (transfer learning) usadas y las decisiones tomadas para el dise ˜no
+del proyecto de clasiﬁcaci ´on de autores con redes neuronales recurrentes.
+3.1. Transferencia de aprendizaje
+Un concepto esencial para este trabajo y para toda el´area de Deep Learning,
+es la capacidad de transferir aprendizaje adquirido previamente de un proble-
+ma poco acotado y aprovechar este aprendizaje en problemas m ´as acotados, al
+permitir as´ı que las demandas de recursos como datos y tiempo de ejecuci´on ten-
+gan m´as holgura. Se obtienen mejores resultados en menos tiempo al transferir
+aprendizaje de un modelo que cuando se inicializan los pesos de los par´ametros
+de la red aleatoriamente (Erhan y col., 2010).
+
+===== PAGINA 40 =====
+
+22 Cap´ıtulo 3. Transferencia de aprendizaje
+Capa CNN
+Capa CNN
+Capa CNN
+Capa CNN
+FIGURA 3.1: Ejemplo ilustrativo de lo que podr´ıa aprender una red
+profunda de visi´on artiﬁcial para la detecci ´on de veh´ıculos.
+3.2. Concepto de transferencia
+Las redes neuronales capturan diferente informaci ´on en sus capas (Yosins-
+ki, Clune, Bengio & Lipson, 2014; Zeiler & Fergus, 2014) y la forma en que diﬁe-
+ren permite transferir conocimiento a trav´es de redes entrenadas para diferentes
+tareas. En las primeras capas se aprende informaci´on bastante abstracta con res-
+pecto a la tarea, y conforme se avanza en la profundidad de la red se vuelve m´as
+espec´ıﬁca la informaci´on que se va aprendiendo. Debido a esto se puede utilizar
+lo aprendido en las primeras capas para otra tarea del mismo dominio.
+Ejemplo ilustrativo. En una red neuronal, cuya tarea es en el ´area de vi-
+si´on artiﬁcial las primeras capas comienzan a entender conceptos de orillas ho-
+rizontales o verticales; las siguientes capas podr ´an entender qu ´e son esquinas
+circunferencias; las siguientes capas podr´an entender l´ımites de objetos; etc.
+
+===== PAGINA 41 =====
+
+3.3. Aplicaci ´on en CV 23
+La informaci ´on en las primeras capas de una red neuronal de visi ´on arti-
+ﬁcial puede llegar a ser muy ´util, sin importar la tarea ﬁnal o qu ´e tan acotada
+est´e. Por esta raz ´on es posible tomar un modelo pre-entrenado en una tarea ge-
+neral, remover su capa ﬁnal — la que determina el resultado ﬁnal de esa tarea
+en espec´ıﬁco — y continuar con el proceso de entrenamiento con datos de la ta-
+rea m´as acotada y permitir que las nuevas capas no entrenadas aprovechen los
+conceptos de las capas anteriores para que ellas tengan el poder de predecir al
+usar esa informaci´on y los resultados correctos.
+3.3. Aplicaci´ on en CV
+Para tener el contexto acerca de este concepto crucial para este trabajo de-
+bemos explorar otras ´areas del Deep Learning, en particular el ´area de visi ´on
+artiﬁcial (computer vision en ingl ´es). Este campo fue el que llev ´o a la explosi ´on
+de Deep Learning en el 2012, cuando una red denominada AlexNet domin ´o la
+competencia de clasiﬁcar el dataset ImageNet (Deng y col., 2009).
+ImageNet. Este proyecto es una colecci ´on masiva de im ´agenes que est ´an
+debidamente etiquetadas con cuadros encerrando los objetos detectados en una
+imagen. Debido a la cantidad exagerada de categor´ıas y objetos encontrados en
+las im´agenes y tambi ´en la cantidad en s´ı de im´agenes, se organiza un concurso
+de software todos los a˜nos para determinar cu´al modelo es el mejor en visi´on ar-
+tiﬁcial. Cuando en el 2012 una red de Deep Learning gan´o el concurso se gener´o
+motivaci´on en explorar este campo m´as a fondo.
+Esta tarea lleg ´o a ser el est ´andar para determinar si un modelo pod ´ıa ver
+a nivel general. ¿Qu ´e signiﬁca esto? La tarea de ver es una tarea muy basta y
+
+===== PAGINA 42 =====
+
+24 Cap´ıtulo 3. Transferencia de aprendizaje
+bastante general. Hay muchas caracter´ısticas por considerar, lo que aumenta la
+complejidad de este problema.
+En CV existen muchas m ´as tareas m ´as acotadas que ver. Para estas ser ´ıa
+muy ´util utilizar informaci ´on previamente aprendida con la ﬁnalidad de no
+necesitar muchos datos para la tarea m ´as espec´ıﬁca. Por su misma naturaleza,
+tendr´a menos datos de entrenamiento.
+3.4. Aplicaci´ on en NLP
+Hasta el a ˜no 2018 no se hab ´ıa aplicado la transferencia de aprendizaje en
+el ´area de NLP , pero eso cambi´o despu ´es de trabajos pioneros (Devlin, Chang,
+Lee & Toutanova, 2018; Howard & Ruder, 2018; Peters y col., 2018) la t ´ecnica
+muestra promesa. Se podr´ıa decir que el momento ImageNet ha llegado a NLP
+y el progreso ha sido de crecimiento explosivo.
+La tarea general en NLP para tener un modelo base ha sido la tarea del
+modelo de lenguaje (Howard & Ruder, 2018). Un modelo de lenguaje es el que
+intenta predecir la pr ´oxima palabra tomando en cuenta las palabras mandadas
+como argumento al modelo. En textos de temas espec ´ıﬁcos esto podr´a resultar
+ser un tanto m´as f´acil debido al vocabulario m´as limitado y por tener acotado el
+tema. Idealmente para tener una generalizaci ´on poderosa y que puede aportar
+en tareas de muy distintos campos, se debe tener un modelo de lenguaje apren-
+dido de un corpus de datos amplio y la cantidad de textos deber´a ser masiva.
+Un corpus que cumple con los requisitos mencionados ser ´ıa la versi´on de
+Wikipedia en el lenguaje deseado. La enciclopedia virtual abarca muchos temas
+y tiene diversidad incomparable de vocabulario. Incluso deber ´a ser limitado a
+
+===== PAGINA 43 =====
+
+3.4. Aplicaci ´on en NLP 25
+una cantidad T de tokens. En futuros trabajos se deber ´a explorar la posibilidad
+de utilizar distintos corpora.
+El modelo de lenguaje es entrenado al usar redes neuronales recurrentes
+en alguna variante que se considere prudente. Una red LSTM o una Quasi-
+recurrent Neural Network (QRNN) (Bradbury, Merity, Xiong & Socher, 2016)
+son ideales para prop ´ositos de este trabajo y han mostrado los mejores resulta-
+dos del estado del arte en modelos de lenguaje.
+3.4.1. ULMFiT
+Esta t´ecnica expuesta originalmente por Howard y Ruder (2018), en su cur-
+so de Deep Learning, fue publicado para plantear el algoritmo de forma m ´as
+formal y con estudios de ablaci ´on demostrar que cada aspecto de los pasos es
+esencial para obtener los mejores resultados. La t´ecnica de ULMFiT se divide en
+dos fases (Howard & Ruder, 2018) las que se explicar´an a continuaci´on.
+3.4.1.1. Aﬁnaci´ on de modelo de lenguaje
+Esta fase de la t ´ecnica consiste en tomar el modelo de lenguaje general y
+aﬁnarlo para que est´e orientado a la tarea ﬁnal espec´ıﬁca con la que se trabajar´a.
+Esto se logra al utilizar los datos de la tarea ﬁnal para formar un texto sobre el
+que se terminar ´a de entrenar. Para lograr este aﬁnamiento de la mejor manera,
+se utilizan diferentes t´ecnicas.
+Aﬁnamiento discriminatorio. Esta t´ecnica llamada ﬁne-tuning, en el art´ıcu-
+lo original, consta en usar una tasa de aprendizaje diferente a lo largo de las
+capas. Es decir, cada capa tiene asignada una tasa de aprendizaje distinta. Se
+deﬁne entonces que los par ´ametros ser´an divididos en θ1, . . . ,θL donde L es el
+
+===== PAGINA 44 =====
+
+26 Cap´ıtulo 3. Transferencia de aprendizaje
+n ´umero de capas y θt es el conjunto de par´ametros de la capa l. La actualizaci´on
+de los par´ametros entonces, basado en la ecuaci´on 2.3:
+θl
+t = θl
+t−1− γl∇θL(θ) (3.1)
+Tasa de aprendizaje en triangulo inclinado. Llamado slanted triangle lear-
+ning rates en el art ´ıculo original. Durante el recorrido a trav ´es de los datos se
+var´ıa la tasa de aprendizaje tal, que su valor aumente durante las primeras cut
+instancias donde,
+cut =⌊T· cut f rac⌋
+cut f rac es la fracci´on de datos que queremos sean aprendidos con el creci-
+miento de la tasa de aprendizaje. Despu ´es de que este porcentaje es alcanzado,
+la tasa de aprendizaje deja de incrementar en valor y empieza a disminuir de
+forma menos acelerada hasta que se termina de iterar sobre los datos de entre-
+namiento.
+3.4.1.2. Aﬁnaci´ on de modelo a tarea de clasiﬁcaci´ on
+Para aﬁnar el modelo de la tarea de clasiﬁcaci ´on se deber ´a aplicar el mis-
+mo pre-procesamiento en cuanto a tokens de vocabulario. Tener el modelo pre-
+entrenado y aﬁnado permite obtener resultados bastante precisos, sin necesidad
+de tener muchos datos de entrenamiento para la tarea espec´ıﬁca.
+Para el aﬁnamiento de este modelo se aplican los conceptos desarrollados
+en la secci´on 3.4.1.1. Adicionalmente se utiliza una t´ecnica que previene la p´erdi-
+da de conocimiento.
+
+===== PAGINA 45 =====
+
+3.4. Aplicaci ´on en NLP 27
+Descongelamiento gradual. Llamado gradual unfreezing en el art ´ıculo ori-
+ginal. Esta t ´ecnica es de las m ´as importantes. El concepto de transferencia de
+aprendizaje se basa en no perder conocimiento aprendido desde la tarea gene-
+ral original. Al reﬁnar un modelo completamente se toma gran riesgo de olvidar
+vasta informaci ´on. Esta t´ecnica propone congelar los pesos de todas las capas e
+ir descongelando una por una y despu ´es ajustar y entrenar todas las capas des-
+congeladas. Iterando sobre esto hasta que ya no hay capas por descongelar y se
+termina de aﬁnar el modelo completo.
+3.4.2. Modelo de lenguaje bidireccional
+Existe la posibilidad de volver el modelo de lenguaje en un modelo bidirec-
+cional (Howard & Ruder, 2018). Esto se puede hacer de forma manual, al revertir
+el orden de los textos en el corpus y entrenar de la misma forma. Al tener ambos
+modelos listos se pueden promediar los resultados de las predicciones de cada
+modelo para obtener la predicci´on ﬁnal.
+Esto ha sido denominado como modelo bidireccional poco profundo o su-
+perﬁcial (Devlin y col., 2018). Esto no es debido porque no es un modelo de
+Deep Learning, sino que la representaci´on en ambas direcciones no est´a presen-
+te en el modelo, sino se logra con el resultado de dos modelos unidireccionales
+independientes.
+
+===== PAGINA 46 =====
+
+
+
+===== PAGINA 47 =====
+
+29
+Cap´ ıtulo 4
+Datos utilizados
+“On two occasions I have been asked, ”Pray, Mr. Babbage, if you put into
+the machine wrong ﬁgures, will the right answers come out?”... I am not able
+rightly to apprehend the kind of confusion of ideas that could provoke such a
+question.”
+—Charles Babbage, Passages from the Life of a Philosopher
+El concepto de garbage in, garbage out (basura para adentro, basura para
+afuera) es muy conocido e indica c ´omo un modelo, an ´alisis, etc. es limitado en
+su capacidad por los datos que se usen para alimentarlo.
+En proyectos de aprendizaje artiﬁcial se dice que el 80 % del tiempo se de-
+ber´a usar para la b ´usqueda, la limpieza y el tratado de datos. Esta proporci ´on
+no se mantiene en la mayor ´ıa de casos cuando se lidia con modelos de Deep
+Learning pero el principio se conserva: no se debe subestimar la importancia de
+los datos y su integridad.
+
+===== PAGINA 48 =====
+
+30 Cap´ıtulo 4. Datos utilizados
+CORRELATIVO Edad G ´enero Pa ´ıs Sueldo Moneda
+1 24 F GT 3500 GTQ
+2 145 M Per ´u 100,500 Soles
+3 35 N/A .es 1.5 €
+... ... ...
+2304 18 F GT 2.8k Q
+CUADRO 4.1: Ejemplo de datos tabulares que alimentar´an a un mo-
+delo, ya sea de aprendizaje de m ´aquina o de Deep Learning. En la
+tabla se ilustran algunos errores de datos (campo edad) y datos fal-
+tantes (en el campo G´ enero). Tambi´en se aprecian discrepancias en
+el formato de algunos campos (campo de Moneda y Sueldo) y cam-
+pos completamente inservibles para un modelo (campo CORRE-
+LATIVO.
+4.1. Pre-procesamiento de datos
+4.1.1. Datos tabulares
+La recolecci´on de datos para la alimentaci ´on de modelos, por lo general es
+un proceso que involucra obtener informaci ´on de distintas fuentes con distin-
+tos formatos y distintos detalles que esperar. El pre-procesamiento de datos se
+encarga de darle forma congruente a los datos para que puedan representar el
+problema de forma adecuada. Este proceso puede involucrar eliminar errores
+de formato, identiﬁcar datos at´ıpicos y lidiar con ellos, identiﬁcar caracter´ısticas
+valiosas para un modelo, etc. Estos pasos son m ´as comunes cuando se lidia con
+datos tabulares, es decir datos que est´an separados por categor´ıas o columnas y
+deben ser tratados cada una como variable.
+
+===== PAGINA 49 =====
+
+4.1. Pre-procesamiento de datos 31
+4.1.2. Datos textuales
+En NLP y en este trabajo se lidia con datos en forma de texto y no de forma
+tabular. Esto conlleva un conjunto de retos especiales a considerar; surgen con-
+ceptos nuevos a considerar. En NLP los pasos que generalmente se realizan para
+limpiar los datos son los siguientes:
+Tokenizar. Esta t ´ecnica de pre-procesamiento consiste en separar las ca-
+denas de palabras — textos — en tokens. Esto con el prop ´osito de que el
+modelo sea capaz de digerir las cadenas de palabras por segmentos bien
+deﬁnidos. El delimitador de los tokens en los datos de entrada podr ´a ser
+algo simple como un car´acter de espacio (’ ’). Tambi´en existen t´ecnicas m´as
+elaboradas, por ejemplo: tokenizaci ´on basado en la morfolog´ıa de un len-
+guaje.
+Limitar vocabulario. Como consecuencia de tener cantidades grandes de
+datos para la alimentaci ´on del modelo se puede terminar con un vocabu-
+lario bastante numeroso. Este vocabulario est´a compuesto de todos los to-
+kens ´unicos que se encontraron en los datos de entrada. Una t´ecnica com´un
+para evitar utilizar tokens encontrados, muy pocas veces en la data, es li-
+mitar el n´umero de tokens a usar. Se elige esa cantidadn de datos a usar al
+ordenar los tokens por su frecuencia y tomando los n m´as comunes.
+Eliminar palabras con prop´ osito gram´ atico.Muchas tareas de clasiﬁca-
+ci´on en NLP dependen mucho del contenido de los textos. Una t ´ecnica
+com ´un para enfatizar el valor sem ´antico de los textos es eliminar tokens
+cuyo prop´osito es ´unicamente gramatical. Se podr´ıan nombrar art´ıculos y
+preposici´ones como ejemplos.
+
+===== PAGINA 50 =====
+
+32 Cap´ıtulo 4. Datos utilizados
+Vectorizar. Una t´ecnica muy valiosa que consiste en representar las cade-
+nas de caracteres en vectores en un espacio de d dimensi´on. Mientras m´as
+grande d, mejores las posibilidades de capturar m ´as el signiﬁcado de ca-
+da token o palabra. En modelos del estado del arte en NLP se utiliza una
+dimensionalidad generalmente de d = 300 o d = 400. Algunas t ´ecnicas
+de vectorizaci ´on son capaces de capturar mucha informaci ´on sem ´antica,
+al grado de inferir informaci´on acerca de incluso tokens no antes vistos.
+Zero padding. Esta es una t ´ecnica usada para dar a los datos de entrada
+el mismo largo y permitir que el modelo no sufra por la variabilidad de
+longitud. Esta t´ecnica es m´as com ´un cuando se usan modelos de machine
+learning y no deep learning.
+Tokens especiales. Al aplicar t ´ecnicas como limitaci ´on de vocabulario o
+zero padding surge la necesidad de usar tokens especiales que le indican
+al modelo conceptos como un t ´ermino no antes visto o el ﬁnal de una se-
+cuencia. Estos tokens especiales generalmente son deﬁnidos por quien rea-
+liza el proceso de tokenizaci´on, aunque tambi´en se pueden incluir previo a
+esta etapa. Estos tokens especiales generalmente son representados en este
+estilo <unk> donde unk es generalmente una abreviaci ´on del concepto del
+token especial.
+Todos estos pasos tienen alternativas o son completamente opcionales. Para
+algunas tareas de clasiﬁcaci ´on de texto tareas como la eliminaci ´on de palabras
+gram´aticas son necesarios. Sin embargo, para una tarea como atribuci ´on de au-
+tor de un texto es necesario incluir informaci ´on que pueda identiﬁcar al autor
+(Coulthard, 2004; Louwerse, 2004).
+
+===== PAGINA 51 =====
+
+4.2. Fuente de los datos 33
+4.2. Fuente de los datos
+LEFTy es un proyecto multi-tarea, que signiﬁca que las predicciones son
+de distintos conceptos. Esto generalmente lleva a utilizar datos distintos para
+cada tarea en espec´ıﬁco. Gracias a la ventaja que la transferencia de aprendizaje
+provee — descrita en el cap ´ıtulo 3 — la cantidad de datos necesaria para obtener
+buenos resultados no es excesiva y esto facilita la b´usqueda de datos.
+Las fuentes de los datos para cada subtarea son los siguientes:
+Determinaci´ on de g´ enero y edad.El corpus de datos que se usa para estas
+dos tareas fue el mismo. El corpus es llamado SpanText (Villegas, Ucelay,
+Errecalde & Cagnina, 2014) y contiene textos escritos por personas hispa-
+nohablantes, cada uno etiquetado con su g ´enero y edad. Para estos datos
+se usan solamente textos con una longitud m´ınima de 100 palabras.
+Determinaci´ on de g´ enero y regi´ on en textos informales.Adicional a las
+fuentes de datos mencionadas, se usan los datos de una competencia de
+perﬁlamiento de autores, en espec ´ıﬁco usando textos informales. La com-
+petencia es PAN en su edici ´on del 2017 (https://pan.webis.de/clef17/
+pan17-web/author-proﬁling.html). Los datos han sido utilizados con el
+permiso de los organizadores de la competencia de PAN17 (Rangel, Ros-
+so, Potthast & Stein, 2017a). Estos datos no han sido pre-procesados de
+ninguna forma y la ´unica garant´ıa que se tiene es que hay una cantidad
+m´ınima de tuits por autor y una cantidad m ´ınima de autores por g´enero
+y regi ´on. El conjunto de datos se encuentra dividido entre conjuntos de
+datos para entrenamiento y para prueba de desempe˜no.
+Datos de pre-entrenamiento. Para la fase de pre-entrenamiento del mo-
+delo de lenguaje se utilizan datos de Wikipedia. Se descarga un dump —
+
+===== PAGINA 52 =====
+
+34 Cap´ıtulo 4. Datos utilizados
+colecci´on de datos — de noviembre del 2018. De estos datos se ﬁltran en-
+tonces los textos que ten´ıan como m´ınimom = 1000 cantidad de palabras.
+Luego de esto, se seleccionaron los primeros 100 millones de tokens, esto
+para simular una distribuci ´on de art´ıculos similar a WikiText-103 (Merity,
+Xiong, Bradbury & Socher, 2016) que fue propuesta como muestra m ´as
+realista de la distribuci´on de textos de Wikipedia.
+
+===== PAGINA 53 =====
+
+35
+Cap´ ıtulo 5
+LEFTy: Implementaci´ on y aplicaci´ on
+Language Efﬁcient Text portray (LEFTy) es el nombre designado para re-
+ferirse al trabajo actual. Esta soluci ´on propuesta emplea el concepto de transfer
+learning para permitir entrenar con gran capacidad tareas que no tienen muchos
+ejemplos etiquetados. Se propone este sistema para la tarea de perﬁlaci´on de au-
+tores. Utiliza una RNN como base del modelo y las caracter´ısticas base obtenidas
+fueron:
+Edad.
+G´ enero.
+Regi´ on de origen.
+5.1. Pre-entrenamiento de modelo de lenguaje
+La fase de pre-entrenamiento en el contexto de NLP consiste en entrenar
+un tipo de modelo de lenguaje. En el art ´ıculo original de ULMFiT (Howard &
+Ruder, 2018), se utiliza un modelo est ´andar en donde se predice el siguiente
+token basado en una cadena de tokens. Bi-directional Encoder Representations
+from Transformers (BERT) (Devlin y col., 2018), por otro lado utiliza un Masked
+
+===== PAGINA 54 =====
+
+36 Cap´ıtulo 5. LEFTy: Implementaci´on y aplicaci´on
+Language Model (MLM) que consiste en predecir el 15 % de los tokens dado
+todo el contexto que los rodea. En este trabajo se utiliza un modelo est ´andar de
+lenguaje, es decir se predice el pr ´oximo token basado en los tokens anteriores
+como entrada.
+5.1.1. Modelo de lenguaje de Wikipedia
+El dise˜no base para este modelo de lenguaje es una red denominada Average-
+stochastic-gradient-descent Weight Dropped LSTM (AWD LSTM) (Merity, Kes-
+kar & Socher, 2017), la que emplea una modiﬁcaci ´on agresiva al m ´etodo de re-
+gularizaci´on dropout. En el art´ıculo se sugiere utilizar un concepto denominado
+DropConnect y diﬁere en dropout en que las funciones de activaci ´on no son las
+que toman el valor cero, sino los pesos. Tambi ´en se usan los conceptos de usar
+dropout en la capa de vectorizaci´on de palabras — esto no aporta a la regulariza-
+ci´on pero s´ı disminuye el tama˜no de los vectores representantes de los vectores.
+Se instancian los distintos tipos dedropout con pesos asignados a cada uno. En el
+art´ıculo se recomiendan usar ciertos pesos base y optimizar un hiperpar´ametro
+r f ´unicamente le da escala a los pesos recomendados y deﬁnidos por ellos.
+En el cap´ıtulo 4 se explica el pre-procesamiento que se le da a los datos de
+Wikipedia. Se detallar´a ese proceso a continuaci´on.
+Para realizar este procedimiento se utilizaron los recursos de Google Colabo-
+ratory (Colab), que ofrecen un ambiente de Notebooks de IPython y la habilidad
+de ejecutar comandos de nix.
+Obtenci´ on de datos. El corpus de Wikipedia fue obtenido del sitio oﬁ-
+cial (https://dumps.wikimedia.org/eswiki/). El corpus obtenido fue del mes
+de noviembre del a ˜no 2018. Estos archivos tienen una estructura espec ´ıﬁca y
+
+===== PAGINA 55 =====
+
+5.1. Pre-entrenamiento de modelo de lenguaje 37
+FIGURA 5.1: Estructura de datos resultante al extraer un archivo de
+Wikipedia.
+Cadena de caracteres Resultado tokenizado
+Hola, buenos d´ıas. xxbos xxmaj hola , buenos d´ ıas
+HOLA!!! qu´e bueno verte xxbox xxmaj hola xxrep 3 ! qu´ e bueno verte
+Mis aud´ıfonos son Sennheiser xxbos xxmaj mis aud´ ıfonos son xxunk
+CUADRO 5.1: Muestras de tokenizaci ´on al utilzar spaCy y t´ecnicas
+de fastai
+la forma recomendada de extraer sus contenidos es utilizando WikiExtractor
+(https://github.com/attardi/wikiextractor). Esta herramienta permite realizar
+una extracci ´on que ﬁltra por un par ´ametro de m ´ınimo de longitud del art´ıcu-
+lo. Se us ´o este par ´ametro para ﬁltrar todos los art ´ıculos con menos de 10,000
+caracteres.
+Una vez ﬁnaliza la extracci ´on del archivo — que demora cantidad no des-
+preciable de horas — se procede a leer y ﬁltrar los documentos. En el caso de
+este trabajo se ignoraron todos los documentos despu ´es de haber acumulado
+100 millones de tokens en los textos procesados. Se conservaron 10 millones de
+tokens adicionales para la validaci´on de resultados.
+Tokenizaci´ on.La herramienta utilizada para este proceso fue spaCy (https:
+//spacy.io/). Esta herramienta tiene soporte para m ´as de 34 idiomas, entre los
+
+===== PAGINA 56 =====
+
+38 Cap´ıtulo 5. LEFTy: Implementaci´on y aplicaci´on
+FIGURA 5.2: Ilustraci ´on de progreso de la funci ´on lr find de
+fast.ai. Al momento de divergir el m ´etodo deja de aumentar γ y
+devuelve los resultados.
+que se incluye el espa˜nol. Adem´as de esta herramienta se emplean t´ecnicas adi-
+cionales como codiﬁcar caracteres repetidos o codiﬁcar palabras en may ´usculas
+— ver tabla 5.1.
+Deﬁnici´ on de vocabulario.Unos tokens son codiﬁcados comoxxunk (token
+desconocido), debido a la limitaci´on de palabras ´unicas a codiﬁcar. El vocabula-
+rio fue limitado a 30,000 tokens ´unicos.
+Entrenamiento. Luego tener los datos en el formato adecuado para entrenar
+el modelo, se aplican las t ´ecnicas descritas en el cap ´ıtulo 3 sobre una red AWD
+LSTM. Previo a esto se encuentra unγ ideal y eso se hace aprovechando el m´eto-
+dolr find (ﬁgura 5.2) de la librer´ıa defastai (https://github.com/fastai/fastai)
+que emplea el m´etodo descrito por Smith y Topin (2017). Se aumentaγ a medida
+
+===== PAGINA 57 =====
+
+5.1. Pre-entrenamiento de modelo de lenguaje 39
+Modelo Error en validaci ´on Perplexity
+QRNN 3.193912 24.2884
+AWD LSTM 3.140521 23.1038
+CUADRO 5.2: Resultados de los modelos entrenados. La m ´etrica
+que se utiliza para comparar entre los modelos es perplexity que
+indica y representa qu´e tantas opciones se tienen para la siguiente
+palabra.
+que se recorren los ejemplos a entrenar. Si en alg ´un momento diverge el apren-
+dizaje, se detiene el m ´etodo y se imprime la gr ´aﬁca. Se deber ´a elegir un γ que
+no tenga riesgo de divergir el aprendizaje y que tampoco disminuya la veloci-
+dad del proceso. La elecci ´on adecuada de este hiper-par ´ametro en esta etapa es
+crucial para obtener un modelo en un tiempo razonable, ya que este modelo es
+el m´as grande — en t ´erminos de par´ametros y datos a procesar — que requerir ´a
+entrenamiento. Vale la pena enfatizar que este proceso se realiza una´ unicavez y
+la deﬁnici ´on de modelos clasiﬁcadores en un futuro podr´a hacer uso del modelo
+entrenado originalmente.
+5.1.1.1. Resultados
+Para medir y reportar errores sobre Language Models (LMs) se utiliza la
+m´etrica de perplexity (Jurafsky & Martin, 2014), que es an ´aloga a la entrop´ıa. La
+entrop´ıa representa la cantidad de informaci´on que se tiene; perplexity se puede
+ver como la cantidad de opciones que se tiene. ¿Qu´e signiﬁca esto? Que mientras
+menos opciones considere nuestro LM, m´as estable es y, por lo tanto, que modela
+mejor el lenguaje. Se calcula de la siguiente manera:
+perplexity = eloss
+En nuestro caso, se utiliza el valor de p´erdida de los datos de validaci´on.
+
+===== PAGINA 58 =====
+
+40 Cap´ıtulo 5. LEFTy: Implementaci´on y aplicaci´on
+Modelo Perplexity
+RNN (Goldszmidt, 2018) N/A (34 % prec.)
+RNN (Ingham, 2018) 36.1473
+Activation Mem. (Rae, Dyer, Dayan & Lillicrap, 2018) 29.2
+Transformer-XL (Dai y col., 2019) 18.3
+QRNN (propio) 24.2884
+AWD LSTM (propio) 23.1038
+CUADRO 5.3: Comparaci ´on de LMs con modelos del estado del
+arte en ingl ´es y modelos de referencia para el espa ˜nol. Menor per-
+plexity es mejor. Separamos el modeloTransformer-XLya que utiliza
+otra arquitectura y est ´a presente en la tabla solamente como refe-
+rencia al mejor resultado, al momento de haber escrito este trabajo.
+Se entrenaron dos modelos de RNN, uno fue basado directamente de la
+arquitectura y estrategias de AWD LSTM y el otro modelo basado en la arqui-
+tectura QRNN. Los resultados se muestran en la tabla 5.2. Sin embargo, esta
+tabla no cuenta la historia completa. El modelo QRNN demor´o menos en su en-
+trenamiento de forma no insigniﬁcante tomando 13 % menos en entrenarse con
+resultados muy comparables a los de la red AWD LSTM.
+En la tabla 5.3 se aprecian distintos LMs que fueron entrenados en distintos
+datasets. El modelo Transformer-XL (Dai y col., 2019) utiliza la nueva tenden-
+cia de ﬁnales del 2018 y principios de 2019 de usar transformadores en lugar
+de RNNs, as´ı como propone Google con BERT. El modelo deActivation Memory
+(Rae, Dyer, Dayan & Lillicrap, 2018) es de referencia que utiliza la arquitectura
+de una RNN simpliﬁcando un sub-conjunto de sus par ´ametros. Los otros dos
+modelos han sido modelos previamente entrenados con el prop´osito de ser usa-
+dos para tareas clasiﬁcaci´on en espa˜nol con ULMFiT. Los datos presentados para
+los modelos propios fueron el valor de p ´erdida en un set de validaci ´on de 100
+millones de tokens elegidos al azar de Wikiepedia.
+Aunque hay argumentos en contra de usar perplexity para comparar LMs
+
+===== PAGINA 59 =====
+
+5.1. Pre-entrenamiento de modelo de lenguaje 41
+de distintos lenguajes o que usan distintos vocabularios (Chen, Beeferman & Ro-
+senfeld, 1998), se debe tener un marco de referencia. Los modelos con prop´ositos
+de usar ULMFiT fueron entrenados de una forma muy similar al propio y son
+las comparaciones m´as directas por ser LMs del idioma espa˜nol.
+5.1.1.2. Recursos utilizados para entrenamiento
+Costo monetario. Para esta fase de entrenamiento se recurre a los servicios
+de Google Cloud (https://cloud.google.com) que son ofrecidos con un beneﬁcio
+de 300 USD para utilizar durante el primer a ˜no. No es necesario ser estudiante
+o profesor para gozar de este beneﬁcio. Teniendo estos recursos disponibles se
+opt´o por utilizar una instance de c´omputo n1-highmem-4 (https://cloud.google.
+com/compute/docs/machine-types) que cuenta con el siguiente hardware para
+el entrenamiento:
+Intel Xeon (Skylake) 4 vCPUs
+26 GB de memoria (RAM)
+nVIDIA V100 GPU – 16 GB de memoria
+Lo primordial cuando se trata de entrenamiento de RNNs, es la capacidad
+de c´omputo de la GPU. La V en el modelo V100 indica que es de la ´ultima gene-
+raci´on a la fecha de esta tesis y provee una ventaja signiﬁcativa comparada con
+una K80 o P100.
+Costo de recursos. El costo total resultante despu´es de entrenar un modelo
+inicial y funcional lleg´o a $ 60.20 USD. Esto fue cubierto por los cr´editos iniciales
+ofrecidos por Google. Tambi´en se debe considerar que este paso se debe realizar
+una sola vez para cada lenguaje. En caso de querer utilizar el modelo entrenado
+
+===== PAGINA 60 =====
+
+42 Cap´ıtulo 5. LEFTy: Implementaci´on y aplicaci´on
+en este trabajo, se podr ´a hacerlo y se podr ´a aplicar a otros problemas de clasiﬁ-
+caci´on.
+Costo en tiempo. Para entrenar los modelos de lenguaje con una estructura
+AWD LSTM, una ´epoca se demora alrededor de una hora. Despu´es de 4 ´epocas
+se aproximan los resultados al estado del arte y debe decidirse cuando detener
+el entrenamiento sin perder la generalidad del sistema.
+5.1.2. Modelos clasiﬁcadores
+Procesamiento de datos. El conjunto de datos principales que se utiliz´o fue
+el de PAN17 (Rangel, Rosso, Potthast & Stein, 2017b). Este conjunto de datos no
+es t´ıpico, ya que consta de tuits de un grupo de usuarios. Cada uno de estos
+tuits — 100 por usuario — tiene asociado su usuario que tiene las etiquetas de
+edad y regi´on asignadas. Por lo tanto se puede abordar el problema de distintas
+formas; se puede tomar cada tuit individual y predecir el g ´enero y la regi ´on in-
+dividualmente, sumando despu´es las probabilidades para obtener un veredicto
+ﬁnal para el autor o se pueden concatenar los tuits del autor y realizar una solo
+predicci´on sobre ese texto completo del autor. Para este trabajo se utiliz ´o cada
+tuit individual con el ﬁn de tener un alcance mayor sobre la tarea de perﬁlaci ´on
+de autores sobre textos informales.
+Pre-procesamiento y tokenizaci´ on.El procesamiento const´o de normalizar
+los tokens especiales de los textos (ver tabla 5.4); en particular se normalizaron
+las menciones de usuario y los hashtags. Este proceso consisti´o en ordenar los to-
+kens del vocabulario del modelo pre-entrenado de Wikipedia y buscar las instan-
+cias encontradas en los tokens de inter´es. Luego de haber hecho esto, anteponer
+un token especial que indique que se encontraba ah´ı originalmente, por ejemplo
+
+===== PAGINA 61 =====
+
+5.1. Pre-entrenamiento de modelo de lenguaje 43
+Estado del texto Resultado
+Original #igualdaddegenero y #mediosdecomunicacion
+http://t.me/ssbM
+Sin normalizar xxunk xxunk y xxunk xxunk xxunk
+Normalizado xxhashtag igualdad enero y xxhashtag medios
+comunica xxurl
+CUADRO 5.4: Ejempliﬁcaci ´on de normalizaci´on de textos informa-
+les obtenidos del dataset PAN17 para la tarea de perﬁlaci ´on de
+autores. El proceso de normalizaci ´on permite extraer informaci ´on
+de los tokens que son menciones de usuario y hashtags. En la tabla
+se aprecia un ejemplo real con dr ´asticos cambios que depende del
+procesamiento.
+xxhashtag. Se tokenizan los datos de la misma manera en que se tokenizaron los
+datos en la fase de modelo de lenguaje al utilizar spaCy.
+Aﬁnaci´ on de LM.Despu´es de haber entrenado el modelo de lenguaje se
+procede a una fase de aﬁnaci´on (Howard & Ruder, 2018). Se emplean las t´ecnicas
+descritas en el cap ´ıtulo 3 para aﬁnar el modelo. Este proceso se realiza con los
+datos de la tarea en espec´ıﬁco. Se adapta el formato de los datos de clasiﬁcaci´on
+a datos para entrenamiento de un LM y se aﬁna el modelo para textos de este
+dominio espec´ıﬁco. Sobre la m´etrica de perplexity o la precisi´on no se pone mayor
+´enfasis, lo importante ser´a que la estructura general de los textos y el vocabulario
+que se use, reﬂeje los datos reales del problema espec´ıﬁco.
+Entrenamiento de los modelos clasiﬁcadores. Al tener el LM aﬁnado se
+procede a entrenar un clasiﬁcador. Este proceso es descrito en la secci ´on 2.5. A
+continuaci´on se detallan las decisiones tomadas.
+Entrenamiento del clasiﬁcador. Antes de comenzar con el entrenamiento
+se deben elegir los hiper-par´ametros adecuados. Primero se eligi´o un peso para
+los par´ametros de dropout (basado en pruebas emp´ıricas) y despu´es se eligi´o un
+γ ´optimo basado en la herramienta de lr find (ﬁgura 5.3). Los valores elegidos
+
+===== PAGINA 62 =====
+
+44 Cap´ıtulo 5. LEFTy: Implementaci´on y aplicaci´on
+FIGURA 5.3: Evoluci ´on de la p ´erdida conforme se cambia la tasa
+de aprendizaje en el clasiﬁcador. Al igual que con el LM, se deber´a
+elegir un valor ´optimo para mayor eﬁciencia.
+fuerondropout = 0.3 y un γ inicial, con valor de 1e-2. Se habla de un γ inicial
+ya que en el entrenamiento del modelo clasiﬁcador se aplica el concepto de usar
+un γ c´ıclico (Smith & Topin, 2017) abordado en el cap´ıtulo 3.
+El entrenamiento de un clasiﬁcador con pocos datos no deber ´a tomar mu-
+cho tiempo y los resultados deber ´an ser satisfactorios aplicando los temas ex-
+puestos en este trabajo. En la ﬁgura 5.4 se puede apreciar c ´omo la evoluci ´on
+de p ´erdida avanza lentamente a trav ´es de las ´epocas y converge en un valor
+despu´es de un n ´umero de ´epocas relativamente bajo. Sin embargo, es posible
+continuar con el entrenamiento hasta lidiar con overﬁtting. Este problema surge
+cuando se han aﬁnado tanto los par ´ametros del modelo que el proceso de back-
+propagation empieza a ajustarse conforme solamente los datos de entrenamiento
+y no el problema en s´ı. La manera m´as f´acil de detectar este fen ´omeno es con la
+
+===== PAGINA 63 =====
+
+5.2. Resultados 45
+FIGURA 5.4: Avance de p ´erdida conforme avanzan las ´epocas de
+entrenamiento. Menor es mejor.
+comparaci´on de resultados sobre la funci´on de p´erdida de los datos de entrena-
+miento con los datos de evaluaci´on. Si el valor de p´erdida para ambos conjuntos
+de datos disminuye, signiﬁca que el entrenamiento se est ´a realizando con ´exito.
+Si en alg ´un momento el valor de p ´erdida para los datos de entrenamiento con-
+tinua disminuyendo pero al mismo tiempo el valor de p ´erdida para los datos
+de validaci ´on aumenta, signiﬁca que ya no estamos obteniendo resultados que
+puedan ser generalizados a datos no antes vistos.
+5.2. Resultados
+Se ha dicho que para RNNs y t ´ecnicas de Deep Learning no han tenido el
+mismo ´exito que en otras tareas debido a la diﬁcultad que un modelo de Deep
+Learning tiene al aprender la cantidad de par ´ametros inmensa con pocos datos
+
+===== PAGINA 64 =====
+
+46 Cap´ıtulo 5. LEFTy: Implementaci´on y aplicaci´on
+(Malmasi y col., 2016; Zampieri y col., 2017). Esta tarea es, por lo tanto, ideal para
+determinar la capacidad real la transferencia de aprendizaje en NLP y, sobre
+todo, cuando las instancias de aprendizaje son limitadas.
+5.2.1. Predicci´ on sobre textos informales
+Los datos y resultados en referencia a predicci´on de regi´on y g´enero provie-
+nen del reporte de la competencia PAN17 (Rangel y col., 2017b) y proveen un
+contexto para la tarea del trazo de perﬁles de autores. Debido a que los conjun-
+tos de datos de pruebas son los mismos, las comparaciones se podr ´an hacer de
+forma directa. Se realiza una comparaci´on con datos exclusivamente del idioma
+espa˜nol. Los modelos a comparar son los siguientes:
+Term Frequency – Inverse Document Frequency (TF-IDF) + Convolutional
+Neural Network (CNN) (Schaetti, 2017)
+RNN (Kodiyan, Hardegger, Neuhaus & Cieliebak, 2017)
+AVG DNN (Franco-Salvador, Plotnikova, Pawar & Benajiba, 2017)
+CNN + RNN + Attention (Miura, Taniguchi, Taniguchi & Ohkuma, 2017)
+Para estos resultados se utiliza la m ´etrica usada en la competencia PAN17
+la cu´al es:
+Acccat = Predicciones correctas
+Total de predicciones
+Donde cat es la categor ´ıa sobre la que se est ´a prediciendo. Las prediccio-
+nes son aplicadas sobre los datos de validaci ´on, que fueron segmentados por el
+equipo organizador de PAN17 y cuenta con 2,800 autores, cada uno asociado a
+100 tuits.
+
+===== PAGINA 65 =====
+
+5.2. Resultados 47
+Referencia
+Predicci´ on Femenino Masculino
+Femenino 83110 49573
+Masculino 56890 90427
+CUADRO 5.5: Matriz de confusi ´on de resultados sobre predicci ´on
+de g´enero en tuits individuales.
+Referencia
+Predicci´ on Femenino Masculino
+Femenino 963 283
+Masculino 437 1117
+CUADRO 5.6: Matriz de confusi ´on de resultados de predicciones
+por autor.
+5.2.1.1. Predicci´ on de g´ enero
+La predicci´on de g´enero sobre un texto an´onimo se efectu´o basado en datos
+de tuits. La clasiﬁcaci ´on se llev´o a cabo en dos niveles. Se efectu´o una predicci´on
+a nivel de tuit individual y una predicci´on a nivel de autor.
+En la tabla 5.5 se aprecian los resultados de las predicciones sobre tuits in-
+dividuales. La evaluaci´on de la m´etrica con estos datos ser´ıa entonces:
+Accgender idv = 173, 537
+280, 000 = 0.6198
+La predicci ´on sobre los autores es basada en las predicciones sobre tuits
+individuales. Esto resulta en una suma ponderada de las predicciones indivi-
+duales descrita como
+ˆpa(X) = m´ax
+100
+∑
+n=1
+p(Xn),
+donde X representa una matriz de probabilidades; las ﬁlas representan tuits in-
+dividuales y las columnas las probabilidades de que el tuit pertenezca a la cate-
+gor´ıa de esa columna (p.e. el g´enero femenino).
+
+===== PAGINA 66 =====
+
+48 Cap´ıtulo 5. LEFTy: Implementaci´on y aplicaci´on
+Modelo Resultado
+TF-IDF + CNN (Schaetti, 2017) 0.7150
+RNN (Kodiyan y col., 2017) 0.7217
+AVG DNN (Franco-Salvador y col., 2017) 0.7721
+CNN + RNN + Attention (Miura y col., 2017) 0.8118
+RNN + Transfer Learning (propio) 0.7429
+CUADRO 5.7: Comparaci ´on de modelos de Deep Learning en la ta-
+rea de predicci´on de g´enero — mayor es mejor. El modelo de Miura
+y col. (2017) se separa, ya que es un ensamble de modelos y no se
+puede hacer una comparaci´on directa.
+Dada la anterior, tenemos la tabla 5.6 y un resultado de
+Accgender = 0.7429.
+La sumatoria ponderada resulta en un sistema similar a un ensamble de
+modelos que toman prioridad seg ´un la conﬁanza que tengan en su predicci ´on.
+Debido a esto, el resultado aumenta en la m´etrica considerablemente.
+Al comparar el modelo propio con los modelos de Deep Learning presen-
+tados en la competencia PAN17 (tabla 5.7), se puede apreciar que los resultados
+obtenidos son del estado del arte para RNN, siendo solamente superado por un
+AVG DNN y un ensamble de CNN, RNN y elementos de atenci´on.
+5.2.1.2. Predicci´ on de regi´ on
+La predicci´on de regi´on sobre un texto an´onimo se efectu´o basado en datos
+de tuits. Al igual que en la clasiﬁcaci ´on de g ´enero, se efect ´ua una predicci ´on a
+nivel de tuit individual y una predicci´on a nivel de autor.
+De la misma manera que con las predicciones de g ´enero, en la tabla 5.8 se
+aprecian los resultados de las predicciones sobre tuits individuales. La evalua-
+ci´on de la m´etrica con estos datos — siendo esta solo indicativa — ser ´ıa entonces
+
+===== PAGINA 67 =====
+
+5.2. Resultados 49
+Referencia
+Predicci´ on AR CL CO MX PE ES VZ
+AR 22,610 3,013 3,147 2,220 3,783 2,558 2,188
+CL 3,064 21,058 2,988 3,034 3,760 2,599 2,454
+CO 3,435 2,993 20,007 4,401 4,251 2,746 3,696
+MX 2,554 3,429 3,977 18,803 4,173 3,681 3,616
+PE 2,992 3,780 3,544 3,542 17,812 2,552 2,605
+ES 3,331 3,565 3,519 5,131 3,662 23,722 3,689
+VZ 2,014 2,162 2,818 2,869 2,559 2,142 21,752
+CUADRO 5.8: Matriz de confusi ´on de resultados sobre predicci ´on
+de regi´on en tuits individuales.
+Referencia
+Predicci´ on AR CL CO MX PE ES VZ
+AR 381 5 7 5 14 1 7
+CL 2 370 2 3 4 1 1
+CO 2 3 367 10 9 3 8
+MX 3 5 4 364 9 3 9
+PE 4 7 8 3 353 3 4
+ES 5 5 8 13 4 388 17
+VZ 3 5 3 2 7 1 354
+CUADRO 5.9: Matriz de confusi ´on de resultados de predicci ´on de
+regi´on por autor.
+la siguiente:
+Accregion idv = 145, 764
+280, 000 = 0.5206
+La predicci ´on sobre los autores basada en la suma ponderada tenemos la
+tabla 5.9 y un resultado de
+Accregion = 0.9207.
+La sumatoria ponderada resulta en un resultado mucho mayor que el de las
+predicciones individuales. Esto puede deberse a dos cosas:
+
+===== PAGINA 68 =====
+
+50 Cap´ıtulo 5. LEFTy: Implementaci´on y aplicaci´on
+Modelo Resultado
+TF-IDF + CNN (Schaetti, 2017) 0.9336
+RNN (Kodiyan y col., 2017) 0.9143
+AVG DNN (Franco-Salvador y col., 2017) 0.9000
+CNN + RNN(Att.) (Miura y col., 2017) 0.9271
+RNN + Transfer Learning (propio) 0.9207
+CUADRO 5.10: Comparaci ´on de modelos de Deep Learning en la
+tarea de predicci´on de regi´on — mayor es mejor. El modelo de Miu-
+ra y col. (2017) se separa, ya que es un ensamble de modelos y no
+es posible hacer una comparaci´on directa.
+Muchos tuits son muy limitados en su n ´umero de caracteres, por lo que
+algunos no revelar´an mucha informaci´on acerca del autor por s´ı solos.
+La cobertura de vocabulario con palabras regionales disminuye, por lo que
+algunos tuits individuales con palabras claves no proveen mucha informa-
+ci´on.
+Nuevamente se comparan los resultados con los modelos de Deep Learning
+de PAN17 (tabla 5.10). Una combinaci´on de TF-IDF y CNN (Schaetti, 2017) logr´o
+clasiﬁcar de la mejor manera; el modelo propio obtiene la segunda mejor preci-
+si´on en modelos simples y la tercera al considerar el ensamble de modelos CNN
+y RNN de Miura y col. (2017).
+5.2.2. Predicci´ on sobre textos formales
+Los experimentos se repiten sobre textos formales al usar los datos de Span-
+Text (Villegas y col., 2014). Los datos de referencia y comparaci´on se obtuvieron
+directamente de la publicaci´on del conjunto de datos.
+El corpus de SpanText est´a compuesto por un dos subconjuntos de datos:
+Dataset balanceado, es decir las distintas clases de textos que conforman
+el conjunto est ´an repartidas equitativamente, es decir que p.e. por cada
+
+===== PAGINA 69 =====
+
+5.2. Resultados 51
+Clase Cantidad de textos Longitud (palabras)
+10smale 140 153
+10sfemale 60 130
+20smale 210 239
+20sfemale 90 236
+30smale 350 267
+30sfemale 150 240
+CUADRO 5.11: Distribuci ´on de datos usados para la tarea de clasi-
+ﬁcaci ´on de textos formales.
+texto que sea de una persona de g ´enero masculino, hay un texto de autor
+femenino.
+Dataset desbalanceado. Este dataset se cre´o con el prop´osito de emular la
+distribuci´on encontrada en los datos de la competencia PAN y as´ı permitir
+una comparaci ´on m ´as directa en t ´erminos de resultados (Villegas y col.,
+2014).
+Los mejores resultados obtenidos por Villegas y col. fueron sobre el data-
+set desbalanceado, por lo que sobre esos se har ´a la comparaci ´on con el modelo
+propio. La distribuci´on de los datos desbalanceados se muestra en la table 5.11.
+5.2.2.1. Resultados
+La tarea deﬁnida en el art ´ıculo deSpanText es la de la predicci ´on ambos el
+g´enero y la edad del autor del texto formal, esto signiﬁca que la precisi´on repor-
+tada es de la proporci´on de textos sobre los que se predijo ambas caracter´ısticas.
+La cantidad de textos por clase es bastante limitada, as ´ı como la longitud pro-
+medio de los textos, que aumenta la diﬁcultad de la tarea para modelos de Deep
+Learning.
+Para la tarea de clasiﬁcaci ´on, Villegas y col. propusieron dos diferentes mo-
+delos de clasiﬁcaci ´on, junto con distintas formas de representar los tokens de
+
+===== PAGINA 70 =====
+
+52 Cap´ıtulo 5. LEFTy: Implementaci´on y aplicaci´on
+Modelo Resultado
+LIBLINEAR; TF-IDF + words (Ville-
+gas y col., 2014)
+58.4
+Na¨ıve Bayes; boolean + words (Ville-
+gas y col., 2014)
+61.2
+RNN + Transfer Learning (propio) 71.0
+CUADRO 5.12: Comparaci ´on de modelos en la tarea de clasiﬁca-
+ci´on de SpanText. El ´unico modelo de Deep Learning es el propio.
+El resultado es la precisi ´on de la predicci ´on, por lo que un mayor
+resultado es mejor.
+alimentaci´on al modelo. Se eligieron los dos mejores modelos — uno por el tipo
+de modelo LIBLINEAR y otro para el tipo de modeloNa¨ ıve Bayes— para realizar
+la comparaci ´on con el modelo propio. Los resultados se pueden apreciar en la
+tabla 5.12.
+
+===== PAGINA 71 =====
+
+53
+Cap´ ıtulo 6
+Conclusiones
+En este cap´ıtulo se presentan las conclusiones obtenidas a partir del trabajo
+de investigaci´on y los resultados encontrados.
+6.1. Conclusiones
+El campo de Deep Learning ha mostrado mucha promesa en los ´ultimos
+a˜nos, pero el ´area de NLP no ha mostrado tanta promesa sino hasta el ´ultimo
+a˜no. En este trabajo se busca fomentar y profundizar m´as la penetraci´on que han
+tenido estas t´ecnicas en el ´area, tanto en sectores industriales como acad´emicos.
+Para plantear las conclusiones de este trabajo, se deber´a recordar los objeti-
+vos principales mencionados en un comienzo. Se pretend´ıa plantear un sistema
+competitivo a niveles del estado del arte que no requiriera ingenier ´ıa de carac-
+ter´ısticas sobre los textos. Un modelo que no requiriera expertiz en el campo de
+la ling¨u´ıstica para ser dise˜nado; un modelo que no necesitara tantos ejemplos de
+entrenamiento para generalizar y desempe ˜narse bien la tarea asignada. LEFTy
+cumple con estos objetivos de forma elegante y novedosa aplicandotransfer lear-
+ning a la tarea de perﬁlamiento de autores en el ´area de NLP .
+
+===== PAGINA 72 =====
+
+54 Cap´ıtulo 6. Conclusiones
+Este concepto permite abrir muchas puertas y se ha demostrado que no s´olo
+aplica para el ´area de visi ´on artiﬁcial con muchas publicaciones en el ´ultimo
+a˜no de laboratorios grandes como OpenAI, fastai, Google, Deep Mind, etc. La
+promesa que trae esta t ´ecnica a NLP , permitir´ıa aplicarse a una inﬁnidad de
+tareas sin depender de muchos ejemplos, justo como se pudo apreciar con los
+resultados presentados sobre textos formales.
+Sin embargo, transfer learning tiene compromisos que se deben tomar en
+cuenta, a pesar de todas las ventajas que provee. Una de ellas es no cambiar
+la estructura del modelo pre-entrenado de una manera muy signiﬁcativa sin el
+riesgo de una p ´erdida catastr´oﬁca del aprendizaje general con el que se cuenta.
+Lo anterior lleva tambi ´en a la conclusi ´on que se debe tener mucho cuidado al
+aﬁnar un modelo general a una tarea espec´ıﬁca en NLP , ya que se tiene el mismo
+riesgo si se entrena de manera desenfrenada.
+En este trabajo se reiteran algunas t´ecnicas de aﬁnamiento de modelos, tan-
+to para modelos de lenguaje como para modelos clasiﬁcadores de una tarea ﬁ-
+nal, reproduciendo de manera parcial los resultados presentados por Howard y
+Ruder.
+Los resultados presentados en el cap´ıtulo 5 de este trabajo compiten con los
+modelos del estado del arte y con gente que se ha dedicado por a ˜nos al estudio
+de NLP , ling¨u´ıstica y su intersecci ´on como ciencias. Esto demuestra que no se
+debe ser persona experta para aprovechar el poder del deep learning.
+Se present´o un modelo de lenguaje del idioma espa ˜nol que puede ser utili-
+zado para una cantidad ilimitada de tareas y se hizo p´ublico para que pueda ser
+aprovechado por la comunidad cient ´ıﬁca en esta ´area; este ha sido descargado
+m´as de 30 veces al momento de la publicaci´on de este trabajo.
+
+===== PAGINA 73 =====
+
+6.2. Trabajo futuro 55
+El modelo publicado tambi ´en provee la ventaja de permitir una reducci ´on
+de costos al entrenar modelos clasiﬁcadores futuros, ya que el mayor costo pre-
+sentado en este trabajo fue el del entrenamiento del modelo de lenguaje general
+entrenado sobre datos de Wikipedia. Este hecho promete que el uso de Deep
+Learning no sea prohibitivo para compa ˜n´ıas e individuos que no tienen acceso
+a poder computacional masivo o incluso ilimitado como algunas compa ˜n´ıas, lo
+que se considera una contribuci´on muy valiosa a la comunidad.
+6.2. Trabajo futuro
+Las estrategias, t´ecnicas y tecnolog´ıas utilizadas en este trabajo muestra un
+balance entre obtener resultados del estado del arte y realizar la tarea sin sobre-
+llevar costos prohibitivos. Debido a esto, algunas t ´ecnicas no fueron utilizadas
+debido a limitaciones econ ´omicas o temporales y una secci ´on de trabajo futuro
+es necesaria.
+Asimismo, debido a que el desarrollo en esta ´area tiene un ritmo muy ace-
+lerado, durante la elaboraci ´on de este trabajo se realizaron m ´ultiples publica-
+ciones con nuevos aportes a la comunidad cient ´ıﬁca que pueden ser de mucho
+valor para la aplicaci´on espec´ıﬁca descrita en este proyecto.
+A continuaci´on se plantea el trabajo futuro a considerar:
+La adici´on m´as simple que se podr´ıa hacer con el trabajo realizado es utili-
+zar LSTMs bidireccionales. En este caso en particular signiﬁcar ´ıa entrenar
+un modelo que eval ´ue los tuis con el orden inverso de las palabras y reali-
+zar un ensamble de los modelos resultantes.
+Radford y col. (2019) han mostrado que utilizar textos m ´as diversos y en
+mayores cantidades para el entrenamiento de modelos de lenguaje puede
+
+===== PAGINA 74 =====
+
+56 Cap´ıtulo 6. Conclusiones
+resultar en una ventaja adicional, no s´olo en ese modelo en particular sino
+en las tareas espec ´ıﬁcas para las que despu ´es se utilizar ´a el sistema pre-
+entrenado.
+El uso de una nueva estructura llamada transformador ha tomado un auge
+en el a˜no 2018 y 2019 y ha presentado nuevos resultados del estado del ar-
+te. En algunas ocasiones ha superado por un margen elevado al resultado
+a vencer. Esto indica que puede aportar mucho valor usar una estructura
+de trasnformador en lugar de una de LSTM. Los transformadores proveen
+ventajas como la posibilidad de ser entrenados en modalidades paralelas.
+Sin embargo, muchos resultados han necesitado de mucho poder compu-
+tacional por lo que puede llegar a ser prohibitivo su uso.
+En este trabajo se mostr ´o que el pre-procesamiento de los textos antes de
+ser alimentados al modelo no es perfecto, por lo que se deben explorar
+formas de reﬁnar esto. En particular, la normalizaci ´on y conservaci ´on del
+aspecto sem ´antico de los textos, especialmente los informales, requerir ´an
+de mayor esfuerzo y experimentaci´on.
+Para este trabajo se clasiﬁcaron los tuits individualmente, sin embargo
+exist´ıa la posibilidad de utilizar concatenaci´on de textos y evaluar sobre el
+texto resultante para cada autor. Se podr´ıa usar este abordamiento al pro-
+blema y evaluar si se obtiene mejor desempe ˜no. Esto tendr´ıa el prop´osito
+de mejorar la posici ´on en una competencia y no de avanzar el campo en
+esta tarea en espec´ıﬁco.
+Muchos avances se han realizado en los ´ultimos a ˜nos con respecto a mo-
+delos multi-tarea (multitask) — que son modelos que tienen la capacidad
+de realizar m ´ultiples predicciones, cada una de una tarea independiente.
+
+===== PAGINA 75 =====
+
+6.2. Trabajo futuro 57
+Tener solamente un modelo resultar ´ıa en menores tiempos de inferencia
+y menores requerimientos de memoria en el servidor donde se monte el
+sistema de predicci´on.
+
+===== PAGINA 76 =====
+
+
+
+===== PAGINA 77 =====
+
+59
+Glosario
+aprendizaje profundo ver deep learning. (p. 1)
+aprendizaje supervisado Proceso a tomar cuando se tiene un conjunto de datos
+y un resultado esperado asociado a cada uno de ellos. Uno de los dos tipos
+principales de problema en machine learning. (p. 8)
+AWD LSTM Average-stochastic-gradient-descent Weight Dropped LSTM. (p.
+36)
+BERT Bi-directional Encoder Representations from Transformers. (p. 35)
+CNN Convolutional Neural Network. (p. 46)
+corpora Plural de corpus. Una conjunto de cuerpo de datos obtenidos general-
+mente con un ﬁn acad ´emico. (p. 16)
+CV Computer Vision. (p. 2)
+deep learning Conjunto de t´ecnicas que buscan resolver tareas a partir del apren-
+dizaje de representaci ´on de datos. ´Area caracterizada por el uso de redes
+neuronales de arquitectura profunda. (p. 1)
+
+===== PAGINA 78 =====
+
+60 Glosario
+entrenamiento Fase de aprendizaje de alg´un modelo. En esta fase se alimentan
+ejemplos con su debido resultado esperado y permite que con la retro-
+alimentaci´on de una funci ´on de perdida o de error el modelo mejore su
+desempe˜no. (p. 2)
+idiolecto Conjunto de caracter´ısticas que identiﬁcan la variante de lenguaje pa-
+ra un individuo. (p. 5)
+ingenier´ ıa de caracter´ ısticasProceso de elecci´on de caracter´ısticas esenciales pa-
+ra resolver un problema. Generalmente realizado por un experto del cam-
+po. (p. 4)
+LEFTy Language Efﬁcient Text portray. (p. 35)
+LM Language Model. (p. 39)
+LSTM Long Short Term Memory. (p. 14)
+machine learning Es el campo que se encarga de estudiar algoritmos y modelos
+estad´ısticos y aplicarlos para resolver una tarea sin tener la necesidad de
+utilizar instrucciones explicitas relacionadas a la misma. (p. 1)
+matriz de confusi´ onForma de presentar los resultados de un modelo clasiﬁca-
+dor. Permite encontrar distintos de error de forma muy eﬁciente. (p. 19)
+MLM Masked Language Model. (p. 35)
+Natural Language Processing Es el campo de las ciencias de computaci´on e in-
+teligencia artiﬁcial que maneja las interacciones entre computadoras y len-
+guajes naturales humanos, puntualmente en c ´omo procesar estos lengua-
+jes. (p. 3)
+
+===== PAGINA 79 =====
+
+Glosario 61
+NLP Natural Language Processing. (p. 2)
+PAN Serie de eventos cient´ıﬁcos y competencias que abordan tareas de natura-
+leza forense y de estilometr´ıa. (p. 33)
+perﬁlamiento de autores La tarea de extraer caraceter´ısticas de un autor basado
+en un texto escrito por el mismo. (p. 2)
+QRNN Quasi-recurrent Neural Network. (p. 25)
+red neuronal Arquitectura que consta de unidades (neuronas) conectadas entre
+s´ı. Estas redes est´an ordenadas por capas, donde la capa de salida deﬁne
+a qu´e tipo de problema se pueden aplicar. Las redes neuronales se ha de-
+mostrado que son aproximadores universales. (p. 1)
+RNN Recurrent Neural Network. (p. 3)
+scraping El proceso de obtenci´on de datos, generalmente de una p´agina web, a
+partir de informaci´on desplegada por otro programa. (p. 16)
+sociolecto Conjunto de caracter´ısticas de una variante de lenguaje que compar-
+te un subconjunto de hablantes relacionados por estatus social, etc. (p. 5)
+SpanText Proyecto propuesto por investigadores argentinos que consta de un
+conjunto de textos formales catalogados por edad y g´enero. (p. 33)
+tasa de aprendizaje Ponderaci´on que determina la magnitud en la que debe
+afectar el gradiente de una funci ´on de p ´erdida a los nuevos par ´ametros
+propuestos. Es responsable del ritmo y velocidad con la que se entrena
+una red neuronal. (p. 10)
+TF-IDF Term Frequency – Inverse Document Frequency. (p. 46)
+
+===== PAGINA 80 =====
+
+62 Glosario
+tokenizaci´ onEl proceso de separar texto plano en unidades discretas. General-
+mente estas unidades representan palabras, ra´ıces de palabras o caracteres.
+(p. 31)
+transfer learning Tambi´en conocido como transferencia de aprendizaje, se re-
+ﬁere al concepto de aprovechar conocimiento previamente adquirido en
+un modelo y aplicarlo en una tarea diferente pero relacionada — general-
+mente esta es una tarea m´as espec´ıﬁca y/o acotada. (p. 3)
+ULMFiT Universal Language Model Fine-tuning. Una t ´ecnica propuesta en el
+2018 para poder aﬁnar un modelo de lenguaje a una tarea diferente sin
+correr el riesgo de p´erdida de conocimiento del modelo pre-entrenado. (p.
+25)
+vocabulario Conjunto de tokens que forman parte de los tokens conocidos por
+un modelo. (p. 31)
+
+===== PAGINA 81 =====
+
+63
+Bibliograf´ ıa
+Aggarwal, C. C. & Zhai, C. (2012). Mining text data. Springer Science & Business
+Media.
+Bradbury, J., Merity, S., Xiong, C. & Socher, R. (2016). Quasi-Recurrent Neural
+Networks. arXiv e-prints, arXiv:1611.01576. arXiv: 1611.01576[cs.NE]
+Chen, S. F., Beeferman, D. & Rosenfeld, R. (1998). Evaluation metrics for lan-
+guage models. En DARP A Broadcast News Transcription and Understanding
+Workshop (pp. 275-280). Citeseer.
+Coulthard, M. (2004). Author identiﬁcation, idiolect, and linguistic uniqueness.
+Applied linguistics, 25(4), 431-447.
+Dai, Z., Yang, Z., Yang, Y., Carbonell, J., Le, Q. V . & Salakhutdinov, R. (2019).
+Transformer-XL: Attentive Language Models Beyond a Fixed-Length Con-
+text. arXiv e-prints, arXiv:1901.02860. arXiv: 1901.02860[cs.LG]
+Deng, J., Dong, W., Socher, R., Li, L.-J., Li, K. & Fei-Fei, L. (2009). Imagenet: A
+large-scale hierarchical image database. En Computer Vision and Pattern Re-
+cognition, 2009. CVPR 2009. IEEE Conference on (pp. 248-255). Ieee.
+Devlin, J., Chang, M.-W., Lee, K. & Toutanova, K. (2018). BERT: Pre-training of
+Deep Bidirectional Transformers for Language Understanding. arXiv pre-
+print arXiv:1810.04805.
+Edmundson, H. P . (1969). New Methods in Automatic Extracting.J. ACM, 16(2),
+264-285. doi:10.1145/321510.321519
+
+===== PAGINA 82 =====
+
+64 Bibliograf´ıa
+Erhan, D., Bengio, Y., Courville, A., Manzagol, P .-A., Vincent, P . & Bengio, S.
+(2010). Why Does Unsupervised Pre-training Help Deep Learning?J. Mach.
+Learn. Res. 11, 625-660. Recuperado desde http://dl.acm.org/citation.cfm?
+id=1756006.1756025
+Franco-Salvador, M., Plotnikova, N., Pawar, N. & Benajiba, Y. (2017). Subword-
+based Deep Averaging Networks for Author Proﬁling in Social Media. En
+CLEF (Working Notes).
+Goldszmidt, G. (2018). fast.ai forums post. Recuperado el 31 de enero de 2019,
+desde https://forums.fast.ai/t/ulmﬁt-spanish/29715/4
+Hoo-Chang, S., Roth, H. R., Gao, M., Lu, L., Xu, Z., Nogues, I., . . . Summers,
+R. M. (2016). Deep convolutional neural networks for computer-aided de-
+tection: CNN architectures, dataset characteristics and transfer learning.
+IEEE transactions on medical imaging, 35(5), 1285.
+Hornik, K., Stinchcombe, M. & White, H. (1989). Multilayer feedforward net-
+works are universal approximators. Neural networks, 2(5), 359-366.
+Howard, J. & Ruder, S. (2018). Universal language model ﬁne-tuning for text
+classiﬁcation. En Proceedings of the 56th Annual Meeting of the Association for
+Computational Linguistics (Volume 1: Long Papers) (Vol. 1, pp. 328-339).
+Ingham, F. (2018). SpanishULMFiT Github. Recuperado el 31 de enero de 2019,
+desde https://github.com/fpingham/SpanishULMFit/blob/master/
+Wiki-Corpus.ipynb
+Jordan, M. I. & Mitchell, T. M. (2015). Machine learning: Trends, perspectives,
+and prospects. Science, 349(6245), 255-260.
+Jurafsky, D. & Martin, J. H. (2014). Speech and language processing. Pearson Lon-
+don.
+Kodiyan, D., Hardegger, F., Neuhaus, S. & Cieliebak, M. (2017). Author Proﬁ-
+ling with bidirectional rnns using Attention with grus: Notebook for PAN
+
+===== PAGINA 83 =====
+
+Bibliograf´ıa 65
+at CLEF 2017. En CLEF 2017 Evaluation Labs and Workshop–Working Notes
+Papers, Dublin, Ireland, 11-14 September 2017 (Vol. 1866). RWTH Aachen.
+Kupiec, J., Pedersen, J. & Chen, F. (1995). A trainable document summarizer. En
+Proceedings of the 18th annual international ACM SIGIR conference on Research
+and development in information retrieval (pp. 68-73). ACM.
+LeCun, Y., Bengio, Y. & Hinton, G. (2015). Deep learning.nature, 521(7553), 436.
+Lei, N., Luo, Z., Yau, S.-T. & Xianfeng Gu, D. (2018). Geometric Understanding of
+Deep Learning. arXiv e-prints, arXiv:1805.10451. arXiv: 1805.10451[cs.LG]
+Louwerse, M. M. (2004). Semantic variation in idiolect and sociolect: Corpus
+linguistic evidence from literary texts. Computers and the Humanities, 38(2),
+207-221.
+Malmasi, S. & Dras, M. (2018). Native Language Identiﬁcation With Classiﬁer
+Stacking and Ensembles. Computational Linguistics, 44(3), 403-446. Recupe-
+rado desde http://aclweb.org/anthology/J18-3003
+Malmasi, S., Zampieri, M., Ljubeˇsi´c, N., Nakov, P ., Ali, A. & Tiedemann, J. (2016).
+Discriminating between similar languages and arabic dialect identiﬁca-
+tion: A report on the third dsl shared task. EnProceedings of the Third Works-
+hop on NLP for Similar Languages, Varieties and Dialects (VarDial3)(pp. 1-14).
+Merity, S., Keskar, N. S. & Socher, R. (2017). Regularizing and Optimizing LSTM
+Language Models. arXiv preprint arXiv:1708.02182.
+Merity, S., Xiong, C., Bradbury, J. & Socher, R. (2016). Pointer Sentinel Mixture
+Models. arXiv e-prints, arXiv:1609.07843. arXiv: 1609.07843[cs.CL]
+Miura, Y., Taniguchi, T., Taniguchi, M. & Ohkuma, T. (2017). Author Proﬁling
+with Word+ Character Neural Attention Network. En CLEF (Working No-
+tes).
+
+===== PAGINA 84 =====
+
+66 Bibliograf´ıa
+Peters, M. E., Neumann, M., Iyyer, M., Gardner, M., Clark, C., Lee, K. & Zettle-
+moyer, L. (2018). Deep contextualized word representations.arXiv e-prints,
+arXiv:1802.05365. arXiv: 1802.05365[cs.CL]
+Radford, A., Wu, J., Child, R., Luan, D., Amodei, D. & Sutskever, I. (2019). Lan-
+guage Models are Unsupervised Multitask Learners.
+Rae, J. W., Dyer, C., Dayan, P . & Lillicrap, T. P . (2018). Fast Parametric Lear-
+ning with Activation Memorization. arXiv e-prints , arXiv:1803.10049. ar-
+Xiv: 1803.10049[cs.LG]
+Rangel, F., Rosso, P ., Potthast, M. & Stein, B. (2017a). Overview of the 5th Author
+Proﬁling Task at PAN 2017: Gender and Language Variety Identiﬁcation in
+Twitter. En Cappellato L., Ferro N., Goeuriot L, Mandl T. (Eds.) CLEF 2017
+Labs and Workshops, Notebook Papers. CEUR Workshop Proceedings (CEUR)
+(Vol. 1866). Recuperado desde CEUR-WS.org
+Rangel, F., Rosso, P ., Potthast, M. & Stein, B. (2017b). Overview of the 5th author
+proﬁling task at pan 2017: Gender and language variety identiﬁcation in
+twitter. Working Notes Papers of the CLEF.
+Rumelhart, D. E., Hinton, G. E. & Williams, R. J. (1986). Learning representations
+by back-propagating errors. nature, 323(6088), 533.
+Schaetti, N. (2017). UniNE at CLEF 2017: TF-IDF and Deep-Learning for Author
+Proﬁling. En CLEF (Working Notes).
+Schmidhuber, J. (2015). Deep learning in neural networks: An overview. Neural
+networks, 61, 85-117.
+Sierra, S., Montes-y-G´omez, M., Solorio, T. & Gonz´alez, F. A. (2017). Convolutio-
+nal Neural Networks for Author Proﬁling. Working Notes of the CLEF.
+Smith, L. N. & Topin, N. (2017). Super-Convergence: Very Fast Training of Neu-
+ral Networks Using Large Learning Rates.arXiv e-prints, arXiv:1708.07120.
+arXiv: 1708.07120[cs.LG]
+
+===== PAGINA 85 =====
+
+Bibliograf´ıa 67
+Tan, L., Zampieri, M., Ljube ˇsic, N. & Tiedemann, J. (2014). Merging Compara-
+ble Data Sources for the Discrimination of Similar Languages: The DSL
+Corpus Collection. En Proceedings of the 7th Workshop on Building and Using
+Comparable Corpora (BUCC) (pp. 11-15). Reykjavik, Iceland.
+Villegas, M. P ., Ucelay, M. J., Errecalde, M. L. & Cagnina, L. C. (2014). A Spa-
+nish text corpus for the author proﬁling task. En XX Congreso Argentino de
+Ciencias de la Computaci´ on (CACIC 2014), Buenos Aires, Argentina.
+Werbos, P . J. (1982). Applications of advances in nonlinear sensitivity analysis.
+En System modeling and optimization (pp. 762-770). Springer.
+Yosinski, J., Clune, J., Bengio, Y. & Lipson, H. (2014). How transferable are fea-
+tures in deep neural networks? arXiv e-prints, arXiv:1411.1792. arXiv: 1411.
+1792[cs.LG]
+Zampieri, M., Malmasi, S., Ljubeˇsi´c, N., Nakov, P ., Ali, A., Tiedemann, J., . . . Ae-
+pli, N. (2017). Findings of the VarDial Evaluation Campaign 2017. En Pro-
+ceedings of the Fourth Workshop on NLP for Similar Languages, Varieties and
+Dialects (VarDial) (pp. 1-15). Valencia, Spain: Association for Computatio-
+nal Linguistics. Recuperado desde http://www.aclweb.org/anthology/
+W/W17/W17-1201
+Zeiler, M. D. & Fergus, R. (2014). Visualizing and understanding convolutional
+networks. En European conference on computer vision(pp. 818-833). Springer.

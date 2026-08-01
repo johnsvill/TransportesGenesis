@@ -1,0 +1,41 @@
+
+
+===== PAGINA 1 =====
+
+                                            
+Tesis Checklist 
+002 
+Preparación de Tesis 
+
+===== PAGINA 2 =====
+
+ 
+  
+Preparación	de	Tesis	
+Tesis	Checklist	
+Guía para la elaboración del trabajo de graduación (tesis) Universidad Galileo — FISICC · Ciencias de la Computación 
+1. Propósito de esta guía Esta guía consolida los requisitos formales de la Universidad Galileo para trabajos de graduación y los adapta al contexto de una tesis de Ciencias de la Computación. Incluye un checklist verificable por fases y una plantilla de objetivos alineada con trabajos empíricos o de desarrollo tecnológico. Fuentes: Guía para la Preparación de Trabajo de Graduación (Universidad Galileo) y tesis aprobada: Redes neuronales y transferencia de aprendizaje aplicado a la tarea de perfilamiento de autores de textos anónimos (Del Valle, 2019). Nota: La guía institucional original proviene de la Facultad de Educación; confirme con su asesor o coordinación de FISICC si existen requisitos adicionales vigentes. 2. Criterios del tema de investigación ☐ El tema es inédito, original, empírico y funcional. ☐ Se evaluaron recursos humanos, económicos y computacionales disponibles. ☐ El tema tiene interés personal y relevancia científica o práctica. ☐ El alcance está delimitado operacionalmente (qué se estudia y qué no). ☐ Existe un plan de trabajo con cronograma y margen para imprevistos. ☐ Se realizó revisión bibliográfica (libros, artículos y fuentes actuales). ☐ Se consultó a expertos o al asesor sobre viabilidad y enfoque. 3. Objetivos de la tesis: ¿qué deben incluir? Todo trabajo de graduación en computación debe articular claramente el problema, la hipótesis (si aplica), los objetivos y los resultados esperados. Use la siguiente estructura como plantilla. Elemento Descripción Ejemplo (tesis 2019) Tema principal Enunciado breve del foco del trabajo. Transferencia de aprendizaje aplicada al perfilamiento de autores anónimos. Introducción Contexto, motivación, estado del problema y relevancia. Evolución de Deep Learning y NLP; necesidad de nuevas técnicas. Hipótesis Afirmación verificable con evidencia empírica o analítica. La transferencia de aprendizaje mejora el desempeño medible en la tarea. 
+
+===== PAGINA 3 =====
+
+ 
+  
+Preparación	de	Tesis	
+Tesis	Checklist	
+Elemento Descripción Ejemplo (tesis 2019) Objetivo general Meta central del proyecto en una oración. Aplicar el estado del arte al perfilamiento de autores en NLP. Objetivos específicos Metas concretas, medibles y alcanzables (3–5 ítems). Implementar sistema, comparar resultados, contribuir a la academia. Planteamiento del problema Problema real, brecha existente y justificación teórica. Limitaciones del NLP tradicional y necesidad de automatización. Requisitos / criterios de éxito Condiciones que debe cumplir la solución propuesta. Precisión comparable al estado del arte, sin ingeniería manual extensa.  Plantilla para redactar objetivos ☐ Objetivo general: [Verbo en infinitivo] + [qué se hará] + [para qué / con qué propósito]. ☐ Objetivo específico 1: Analizar / diseñar / implementar [componente o fase]. ☐ Objetivo específico 2: Evaluar [métricas] comparando con [baselines o estado del arte]. ☐ Objetivo específico 3: Documentar limitaciones, ventajas y posibles aplicaciones. ☐ Objetivo específico 4: Contribuir con [artefacto, dataset, modelo, herramienta o hallazgos]. 4. Estructura recomendada de capítulos (FISICC) Para tesis experimentales (IA, ML, ciencia de datos) o de desarrollo con evaluación: • Capítulo 1 — Introducción: Tema, contexto, hipótesis, objetivos, planteamiento, resumen. • Capítulo 2 — Marco teórico: Fundamentos, conceptos clave y trabajos previos citados. • Capítulo 3 — Marco metodológico / técnica central: Enfoque, arquitectura, algoritmo o framework elegido. • Capítulo 4 — Datos o diseño experimental: Fuentes, preprocesamiento, variables y diseño de pruebas. • Capítulo 5 — Implementación y resultados: Sistema, experimentos, métricas, tablas, figuras y análisis. • Capítulo 6 — Conclusiones: Respuesta a objetivos, limitaciones, trabajo futuro. • Glosario: Términos técnicos y siglas (recomendado en trabajos de computación). • Bibliografía: Fuentes citadas en formato consistente. • Apéndices: Código, configuraciones, datos adicionales (referenciados en el texto). 
+
+===== PAGINA 4 =====
+
+ 
+  
+Preparación	de	Tesis	
+Tesis	Checklist	
+5. Partes preliminares del documento ☐ Carátula: autor, título, escudo, Universidad Galileo, facultad, año (color amarillo pálido). ☐ Lomo: título, inicial del nombre, primer apellido y año. ☐ Carta de aprobación del asesor. ☐ Dictamen del Director de Programas / carrera. ☐ Autorización del Decano para publicación. ☐ Resumen (abstract) del trabajo completo. ☐ Índice general (numeración romana desde VIII). ☐ Índice de cuadros e índice de figuras (si aplican). ☐ Dedicatoria y prefacio/agradecimientos (opcional según guía). 6. Requisitos de formato ☐ Tamaño carta; márgenes: 4 cm (arriba/izquierda), 2.5 cm (derecha/abajo). ☐ Texto principal en doble espacio; párrafos con sangría de 5 espacios. ☐ Títulos de capítulo en MAYÚSCULAS y centrados. ☐ Capítulos y apéndices inician en página impar. ☐ Cuerpo inicia en página 1 (sin número impreso); numeración arriba derecha (impar) e izquierda (par). ☐ Figuras y cuadros numerados como capítulo.secuencia (ej. Figura 5.2, Cuadro 4.1). ☐ Redacción impersonal (evitar "yo" y "nosotros"). ☐ Español con corrección gramatical e idiomática; lenguaje técnico-científico. ☐ Todas las ideas ajenas debidamente citadas (sin plagio). 7. Contenido específico — Ciencias de la Computación ☐ Diagrama de arquitectura o flujo del sistema/proyecto. ☐ Descripción de tecnologías, frameworks, librerías y versiones relevantes. ☐ Documentación de datasets (origen, tamaño, licencia, particiones train/test). ☐ Sección de preprocesamiento y limpieza de datos. ☐ Descripción del modelo, algoritmo o diseño de software implementado. ☐ Métricas de evaluación definidas y justificadas (precisión, F1, perplexity, tiempo, etc.). ☐ Resultados experimentales con tablas, gráficas y matrices de confusión (si aplica). ☐ Comparación cuantitativa con baselines o estado del arte. ☐ Análisis de recursos computacionales (hardware, tiempos, costos). 
+
+===== PAGINA 5 =====
+
+ 
+  
+Preparación	de	Tesis	
+Tesis	Checklist	
+☐ Discusión de limitaciones, amenazas a la validez y trabajo futuro. ☐ Código o configuraciones en apéndices o repositorio referenciado. ☐ Contribución clara: herramienta, modelo, hallazgos o metodología replicable. 8. Trámite administrativo Paso Actividad Responsable 1 Solicitud y aprobación del punto de tesis Decano / coordinación 2 Designación y aceptación del asesor Decano + asesor 3 Desarrollo del trabajo con reuniones periódicas Estudiante + asesor 4 Aprobación de contenido por el asesor Asesor (carta formal) 5 Revisión gramatical y estilística Servicio universitario 6 Dictamen del Director de Programas Director de carrera 7 Autorización del Decano para publicación Decano 8 Impresión, encuadernación y entrega final Estudiante  9. Checklist final antes de entregar ☐ Los objetivos específicos se responden en las conclusiones. ☐ La hipótesis fue evaluada con evidencia (datos, pruebas o análisis). ☐ Todas las figuras y cuadros están referenciados en el texto. ☐ Índices actualizados (general, figuras, cuadros). ☐ Bibliografía completa y citaciones consistentes. ☐ Glosario y apéndices incluidos y referenciados. ☐ Cartas de aprobación y autorizaciones en preliminares. ☐ Formato revisado según guía institucional. ☐ Corrección ortográfica y de estilo completada. ☐ Asesor y director han dado su visto bueno formal. 

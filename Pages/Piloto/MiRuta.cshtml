@@ -576,7 +576,7 @@
         let mapa;
         let marcadores = [];
         let marcadorUsuario = null;
-        let rutaData = @Html.Raw(Model.RutaActiva != null ? System.Text.Json.JsonSerializer.Serialize(Model.RutaActiva) : "null");
+        let rutaData = @Html.Raw(Model.RutaActiva != null ? System.Text.Json.JsonSerializer.Serialize(Model.RutaActiva, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase }) : "null");
 
         // Variables de simulación
         let simulacionPilotoActiva = false;
@@ -595,6 +595,49 @@
             if (p.idAlumno != null) return false;
             const n = (p.nombre || '').toLowerCase();
             return n.includes('colegio') || n.includes('yulimay');
+        }
+
+        /** Lee lat/lng de parada API o simulación (camelCase / PascalCase). */
+        function leerCoordenadaParada(p) {
+            if (!p) return null;
+            if (Array.isArray(p.coordenadas) && p.coordenadas.length >= 2) {
+                const lat = parseFloat(p.coordenadas[0]);
+                const lng = parseFloat(p.coordenadas[1]);
+                if (Number.isFinite(lat) && Number.isFinite(lng)) return [lat, lng];
+            }
+            const lat = parseFloat(p.latitud ?? p.Latitud);
+            const lng = parseFloat(p.longitud ?? p.Longitud);
+            if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+            return [lat, lng];
+        }
+
+        function esCoordenadaValida(coords) {
+            return Array.isArray(coords) && coords.length >= 2
+                && Number.isFinite(coords[0]) && Number.isFinite(coords[1]);
+        }
+
+        function getParadasDesdeRuta(data) {
+            return data?.paradas ?? data?.Paradas ?? [];
+        }
+
+        function filtrarParadasConCoordenadasValidas(paradas) {
+            const validas = (paradas || []).map(function(p) {
+                const coords = leerCoordenadaParada(p);
+                if (!coords) return null;
+                return {
+                    ...p,
+                    coordenadas: coords,
+                    nombre: p.nombre ?? p.nombreAlumno ?? p.NombreAlumno ?? p.direccion ?? p.Direccion ?? `Parada ${p.orden ?? p.Orden ?? ''}`,
+                    orden: p.orden ?? p.Orden ?? 0,
+                    idParada: p.idParada ?? p.IdParada ?? null,
+                    idAlumno: p.idAlumno ?? p.IdAlumno ?? null
+                };
+            }).filter(Boolean);
+            if (validas.length < (paradas || []).length) {
+                console.warn('[Piloto] Paradas omitidas por coordenadas inválidas:',
+                    (paradas || []).length - validas.length);
+            }
+            return validas;
         }
 
         function esTurnoMañana() {
@@ -725,9 +768,14 @@
 
         function mostrarParadasSimulacionPreview() {
             if (!mapa || !datosSimulacionPiloto.paradas.length) return;
-            const coordenadasRuta = rutaSimulacionPiloto.length
+            const coordenadasRuta = (rutaSimulacionPiloto.length
                 ? rutaSimulacionPiloto.map(function(p) { return p.coordenadas; })
-                : datosSimulacionPiloto.paradas.map(function(p) { return p.coordenadas; });
+                : datosSimulacionPiloto.paradas.map(function(p) { return p.coordenadas; })
+            ).filter(esCoordenadaValida);
+            if (!coordenadasRuta.length) {
+                console.warn('[Piloto] Sin coordenadas válidas para preview de ruta');
+                return;
+            }
             if (rutaPolyline) mapa.removeLayer(rutaPolyline);
             rutaPolyline = L.polyline(coordenadasRuta, {
                 color: '#FF6B35',
@@ -861,18 +909,25 @@
         };
 
         function initDatosSimulacionFromRutaData() {
-            const paradas = rutaData?.paradas ?? rutaData?.Paradas;
-            if (!paradas || !paradas.length) return;
+            const paradas = getParadasDesdeRuta(rutaData);
+            if (!paradas.length) return;
 
-            datosSimulacionPiloto.paradas = paradas.map(p => ({
-                nombre: p.nombreAlumno ?? p.direccion ?? `Parada ${p.orden}`,
-                coordenadas: [parseFloat(p.latitud), parseFloat(p.longitud)],
-                orden: p.orden,
-                idParada: p.idParada ?? null,
-                idAlumno: p.idAlumno ?? null,
-                esColegio: (p.idAlumno == null) && ((p.nombreAlumno ?? p.direccion ?? '').toLowerCase().includes('colegio') ||
-                    (p.nombreAlumno ?? p.direccion ?? '').toLowerCase().includes('yulimay'))
+            datosSimulacionPiloto.paradas = filtrarParadasConCoordenadasValidas(paradas.map(function(p) {
+                const nom = (p.nombreAlumno ?? p.NombreAlumno ?? p.direccion ?? p.Direccion ?? '').toLowerCase();
+                const idAl = p.idAlumno ?? p.IdAlumno ?? null;
+                return {
+                    nombre: p.nombreAlumno ?? p.NombreAlumno ?? p.direccion ?? p.Direccion ?? `Parada ${p.orden ?? p.Orden}`,
+                    coordenadas: leerCoordenadaParada(p),
+                    orden: p.orden ?? p.Orden,
+                    idParada: p.idParada ?? p.IdParada ?? null,
+                    idAlumno: idAl,
+                    esColegio: idAl == null && (nom.includes('colegio') || nom.includes('yulimay'))
+                };
             }));
+            if (!datosSimulacionPiloto.paradas.length) {
+                console.warn('[Piloto] Ruta en BD sin paradas con GPS válido; se usan paradas demo por defecto');
+                return;
+            }
             datosSimulacionPiloto.idRuta = rutaData.idRuta ?? rutaData.IdRuta ?? datosSimulacionPiloto.idRuta;
             datosSimulacionPiloto.tipoRuta = rutaData.tipoRuta ?? rutaData.TipoRuta ?? datosSimulacionPiloto.tipoRuta;
             datosSimulacionPiloto.ruta = rutaData.nombre ?? rutaData.Nombre ?? datosSimulacionPiloto.ruta;
@@ -900,6 +955,10 @@
             for (let i = 0; i < datosSimulacionPiloto.paradas.length - 1; i++) {
                 const inicio = datosSimulacionPiloto.paradas[i];
                 const fin = datosSimulacionPiloto.paradas[i + 1];
+                if (!esCoordenadaValida(inicio.coordenadas) || !esCoordenadaValida(fin.coordenadas)) {
+                    console.warn('[Piloto] Segmento omitido por coordenadas inválidas', i);
+                    continue;
+                }
 
                 // Agregar punto de parada inicial
                 rutaSimulacionPiloto.push({
@@ -937,14 +996,16 @@
 
             // Agregar última parada
             const ultimaParada = datosSimulacionPiloto.paradas[datosSimulacionPiloto.paradas.length - 1];
-            rutaSimulacionPiloto.push({
-                coordenadas: ultimaParada.coordenadas,
-                esParada: true,
-                nombreParada: ultimaParada.nombre,
-                orden: ultimaParada.orden,
-                idParada: ultimaParada.idParada ?? null,
-                idAlumno: ultimaParada.idAlumno ?? null
-            });
+            if (esCoordenadaValida(ultimaParada.coordenadas)) {
+                rutaSimulacionPiloto.push({
+                    coordenadas: ultimaParada.coordenadas,
+                    esParada: true,
+                    nombreParada: ultimaParada.nombre,
+                    orden: ultimaParada.orden,
+                    idParada: ultimaParada.idParada ?? null,
+                    idAlumno: ultimaParada.idAlumno ?? null
+                });
+            }
 
             console.log(`Ruta generada con ${rutaSimulacionPiloto.length} puntos siguiendo calles reales`);
         }
@@ -1234,7 +1295,8 @@
 
         // Mostrar ruta en el mapa
         function mostrarRutaEnMapa() {
-            if (!rutaData || !rutaData.paradas) return;
+            const paradasRuta = getParadasDesdeRuta(rutaData);
+            if (!paradasRuta.length) return;
 
             console.log('Mostrando ruta en mapa:', rutaData);
 
@@ -1246,16 +1308,19 @@
             let coordenadas = [];
 
             // Agregar marcadores para cada parada
-            rutaData.paradas.forEach(function(parada, index) {
-                if (parada.latitud && parada.longitud) {
-                    coordenadas.push([parada.latitud, parada.longitud]);
+            getParadasDesdeRuta(rutaData).forEach(function(parada, index) {
+                const coords = leerCoordenadaParada(parada);
+                if (coords) {
+                    coordenadas.push(coords);
+                    const lat = coords[0];
+                    const lon = coords[1];
 
                     // Color del marcador según estado
                     const color = parada.completada ? '#28a745' : '#ffc107';
                     const iconClass = parada.completada ? 'bi-check-circle-fill' : 'bi-clock';
 
                     // Crear marcador
-                    const marcador = L.marker([parada.latitud, parada.longitud], {
+                    const marcador = L.marker([lat, lon], {
                         icon: L.divIcon({
                             className: 'custom-div-icon',
                             html: `
@@ -1275,11 +1340,11 @@
                     marcador.bindPopup(`
                         <div>
                             <strong>Parada ${parada.orden}</strong><br>
-                            <strong>${parada.nombreAlumno}</strong><br>
-                            <small>${parada.direccion}</small><br>
-                            ${parada.horaEstimada ? `<small><i class="bi bi-clock"></i> ${parada.horaEstimada}</small><br>` : ''}
-                            <span class="badge ${parada.completada ? 'bg-success' : 'bg-warning'}">
-                                <i class="${iconClass}"></i> ${parada.completada ? 'Completada' : 'Pendiente'}
+                            <strong>${parada.nombreAlumno ?? parada.NombreAlumno ?? 'Parada'}</strong><br>
+                            <small>${parada.direccion ?? parada.Direccion ?? ''}</small><br>
+                            ${(parada.horaEstimada ?? parada.HoraEstimada) ? `<small><i class="bi bi-clock"></i> ${parada.horaEstimada ?? parada.HoraEstimada}</small><br>` : ''}
+                            <span class="badge ${(parada.completada ?? parada.Completada) ? 'bg-success' : 'bg-warning'}">
+                                <i class="${iconClass}"></i> ${(parada.completada ?? parada.Completada) ? 'Completada' : 'Pendiente'}
                             </span>
                         </div>
                     `);
@@ -1397,6 +1462,17 @@
                 btn.disabled = false;
             }
 
+            const paradasValidas = datosSimulacionPiloto.paradas.filter(function(p) {
+                return esCoordenadaValida(p.coordenadas);
+            });
+            if (!paradasValidas.length || !rutaSimulacionPiloto.length) {
+                alert('No hay paradas con coordenadas GPS válidas para simular. Verifique la ruta en Admin o ejecute el seed de demo.');
+                btn.innerHTML = '<i class="bi bi-play-circle-fill me-2"></i>Simular Ruta';
+                btn.className = 'btn btn-warning btn-lg w-100';
+                estado.innerHTML = 'Sin coordenadas válidas en paradas';
+                return;
+            }
+
             // Cambiar estado del botón
             btn.innerHTML = '<i class="bi bi-stop-circle-fill me-2"></i>Detener Simulación';
             btn.className = 'btn btn-danger btn-lg w-100';
@@ -1406,14 +1482,24 @@
             simulacionPilotoActiva = true;
             indiceParadaActual = 0;
 
-            // Crear marcador de bus de simulación
-            crearBusSimulacionPiloto();
+            try {
+                // Crear marcador de bus de simulación
+                crearBusSimulacionPiloto();
 
-            // Mostrar todas las paradas de simulación
-            mostrarParadasSimulacion();
+                // Mostrar todas las paradas de simulación
+                mostrarParadasSimulacion();
 
-            // Ajustar vista del mapa
-            ajustarVistaMapa();
+                // Ajustar vista del mapa
+                ajustarVistaMapa();
+            } catch (e) {
+                console.error('[Piloto] Error iniciando simulación:', e);
+                simulacionPilotoActiva = false;
+                btn.innerHTML = '<i class="bi bi-play-circle-fill me-2"></i>Simular Ruta';
+                btn.className = 'btn btn-warning btn-lg w-100';
+                estado.innerHTML = 'Error al iniciar simulación (coordenadas inválidas)';
+                alert('No se pudo iniciar la simulación: faltan coordenadas GPS válidas en las paradas.');
+                return;
+            }
 
             // Reproducir sonido de inicio
             reproducirSonidoInicio();
@@ -1431,7 +1517,12 @@
                 mapa.removeLayer(marcadorBusSimulacion);
             }
 
-            marcadorBusSimulacion = L.marker(rutaSimulacionPiloto[0].coordenadas, {
+            const inicio = rutaSimulacionPiloto.find(function(p) { return esCoordenadaValida(p.coordenadas); });
+            if (!inicio) {
+                throw new Error('Sin punto de inicio válido para la simulación');
+            }
+
+            marcadorBusSimulacion = L.marker(inicio.coordenadas, {
                 icon: L.divIcon({
                     className: 'custom-marker',
                     html: `
@@ -1467,7 +1558,14 @@
         // Mostrar paradas de simulación
         function mostrarParadasSimulacion() {
             // Dibujar línea de ruta completa
-            const coordenadasRuta = rutaSimulacionPiloto.map(p => p.coordenadas);
+            const coordenadasRuta = rutaSimulacionPiloto
+                .map(p => p.coordenadas)
+                .filter(esCoordenadaValida);
+
+            if (!coordenadasRuta.length) {
+                console.warn('[Piloto] mostrarParadasSimulacion: sin coordenadas válidas');
+                return;
+            }
 
             if (rutaPolyline) {
                 mapa.removeLayer(rutaPolyline);
@@ -1484,6 +1582,7 @@
 
             // Agregar marcadores para paradas de simulación
             datosSimulacionPiloto.paradas.forEach(parada => {
+                if (!esCoordenadaValida(parada.coordenadas)) return;
                 const marcadorParada = L.marker(parada.coordenadas, {
                     icon: L.divIcon({
                         className: 'custom-marker',
@@ -1820,7 +1919,10 @@
 
         // Ajustar vista del mapa para simulación
         function ajustarVistaMapa() {
-            const coordenadas = datosSimulacionPiloto.paradas.map(p => p.coordenadas);
+            const coordenadas = datosSimulacionPiloto.paradas
+                .map(p => p.coordenadas)
+                .filter(esCoordenadaValida);
+            if (!coordenadas.length) return;
             const bounds = L.latLngBounds(coordenadas);
             mapa.fitBounds(bounds.pad(0.1));
         }
