@@ -10,6 +10,9 @@ from __future__ import annotations
 import importlib.util
 from pathlib import Path
 
+from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_LINE_SPACING
+from docx.shared import Cm, Pt
+
 
 ROOT = Path(__file__).resolve().parents[3]
 BASE = Path(__file__).resolve().parent
@@ -30,6 +33,21 @@ GENERATOR_BASE = (
 SOURCE_OUT = BASE / "TESIS_TRANSPORTES_GENESIS_v4.md"
 DOCX_OUT = BASE / "TESIS_TRANSPORTES_GENESIS_v4.docx"
 README_OUT = BASE / "README.md"
+DIAGRAMS_DIR = BASE / "diagramas_integrados"
+SOURCE_DIAGRAM_DOCX = (
+    ROOT
+    / "Documentos"
+    / "Proyecto"
+    / "final"
+    / "Presentacion_final_20062026"
+    / "Proyecto_Transportes_Genesis_v4.docx"
+)
+DIAGRAM_FILES = {
+    "arquitectura_general": DIAGRAMS_DIR / "figura_4_2_arquitectura_general.png",
+    "geolocalizacion": DIAGRAMS_DIR / "figura_4_4_geolocalizacion.png",
+    "asistencia_abordaje": DIAGRAMS_DIR / "figura_4_5_asistencia_abordaje.png",
+    "pagos_conciliacion": DIAGRAMS_DIR / "figura_4_6_pagos_conciliacion.png",
+}
 
 
 def replace_section(text: str, start: str, end: str, replacement: str) -> str:
@@ -107,11 +125,11 @@ La investigación es aplicada, con alcance descriptivo y evaluativo y enfoque mi
 
 **Hipótesis de investigación (H1):**
 
-La integración de los módulos de geolocalización, asistencia y abordaje y pagos, acompañada de pruebas de aceptación de usuario, mejora la eficiencia operativa del transporte escolar y la percepción de seguridad de los padres de familia.
+La integración de la geolocalización y del módulo de asistencia y abordaje mejora la eficiencia operativa del transporte escolar y la percepción de seguridad de los padres de familia.
 
 **Hipótesis nula (H0):**
 
-La integración de los módulos de geolocalización, asistencia y abordaje y pagos, acompañada de pruebas de aceptación de usuario, no produce mejoras observables en la eficiencia operativa ni en la percepción de seguridad de los padres de familia.
+La integración de la geolocalización y del módulo de asistencia y abordaje no produce mejoras observables en la eficiencia operativa ni en la percepción de seguridad de los padres de familia.
 
 La eficiencia se entiende como la capacidad de completar tareas operativas dentro de una plataforma integrada, con menor fragmentación de información. La seguridad se interpreta como percepción de información y control, no como garantía de seguridad física. Para confirmar una mejora se requieren mediciones comparables o evidencia de aceptación estructurada. Las fotografías, videos y comentarios cualitativos permiten valorar funcionamiento y utilidad aparente, pero no sustituyen tiempos antes y después, escalas de satisfacción ni un acta UAT.
 
@@ -121,7 +139,6 @@ La eficiencia se entiende como la capacidad de completar tareas operativas dentr
 |---|---|---|
 | Geolocalización | Video, fotografías y registro técnico | Mapa, ruta y actualización de ubicación observables |
 | Asistencia y abordaje | Video, fotografías y persistencia | Confirmación asociada a fecha, turno y estudiante |
-| Pagos | Flujo UAT, historial y reporte | Registro, validación e historial sin defecto crítico |
 | UAT | Casos, participantes, resultados y acta | Ejecución por usuarios representativos con evidencia trazable |
 | Eficiencia | Tiempos o pasos antes y después | Reducción observable y documentada |
 | Seguridad percibida | Instrumento o retroalimentación estructurada | Mejora reportada sin presentarla como seguridad física |
@@ -136,14 +153,12 @@ La eficiencia se entiende como la capacidad de completar tareas operativas dentr
 
 ### 1.4.1 Objetivo general
 
-Evaluar si la integración de geolocalización, asistencia y abordaje, pagos y pruebas UAT mejora la eficiencia operativa del transporte escolar y la percepción de seguridad de los padres de familia.
+Validar si la integración de la geolocalización y del módulo de asistencia y abordaje mejora la eficiencia operativa del transporte escolar y la percepción de seguridad de los padres de familia.
 
 ### 1.4.2 Objetivos específicos
 
-1. Implementar geolocalización en tiempo casi real para el monitoreo de buses y rutas.
+1. Implementar geolocalización en tiempo real para el monitoreo de buses y rutas.
 2. Desarrollar el módulo de asistencia y abordaje para el control operativo de estudiantes.
-3. Integrar el sistema de pagos con el modelo de datos, sus migraciones y la trazabilidad administrativa.
-4. Validar el sistema mediante pruebas UAT con padres de familia, pilotos, monitores y personal administrativo.
 """,
     )
 
@@ -159,7 +174,7 @@ La falta de una fuente centralizada limita la trazabilidad. Un padre puede desco
 
 Por lo anterior, la investigación responde la siguiente pregunta:
 
-**¿En qué medida la integración de geolocalización, asistencia y abordaje, pagos y pruebas UAT mejora la eficiencia operativa del transporte escolar y la percepción de seguridad de los padres de familia?**
+**¿En qué medida la integración de la geolocalización y del módulo de asistencia y abordaje mejora la eficiencia operativa del transporte escolar y la percepción de seguridad de los padres de familia?**
 """,
     )
 
@@ -369,6 +384,59 @@ La metodología combina un método con usuarios reales —UAT y observación— 
         "9. El cálculo de meses del módulo de pagos debe corregirse o validarse "
         "para enero, noviembre y diciembre.",
     )
+    text = text.replace(
+        "**Figura 4.2. Flujo de una ubicación**",
+        "**Figura 4.3. Flujo de una ubicación**",
+    )
+    text = text.replace(
+        "La arquitectura combina Razor Pages y MVC por la evolución del proyecto. "
+        "Las API atienden ubicaciones y rutas. Los servicios encapsulan reglas de "
+        "negocio y Entity Framework Core gestiona persistencia.",
+        "La arquitectura combina Razor Pages y MVC por la evolución del proyecto. "
+        "Las API atienden ubicaciones y rutas. Los servicios encapsulan reglas de "
+        "negocio y Entity Framework Core gestiona persistencia. La Figura 4.2 "
+        "presenta la arquitectura general y la relación entre presentación, API, "
+        "servicios, datos y proveedores externos.\n\n"
+        "[IMAGEN:arquitectura_general]\n\n"
+        "**Figura 4.2. Arquitectura general del sistema Transportes Génesis**",
+    )
+    text = text.replace(
+        "El sistema identifica una ubicación como reciente según reglas temporales. "
+        "Puede clasificar el bus como detenido, en movimiento o sin señal. Las alertas "
+        "se calculan por distancia aproximada. No se utilizan geocercas poligonales.",
+        "La Figura 4.4 resume el flujo de geolocalización desde la captura del GPS "
+        "del navegador hasta la actualización de las pantallas mediante SignalR.\n\n"
+        "[IMAGEN:geolocalizacion]\n\n"
+        "**Figura 4.4. Geolocalización en tiempo real y distribución mediante SignalR**\n\n"
+        "El sistema identifica una ubicación como reciente según reglas temporales. "
+        "Puede clasificar el bus como detenido, en movimiento o sin señal. Las alertas "
+        "se calculan por distancia aproximada. No se utilizan geocercas poligonales.",
+    )
+    text = text.replace(
+        "El término «registro de abordaje» se utiliza como concepto operativo. "
+        "El sistema no verifica identidad mediante hardware y depende de la acción "
+        "del usuario autorizado. Esta limitación será comunicada a los participantes.",
+        "La Figura 4.5 relaciona la confirmación diaria, la consulta de la ruta, la "
+        "transmisión GPS y el registro de recogida efectuado por el monitor.\n\n"
+        "[IMAGEN:asistencia_abordaje]\n\n"
+        "**Figura 4.5. Flujo de asistencia y abordaje durante la operación diaria**\n\n"
+        "El término «registro de abordaje» se utiliza como concepto operativo. "
+        "El sistema no verifica identidad mediante hardware y depende de la acción "
+        "del usuario autorizado. Esta limitación será comunicada a los participantes.",
+    )
+    text = text.replace(
+        "La pasarela Stripe se considera complementaria. Si no se encuentra habilitada "
+        "con credenciales de prueba, se documentará su exclusión y no se presentará "
+        "como resultado validado.",
+        "La Figura 4.6 documenta el flujo diseñado para registro, revisión y "
+        "conciliación. La validación administrativa y los estados finales se presentan "
+        "como diseño de referencia; no como resultado UAT aprobado.\n\n"
+        "[IMAGEN:pagos_conciliacion]\n\n"
+        "**Figura 4.6. Flujo propuesto de pagos y conciliación administrativa**\n\n"
+        "La pasarela Stripe se considera complementaria. Si no se encuentra habilitada "
+        "con credenciales de prueba, se documentará su exclusión y no se presentará "
+        "como resultado validado.",
+    )
 
     chapter5_pending = """# CAPÍTULO 5
 
@@ -573,10 +641,9 @@ La retroalimentación entregada reporta los siguientes hallazgos:
 | Administrador | Exigir piloto y monitor al asignar un bus | No visible en el material; requiere caso negativo |
 | Administrador | Enlace SignalR entre roles | Parcial; no hay grabación simultánea |
 | Piloto/monitor | Pausa de ruta por incidente o espera | Implementada en el sistema; no visible en el video entregado |
-| Piloto/monitor | Geolocalización activa | Respaldada funcionalmente por PM-01 y PM-02 |
+| Piloto/monitor | Geolocalización activa; equilibrar la visualización entre ruta y alumnos | Geolocalización respaldada por PM-01 y PM-02; ajuste de interfaz pendiente de prueba |
 | Padre | Asistencia limitada al día confirmado | Respaldada visualmente; persistencia pendiente de prueba |
 | Padre | Mayor percepción de seguridad por geolocalización | Comentario cualitativo reportado; no cuantificado |
-| Pagos | Reducción de tiempos y mayor confianza | Sin medición ni evidencia audiovisual del flujo |
 
 Las imágenes muestran interacción humana con las pantallas, pero no identifican de forma metodológica el número de participantes, sus códigos, el guion aplicado o el estado de cada caso. El material se clasifica como evidencia de demostración y retroalimentación cualitativa, no como acta definitiva de aceptación UAT.
 
@@ -606,16 +673,14 @@ Los videos permiten registrar duración del material, pero esa duración no equi
 |---|---|---|
 | Geolocalización en tiempo casi real | Mapas, ruta y movimiento del marcador | Cumplimiento funcional parcial |
 | Asistencia y abordaje | Calendario, confirmación y traslados | Asistencia respaldada; abordaje pendiente |
-| Integración de pagos | Acceso visible y respaldo en código | Implementado, sin validación audiovisual completa |
-| Validación UAT con usuarios | Fotografías, videos y retroalimentación | Evidencia cualitativa parcial; cierre formal pendiente |
 
 ## 5.9 Evaluación de la hipótesis
 
 La evidencia respalda que la plataforma integra visualmente funciones de administración, geolocalización, asistencia y traslados, y que usuarios pueden interactuar con ellas en un ambiente controlado. También existe retroalimentación favorable respecto de la información geográfica y de las correcciones al calendario.
 
-No obstante, la hipótesis incluye una mejora en eficiencia y seguridad. La reducción de tiempos no fue medida contra un proceso anterior; el flujo de pagos no cuenta con evidencia audiovisual completa; y la percepción de seguridad no fue recolectada mediante un instrumento estructurado. Asimismo, el material no constituye una UAT cerrada con resultados por caso y acta de aceptación.
+No obstante, la hipótesis incluye una mejora en eficiencia y seguridad. La reducción de tiempos no fue medida contra un proceso anterior; la percepción de seguridad no fue recolectada mediante un instrumento estructurado; y el abordaje no dispone de evidencia específica. Asimismo, el material no constituye una UAT cerrada con resultados por caso y acta de aceptación.
 
-Por lo anterior, **la hipótesis queda parcialmente respaldada en el nivel funcional y cualitativo, pero no puede confirmarse de manera definitiva**. No corresponde rechazar la hipótesis nula con la evidencia disponible. La confirmación global requiere completar el flujo de pagos, la matriz UAT, mediciones comparables de eficiencia y un registro estructurado de percepción de seguridad.
+Por lo anterior, **la hipótesis queda parcialmente respaldada en el nivel funcional y cualitativo, pero no puede confirmarse de manera definitiva**. No corresponde rechazar la hipótesis nula con la evidencia disponible. La confirmación global requiere documentar el abordaje, completar la matriz UAT, obtener mediciones comparables de eficiencia y registrar de forma estructurada la percepción de seguridad.
 
 ## 5.10 Discusión
 
@@ -719,8 +784,6 @@ Las conclusiones se formulan únicamente a partir del código documentado, las f
 |---|---|---|
 | Implementar geolocalización | Mapas de administrador, padre y piloto o monitor; video de marcador | Implementado y demostrado en ambiente controlado |
 | Desarrollar asistencia y abordaje | Calendario, confirmaciones y traslado temporal | Asistencia demostrada; abordaje requiere evidencia específica |
-| Integrar pagos y trazabilidad | Accesos en panel, código y modelo de datos | Integrado técnicamente; validación del flujo completo pendiente |
-| Validar mediante UAT | Fotografías, videos y retroalimentación | Validación cualitativa parcial; acta y matriz UAT pendientes |
 
 ## 6.3 Conclusiones principales
 
@@ -733,9 +796,9 @@ Las conclusiones se formulan únicamente a partir del código documentado, las f
 
 ## 6.4 Conclusión sobre la hipótesis
 
-La hipótesis sostiene que la integración de geolocalización, asistencia y abordaje, pagos y UAT mejora la eficiencia operativa y la percepción de seguridad. El material respalda parcialmente la integración y el funcionamiento de geolocalización y asistencia, además de registrar un indicio cualitativo favorable sobre la información disponible para los padres.
+La hipótesis sostiene que la integración de la geolocalización y del módulo de asistencia y abordaje mejora la eficiencia operativa y la percepción de seguridad. El material respalda parcialmente la integración y el funcionamiento de geolocalización y asistencia, además de registrar un indicio cualitativo favorable sobre la información disponible para los padres.
 
-La ausencia de mediciones antes y después, evidencia completa de pagos, resultados estructurados de satisfacción y cierre UAT impide confirmar la mejora global. Por tanto, **la hipótesis se considera parcialmente respaldada, pero no confirmada de manera definitiva**. La evidencia disponible tampoco permite rechazar formalmente la hipótesis nula.
+La ausencia de mediciones antes y después, evidencia específica de abordaje, resultados estructurados de percepción y cierre UAT impide confirmar la mejora global. Por tanto, **la hipótesis se considera parcialmente respaldada, pero no confirmada de manera definitiva**. La evidencia disponible tampoco permite rechazar formalmente la hipótesis nula.
 
 ## 6.5 Recomendaciones
 
@@ -910,6 +973,21 @@ Esta guía se aplicará al administrador de Transportes Génesis y, cuando sea p
 8. ¿Qué funciones deben aprobarse obligatoriamente antes de la entrega?
 
 Las respuestas se codificarán por proceso, requisito, riesgo y criterio de aceptación.
+
+# APÉNDICE H
+
+# DIAGRAMAS DE ARQUITECTURA Y FLUJOS
+
+Los diagramas se extrajeron de los documentos ubicados en `Documentos/Proyecto/final/Presentacion_final_20062026`. Se integraron y referenciaron en el Capítulo 4 para evitar duplicarlos:
+
+| Figura | Contenido | Archivo local |
+|---|---|---|
+| Figura 4.2 | Arquitectura general del sistema | `diagramas_integrados/figura_4_2_arquitectura_general.png` |
+| Figura 4.4 | Geolocalización en tiempo real | `diagramas_integrados/figura_4_4_geolocalizacion.png` |
+| Figura 4.5 | Asistencia y abordaje | `diagramas_integrados/figura_4_5_asistencia_abordaje.png` |
+| Figura 4.6 | Pagos y conciliación propuestos | `diagramas_integrados/figura_4_6_pagos_conciliacion.png` |
+
+El flujo de pagos se conserva como documentación de diseño complementaria. Su inclusión no equivale a validación UAT del proceso completo.
 """
     text = text[: text.index("# APÉNDICE A")] + appendices.rstrip() + "\n"
 
@@ -956,6 +1034,7 @@ La copia local está en:
 - `TESIS_TRANSPORTES_GENESIS_v4.docx`: documento Word.
 - `TESIS_TRANSPORTES_GENESIS_v4.md`: fuente editable.
 - `generar_tesis_v4.py`: regenera ambos documentos.
+- `diagramas_integrados/`: figuras extraídas de la presentación y el Word del proyecto.
 
 ## Evidencias pendientes
 
@@ -984,10 +1063,47 @@ def generate_docx() -> None:
     spec.loader.exec_module(module)
     module.SOURCE = SOURCE_OUT
     document = module.build_document()
+    for paragraph in document.paragraphs:
+        marker = paragraph.text.strip()
+        if not marker.startswith("[IMAGEN:") or not marker.endswith("]"):
+            continue
+        key = marker[8:-1]
+        image_path = DIAGRAM_FILES.get(key)
+        if image_path is None or not image_path.exists():
+            raise FileNotFoundError(f"No existe el diagrama requerido: {image_path}")
+        paragraph.clear()
+        paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        paragraph.paragraph_format.first_line_indent = Cm(0)
+        paragraph.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
+        paragraph.paragraph_format.space_after = Pt(3)
+        paragraph.add_run().add_picture(str(image_path), width=Cm(15))
     document.save(DOCX_OUT)
 
 
+def extract_word_diagrams() -> None:
+    from docx import Document
+
+    DIAGRAMS_DIR.mkdir(parents=True, exist_ok=True)
+    source = Document(SOURCE_DIAGRAM_DOCX)
+    relation_map = {
+        "rId36": DIAGRAM_FILES["arquitectura_general"],
+        "rId25": DIAGRAM_FILES["asistencia_abordaje"],
+        "rId26": DIAGRAM_FILES["pagos_conciliacion"],
+    }
+    for relation_id, output_path in relation_map.items():
+        output_path.write_bytes(source.part.rels[relation_id].target_part.blob)
+
+    geolocation_export = DIAGRAMS_DIR / "figura_4_3_geolocalizacion.png"
+    if geolocation_export.exists():
+        geolocation_export.replace(DIAGRAM_FILES["geolocalizacion"])
+    if not DIAGRAM_FILES["geolocalizacion"].exists():
+        raise FileNotFoundError(
+            "Falta exportar la diapositiva 6 como figura de geolocalización."
+        )
+
+
 def main() -> None:
+    extract_word_diagrams()
     SOURCE_OUT.write_text(build_markdown(), encoding="utf-8")
     write_readme()
     generate_docx()

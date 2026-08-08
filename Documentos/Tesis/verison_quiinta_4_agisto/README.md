@@ -32,6 +32,7 @@ La copia local está en:
 - `TESIS_TRANSPORTES_GENESIS_v4.docx`: documento Word.
 - `TESIS_TRANSPORTES_GENESIS_v4.md`: fuente editable.
 - `generar_tesis_v4.py`: regenera ambos documentos.
+- `diagramas_integrados/`: figuras extraídas de la presentación y el Word del proyecto.
 
 ## Evidencias pendientes
 
